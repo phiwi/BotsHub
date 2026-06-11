@@ -1,7 +1,7 @@
 ﻿{
 	"main": {
-		"character": "A R U Technology",
-		"farm": "Froggy",
+		"character": "A R U Intelligence",
+		"farm": "Wajjun Bazar",
 		"loot_configuration": "new"
 	},
 	"run": {
@@ -13,15 +13,15 @@
 		"use_scrolls": false,
 		"sort_items": false,
 		"collect_data": false,
+		"go_offline": false,
+		"flash_whisper": false,
 		"donate_faction_points": true,
 		"buy_faction_resources": false,
 		"buy_faction_scrolls": false,
 		"weapon_slot": 0,
 		"bags_count": 5,
 		"district": "Random EU",
-		"disable_rendering": false,
-		"go_offline": false,
-		"flash_whisper": false
+		"disable_rendering": false
 	},
 	"team": {
 		"automatic_team_setup": false,

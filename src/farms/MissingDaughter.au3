@@ -391,14 +391,7 @@ EndFunc
 
 
 Func MDAssureHeroPanelsVisible()
-	Local $heroCount = GetHeroCount()
-	Info('Missing Daughter: forcing hero skill panels 1-' & $heroCount & ' visible')
-	CloseAllPanels()
-	Sleep(120 + GetPing())
-	For $heroIndex = 1 To $heroCount
-		ToggleHeroPanel($heroIndex)
-		Sleep(120 + GetPing())
-	Next
+	SupportTeamOpenHeroPanels('Missing Daughter')
 EndFunc
 
 

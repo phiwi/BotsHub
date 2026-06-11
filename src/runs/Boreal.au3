@@ -108,7 +108,11 @@ EndFunc
 ;~ Boreal chest farm setup
 Func SetupBorealFarm()
 	Info('Setting up farm')
-	TravelToOutpost($ID_BOREAL_STATION, $district_name)
+	If BorealEnsureSoloParty() == $FAIL Then
+		Warn('Could not reset party before travelling to Boreal Station')
+		Return $FAIL
+	EndIf
+	If BorealTravelToOutpost($district_name) == $FAIL Then Return $FAIL
 	If Not SupportTeamStabilizeAfterTravel($ID_BOREAL_STATION, 10000, 300) Then Return $FAIL
 
 	If SetupPlayerBorealChestFarm() == $FAIL Then Return $FAIL
@@ -133,6 +137,28 @@ Func SetupBorealFarm()
 	$boreal_farm_setup = True
 	Info('Preparations complete')
 	Return $SUCCESS
+EndFunc
+
+
+Func BorealTravelToOutpost($preferredDistrict)
+	Local $districts[] = [$preferredDistrict, 'Random', 'Random EU', 'Random US', 'Random Asia']
+	For $i = 0 To UBound($districts) - 1
+		If TravelToOutpost($ID_BOREAL_STATION, $districts[$i]) == $SUCCESS Then Return $SUCCESS
+	Next
+
+	; Fallback: hop through nearby EotN outposts, then retry Boreal travel.
+	Local $hubs[] = [$ID_GUNNARS_HOLD, $ID_OLAFSTEAD, $ID_SIFHALLA, $ID_EYE_OF_THE_NORTH]
+	For $h = 0 To UBound($hubs) - 1
+		If TravelToOutpost($hubs[$h], 'Random') == $SUCCESS Then
+			RandomSleep(700)
+			For $i = 0 To UBound($districts) - 1
+				If TravelToOutpost($ID_BOREAL_STATION, $districts[$i]) == $SUCCESS Then Return $SUCCESS
+			Next
+		EndIf
+	Next
+
+	Warn('Boreal travel failed after district and EotN-hub fallback attempts')
+	Return $FAIL
 EndFunc
 
 

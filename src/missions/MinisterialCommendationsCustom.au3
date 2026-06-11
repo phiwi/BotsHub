@@ -223,6 +223,7 @@ Func SetupTeamMinisterialCommendationsCustomFarm()
 
     CancelAllHeroes()
     RandomSleep(250)
+    SupportTeamOpenHeroPanels('Ministerial Commendations Custom')
     Return $SUCCESS
 EndFunc
 

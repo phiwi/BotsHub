@@ -22,6 +22,7 @@
 #include '../../lib/Utils-Console.au3'
 #include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SupportTeam.au3'
 
 ; Possible improvements :
 ; - noticed some scenarios where map is not cleared - check whether this can be fixed by adding a few additional locations
@@ -59,6 +60,7 @@ Func KurzickDrazachSetup()
 	Info('Setting up farm')
 	TravelToOutpost($ID_THE_ETERNAL_GROVE, $district_name)
 	SwitchMode($ID_HARD_MODE)
+	SupportTeamOpenHeroPanels('Kurzick Drazach')
 
 	$kurzick_drazach_setup = True
 	Info('Preparations complete')

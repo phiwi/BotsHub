@@ -177,13 +177,33 @@ Func TravelToOutpost($outpostID, $district = 'Random')
 	Local $outpostName = $MAP_NAMES_FROM_IDS[$outpostID]
 	If GetMapID() == $outpostID Then Return $SUCCESS
 	Info('Travelling to ' & $outpostName & ' (Outpost)')
+
 	DistrictTravel($outpostID, $district)
-	RandomSleep(1000)
-	If GetMapID() <> $outpostID Then
-		Warn('Player may not have access to ' & $outpostName & ' (outpost)')
-		Return $FAIL
+	Local $arrivalWindow = TimerInit()
+	While TimerDiff($arrivalWindow) < 5000
+		If GetMapID() == $outpostID Then Return $SUCCESS
+		Sleep(200)
+	WEnd
+
+	Warn('Travel to ' & $outpostName & ' did not complete in district "' & $district & '"')
+
+	If $district <> 'Random' Then
+		Warn('Retrying travel to ' & $outpostName & ' in Random district')
+		DistrictTravel($outpostID, 'Random')
+		$arrivalWindow = TimerInit()
+		While TimerDiff($arrivalWindow) < 5000
+			If GetMapID() == $outpostID Then Return $SUCCESS
+			Sleep(200)
+		WEnd
 	EndIf
-	Return $SUCCESS
+
+	Local $currentMapID = GetMapID()
+	Local $currentMapName = 'unknown'
+	If $currentMapID >= 0 And $currentMapID < UBound($MAP_NAMES_FROM_IDS) Then
+		$currentMapName = $MAP_NAMES_FROM_IDS[$currentMapID]
+	EndIf
+	Warn('Player may not have access to ' & $outpostName & ' (outpost). Current map=' & $currentMapName & ' [id=' & $currentMapID & ']')
+	Return $FAIL
 EndFunc
 
 

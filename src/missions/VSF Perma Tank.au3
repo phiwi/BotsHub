@@ -761,6 +761,7 @@ Func SetupVSFTeamFromMinisterialCommendations()
 
 	ClearPartyCommands()
 	CancelAllHeroes()
+	SupportTeamOpenHeroPanels('VSF Perma Tank')
 	Return $SUCCESS
 EndFunc
 
