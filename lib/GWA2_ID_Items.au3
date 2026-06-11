@@ -270,9 +270,9 @@ Global Const $BASIC_MATERIAL_NAMES_FROM_IDS		= MapFromArrays($BASIC_MATERIALS_AR
 Global Const $RARE_MATERIALS_DOUBLE_ARRAY[][]	= [	[$ID_FUR_SQUARE, 'Fur Square'], [$ID_BOLT_OF_LINEN, 'Bolt of Linen'], [$ID_BOLT_OF_DAMASK, 'Bolt of Damask'], [$ID_BOLT_OF_SILK, 'Bolt of Silk'], _
 													[$ID_GLOB_OF_ECTOPLASM, 'Glob of Ectoplasm'], [$ID_STEEL_INGOT, 'Steel Ingot'], [$ID_DELDRIMOR_STEEL_INGOT, 'Deldrimor Steel Ingot'], _
 													[$ID_MONSTROUS_CLAW, 'Monstrous Claw'], [$ID_MONSTROUS_EYE, 'Monstrous Eye'], [$ID_MONSTROUS_FANG, 'Monstrous Fang'], _
-													[$ID_RUBY, 'Ruby'], [$ID_SAPPHIRE, 'Sapphire'], [$ID_DIAMOND, 'Diamond'], [$ID_ONYX_GEMSTONE, 'Onyx Gemstones'], _
-													[$ID_LUMP_OF_CHARCOAL, 'Lumps of Charcoal'], [$ID_OBSIDIAN_SHARD, 'Obsidian Shard'], [$ID_TEMPERED_GLASS_VIAL, 'Tempered Glass Vial'], _
-													[$ID_LEATHER_SQUARE, 'Leather Squares'], [$ID_ELONIAN_LEATHER_SQUARE, 'Elonian Leather Square'], [$ID_VIAL_OF_INK, 'Vial of Ink'], _
+													[$ID_RUBY, 'Ruby'], [$ID_SAPPHIRE, 'Sapphire'], [$ID_DIAMOND, 'Diamond'], [$ID_ONYX_GEMSTONE, 'Onyx Gemstone'], _
+													[$ID_LUMP_OF_CHARCOAL, 'Lump of Charcoal'], [$ID_OBSIDIAN_SHARD, 'Obsidian Shard'], [$ID_TEMPERED_GLASS_VIAL, 'Tempered Glass Vial'], _
+													[$ID_LEATHER_SQUARE, 'Leather Square'], [$ID_ELONIAN_LEATHER_SQUARE, 'Elonian Leather Square'], [$ID_VIAL_OF_INK, 'Vial of Ink'], _
 													[$ID_ROLL_OF_PARCHMENT, 'Roll of Parchment'], [$ID_ROLL_OF_VELLUM, 'Roll of Vellum'], [$ID_SPIRITWOOD_PLANK, 'Spiritwood Plank'], _
 													[$ID_AMBER_CHUNK, 'Amber Chunk'], [$ID_JADEITE_SHARD, 'Jadeite Shard']]
 Global Const $MAP_RARE_MATERIALS				= MapFromDoubleArray($RARE_MATERIALS_DOUBLE_ARRAY)
@@ -1143,10 +1143,12 @@ Global Const $ID_GHASTLY_SUMMON					= 32557
 Global Const $ID_CELESTIAL_SUMMON				= 34176
 Global Const $ID_SHINING_BLADE_SUMMON			= 35126
 Global Const $ID_LEGIONNAIRE_SUMMONING_CRYSTAL	= 37810
+Global Const $ID_CRACKED_ASCALONIAN_WAR_HORN	= 38369
 Global Const $SUMMONING_STONES_ARRAY[]			= [$ID_MERCHANT_SUMMON, $ID_TENGU_SUMMON, $ID_IMPERIAL_GUARD_SUMMON, $ID_AUTOMATON_SUMMON, $ID_IGNEOUS_SUMMONING_STONE, _
 													$ID_CHITINOUS_SUMMON, $ID_MYSTICAL_SUMMON, $ID_AMBER_SUMMON, $ID_ARTIC_SUMMON, $ID_DEMONIC_SUMMON, $ID_GELATINOUS_SUMMON, _
 													$ID_FOSSILIZED__SUMMON, $ID_JADEITE_SUMMON, $ID_MISCHIEVOUS_SUMMON, $ID_FROSTY_SUMMON, $ID_MYSTERIOUS_SUMMON, _
-													$ID_ZAISHEN_SUMMON, $ID_GHASTLY_SUMMON, $ID_CELESTIAL_SUMMON, $ID_SHINING_BLADE_SUMMON]
+													$ID_ZAISHEN_SUMMON, $ID_GHASTLY_SUMMON, $ID_CELESTIAL_SUMMON, $ID_SHINING_BLADE_SUMMON, $ID_LEGIONNAIRE_SUMMONING_CRYSTAL, _
+													$ID_CRACKED_ASCALONIAN_WAR_HORN]
 Global Const $MAP_SUMMONING_STONES				= MapFromArray($SUMMONING_STONES_ARRAY)
 #EndRegion Summoning Stones
 

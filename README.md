@@ -15,7 +15,7 @@ It provides a **single framework and interface** to run multiple bot scripts, wi
 To use it:
 
 0. Run the game with no add-ons: NO Toolbox, NO cartography, NO reshade, nothing. Also use lowest graphics if possible.
-1. Install **AutoIt (≥ 3.3.16.0)** 🛠️
+1. Install **AutoIt (≥ 3.3.16.1)** 🛠️
 2. Clone or download the repository (`<> Code → Download ZIP`) 📥
 3. Extract the archive if needed
 4. Run `BotsHub.au3` **using AutoIt** ▶️
@@ -86,6 +86,7 @@ To use it:
 | City of Torc'qua				| Margonite Gemstones								|
 | Ravenheart Gloom				| Torment Gemstones									|
 | Stygian Veil					| Stygian Gemstones									|
+| Tunnels of the Forsaken		| E-blade											|
 | Underworld					| Globs of Ectoplasm								|
 
 ### Chest Runs
@@ -169,7 +170,7 @@ Some require manual setup in the **Team** tab or in-game 🛡️
 <summary><strong>Q: Error: 'Variable subscript badly formatted' (`Local $map[]`).</strong></summary>
 
 Your AutoIt version is too old.  
-Update to **AutoIt ≥ 3.3.16.0** 🆙
+Update to **AutoIt ≥ 3.3.16.1** 🆙
 </details>
 
 <details>
