@@ -1,0 +1,23 @@
+> [33mc12e25e[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m Tunnels bot (#184)
+> [33m18d6c22[m feat:	Update Dragon Moss Farm (#187)
+> [33m0f438cb[m fix:		Temporary fix of using less performant read per agent to avoid the issue on decommited blocks read
+> [33m239c2c8[m feat:		Small changes in default components kept: getting rid of blessed, clarity, nightstalkers, and some runes and keeping some scythe and spear mods
+> [33m5456b1a[m feat:		Small debugging additions
+> [33medc4488[m fix:		Fixed some items named with a plural in configuration making them unusable
+> [33md258f21[m fix:		Legionnaire summoning stone absent from summoning stone array making it unusable
+> [33m2a9c2a2[m fix:		Added waiting for team to be back if it died on Froggy, SoO and Voltaic
+> [33m6384059[m fix:		Change of ID in War Supply bot
+> [33md3494d8[m feat: harden Follower with leash range and outpost leader resolution (#173)
+> [33m73f22f8[m feat: rewrite WriteChat to use kWriteToChatLog via CommandUIMsg (#178)
+> [33m1e764c5[m feat: add Devona and Ghost of Althea heroes (#180)
+> [33me4916af[m fix: prevent crash when copying agent structs across page boundaries (#177)
+> [33mfb53f8b[m feat: Comprehensive instructions for BotsHub Copilot, detailing project overview, coding standards, review priorities, architecture constraints, testing expectations, reliability rules, and AutoIt-specific guidance. (#179)
+> [33mb135548[m Add go-offline and whisper-flash features; refactor ChatLog polling (#174)
+> [33m3b900ba[m fix: correct KickAllHeroes parameter (#175)
+> [33m18aa3e0[m fix:		Fixed gold balancing logic (#161)
+> [33m71c46c5[m docs:		Moved required AutoIt version to 3.3.16.1 minimum
+> [33m11a88c1[m refactor:		Small refactor
+> [33mfbec1b9[m feat:	Add 'Open Storage' button to GUI (#163)
+> [33mc596ad3[m fix: ToggleHeroSkillState address (#166)
+> [33m839281f[m fix: Update CommandTradeInitiate (#168)
+> [33md764486[m fix: update quest dialog ID for Auspicious Beginnings (#169)

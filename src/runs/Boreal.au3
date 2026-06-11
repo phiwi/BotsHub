@@ -25,6 +25,7 @@
 #include '../../lib/Utils-Console.au3'
 #include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SupportTeam.au3'
 
 ; ==== Constants ====
 ; Universal run build for every profession
@@ -63,7 +64,21 @@ Global Const $BOREAL_HEART_OF_SHADOW	= 8
 Global Const $BOREAL_MOUNTAIN_PINESOUL_MODEL_ID = 6539
 Global Const $BOREAL_MOUNTAIN_ALOE_MODEL_ID = 6540
 
-; global variable to remember profession of player in setup
+Global Const $BOREAL_HERO_KAHMU_TEMPLATE = 'OgChoyz9FAAAAAAAAAAAAA'
+Global Const $BOREAL_HERO_MELONNI_TEMPLATE = 'OgChoyz9FAAAAAAAAAAAAA'
+Global Const $BOREAL_HERO_MORGAHN_TEMPLATE = 'OQijEqmMKO0YAAAAAAAAAAAAAA'
+
+Global Const $BOREAL_HERO_KAHMU_INDEX = 1
+Global Const $BOREAL_HERO_MELONNI_INDEX = 2
+Global Const $BOREAL_HERO_MORGAHN_INDEX = 3
+Global Const $BOREAL_HERO_SUPPORT_SKILL_SLOT = 1
+Global Const $BOREAL_HERO_MH_CAST_INTERVAL_MS = 1000
+Global Const $BOREAL_HERO_CAUTERY_CAST_INTERVAL_MS = 5000
+Global Const $BOREAL_PORTAL_FLAG_FALLBACK_X = 3986
+Global Const $BOREAL_PORTAL_FLAG_FALLBACK_Y = -27642
+Global Const $BOREAL_SUPPORT_DEBUG_VERBOSE = False
+
+; global variable to remember player's profession in setup
 Global $boreal_player_profession = $ID_ASSASSIN
 Global $boreal_farm_setup = False
 
@@ -73,10 +88,17 @@ Global $boreal_has_heart_of_shadow = False
 Global $boreal_has_deaths_charge = False
 Global $boreal_has_pious_renewal = False
 Global $boreal_has_pious_haste = False
+Global $boreal_support_enabled = False
+Global $boreal_next_mh_tick = 0
+Global $boreal_next_cautery_tick = 0
+Global $boreal_mh_rotation_index = 0
+Global $boreal_kahmu_index = $BOREAL_HERO_KAHMU_INDEX
+Global $boreal_melonni_index = $BOREAL_HERO_MELONNI_INDEX
+Global $boreal_morgahn_index = $BOREAL_HERO_MORGAHN_INDEX
 
 ;~ Main method to chest farm Boreal
 Func BorealChestFarm()
-	If Not $boreal_farm_setup Then SetupBorealFarm()
+	If Not $boreal_farm_setup And SetupBorealFarm() == $FAIL Then Return $PAUSE
 	Local $result = BorealChestFarmLoop()
 	ResignAndReturnToOutpost($ID_BOREAL_STATION)
 	Return $result
@@ -87,9 +109,10 @@ EndFunc
 Func SetupBorealFarm()
 	Info('Setting up farm')
 	TravelToOutpost($ID_BOREAL_STATION, $district_name)
+	If Not SupportTeamStabilizeAfterTravel($ID_BOREAL_STATION, 10000, 300) Then Return $FAIL
 
-	SetupPlayerBorealChestFarm()
-	LeaveParty()
+	If SetupPlayerBorealChestFarm() == $FAIL Then Return $FAIL
+	If SetupTeamBorealChestFarm() == $FAIL Then Return $FAIL
 	SwitchToHardModeIfEnabled()
 	SetDisplayedTitle($ID_NORN_TITLE)
 
@@ -109,6 +132,7 @@ Func SetupBorealFarm()
 	WaitMapLoading($ID_BOREAL_STATION, 10000, 2000)
 	$boreal_farm_setup = True
 	Info('Preparations complete')
+	Return $SUCCESS
 EndFunc
 
 
@@ -145,6 +169,9 @@ Func SetupPlayerBorealChestFarm()
 		Case $ID_DERVISH
 			$boreal_player_profession = $ID_DERVISH
 			LoadSkillTemplate($BOREAL_DERVISH_CHEST_RUNNER_SKILLBAR)
+		Case Else
+			Warn('Unsupported profession for Boreal run')
+			Return $FAIL
 	EndSwitch
 	RandomSleep(250)
 	$boreal_has_shroud_of_distress = GetSkillbarSkillID($BOREAL_SHROUD_OF_DISTRESS) == $ID_SHROUD_OF_DISTRESS
@@ -152,12 +179,187 @@ Func SetupPlayerBorealChestFarm()
 	$boreal_has_deaths_charge = GetSkillbarSkillID($BOREAL_DEATHS_CHARGE) == $ID_DEATHS_CHARGE
 	$boreal_has_pious_renewal = GetSkillbarSkillID($BOREAL_PIOUS_RENEWAL) == $ID_PIOUS_RENEWAL
 	$boreal_has_pious_haste = GetSkillbarSkillID($BOREAL_PIOUS_HASTE) == $ID_PIOUS_HASTE
+	BorealEnsureWeaponSet3()
+	Return $SUCCESS
+EndFunc
+
+
+Func BorealEnsureWeaponSet3()
+	ChangeWeaponSet(3)
+	RandomSleep(100)
+EndFunc
+
+
+Func SetupTeamBorealChestFarm()
+	Info('Setting up fixed support team')
+	BorealLogSupportSetupState('pre_solo_reset')
+	If BorealEnsureSoloParty() == $FAIL Then
+		Warn('Could not reset to solo party before hero setup')
+		$boreal_support_enabled = False
+		Return $FAIL
+	EndIf
+	BorealLogSupportSetupState('post_solo_reset')
+
+	BorealLogSupportSetupState('pre_hero_add_attempt_1')
+	If BorealTryAddSupportHero($ID_KAHMU, 'Kahmu', 2) == $FAIL _
+		Or BorealTryAddSupportHero($ID_MELONNI, 'Melonni', 3) == $FAIL _
+		Or BorealTryAddSupportHero($ID_GENERAL_MORGAHN, 'General Morgahn', 4) == $FAIL Then
+		Warn('First support-team assembly attempt failed, retrying after outpost refresh')
+		BorealLogSupportSetupState('hero_add_attempt_1_failed')
+		TravelToOutpost($ID_BOREAL_STATION, $district_name)
+		If Not SupportTeamStabilizeAfterTravel($ID_BOREAL_STATION, 10000, 300) Then
+			$boreal_support_enabled = False
+			Return $FAIL
+		EndIf
+		BorealLogSupportSetupState('post_refresh_before_retry')
+		If BorealEnsureSoloParty() == $FAIL Then
+			Warn('Could not reset to solo party for retry hero setup')
+			$boreal_support_enabled = False
+			Return $FAIL
+		EndIf
+		BorealLogSupportSetupState('post_solo_reset_retry')
+		BorealLogSupportSetupState('pre_hero_add_attempt_2')
+		If BorealTryAddSupportHero($ID_KAHMU, 'Kahmu', 2) == $FAIL _
+			Or BorealTryAddSupportHero($ID_MELONNI, 'Melonni', 3) == $FAIL _
+			Or BorealTryAddSupportHero($ID_GENERAL_MORGAHN, 'General Morgahn', 4) == $FAIL Then
+			BorealLogSupportSetupState('hero_add_attempt_2_failed')
+			$boreal_support_enabled = False
+			Return $FAIL
+		EndIf
+	EndIf
+	BorealLogSupportSetupState('hero_add_success')
+
+	If Not BorealHasExactSupportTeam() Then
+		Warn('Could not set up party correctly. Team composition is invalid. Party=' & GetPartySize())
+		$boreal_support_enabled = False
+		Return $FAIL
+	EndIf
+
+	$boreal_kahmu_index = SupportTeamResolveHeroIndex($ID_KAHMU, $BOREAL_HERO_KAHMU_INDEX)
+	$boreal_melonni_index = SupportTeamResolveHeroIndex($ID_MELONNI, $BOREAL_HERO_MELONNI_INDEX)
+	$boreal_morgahn_index = SupportTeamResolveHeroIndex($ID_GENERAL_MORGAHN, $BOREAL_HERO_MORGAHN_INDEX)
+
+	LoadSkillTemplate($BOREAL_HERO_KAHMU_TEMPLATE, $boreal_kahmu_index)
+	RandomSleep(150)
+	LoadSkillTemplate($BOREAL_HERO_MELONNI_TEMPLATE, $boreal_melonni_index)
+	RandomSleep(150)
+	LoadSkillTemplate($BOREAL_HERO_MORGAHN_TEMPLATE, $boreal_morgahn_index)
+	RandomSleep(250)
+
+	DisableAllHeroSkills($boreal_kahmu_index)
+	DisableAllHeroSkills($boreal_melonni_index)
+	DisableAllHeroSkills($boreal_morgahn_index)
+	EnableHeroSkillSlot($boreal_kahmu_index, $BOREAL_HERO_SUPPORT_SKILL_SLOT)
+	EnableHeroSkillSlot($boreal_melonni_index, $BOREAL_HERO_SUPPORT_SKILL_SLOT)
+	EnableHeroSkillSlot($boreal_morgahn_index, $BOREAL_HERO_SUPPORT_SKILL_SLOT)
+
+	ResetBorealSupportScheduler()
+	$boreal_support_enabled = True
+	Return $SUCCESS
+EndFunc
+
+
+Func BorealEnsureSoloParty($maxWaitMs = 8000)
+	Local $timer = TimerInit()
+	Local $attempt = 0
+	SupportTeamKickAllHeroesByIDSweep()
+	KickAllHeroes()
+	LeaveParty(False)
+	While TimerDiff($timer) < $maxWaitMs
+		$attempt += 1
+		If GetPartySize() <= 1 Then Return $SUCCESS
+		SupportTeamDebug($BOREAL_SUPPORT_DEBUG_VERBOSE, 'Boreal reset attempt #' & $attempt & ' party=' & GetPartySize())
+		SupportTeamKickAllHeroesByIDSweep()
+		KickAllHeroes()
+		LeaveParty(False)
+		RandomSleep(320)
+	WEnd
+	Warn('Solo-party reset timeout. Party=' & GetPartySize())
+	Return $FAIL
+EndFunc
+
+
+Func BorealTryAddSupportHero($heroID, $heroName, $expectedSize)
+	For $i = 1 To 10
+		If GetHeroNumberByHeroID($heroID) <> Null Then Return $SUCCESS
+		AddHero($heroID)
+		RandomSleep(500)
+		If GetHeroNumberByHeroID($heroID) <> Null Then Return $SUCCESS
+		If GetPartySize() >= $expectedSize Then Return $SUCCESS
+	Next
+	Warn('Could not add support hero ' & $heroName & '. Party size=' & GetPartySize())
+	Return $FAIL
+EndFunc
+
+
+Func BorealLogSupportSetupState($phase)
+	Info('Boreal support state [' & $phase & '] map=' & GetMapID() & ', party=' & GetPartySize() & ', heroes=' & GetHeroCount())
+EndFunc
+
+
+Func BorealHasExactSupportTeam()
+	Local $requiredHeroes[] = [$ID_KAHMU, $ID_MELONNI, $ID_GENERAL_MORGAHN]
+	Return SupportTeamHasExactHeroes($requiredHeroes, 4)
+EndFunc
+
+
+Func ResetBorealSupportScheduler()
+	$boreal_next_mh_tick = 0
+	$boreal_next_cautery_tick = 0
+	$boreal_mh_rotation_index = 0
+EndFunc
+
+
+Func FlagBorealSupportHeroesAtPortal()
+	If Not $boreal_support_enabled Then Return
+	If GetMapID() <> $ID_ICE_CLIFF_CHASMS Then Return
+
+	Local $flagX = $BOREAL_PORTAL_FLAG_FALLBACK_X
+	Local $flagY = $BOREAL_PORTAL_FLAG_FALLBACK_Y
+	Local $me = GetMyAgent()
+	If $me <> Null Then
+		$flagX = Int(DllStructGetData($me, 'X'))
+		$flagY = Int(DllStructGetData($me, 'Y'))
+	EndIf
+
+	CommandHero($boreal_kahmu_index, $flagX, $flagY)
+	CommandHero($boreal_melonni_index, $flagX, $flagY)
+	CommandHero($boreal_morgahn_index, $flagX, $flagY)
+EndFunc
+
+
+Func TickBorealSupportCasts()
+	If Not $boreal_support_enabled Then Return
+	If GetMapID() <> $ID_ICE_CLIFF_CHASMS Then Return
+	Local $mhOrder[] = [$boreal_melonni_index, $boreal_kahmu_index]
+
+	If $boreal_next_mh_tick == 0 Or TimerDiff($boreal_next_mh_tick) >= $BOREAL_HERO_MH_CAST_INTERVAL_MS Then
+		Local $mhCount = UBound($mhOrder)
+		For $i = 0 To $mhCount - 1
+			Local $mhPos = Mod($boreal_mh_rotation_index + $i, $mhCount)
+			Local $mhHero = $mhOrder[$mhPos]
+			If IsRecharged($BOREAL_HERO_SUPPORT_SKILL_SLOT, $mhHero) Then
+				UseHeroSkill($mhHero, $BOREAL_HERO_SUPPORT_SKILL_SLOT)
+				$boreal_mh_rotation_index = Mod($mhPos + 1, $mhCount)
+				$boreal_next_mh_tick = TimerInit()
+				ExitLoop
+			EndIf
+		Next
+	EndIf
+
+	If $boreal_next_cautery_tick == 0 Or TimerDiff($boreal_next_cautery_tick) >= $BOREAL_HERO_CAUTERY_CAST_INTERVAL_MS Then
+		If IsRecharged($BOREAL_HERO_SUPPORT_SKILL_SLOT, $boreal_morgahn_index) Then
+			UseHeroSkill($boreal_morgahn_index, $BOREAL_HERO_SUPPORT_SKILL_SLOT)
+			$boreal_next_cautery_tick = TimerInit()
+		EndIf
+	EndIf
 EndFunc
 
 
 ;~ Boreal Chest farm loop
 Func BorealChestFarmLoop()
 	TravelToOutpost($ID_BOREAL_STATION, $district_name)
+	BorealEnsureWeaponSet3()
 	If FindInInventory($ID_LOCKPICK)[0] == 0 Then
 		Error('No lockpicks available to open chests')
 		Return $PAUSE
@@ -174,6 +376,8 @@ Func BorealChestFarmLoop()
 	Move(3986, -27642)
 	RandomSleep(1500)
 	WaitMapLoading($ID_ICE_CLIFF_CHASMS, 10000, 2000)
+	FlagBorealSupportHeroesAtPortal()
+	ResetBorealSupportScheduler()
 
 	Local $openedChests = 0
 	Local $totalChestsCount = 0
@@ -225,6 +429,8 @@ EndFunc
 
 ;~ Function to unblocked when opening chests
 Func BorealUnblock()
+	BorealEnsureWeaponSet3()
+	TickBorealSupportCasts()
 	If $boreal_has_heart_of_shadow And IsRecharged($BOREAL_HEART_OF_SHADOW) And GetEnergy() >= 5 Then
 		Local $target = GetNearestEnemyToAgent(GetMyAgent())
 		If $target == Null Then $target = GetMyAgent()
@@ -238,6 +444,8 @@ EndFunc
 
 ;~ Function to speed run up
 Func BorealSpeedRun()
+	BorealEnsureWeaponSet3()
+	TickBorealSupportCasts()
 	If IsPlayerDead() Then Return $FAIL
 	Local $me = GetMyAgent()
 	Local $myHealthPercent = DllStructGetData($me, 'HealthPercent')
@@ -292,10 +500,12 @@ EndFunc
 ;~ Main function for chest run
 Func BorealChestRun($X, $Y)
 	Local $runTimer = TimerInit()
+	BorealEnsureWeaponSet3()
 	Move($X, $Y)
 	Local $me = GetMyAgent()
 	While GetDistanceToPoint($me, $X, $Y) > $RANGE_ADJACENT
 		If TimerDiff($runTimer) > $BOREAL_CHEST_RUN_TIMEOUT_MS Then Return $FAIL
+		TickBorealSupportCasts()
 		BorealSpeedRun()
 		Sleep(250)
 		$me = GetMyAgent()

@@ -96,6 +96,7 @@ Func SetupPlayerDragonMossFarm()
 	If DllStructGetData(GetMyAgent(), 'Primary') == $ID_RANGER Then
 		LoadSkillTemplate($RA_DRAGON_MOSS_FARMER_SKILLBAR)
 		RandomSleep(250)
+		DragonMossEnsureWeaponSet1()
 	Else
 		Warn('Should run this farm as ranger')
 		Return $FAIL
@@ -122,8 +123,15 @@ Func SetupTeamDragonMossFarm()
 	Return $SUCCESS
 EndFunc
 
+Func DragonMossEnsureWeaponSet1()
+	ChangeWeaponSet(1)
+	RandomSleep(100)
+EndFunc
+
+
 ;~ Move out of outpost into Drazach Thicket
 Func GoToDrazachThicket()
+	DragonMossEnsureWeaponSet1()
 	TravelToOutpost($ID_SAINT_ANJEKAS_SHRINE, $district_name)
 	While GetMapID() <> $ID_DRAZACH_THICKET
 		Info('Moving to Drazach Thicket')
@@ -138,6 +146,7 @@ EndFunc
 ;~ Farm loop
 Func DragonMossFarmLoop()
 	If GetMapID() <> $ID_DRAZACH_THICKET Then Return $FAIL
+	DragonMossEnsureWeaponSet1()
 
 	; Speed boosting and moving to the shrine
 	If $DM_RANGER_HERO > 0 Then

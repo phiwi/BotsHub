@@ -1,4 +1,4 @@
-#CS ===========================================================================
+﻿#CS ===========================================================================
 ; Author: caustic-kronos (aka Kronos, Night, Svarog)
 ; Contributor: Gahais
 ; Copyright 2025 caustic-kronos
@@ -27,77 +27,82 @@
 #RequireAdmin
 #NoTrayIcon
 
-Opt('MustDeclareVars', True)
-;Opt('ExpandEnvStrings', 1)
-
 #Region Includes
-#include-once
 #include <Math.au3>
-
-#include 'lib/BotsHub-GUI.au3'
+#include 'lib/GWA2_Headers.au3'
+#include 'lib/GWA2_ID.au3'
 #include 'lib/GWA2.au3'
 #include 'lib/GWA2_Assembly.au3'
 #include 'lib/GWA2_Assembly_Chatlog.au3'
-#include 'lib/GWA2_ID.au3'
-#include 'lib/GWA2_ID_Maps.au3'
-#include 'lib/GWA2_ID_Skills.au3'
-#include 'lib/JSON.au3'
 #include 'lib/Utils.au3'
-#include 'lib/Utils-Console.au3'
-#include 'lib/Utils-Debugger.au3'
-#include 'lib/Utils-Items_Modstructs.au3'
-#include 'lib/Utils-Shared_Memory.au3'
+#include 'lib/Utils-Agents.au3'
 #include 'lib/Utils-Storage.au3'
+#include 'lib/Utils-Debugger.au3'
 #include 'lib/Build_PW_Heroic-Refrain.au3'
+#include 'lib/BotsHub-GUI.au3'
 
+#include 'src/farms/Brightclaw.au3'
 #include 'src/farms/CoF.au3'
 #include 'src/farms/Corsairs.au3'
 #include 'src/farms/DragonMoss.au3'
-#include 'src/farms/DrakeFlesh.au3'
 #include 'src/farms/EdenIris.au3'
 #include 'src/farms/Feathers.au3'
+#include 'src/farms/FeathersSin.au3'
 #include 'src/farms/FoWTowerOfCourage.au3'
+#include 'src/farms/UWChamberTraps.au3'
+#include 'src/farms/FocusHanaku.au3'
 #include 'src/farms/Gemstones.au3'
 #include 'src/farms/GemstoneMargonite.au3'
 #include 'src/farms/GemstoneStygian.au3'
 #include 'src/farms/GemstoneTorment.au3'
 #include 'src/farms/JadeBrotherhood.au3'
+#include 'src/farms/MissingDaughter.au3'
 #include 'src/farms/Lightbringer-Sunspear.au3'
 #include 'src/farms/Lightbringer.au3'
 #include 'src/farms/Mantids.au3'
 #include 'src/farms/Kournans.au3'
 #include 'src/farms/Minotaurs.au3'
+#include 'src/farms/OutcastHalcyon.au3'
 #include 'src/farms/Raptors.au3'
-#include 'src/farms/SkaleFins.au3'
-#include 'src/farms/Skrees.au3'
 #include 'src/farms/SpiritSlaves.au3'
+#include 'src/farms/SpiritSlavesCustom.au3'
+#include 'src/farms/SpiritSlavesSin.au3'
+#include 'src/farms/SpiritSlavesRangerDerv.au3'
 #include 'src/farms/Vaettirs.au3'
-#include 'src/farms/Zodiac.au3'
+#include 'src/farms/Vanquish.au3'
+#include 'src/farms/Vanquish Blacktide Lahtenda.au3'
+#include 'src/farms/Warden.au3'
+#include 'src/farms/Wingstorm.au3'
 #include 'src/missions/Deldrimor.au3'
 #include 'src/missions/FoW.au3'
 #include 'src/missions/Froggy.au3'
 #include 'src/missions/GlintChallenge.au3'
-#include 'src/missions/Kilroy.au3'
-#include 'src/missions/MinisterialCommendations.au3'
+#include 'src/missions/MinisterialCommendationsAny.au3'
+#include 'src/missions/MinisterialCommendationsCustom.au3'
 #include 'src/missions/NexusChallenge.au3'
 #include 'src/missions/SoO.au3'
 #include 'src/missions/SunspearArmor.au3'
 #include 'src/missions/TunnelsOfTheForsaken.au3'
 #include 'src/missions/Underworld.au3'
+#include 'src/missions/UnderworldPlainsTrainer.au3'
 #include 'src/missions/Voltaic.au3'
+#include 'src/missions/VSF Perma Tank.au3'
+#include 'src/missions/VSF Perma Tank Thommis.au3'
 #include 'src/missions/WarSupplyKeiran.au3'
 #include 'src/runs/Boreal.au3'
+#include 'src/runs/OutcastRheasCrater.au3'
 #include 'src/runs/Pongmei.au3'
+#include 'src/runs/PongmeiSin.au3'
 #include 'src/runs/Tasca.au3'
 #include 'src/titles/LDOA.au3'
 #include 'src/utilities/Follower.au3'
 #include 'src/utilities/OmniFarmer.au3'
+#include 'src/utilities/PathActionRecorder.au3'
 #include 'src/utilities/TestSuite.au3'
 #include 'src/vanquishes/Asuran.au3'
-#include 'src/vanquishes/KurzickFerndale.au3'
-#include 'src/vanquishes/KurzickDrazach.au3'
-#include 'src/vanquishes/LuxonMountQinkai.au3'
-#include 'src/vanquishes/LuxonSilentSurf.au3'
+#include 'src/vanquishes/Kurzick.au3'
+#include 'src/vanquishes/Kurzick2.au3'
+#include 'src/vanquishes/Luxon.au3'
 #include 'src/vanquishes/Norn.au3'
 #include 'src/vanquishes/Vanguard.au3'
 #EndRegion Includes
@@ -110,6 +115,11 @@ Global Const $NOT_STARTED = -1
 Global Const $SUCCESS = 0
 Global Const $FAIL = 1
 Global Const $PAUSE = 2
+
+Global Const $AVAILABLE_FARMS = '|Asuran|Boreal|CoF|Corsairs|Deldrimor|Dragon Moss|Eden Iris|Feathers|Feathers Sin|Follower|FoW|FoW Tower of Courage|Froggy|Gemstones|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|' & _
+	'Focus Hanaku|Glint Challenge|Jade Brotherhood|Kournans|Kurzick|Kurzick Drazach|Lightbringer & Sunspear|Lightbringer|LDOA|Luxon|Mantids|Ministerial Commendations|Ministerial Com. Custom|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Pongmei|Pongmei Sin|' & _
+	'Outcast Halcyon|Outcast Rhea''s Crater|Brightclaw|Wingstorm|Path Recorder|' & _
+	'Raptors|SoO|SpiritSlaves|Spirit Slaves Ele|Spirit Slaves Ranger|Spirit Slaves Sin|Sunspear Armor|Tasca|TunnelsOfTheForsaken|Underworld|Underworld Plains Trainer|UW Chamber Traps|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Warden Farm|War Supply Keiran|Storage|Tests|TestSuite|Dynamic execution'
 
 Global Const $AVAILABLE_DISTRICTS = '|Random|Random EU|Random US|Random Asia|America|China|English|French|German|International|Italian|Japan|Korea|Polish|Russian|Spanish'
 
@@ -130,12 +140,10 @@ Global $loot_configuration = 'Default Loot Configuration'
 Global $inventory_space_needed = 5
 Global $run_timer = Null
 Global $global_farm_setup = False
-
-Global $slave_heartbeat = 0
+Global $log_level = $LVL_INFO
 
 ; Farm Name;Farm function;Inventory space;Farm duration
 Global $farm_map[]
-Global $gui_enabled
 
 Global $inventory_management_cache[]
 Global $run_options_cache[]
@@ -160,13 +168,13 @@ Global $bags_count = 5
 
 
 #Region Main loops
-BotsHubMain()
+Main()
 
 ;------------------------------------------------------
 ; Title...........:	Main
 ; Description.....:	run the main program
 ;------------------------------------------------------
-Func BotsHubMain()
+Func Main()
 	; Verify validity
 	If @AutoItVersion < '3.3.16.1' Then
 		MsgBox(16, 'Error', 'This bot requires AutoIt version 3.3.16.1 or higher. You are using ' & @AutoItVersion & '.')
@@ -185,8 +193,7 @@ Func BotsHubMain()
 	LoadDefaultLootConfiguration()
 
 	If $run_mode == 'GUI' Then
-		$gui_enabled = True
-		CreateBotsHubGUI()
+		CreateGUI()
 		ApplyConfigToGUI()
 		FillConfigurationCombo()
 		GUISetState(@SW_SHOWNORMAL)
@@ -195,7 +202,6 @@ Func BotsHubMain()
 		ScanAndUpdateGameClients()
 		RefreshCharactersComboBox()
 	ElseIf $run_mode == 'HEADLESS' Then
-		$gui_enabled = False
 		; Need minimum 4 things to run a bot: slave index, process ID, character name and farm name
 		If $cmdLine[0] < 4 Then
 			MsgBox(0, 'Error', 'The Hub needs 0 or at least 4 arguments.')
@@ -208,30 +214,19 @@ Func BotsHubMain()
 
 		Info('Running in CMD mode with process ID: ' & $process_id & ' character name: ' & $character_name & ' farm name: ' & $farm_name)
 
-		If $character_name <> '' Then
-			Local $openProcess = SafeDllCall9($kernel_handle, 'int', 'OpenProcess', 'int', 0x1F0FFF, 'int', 1, 'int', $process_id)
-			Local $processHandle = IsArray($openProcess) ? $openProcess[0] : 0
-			If $processHandle <> 0 Then
-				Local $windowHandle = GetWindowHandleForProcess($process_id)
-				AddClient($process_id, $processHandle, $windowHandle, $character_name)
-				SelectClient(1)
-			Else
-				MsgBox(0, 'Error', 'GW Process with incorrect handle.')
-				Exit
-			EndIf
+		Local $openProcess = SafeDllCall9($kernel_handle, 'int', 'OpenProcess', 'int', 0x1F0FFF, 'int', 1, 'int', $process_id)
+		Local $processHandle = IsArray($openProcess) ? $openProcess[0] : 0
+		If $processHandle <> 0 Then
+			Local $windowHandle = GetWindowHandleForProcess($process_id)
+			AddClient($process_id, $processHandle, $windowHandle, $character_name)
+			SelectClient(1)
+		Else
+			MsgBox(0, 'Error', 'GW Process with incorrect handle.')
+			Exit
 		EndIf
 		; Authentication
 		Authentification($character_name)
 		$runtime_status = 'RUNNING'
-
-
-		If $slave_index >= 0 Then
-			If OpenMasterSlaveSharedMemory($slave_index) Then
-				AdlibRegister('UpdateHeartbeat', 5000)
-			Else
-				Error('Unable to open shared memory blocks.')
-			EndIf
-		EndIf
 	Else
 		MsgBox(0, 'Error', 'Unknown run mode: ' & $run_mode)
 		Exit
@@ -247,13 +242,13 @@ Func BotHubLoop()
 	While True
 		If ($runtime_status == 'RUNNING') Then
 			If $run_mode == 'GUI' Then
+				DisableGUIComboboxes()
 				If $farm_name == Null Or $farm_name == '' Then
 					Error('This farm does not exist.')
 					$runtime_status = 'INITIALIZED'
 					EnableStartButton()
 					Return $PAUSE
 				EndIf
-				DisableGUIComboboxes()
 			EndIf
 			Local $result = RunFarmLoop()
 			If ($result == $PAUSE Or $run_options_cache['run.loop_mode'] == False) Then $runtime_status = 'WILL_PAUSE'
@@ -539,13 +534,14 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'CoF',							CoFFarm,						5,					$COF_FARM_DURATION)
 	AddFarmToFarmMap(	'Corsairs',						CorsairsFarm,					5,					$CORSAIRS_FARM_DURATION)
 	AddFarmToFarmMap(	'Deldrimor',					DeldrimorFarm,					10,					$DELDRIMOR_FARM_DURATION)
-	AddFarmToFarmMap(	'Drake Flesh',					DrakeFleshFarm,					5,					$DRAKE_FLESH_FARM_DURATION)
 	AddFarmToFarmMap(	'Dragon Moss',					DragonMossFarm,					5,					$DRAGONMOSS_FARM_DURATION)
 	AddFarmToFarmMap(	'Eden Iris',					EdenIrisFarm,					2,					$IRIS_FARM_DURATION)
 	AddFarmToFarmMap(	'Feathers',						FeathersFarm,					10,					$FEATHERS_FARM_DURATION)
+	AddFarmToFarmMap(	'Feathers Sin',						FeathersFarmSin,					10,					$FEATHERS_SIN_FARM_DURATION)
 	AddFarmToFarmMap(	'Follower',						FollowerFarm,					5,					30 * 60 * 1000)
 	AddFarmToFarmMap(	'FoW',							FoWFarm,						15,					$FOW_FARM_DURATION)
 	AddFarmToFarmMap(	'FoW Tower of Courage',			FoWToCFarm,						10,					$FOW_TOC_FARM_DURATION)
+	AddFarmToFarmMap(	'Focus Hanaku',						FocusHanakuFarm,					5,					$HANAKU_FARM_DURATION)
 	AddFarmToFarmMap(	'Froggy',						FroggyFarm,						10,					$FROGGY_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstones',					GemstonesFarm,					10,					$GEMSTONES_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Margonite',			GemstoneMargoniteFarm,			10,					$GEMSTONE_MARGONITE_FARM_DURATION)
@@ -553,41 +549,54 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Gemstone Torment',				GemstoneTormentFarm,			10,					$GEMSTONE_TORMENT_FARM_DURATION)
 	AddFarmToFarmMap(	'Glint Challenge',				GlintChallengeFarm,				5,					$GLINT_CHALLENGE_DURATION)
 	AddFarmToFarmMap(	'Jade Brotherhood',				JadeBrotherhoodFarm,			5,					$JADEBROTHERHOOD_FARM_DURATION)
-	AddFarmToFarmMap(	'Kilroy',						KilroyFarm,						10,					$KILROY_FARM_DURATION)
+	AddFarmToFarmMap(	'Missing Daughter',				MissingDaughterFarm,			5,					$MISSING_DAUGHTER_FARM_DURATION)
 	AddFarmToFarmMap(	'Kournans',						KournansFarm,					5,					$KOURNANS_FARM_DURATION)
-	AddFarmToFarmMap(	'Kurzick Ferndale',				KurzickFerndaleFarm,			15,					$KURZICKS_FERNDALE_DURATION)
-	AddFarmToFarmMap(	'Kurzick Drazach',				KurzickDrazachFarm,				10,					$KURZICKS_DRAZACH_DURATION)
+	AddFarmToFarmMap(	'Kurzick',						KurzickFactionFarm,				15,					$KURZICKS_FARM_DURATION)
+	AddFarmToFarmMap(	'Kurzick Drazach',				KurzickFactionFarmDrazach,		10,					$KURZICKS_FARM_DRAZACH_DURATION)
 	AddFarmToFarmMap(	'LDOA',							LDOATitleFarm,					0,					$LDOA_FARM_DURATION)
 	AddFarmToFarmMap(	'Lightbringer',					LightbringerFarm,				5,					$LIGHTBRINGER_FARM_DURATION)
 	AddFarmToFarmMap(	'Lightbringer & Sunspear',		LightbringerSunspearFarm,		10,					$LIGHTBRINGER_SUNSPEAR_FARM_DURATION)
-	AddFarmToFarmMap(	'LuxonMQ',						LuxonMountQinkaiFarm,			10,					$LUXONS_MOUNT_QINKAI_DURATION)
-	AddFarmToFarmMap(	'LuxonSS',						LuxonSilentSurfFarm,			10,					$LUXONS_SILENT_SURF_DURATION)
+	AddFarmToFarmMap(	'Luxon',						LuxonFactionFarm,				10,					$LUXONS_FARM_DURATION)
 	AddFarmToFarmMap(	'Mantids',						MantidsFarm,					5,					$MANTIDS_FARM_DURATION)
 	AddFarmToFarmMap(	'Ministerial Commendations',	MinisterialCommendationsFarm,	5,					$COMMENDATIONS_FARM_DURATION)
+	AddFarmToFarmMap(	'Ministerial Com. Custom',	MinisterialCommendationsCustomFarm,	5,					$COMMENDATIONS_CUSTOM_FARM_DURATION)
 	AddFarmToFarmMap(	'Minotaurs',					MinotaursFarm,					5,					$MINOTAURS_FARM_DURATION)
 	AddFarmToFarmMap(	'Nexus Challenge',				NexusChallengeFarm,				5,					$NEXUS_CHALLENGE_FARM_DURATION)
 	AddFarmToFarmMap(	'Norn',							NornTitleFarm,					5,					$NORN_FARM_DURATION)
 	AddFarmToFarmMap(	'OmniFarm',						OmniFarm,						5,					5 * 60 * 1000)
+	AddFarmToFarmMap(	'Outcast Halcyon',					OutcastHalcyonFarm,				5,					$OUTCAST_HALCYON_FARM_DURATION)
+	AddFarmToFarmMap(	'Outcast Rhea''s Crater',			OutcastRheasCraterChestFarm,		5,					$OUTCAST_RHEAS_CRATER_FARM_DURATION)
 	AddFarmToFarmMap(	'Pongmei',						PongmeiChestFarm,				5,					$PONGMEI_FARM_DURATION)
+	AddFarmToFarmMap(	'Pongmei Sin',					PongmeiSinChestFarm,				5,					$PONGMEI_SIN_FARM_DURATION)
+	AddFarmToFarmMap(	'Brightclaw',							BrightclawFarm,					5,					5 * 60 * 1000)
+	AddFarmToFarmMap(	'Wingstorm',							WingstormFarm,					5,					$WINGSTORM_RUN_TIMEOUT_MS)
+	AddFarmToFarmMap(	'Path Recorder',					PathActionRecorderFarm,			0,					$PATH_ACTION_RECORDER_DURATION)
 	AddFarmToFarmMap(	'Raptors',						RaptorsFarm,					5,					$RAPTORS_FARM_DURATION)
-	AddFarmToFarmMap(	'Skale Fins',					SkaleFinsFarm,					5,					$SKALE_FINS_FARM_DURATION)
-	AddFarmToFarmMap(	'Skrees',						SkreesFarm,						10,					$SKREES_FARM_DURATION)
 	AddFarmToFarmMap(	'SoO',							SoOFarm,						15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SpiritSlaves',					SpiritSlavesFarm,				5,					$SPIRIT_SLAVES_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves Ele',				SpiritSlavesCustomFarm,			5,					$SPIRIT_SLAVES_CUSTOM_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves Ranger',			SpiritSlavesRangerDervFarm,		5,					$SPIRIT_SLAVES_RANGER_DERV_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves Sin',				SpiritSlavesSinFarm,				5,					$SPIRIT_SLAVES_SIN_FARM_DURATION)
 	AddFarmToFarmMap(	'Sunspear Armor',				SunspearArmorFarm,				5,					$SUNSPEAR_ARMOR_FARM_DURATION)
 	AddFarmToFarmMap(	'Tasca',						TascaChestFarm,					5,					$TASCA_FARM_DURATION)
 	AddFarmToFarmMap(	'TunnelsOfTheForsaken',			TunnelsOfTheForsakenFarm,		5,					$TUNNELS_OF_THE_FORSAKEN_FARM_DURATION)
 	AddFarmToFarmMap(	'Underworld',					UnderworldFarm,					5,					$UW_FARM_DURATION)
+	AddFarmToFarmMap(	'Underworld Plains Trainer',	UnderworldPlainsTrainerFarm,	0,					$UWPT_TARGET_LOOP_DURATION_MS)
+	AddFarmToFarmMap(	'UW Chamber Traps',				UWChamberTrapsFarm,				5,					$UWCT_FARM_DURATION)
 	AddFarmToFarmMap(	'Vaettirs',						VaettirsFarm,					5,					$VAETTIRS_FARM_DURATION)
 	AddFarmToFarmMap(	'Vanguard',						VanguardTitleFarm,				5,					$VANGUARD_TITLE_FARM_DURATION)
+	AddFarmToFarmMap(	'Vanquish Blacktide Lahtenda',		VanquishBlackTideLahtendaFarm,	5,					$VANQBT_RUN_TIMEOUT_MS)
+	AddFarmToFarmMap(	'Vanquish Jokanur Zehlon',			VanquishFarm,					5,					$VANQ_RUN_TIMEOUT_MS)
 	AddFarmToFarmMap(	'Voltaic',						VoltaicFarm,					10,					$VOLTAIC_FARM_DURATION)
+	AddFarmToFarmMap(	'VSF Perma Tank',				VSFPermaTankFarm,				5,					$VSF_PERMA_TANK_FARM_DURATION)
+	AddFarmToFarmMap(	'VSF Perma Tank Thommis',		VSFPermaTankThommisFarm,		5,					$VSF_PERMA_TANK_THOMMIS_FARM_DURATION)
+	AddFarmToFarmMap(	'Warden Farm',					WardenFarm,					5,					$WARDEN_FARM_DURATION)
 	AddFarmToFarmMap(	'War Supply Keiran',			WarSupplyKeiranFarm,			10,					$WAR_SUPPLY_FARM_DURATION)
-	AddFarmToFarmMap(	'Zodiac',						ZodiacFarm,						10,					$ZODIAC_FARM_DURATION)
-	AddFarmToFarmMap(	'Manual Mode',					ManualMode,						0,					2 * 60 * 1000)
+	AddFarmToFarmMap(	'Execution',					RunTests,						5,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'Storage',						InventoryManagementBeforeRun,	5,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'Tests',						RunTests,						0,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'TestSuite',					RunTestSuite,					0,					5 * 60 * 1000)
-	AddFarmToFarmMap(	'',								RunTests,						0,					2 * 60 * 1000)
+	AddFarmToFarmMap(	'',								Null,							0,					2 * 60 * 1000)
 EndFunc
 
 
@@ -595,25 +604,37 @@ EndFunc
 Func ResetBotsSetups()
 	$global_farm_setup						= False
 	$boreal_farm_setup						= False
-	$drake_flesh_farm_setup					= False
 	$dm_farm_setup							= False
 	$feathers_farm_setup					= False
+	$feathers_sin_farm_setup			= False
 	$froggy_farm_setup						= False
+	$hanaku_farm_setup						= False
 	$iris_farm_setup						= False
 	$jade_brotherhood_farm_setup			= False
+	$missing_daughter_farm_setup			= False
 	$kournans_farm_setup					= False
 	$ldoa_farm_setup						= False
 	$lightbringer_farm_setup				= False
 	$mantids_farm_setup						= False
+	$outcast_rheas_crater_farm_setup		= False
 	$pongmei_farm_setup						= False
+	$pongmei_sin_farm_setup					= False
 	$raptors_farm_setup						= False
-	$skrees_farm_setup						= False
 	$soo_farm_setup							= False
 	$spirit_slaves_farm_setup				= False
+	$spirit_slaves_custom_farm_setup		= False
+	$spirit_slaves_ranger_derv_farm_setup	= False
+	$spirit_slaves_ranger_derv_build_setup	= False
+	$spirit_slaves_sin_farm_setup			= False
 	$tasca_farm_setup						= False
 	$tunnels_of_the_forsaken_farm_setup		= False
 	$vaettirs_farm_setup					= False
-	$zodiac_farm_setup						= False
+	$vanq_setup_done					= False
+	$vanqbt_setup_done					= False
+	$warden_farm_setup					= False
+	$vsf_setup_done						= False
+	$wingstorm_farm_setup				= False
+	$uwpt_setup_done						= False
 	; Those do not need to be reset - party did not change, build did not change, and there is no need to refresh portal
 	; BUT those bots MUST tp to the correct map on every loop
 	;$cof_farm_setup						= False
@@ -639,7 +660,7 @@ Func GeneralFarmSetup()
 	If $weaponSlot <> 0 Then
 		Info('Setting player weapon slot to ' & $weaponSlot & ' according to GUI settings')
 		ChangeWeaponSet($weaponSlot)
-		Sleep(500)
+		RandomSleep(250)
 	EndIf
 	If $run_options_cache['team.automatic_team_setup'] Then
 		; Need to be in an outpost to change team and builds
@@ -676,25 +697,19 @@ Func SetupPlayerUsingGlobalSettings()
 	If $run_options_cache['team.load_player_build'] Then
 		Info('Loading player build from GUI')
 		LoadSkillTemplate($run_options_cache['team.player_build'])
-		RandomSleep(500)
+		RandomSleep(250)
 	EndIf
 EndFunc
 
 
 ;~ Auto-detect player build and wire up specialized combat/maintenance routines
 Func SetupPlayerBuildOverrides()
-	; For build detection, we iterate over skills and key skills + profession will give use which build must be used
-	Local $profession = GetHeroProfession(0)
-	Local $skillbar = GetSkillbar(0)
+	If GetHeroProfession(0) <> $ID_PARAGON Then Return
 	For $i = 1 To 8
-		Local $skillID = DllStructGetData($skillbar, 'SkillID' & $i)
-		If $profession == $ID_PARAGON Then
-			If $skillID == $ID_HEROIC_REFRAIN Then Return SetupHRBuild()
-			;If $skillID == ... Then Return ...
+		If GetSkillbarSkillID($i) == $ID_HEROIC_REFRAIN Then
+			SetupHRAdrenalineBuild()
+			Return
 		EndIf
-		;If $profession == $ID_NECROMANCER Then
-			;If $skillID == ... Then Return ...
-		;EndIf
 	Next
 EndFunc
 
@@ -709,7 +724,7 @@ Func SetupTeamUsingGlobalSettings($teamSize = $ID_TEAM_SIZE_LARGE)
 		If $hero <> '' Then
 			AddHero($HERO_IDS_FROM_NAMES[$hero])
 			If $run_options_cache['team.load_hero_' & $i & '_build'] Then
-				RandomSleep(500)
+				RandomSleep(500 + GetPing())
 				Info('Loading hero ' & $i & ' build from GUI')
 				LoadSkillTemplate($run_options_cache['team.hero_' & $i & '_build'], $i)
 			EndIf
@@ -905,25 +920,3 @@ Func Authentification($characterName)
 	Return $SUCCESS
 EndFunc
 #EndRegion Authentification and Login
-
-
-Func UpdateHeartbeat()
-	WriteSlaveToMaster($slave_index, 'heartbeat', $slave_heartbeat)
-	$slave_heartbeat += 1
-
-	Info('Master hearbeat: ' & ReadMasterBroadcast('heartbeat'))
-	Local $enableGUICommand = ReadMasterToSlave($slave_index, 'enableGUI')
-	Info('Enable GUI order: ' & $enableGUICommand)
-	If Not $gui_enabled And $enableGUICommand Then
-		CreateBotsHubGUI()
-		ApplyConfigToGUI()
-		FillConfigurationCombo()
-		GUISetState(@SW_SHOWNORMAL)
-		Info('GW Bot Hub ' & $GW_BOT_HUB_VERSION)
-		$gui_enabled = True
-	EndIf
-	If $gui_enabled And Not $enableGUICommand Then
-		GUISetState(@SW_HIDE)
-		$gui_enabled = False
-	EndIf
-EndFunc
