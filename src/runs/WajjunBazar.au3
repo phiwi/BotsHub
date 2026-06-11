@@ -25,6 +25,8 @@ Global Const $WBZ_SKILL_COSTS_MAP = MapFromArrays($WBZ_SKILLS_ARRAY, $WBZ_SKILLS
 Global Const $WBZ_CHAIN_MIN_ADREN5 = 6
 Global Const $WBZ_CHAIN_MIN_ADREN6 = 5
 Global Const $WBZ_KILL_TIMEOUT = 120000
+Global Const $WBZ_EARLY_STANCE_SWAP_MS = 450
+Global Const $WBZ_PULL_EMERGENCY_HP_ABS = 200
 
 Global $wajjun_bazar_run_setup = False
 Global $wajjun_bazar_active_stance = $WBZ_ESCAPE
@@ -36,6 +38,7 @@ Func WajjunBazarRun()
 
 	Local $result = WajjunBazarRunLoop()
 	If $result == $SUCCESS Then ResignAndReturnToOutpost($ID_THE_MARKETPLACE)
+	If $result == $FAIL And IsPlayerDead() Then ResignAndReturnToOutpost($ID_THE_MARKETPLACE)
 	Return $result
 EndFunc
 
@@ -92,11 +95,27 @@ Func WajjunBazarRunLoop()
 	If GetMapID() <> $ID_WAJJUN_BAZAAR Then Return $FAIL
 
 	WajjunBazarCastOutsidePrep()
-	If WajjunBazarLureToQuayEdge() == $FAIL Then Return $FAIL
-	If WajjunBazarKillChoreography() == $FAIL Then Return $FAIL
+	If WajjunBazarLureToQuayEdge() == $FAIL Then
+		If WajjunBazarResignIfDead() Then Return $FAIL
+		Return $FAIL
+	EndIf
+	If WajjunBazarKillChoreography() == $FAIL Then
+		If WajjunBazarResignIfDead() Then Return $FAIL
+		Return $FAIL
+	EndIf
 
 	PickUpItems()
 	Return $SUCCESS
+EndFunc
+
+
+Func WajjunBazarResignIfDead()
+	If IsPlayerDead() Then
+		Warn('Player died: resigning to outpost')
+		ResignAndReturnToOutpost($ID_THE_MARKETPLACE)
+		Return True
+	EndIf
+	Return False
 EndFunc
 
 
@@ -116,26 +135,43 @@ EndFunc
 Func WajjunBazarLureToQuayEdge()
 	Local $waypoints[][2] = [[11042, 14763], [10359, 14269], [8532, 14243], [7331, 14461], [6074, 14491], [6411, 15012], [6956, 15410], [7001, 15437]]
 	For $i = 0 To UBound($waypoints) - 1
+		WajjunBazarTryEmergencyPullAura()
 		WajjunBazarMaintainAlternatingStances()
 		MoveTo($waypoints[$i][0], $waypoints[$i][1])
+		WajjunBazarTryEmergencyPullAura()
+		WajjunBazarMaintainAlternatingStances()
 		If IsPlayerDead() Then Return $FAIL
 	Next
 	Return $SUCCESS
 EndFunc
 
 
-Func WajjunBazarMaintainAlternatingStances()
+Func WajjunBazarMaintainAlternatingStances($allowEarlySwitch = False)
 	Local $escapeRemaining = GetEffectTimeRemaining(GetEffect($ID_ESCAPE))
 	Local $lightningRemaining = GetEffectTimeRemaining(GetEffect($ID_LIGHTNING_REFLEXES))
+	Local $escapeActive = $escapeRemaining > 0
+	Local $lightningActive = $lightningRemaining > 0
+
+	; Re-sync tracked state with actual effects so stance switching stays deterministic.
+	If $escapeActive And Not $lightningActive Then
+		$wajjun_bazar_active_stance = $WBZ_ESCAPE
+	ElseIf $lightningActive And Not $escapeActive Then
+		$wajjun_bazar_active_stance = $WBZ_LIGHTNING_REFLEXES
+	EndIf
+
+	Local $escapeExpired = Not $escapeActive
+	Local $lightningExpired = Not $lightningActive
+	Local $escapeExpiringSoon = $allowEarlySwitch And $escapeRemaining > 0 And $escapeRemaining <= $WBZ_EARLY_STANCE_SWAP_MS
+	Local $lightningExpiringSoon = $allowEarlySwitch And $lightningRemaining > 0 And $lightningRemaining <= $WBZ_EARLY_STANCE_SWAP_MS
 
 	If $wajjun_bazar_active_stance == $WBZ_ESCAPE Then
-		If $escapeRemaining > 0 Then Return
+		If Not ($escapeExpired Or $escapeExpiringSoon) Then Return
 		If IsRecharged($WBZ_LIGHTNING_REFLEXES) And GetEnergy() >= $WBZ_SKILL_COSTS_MAP[$WBZ_LIGHTNING_REFLEXES] Then
 			UseSkillEx($WBZ_LIGHTNING_REFLEXES)
 			$wajjun_bazar_active_stance = $WBZ_LIGHTNING_REFLEXES
 		EndIf
 	Else
-		If $lightningRemaining > 0 Then Return
+		If Not ($lightningExpired Or $lightningExpiringSoon) Then Return
 		If IsRecharged($WBZ_ESCAPE) And GetEnergy() >= $WBZ_SKILL_COSTS_MAP[$WBZ_ESCAPE] Then
 			UseSkillEx($WBZ_ESCAPE)
 			$wajjun_bazar_active_stance = $WBZ_ESCAPE
@@ -144,11 +180,19 @@ Func WajjunBazarMaintainAlternatingStances()
 EndFunc
 
 
+Func WajjunBazarTryEmergencyPullAura()
+	Local $me = GetMyAgent()
+	Local $hpAbs = DllStructGetData($me, 'MaxHealth') * DllStructGetData($me, 'HealthPercent')
+	If $hpAbs < $WBZ_PULL_EMERGENCY_HP_ABS And IsRecharged($WBZ_GRENTHS_AURA) And GetEnergy() >= $WBZ_SKILL_COSTS_MAP[$WBZ_GRENTHS_AURA] Then UseSkillEx($WBZ_GRENTHS_AURA)
+EndFunc
+
+
 Func WajjunBazarMaintainUpkeep($target = Null)
+	If $target == Null Then $target = GetNearestEnemyToAgent(GetMyAgent(), $RANGE_COMPASS)
+	If $target <> Null And IsRecharged($WBZ_YOU_ARE_ALL_WEAKLINGS) And GetEnergy() >= $WBZ_SKILL_COSTS_MAP[$WBZ_YOU_ARE_ALL_WEAKLINGS] Then UseSkillEx($WBZ_YOU_ARE_ALL_WEAKLINGS, $target)
 	If IsRecharged($WBZ_DWARVEN_STABILITY) And GetEffectTimeRemaining(GetEffect($ID_DWARVEN_STABILITY)) == 0 And GetEnergy() >= $WBZ_SKILL_COSTS_MAP[$WBZ_DWARVEN_STABILITY] Then UseSkillEx($WBZ_DWARVEN_STABILITY)
 	If IsRecharged($WBZ_MENTAL_BLOCK) And GetEffectTimeRemaining(GetEffect($ID_MENTAL_BLOCK)) == 0 And GetEnergy() >= $WBZ_SKILL_COSTS_MAP[$WBZ_MENTAL_BLOCK] Then UseSkillEx($WBZ_MENTAL_BLOCK)
 	If IsRecharged($WBZ_GRENTHS_AURA) And GetEnergy() >= $WBZ_SKILL_COSTS_MAP[$WBZ_GRENTHS_AURA] Then UseSkillEx($WBZ_GRENTHS_AURA)
-	If $target <> Null And IsRecharged($WBZ_YOU_ARE_ALL_WEAKLINGS) And GetEnergy() >= $WBZ_SKILL_COSTS_MAP[$WBZ_YOU_ARE_ALL_WEAKLINGS] Then UseSkillEx($WBZ_YOU_ARE_ALL_WEAKLINGS, $target)
 EndFunc
 
 
@@ -166,18 +210,22 @@ Func WajjunBazarKillChoreography()
 		Local $nearestFoe = GetNearestEnemyToAgent($me)
 		If $nearestFoe <> Null Then
 			WajjunBazarMaintainUpkeep($nearestFoe)
+			WajjunBazarMaintainAlternatingStances(True)
 			ChangeTarget($nearestFoe)
 			Attack($nearestFoe)
-			WajjunBazarMaintainAlternatingStances()
+			WajjunBazarMaintainAlternatingStances(True)
+			WajjunBazarMaintainUpkeep($nearestFoe)
 
 			If IsRecharged($WBZ_CRIPPLING_VICTORY) And WajjunBazarHasAdrenaline($WBZ_CRIPPLING_VICTORY, $WBZ_CHAIN_MIN_ADREN5) Then
 				UseSkillEx($WBZ_CRIPPLING_VICTORY, $nearestFoe)
 				RandomSleep(60)
 				If IsRecharged($WBZ_REAP_IMPURITIES) And WajjunBazarHasAdrenaline($WBZ_REAP_IMPURITIES, $WBZ_CHAIN_MIN_ADREN6) Then UseSkillEx($WBZ_REAP_IMPURITIES, $nearestFoe)
 			EndIf
+			WajjunBazarMaintainAlternatingStances(True)
+			WajjunBazarMaintainUpkeep($nearestFoe)
 		EndIf
 
-		RandomSleep(200)
+		RandomSleep(40)
 		$foesCount = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_EARSHOT)
 	WEnd
 
