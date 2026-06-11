@@ -30,6 +30,7 @@ https://gwpvx.fandom.com/wiki/Build:R/A_Whirling_Defense_Farmer
 #include '../../lib/GWA2_Headers.au3'
 #include '../../lib/GWA2.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SupportTeam.au3'
 
 Opt('MustDeclareVars', True)
 
@@ -125,7 +126,7 @@ Func SetupFoWToCFarm()
 	Info('Setting up farm')
 	If TravelToFoWOutpost($district_name) == $FAIL Then Return $FAIL
 	SwitchMode($ID_NORMAL_MODE)
-	LeaveParty()
+	If FoWToCEnsureSoloParty() == $FAIL Then Return $FAIL
 	If AddHeroByProfession($ID_MONK, $ID_OGDEN) == $FAIL Then Return $FAIL
 	If AddHeroByProfession($ID_PARAGON, $ID_GENERAL_MORGAHN) == $FAIL Then Return $FAIL
 	If SetupPlayerFoWToCFarm() == $FAIL Then Return $FAIL
@@ -133,6 +134,23 @@ Func SetupFoWToCFarm()
 	$fow_toc_farm_setup = True
 	Info('Preparations complete')
 	Return $SUCCESS
+EndFunc
+
+
+Func FoWToCEnsureSoloParty($maxWaitMs = 9000)
+	Local $timer = TimerInit()
+	SupportTeamKickAllHeroesByIDSweep()
+	KickAllHeroes()
+	LeaveParty(False)
+	While TimerDiff($timer) < $maxWaitMs
+		If GetPartySize() <= 1 Then Return $SUCCESS
+		SupportTeamKickAllHeroesByIDSweep()
+		KickAllHeroes()
+		LeaveParty(False)
+		RandomSleep(320)
+	WEnd
+	Warn('FoW ToC team: party reset timeout. Party=' & GetPartySize() & ', heroes=' & GetHeroCount())
+	Return $FAIL
 EndFunc
 
 

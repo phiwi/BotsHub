@@ -22,6 +22,7 @@ https://gwpvx.fandom.com/wiki/Build:E/Me_Obsidian_Flesh_Vaettir_Farmer
 #include '../../lib/GWA2.au3'
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SupportTeam.au3'
 
 Opt('MustDeclareVars', True)
 
@@ -108,7 +109,7 @@ Func SetupVaettirsFarm()
 	Info('Setting up farm')
 	If TravelToOutpost($ID_LONGEYES_LEDGE, $district_name) == $FAIL Then Return $FAIL
 	If SetupPlayerVaettirsFarm() == $FAIL Then Return $FAIL
-	LeaveParty()
+	If VaettirsDropAllHeroesBeforeRun() == $FAIL Then Return $FAIL
 	SwitchMode($ID_HARD_MODE)
 	While $vaettirs_deadlocked Or GetMapID() <> $ID_JAGA_MORAINE
 		$vaettirs_deadlocked = False
@@ -118,6 +119,24 @@ Func SetupVaettirsFarm()
 	RandomSleep(1000)
 	Info('Preparations complete')
 	Return $SUCCESS
+EndFunc
+
+
+Func VaettirsDropAllHeroesBeforeRun($maxWaitMs = 9000)
+	Local $timer = TimerInit()
+	SupportTeamKickAllHeroesByIDSweep()
+	KickAllHeroes()
+	LeaveParty(False)
+	While TimerDiff($timer) < $maxWaitMs
+		SupportTeamKickAllHeroesByIDSweep()
+		KickAllHeroes()
+		LeaveParty(False)
+		If GetHeroCount() <= 0 And GetPartySize() <= 1 Then Return $SUCCESS
+		RandomSleep(320)
+	WEnd
+
+	Warn('Could not reset Vaettirs party to solo. Party=' & GetPartySize() & ', heroes=' & GetHeroCount())
+	Return $FAIL
 EndFunc
 
 
@@ -147,8 +166,15 @@ Func SetupPlayerVaettirsFarm()
 	Else
 		SetDisplayedTitle($ID_NORN_TITLE)
 	EndIf
+	VaettirsEnsureWeaponSet3()
 	RandomSleep(500)
 	Return $SUCCESS
+EndFunc
+
+
+Func VaettirsEnsureWeaponSet3()
+	ChangeWeaponSet(3)
+	RandomSleep(100)
 EndFunc
 
 
@@ -210,6 +236,7 @@ EndFunc
 
 ;~ Move to X, Y. This is to be used in the run from across Bjora Marches
 Func RunAcrossBjoraMarches($X, $Y)
+	VaettirsEnsureWeaponSet3()
 	Move($X, $Y)
 
 	Local $target
@@ -237,6 +264,7 @@ EndFunc
 
 ;~ Farm loop
 Func VaettirsFarmLoop()
+	VaettirsEnsureWeaponSet3()
 	; In case character died at previous loop
 	If IsPlayerDead() Then
 		If IsPlayerAtMaxMalus() Then
@@ -259,7 +287,7 @@ Func VaettirsFarmLoop()
 	Sleep(1000)
 
 	Info('Picking up loot')
-	PickUpItems(VaettirsStayAlive)
+	PickUpItems(VaettirsStayAlive, VaettirsShouldPickItem)
 	Return RezoneToJagaMoraine()
 EndFunc
 
@@ -379,8 +407,16 @@ Func VaettirsMoveDefending($destinationX, $destinationY)
 	VaettirsKillSequence()
 	If IsPlayerDead() Then Return $FAIL
 	Info('Picking up loot')
-	PickUpItems(VaettirsStayAlive)
+	PickUpItems(VaettirsStayAlive, VaettirsShouldPickItem)
 	Return $SUCCESS
+EndFunc
+
+
+Func VaettirsShouldPickItem($item)
+	Local $itemID = DllStructGetData($item, 'ModelID')
+	; Force-pick all four Sorrow's Furnace map pieces.
+	If IsMapPiece($itemID) Then Return True
+	Return DefaultShouldPickItem($item)
 EndFunc
 
 
@@ -396,6 +432,7 @@ EndFunc
 
 ;~ Use whatever skills you need to keep yourself alive.
 Func VaettirsStayAlive()
+	VaettirsEnsureWeaponSet3()
 	Local $adjacentCount, $areaCount, $foesSpellRange = False, $foesNear = False
 	Local $distance
 	Local $me = GetMyAgent()
@@ -520,6 +557,7 @@ EndFunc
 
 ;~ Kill a mob group
 Func VaettirsKillSequence()
+	VaettirsEnsureWeaponSet3()
 	; Wait for shadow form or other buffs to have been casted very recently
 	While (($vaettirs_player_profession <> $ID_ELEMENTALIST And TimerDiff($vaettir_shadowform_timer) > 5000) Or _
 			($vaettirs_player_profession == $ID_ELEMENTALIST And TimerDiff($vaettir_obsidian_flesh_timer) > 5000)) And _

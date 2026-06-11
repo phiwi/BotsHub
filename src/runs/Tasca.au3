@@ -23,7 +23,7 @@
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
 #include '../../lib/Utils.au3'
-#include '../utilities/OmniFarmer.au3'
+#include '../utilities/SupportTeam.au3'
 
 ; Possible improvements :
 
@@ -61,8 +61,43 @@ Global Const $TASCA_HEART_OF_SHADOW		= 8
 
 Global Const $TASCA_CHEST_RANGE = 1.5 * $RANGE_SPELLCAST
 
+Global Const $TASCA_HERO_KAHMU_TEMPLATE = 'OgChoyz9FAAAAAAAAAAAAA'
+Global Const $TASCA_HERO_MELONNI_TEMPLATE = 'OgChoyz9FAAAAAAAAAAAAA'
+Global Const $TASCA_HERO_MOX_TEMPLATE = 'OgChoyz9FAAAAAAAAAAAAA'
+Global Const $TASCA_HERO_TAHLKORA_TEMPLATE = 'Owohoyz9FAAAAAAAAAAAAA'
+Global Const $TASCA_HERO_MORGAHN_TEMPLATE = 'OQijEqmMKO0YAAAAAAAAAAAAAA'
+Global Const $TASCA_HERO_MOW_TEMPLATE = 'OAlkUwG4RZmDNGAAAAAAAAAAAAA'
+Global Const $TASCA_HERO_OLIAS_TEMPLATE = 'OAlkUwG4RZmDNGAAAAAAAAAAAAA'
+
+Global Const $TASCA_HERO_KAHMU_INDEX = 1
+Global Const $TASCA_HERO_MELONNI_INDEX = 2
+Global Const $TASCA_HERO_MOX_INDEX = 3
+Global Const $TASCA_HERO_TAHLKORA_INDEX = 4
+Global Const $TASCA_HERO_MORGAHN_INDEX = 5
+Global Const $TASCA_HERO_MOW_INDEX = 6
+Global Const $TASCA_HERO_OLIAS_INDEX = 7
+Global Const $TASCA_HERO_SUPPORT_SKILL_SLOT = 1
+Global Const $TASCA_HERO_MH_CAST_INTERVAL_MS = 1000
+Global Const $TASCA_HERO_CAUTERY_CAST_INTERVAL_MS = 5000
+Global Const $TASCA_SUPPORT_DEBUG_VERBOSE = False
+
+Global Const $TASCA_PORTAL_FLAG_FALLBACK_X = -9250
+Global Const $TASCA_PORTAL_FLAG_FALLBACK_Y = 19850
+
 Global $tasca_farm_setup = False
 Global $tasca_player_profession = $ID_DERVISH
+Global $tasca_support_enabled = False
+Global $tasca_next_mh_tick = 0
+Global $tasca_next_cautery_tick = 0
+Global $tasca_mh_rotation_index = 0
+Global $tasca_cautery_rotation_index = 0
+Global $tasca_kahmu_index = $TASCA_HERO_KAHMU_INDEX
+Global $tasca_melonni_index = $TASCA_HERO_MELONNI_INDEX
+Global $tasca_mox_index = $TASCA_HERO_MOX_INDEX
+Global $tasca_tahlkora_index = $TASCA_HERO_TAHLKORA_INDEX
+Global $tasca_morgahn_index = $TASCA_HERO_MORGAHN_INDEX
+Global $tasca_mow_index = $TASCA_HERO_MOW_INDEX
+Global $tasca_olias_index = $TASCA_HERO_OLIAS_INDEX
 
 ;~ Main method to chest farm Tasca
 Func TascaChestFarm()
@@ -130,16 +165,193 @@ EndFunc
 
 
 Func SetupTeamTascaChestFarm()
-	If IsTeamAutoSetup() Then Return True
-
-	Info('Setting up team according to default settings')
-	OmniFarmFullSetup()
-	RandomSleep(500)
-	If GetPartySize() <> 8 Then
-		Warn('Could not set up party correctly. Team size different than 8')
+	Info('Setting up fixed support team')
+	If TascaEnsureSoloParty() == $FAIL Then
+		Warn('Could not reset to solo party before hero setup')
+		$tasca_support_enabled = False
 		Return $FAIL
 	EndIf
+
+	If TascaTryAddSupportHero($ID_KAHMU, 'Kahmu', 2) == $FAIL Then
+		$tasca_support_enabled = False
+		Return $FAIL
+	EndIf
+	If TascaTryAddSupportHero($ID_MELONNI, 'Melonni', 3) == $FAIL Then
+		$tasca_support_enabled = False
+		Return $FAIL
+	EndIf
+	If TascaTryAddSupportHero($ID_MOX, 'M.O.X.', 4) == $FAIL Then
+		$tasca_support_enabled = False
+		Return $FAIL
+	EndIf
+	If TascaTryAddSupportHero($ID_TAHLKORA, 'Tahlkora', 5) == $FAIL Then
+		$tasca_support_enabled = False
+		Return $FAIL
+	EndIf
+	If TascaTryAddSupportHero($ID_GENERAL_MORGAHN, 'General Morgahn', 6) == $FAIL Then
+		$tasca_support_enabled = False
+		Return $FAIL
+	EndIf
+	If TascaTryAddSupportHero($ID_MASTER_OF_WHISPERS, 'Master of Whispers', 7) == $FAIL Then
+		$tasca_support_enabled = False
+		Return $FAIL
+	EndIf
+	If TascaTryAddSupportHero($ID_OLIAS, 'Olias', 8) == $FAIL Then
+		$tasca_support_enabled = False
+		Return $FAIL
+	EndIf
+
+	If Not TascaHasExactSupportTeam() Then
+		Warn('Could not set up party correctly. Team composition is invalid. Party=' & GetPartySize())
+		$tasca_support_enabled = False
+		Return $FAIL
+	EndIf
+
+	$tasca_kahmu_index = SupportTeamResolveHeroIndex($ID_KAHMU, $TASCA_HERO_KAHMU_INDEX)
+	$tasca_melonni_index = SupportTeamResolveHeroIndex($ID_MELONNI, $TASCA_HERO_MELONNI_INDEX)
+	$tasca_mox_index = SupportTeamResolveHeroIndex($ID_MOX, $TASCA_HERO_MOX_INDEX)
+	$tasca_tahlkora_index = SupportTeamResolveHeroIndex($ID_TAHLKORA, $TASCA_HERO_TAHLKORA_INDEX)
+	$tasca_morgahn_index = SupportTeamResolveHeroIndex($ID_GENERAL_MORGAHN, $TASCA_HERO_MORGAHN_INDEX)
+	$tasca_mow_index = SupportTeamResolveHeroIndex($ID_MASTER_OF_WHISPERS, $TASCA_HERO_MOW_INDEX)
+	$tasca_olias_index = SupportTeamResolveHeroIndex($ID_OLIAS, $TASCA_HERO_OLIAS_INDEX)
+
+	LoadSkillTemplate($TASCA_HERO_KAHMU_TEMPLATE, $tasca_kahmu_index)
+	RandomSleep(150)
+	LoadSkillTemplate($TASCA_HERO_MELONNI_TEMPLATE, $tasca_melonni_index)
+	RandomSleep(150)
+	LoadSkillTemplate($TASCA_HERO_MOX_TEMPLATE, $tasca_mox_index)
+	RandomSleep(150)
+	LoadSkillTemplate($TASCA_HERO_TAHLKORA_TEMPLATE, $tasca_tahlkora_index)
+	RandomSleep(150)
+	LoadSkillTemplate($TASCA_HERO_MORGAHN_TEMPLATE, $tasca_morgahn_index)
+	RandomSleep(150)
+	LoadSkillTemplate($TASCA_HERO_MOW_TEMPLATE, $tasca_mow_index)
+	RandomSleep(150)
+	LoadSkillTemplate($TASCA_HERO_OLIAS_TEMPLATE, $tasca_olias_index)
+	RandomSleep(250)
+
+	DisableAllHeroSkills($tasca_kahmu_index)
+	DisableAllHeroSkills($tasca_melonni_index)
+	DisableAllHeroSkills($tasca_mox_index)
+	DisableAllHeroSkills($tasca_tahlkora_index)
+	DisableAllHeroSkills($tasca_morgahn_index)
+	DisableAllHeroSkills($tasca_mow_index)
+	DisableAllHeroSkills($tasca_olias_index)
+	EnableHeroSkillSlot($tasca_kahmu_index, $TASCA_HERO_SUPPORT_SKILL_SLOT)
+	EnableHeroSkillSlot($tasca_melonni_index, $TASCA_HERO_SUPPORT_SKILL_SLOT)
+	EnableHeroSkillSlot($tasca_mox_index, $TASCA_HERO_SUPPORT_SKILL_SLOT)
+	EnableHeroSkillSlot($tasca_tahlkora_index, $TASCA_HERO_SUPPORT_SKILL_SLOT)
+	EnableHeroSkillSlot($tasca_morgahn_index, $TASCA_HERO_SUPPORT_SKILL_SLOT)
+	EnableHeroSkillSlot($tasca_mow_index, $TASCA_HERO_SUPPORT_SKILL_SLOT)
+	EnableHeroSkillSlot($tasca_olias_index, $TASCA_HERO_SUPPORT_SKILL_SLOT)
+
+	ResetTascaSupportScheduler()
+	$tasca_support_enabled = True
 	Return $SUCCESS
+EndFunc
+
+
+Func TascaEnsureSoloParty($maxWaitMs = 8000)
+	Local $timer = TimerInit()
+	Local $attempt = 0
+	SupportTeamKickAllHeroesByIDSweep()
+	KickAllHeroes()
+	LeaveParty(False)
+	While TimerDiff($timer) < $maxWaitMs
+		$attempt += 1
+		If GetPartySize() <= 1 Then Return $SUCCESS
+		SupportTeamDebug($TASCA_SUPPORT_DEBUG_VERBOSE, 'Tasca reset attempt #' & $attempt & ' party=' & GetPartySize() & ' heroes=' & GetHeroCount())
+		SupportTeamKickAllHeroesByIDSweep()
+		KickAllHeroes()
+		LeaveParty(False)
+		RandomSleep(320)
+	WEnd
+	Warn('Solo-party reset timeout. Party=' & GetPartySize() & ', heroes=' & GetHeroCount())
+	Return $FAIL
+EndFunc
+
+
+Func TascaTryAddSupportHero($heroID, $heroName, $expectedSize)
+	For $i = 1 To 6
+		If GetHeroNumberByHeroID($heroID) <> Null Then Return $SUCCESS
+		AddHero($heroID)
+		RandomSleep(420)
+		If GetPartySize() >= $expectedSize Then Return $SUCCESS
+	Next
+	Warn('Could not add support hero ' & $heroName & '. Party size=' & GetPartySize())
+	Return $FAIL
+EndFunc
+
+
+Func TascaHasExactSupportTeam()
+	Local $requiredHeroes[] = [$ID_KAHMU, $ID_MELONNI, $ID_MOX, $ID_TAHLKORA, $ID_GENERAL_MORGAHN, $ID_MASTER_OF_WHISPERS, $ID_OLIAS]
+	Return SupportTeamHasExactHeroes($requiredHeroes, 8)
+EndFunc
+
+
+Func ResetTascaSupportScheduler()
+	$tasca_next_mh_tick = 0
+	$tasca_next_cautery_tick = 0
+	$tasca_mh_rotation_index = 0
+	$tasca_cautery_rotation_index = 0
+EndFunc
+
+
+Func FlagTascaSupportHeroesAtPortal()
+	If Not $tasca_support_enabled Then Return
+	If GetMapID() <> $ID_TASCAS_DEMISE Then Return
+
+	Local $flagX = $TASCA_PORTAL_FLAG_FALLBACK_X
+	Local $flagY = $TASCA_PORTAL_FLAG_FALLBACK_Y
+	Local $me = GetMyAgent()
+	If $me <> Null Then
+		$flagX = Int(DllStructGetData($me, 'X'))
+		$flagY = Int(DllStructGetData($me, 'Y'))
+	EndIf
+
+	CommandHero($tasca_kahmu_index, $flagX, $flagY)
+	CommandHero($tasca_melonni_index, $flagX, $flagY)
+	CommandHero($tasca_mox_index, $flagX, $flagY)
+	CommandHero($tasca_tahlkora_index, $flagX, $flagY)
+	CommandHero($tasca_morgahn_index, $flagX, $flagY)
+	CommandHero($tasca_mow_index, $flagX, $flagY)
+	CommandHero($tasca_olias_index, $flagX, $flagY)
+EndFunc
+
+
+Func TickTascaSupportCasts()
+	If Not $tasca_support_enabled Then Return
+	If GetMapID() <> $ID_TASCAS_DEMISE Then Return
+	Local $mhOrder[] = [$tasca_melonni_index, $tasca_kahmu_index, $tasca_mox_index, $tasca_tahlkora_index]
+	Local $cauteryOrder[] = [$tasca_morgahn_index, $tasca_mow_index, $tasca_olias_index]
+
+	If $tasca_next_mh_tick == 0 Or TimerDiff($tasca_next_mh_tick) >= $TASCA_HERO_MH_CAST_INTERVAL_MS Then
+		Local $mhCount = UBound($mhOrder)
+		For $i = 0 To $mhCount - 1
+			Local $mhPos = Mod($tasca_mh_rotation_index + $i, $mhCount)
+			Local $mhHero = $mhOrder[$mhPos]
+			If IsRecharged($TASCA_HERO_SUPPORT_SKILL_SLOT, $mhHero) Then
+				UseHeroSkill($mhHero, $TASCA_HERO_SUPPORT_SKILL_SLOT)
+				$tasca_mh_rotation_index = Mod($mhPos + 1, $mhCount)
+				$tasca_next_mh_tick = TimerInit()
+				ExitLoop
+			EndIf
+		Next
+	EndIf
+
+	If $tasca_next_cautery_tick == 0 Or TimerDiff($tasca_next_cautery_tick) >= $TASCA_HERO_CAUTERY_CAST_INTERVAL_MS Then
+		Local $cauteryCount = UBound($cauteryOrder)
+		For $i = 0 To $cauteryCount - 1
+			Local $cauteryPos = Mod($tasca_cautery_rotation_index + $i, $cauteryCount)
+			Local $cauteryHero = $cauteryOrder[$cauteryPos]
+			If IsRecharged($TASCA_HERO_SUPPORT_SKILL_SLOT, $cauteryHero) Then
+				UseHeroSkill($cauteryHero, $TASCA_HERO_SUPPORT_SKILL_SLOT)
+				$tasca_cautery_rotation_index = Mod($cauteryPos + 1, $cauteryCount)
+				$tasca_next_cautery_tick = TimerInit()
+				ExitLoop
+			EndIf
+		Next
+	EndIf
 EndFunc
 
 
@@ -153,6 +365,7 @@ Func GoToTascasDemise()
 		RandomSleep(1000)
 		WaitMapLoading($ID_TASCAS_DEMISE, 10000, 2000)
 	WEnd
+	FlagTascaSupportHeroesAtPortal()
 EndFunc
 
 
@@ -167,13 +380,12 @@ Func TascaChestFarmLoop()
 
 	Info('Starting chest run')
 	UseConsumable($ID_BIRTHDAY_CUPCAKE, True)
-	; Calling it here to already use shroud of distress and dwarven stability and have enough mana later on
-	CommandAll(-11300, 21389)
+	FlagTascaSupportHeroesAtPortal()
+	ResetTascaSupportScheduler()
+	TickTascaSupportCasts()
 	TascaDefendFunction(0, 0)
 	Move(-4000, 19000)
 	Sleep(10000)
-	PrepareZephyrSpirit()
-	RegisterBurstHealingUnit()
 
 	Local $openedChests = 0
 	;ToggleMapping(2)
@@ -249,7 +461,6 @@ Func TascaChestFarmLoop()
 	EndIf
 
 	;ToggleMapping()
-	UnregisterBurstHealingUnit()
 	Info('Opened ' & $openedChests & ' chests.')
 	Return ($openedChests > 0) Or IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
@@ -264,6 +475,7 @@ Func TascaChestRun($X, $Y)
 	Local $me = GetMyAgent()
 	Local $energy
 	While GetDistanceToPoint($me, $X, $Y) > 150 And $blockedCounter < 20
+		TickTascaSupportCasts()
 		If Not IsPlayerMoving() Then
 			$blockedCounter += 1
 			Move($X, $Y)
@@ -336,6 +548,7 @@ EndFunc
 
 ;~ Use defensive skills while opening chests
 Func TascaDefendFunction($X, $Y)
+	TickTascaSupportCasts()
 	; Using timers here reduce DllCalls and make bot more reactive
 	Local Static $timer_ShroudOfDistress = Null
 	Local Static $timer_Shadowform = Null

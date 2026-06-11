@@ -22,6 +22,7 @@
 #include '../../lib/GWA2_Headers.au3'
 #include '../../lib/GWA2.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SupportTeam.au3'
 
 Opt('MustDeclareVars', True)
 
@@ -38,12 +39,33 @@ Global Const $ID_FROGGY_QUEST = $ID_QUEST_GIRIFFS_WAR
 
 Global Const $FROGGY_FARM_DURATION = 40 * 60 * 1000
 Global Const $MAX_FROGGY_FARM_DURATION = 60 * 60 * 1000
+Global Const $FROGGY_ASSASSIN_SKILLBAR = 'OwhiAyiMVNNAeNd28N5DWOxMBA'
+Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaXEWYBKmMXEZ4UgpBA'
+;~ Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaXMXcBKmEZ4UgpZbAA'
+Global Const $FROGGY_ASSASSIN_WEAPON_SET = 2
+Global Const $FROGGY_ELEMENTALIST_WEAPON_SET = 3
+Global Const $FROGGY_ASSASSIN_HERO_GWEN_TEMPLATE = 'OQhjAwBc4QkA5ZIg3ATAcQFVXMA'
+Global Const $FROGGY_ASSASSIN_HERO_MOW_TEMPLATE = 'OAlkUwG4RZmUMjC4OWN2uzWYVgdA'
+Global Const $FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE = 'OAlkUwG4RZmUMjC4OWNWC4WIegdA'
+Global Const $FROGGY_ASSASSIN_HERO_DUNKORO_TEMPLATE = 'OwAT02HCXyLaj4upe4ua6DC0oBA'
+Global Const $FROGGY_ASSASSIN_HERO_NORGU_TEMPLATE = 'OQREAsIjU8MV5aI/dwPgnWFQDA'
+Global Const $FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE = 'OQREAsIjU8MV5aI/ewPgnWFQDA'
+Global Const $FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE = 'OAhjQoGYIP3hhWVVaO5EeDzxJA'
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQBDAqoTNhwpXO4mOEMdZglP'
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQBDArwjNngcw0z0VEwpZAiA'
+Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQhkAsC7AGKDNIHM9MdjQcaGgIA'
+Global Const $FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdDBcaG4iB'
+Global Const $FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdDBcaG4iB'
+Global Const $FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA'
+Global Const $FROGGY_ELEMENTALIST_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA'
+Global Const $FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
+Global Const $FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTr3jLcCNdmWzLGA'
 
 Global $froggy_farm_setup = False
 
 ;~ Main method to farm Froggy
 Func FroggyFarm()
-	If Not $froggy_farm_setup Then SetupFroggyFarm()
+	If Not $froggy_farm_setup And SetupFroggyFarm() == $FAIL Then Return $PAUSE
 	Return FroggyFarmLoop()
 EndFunc
 
@@ -52,6 +74,9 @@ EndFunc
 Func SetupFroggyFarm()
 	Info('Setting up farm')
 	TravelToOutpost($ID_GADDS_ENCAMPMENT, $district_name)
+	If SetupFroggyAssassinOverrides() == $FAIL Then Return $FAIL
+	If SetupFroggyElementalistOverrides() == $FAIL Then Return $FAIL
+	ForceFroggyElementalistWeaponSet()
 	SetDisplayedTitle($ID_ASURA_TITLE)
 	SwitchToHardModeIfEnabled()
 	While Not $froggy_farm_setup
@@ -60,6 +85,161 @@ Func SetupFroggyFarm()
 	WEnd
 	Info('Preparations complete')
 	Return $SUCCESS
+EndFunc
+
+
+Func SetupFroggyAssassinOverrides()
+	If DllStructGetData(GetMyAgent(), 'Primary') <> $ID_ASSASSIN Then Return $SUCCESS
+
+	Info('Froggy Assassin mode: loading Sin build, weapon set 2, and fixed support team')
+	LoadSkillTemplate($FROGGY_ASSASSIN_SKILLBAR)
+	RandomSleep(250)
+	ChangeWeaponSet($FROGGY_ASSASSIN_WEAPON_SET)
+	RandomSleep(150)
+
+	If SetupFroggySinTeamFromWingstorm() == $FAIL Then
+		Warn('Could not apply Froggy Assassin fixed team setup')
+		Return $FAIL
+	EndIf
+
+	Return $SUCCESS
+EndFunc
+
+
+Func SetupFroggyElementalistOverrides()
+	If DllStructGetData(GetMyAgent(), 'Primary') <> $ID_ELEMENTALIST Then Return $SUCCESS
+
+	Info('Froggy Elementalist mode: loading Ele build, weapon set 3 and fixed Elementalist team')
+	;~ LoadSkillTemplate($FROGGY_ELEMENTALIST_SKILLBAR)
+	RandomSleep(250)
+	ChangeWeaponSet($FROGGY_ELEMENTALIST_WEAPON_SET)
+	RandomSleep(150)
+
+	If SetupFroggyElementalistTeam() == $FAIL Then
+		Warn('Could not apply Froggy Elementalist fixed team setup')
+		Return $FAIL
+	EndIf
+
+	FroggyTryOpenHeroPanelsForMonitoring()
+
+	Return $SUCCESS
+EndFunc
+
+
+Func SetupFroggyElementalistTeam()
+	Info('Froggy Elementalist team: Gwen, Norgu, Razah, Master of Whispers, Olias, Livia, Xandra')
+	If FroggyEnsureSoloParty() == $FAIL Then Return $FAIL
+
+	If FroggyTryAddHero($ID_GWEN, 'Gwen', 2, 'Froggy Elementalist') == $FAIL _
+		Or FroggyTryAddHero($ID_NORGU, 'Norgu', 3, 'Froggy Elementalist') == $FAIL _
+		Or FroggyTryAddHero($ID_RAZAH, 'Razah', 4, 'Froggy Elementalist') == $FAIL _
+		Or FroggyTryAddHero($ID_MASTER_OF_WHISPERS, 'Master of Whispers', 5, 'Froggy Elementalist') == $FAIL _
+		Or FroggyTryAddHero($ID_OLIAS, 'Olias', 6, 'Froggy Elementalist') == $FAIL _
+		Or FroggyTryAddHero($ID_LIVIA, 'Livia', 7, 'Froggy Elementalist') == $FAIL _
+		Or FroggyTryAddHero($ID_XANDRA, 'Xandra', 8, 'Froggy Elementalist') == $FAIL Then
+		Warn('Froggy Elementalist team assembly failed')
+		Return $FAIL
+	EndIf
+
+	If GetHeroNumberByHeroID($ID_GWEN) <> 1 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_NORGU) <> 2 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_RAZAH) <> 3 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_MASTER_OF_WHISPERS) <> 4 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_OLIAS) <> 5 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_LIVIA) <> 6 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_XANDRA) <> 7 Then Return $FAIL
+
+	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE, 1)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE, 2)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE, 3)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE, 4)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_OLIAS_TEMPLATE, 5)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE, 6)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE, 7)
+	RandomSleep(250)
+
+	ClearPartyCommands()
+	CancelAllHeroes()
+	Return $SUCCESS
+EndFunc
+
+
+Func SetupFroggySinTeamFromWingstorm()
+	Info('Froggy Assassin team: Gwen, Norgu, Razah, Master of Whispers, Olias, Livia, Dunkoro')
+	If FroggyEnsureSoloParty() == $FAIL Then Return $FAIL
+
+	If FroggyTryAddHero($ID_GWEN, 'Gwen', 2, 'Froggy Assassin') == $FAIL _
+		Or FroggyTryAddHero($ID_NORGU, 'Norgu', 3, 'Froggy Assassin') == $FAIL _
+		Or FroggyTryAddHero($ID_RAZAH, 'Razah', 4, 'Froggy Assassin') == $FAIL _
+		Or FroggyTryAddHero($ID_MASTER_OF_WHISPERS, 'Master of Whispers', 5, 'Froggy Assassin') == $FAIL _
+		Or FroggyTryAddHero($ID_OLIAS, 'Olias', 6, 'Froggy Assassin') == $FAIL _
+		Or FroggyTryAddHero($ID_LIVIA, 'Livia', 7, 'Froggy Assassin') == $FAIL _
+		Or FroggyTryAddHero($ID_DUNKORO, 'Dunkoro', 8, 'Froggy Assassin') == $FAIL Then
+		Warn('Froggy Assassin team assembly failed')
+		Return $FAIL
+	EndIf
+
+	If GetHeroNumberByHeroID($ID_GWEN) <> 1 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_NORGU) <> 2 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_RAZAH) <> 3 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_MASTER_OF_WHISPERS) <> 4 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_OLIAS) <> 5 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_LIVIA) <> 6 Then Return $FAIL
+	If GetHeroNumberByHeroID($ID_DUNKORO) <> 7 Then Return $FAIL
+
+	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_GWEN_TEMPLATE, 1)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_NORGU_TEMPLATE, 2)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE, 3)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_MOW_TEMPLATE, 4)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE, 5)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE, 6)
+	RandomSleep(150)
+	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_DUNKORO_TEMPLATE, 7)
+	RandomSleep(250)
+
+	ClearPartyCommands()
+	CancelAllHeroes()
+	Return $SUCCESS
+EndFunc
+
+
+Func FroggyEnsureSoloParty($maxWaitMs = 9000)
+	Local $timer = TimerInit()
+	SupportTeamKickAllHeroesByIDSweep()
+	KickAllHeroes()
+	LeaveParty(False)
+	While TimerDiff($timer) < $maxWaitMs
+		If GetPartySize() <= 1 Then Return $SUCCESS
+		SupportTeamKickAllHeroesByIDSweep()
+		KickAllHeroes()
+		LeaveParty(False)
+		RandomSleep(320)
+	WEnd
+	Warn('Froggy Assassin team: party reset timeout. Party=' & GetPartySize() & ', heroes=' & GetHeroCount())
+	Return $FAIL
+EndFunc
+
+
+Func FroggyTryAddHero($heroID, $heroName, $expectedSize, $teamLabel = 'Froggy team')
+	For $i = 1 To 6
+		If GetHeroNumberByHeroID($heroID) <> Null Then Return $SUCCESS
+		AddHero($heroID)
+		RandomSleep(350)
+		If GetPartySize() >= $expectedSize Then Return $SUCCESS
+	Next
+	Warn('Could not add ' & $teamLabel & ' hero ' & $heroName & ' (party=' & GetPartySize() & ')')
+	Return $FAIL
 EndFunc
 
 
@@ -77,17 +257,48 @@ Func RunToBogroot()
 	WEnd
 	Info('Making way to Bogroot')
 	AdlibRegister('TrackPartyStatus', 10000)
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 4671, 7094, 1250)
-		WaitUntilPartyAlive()
+	Local $bogrootPathPasses = 0
+	While Not IsAgentInRange(GetMyAgent(), 4671, 7094, 1250)
+		If IsPlayerDead() Then
+			RandomSleep(1500)
+			ContinueLoop
+		EndIf
+
+		If IsRunFailed() Then
+			Warn('Froggy setup: party wipe detected on way to Bogroot beacon 1, recovering and retrying path')
+			ResetFailuresCounter()
+			RandomSleep(1500)
+			ContinueLoop
+		EndIf
+
+		$bogrootPathPasses += 1
 		MoveAggroAndKillInRange(-4559, -14406, 'I majored in pain, with a minor in suffering', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-5204, -9831, 'Youre dumb! Youll die, and youll leave a dumb corpse!', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-928, -8699, 'I am fire! I am war! What are you?', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(4200, -4897, 'Praise Joko!', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(4671, 7094, 'I can outrun a centaur', $FROGGY_AGGRO_RANGE)
+
+		If Not IsAgentInRange(GetMyAgent(), 4671, 7094, 1250) And $bogrootPathPasses >= 5 Then
+			Warn('Froggy setup: no progress while moving to Bogroot beacon 1, re-approaching portal and retrying')
+			MoveTo(-9550, -20400)
+			Move(-9451, -19766)
+			RandomSleep(1200)
+			$bogrootPathPasses = 0
+		EndIf
 	WEnd
 
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 12280, 22585, 1250)
-		WaitUntilPartyAlive()
+	While Not IsAgentInRange(GetMyAgent(), 12280, 22585, 1250)
+		If IsPlayerDead() Then
+			RandomSleep(1500)
+			ContinueLoop
+		EndIf
+
+		If IsRunFailed() Then
+			Warn('Froggy setup: party wipe detected on way to Bogroot beacon 2, recovering and retrying path')
+			ResetFailuresCounter()
+			RandomSleep(1500)
+			ContinueLoop
+		EndIf
 		MoveAggroAndKillInRange(11025, 11710, 'Wow. Thats quality armor.', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(14624, 19314, 'By Ogdens Hammer, what savings!', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(14650, 19417, 'More violets I say. Less violence', $FROGGY_AGGRO_RANGE)
@@ -100,6 +311,7 @@ EndFunc
 
 ;~ Farm loop
 Func FroggyFarmLoop()
+	ForceFroggyElementalistWeaponSet()
 	ResetFailuresCounter()
 	AdlibRegister('TrackPartyStatus', 10000)
 	GetRewardRefreshAndTakeFroggyQuest()
@@ -115,6 +327,45 @@ Func FroggyFarmLoop()
 	WEnd
 	Info('Finished Run')
 	Return $SUCCESS
+EndFunc
+
+
+Func ForceFroggyElementalistWeaponSet()
+	If DllStructGetData(GetMyAgent(), 'Primary') <> $ID_ELEMENTALIST Then Return
+	ChangeWeaponSet($FROGGY_ELEMENTALIST_WEAPON_SET)
+	RandomSleep(120)
+EndFunc
+
+
+; GW1 keybinds for hero panels that have no working PerformAction code.
+; Bind in GW1 Options > Controls > "Panel: Open Hero Commander N":
+;   Hero 2 -> 9
+;   Hero 4 -> 5,  Hero 5 -> 6,  Hero 6 -> 7,  Hero 7 -> 8
+; Heroes 1 and 3 work via PerformAction and need no keybind.
+Global Const $FROGGY_HERO2_KEY = "9"
+Global Const $FROGGY_HERO_PANEL_KEYS = "5|6|7|8"
+
+Func FroggyTryOpenHeroPanelsForMonitoring()
+	Local $heroCount = GetHeroCount()
+	If $heroCount <= 0 Then Return
+
+	Info('Froggy mode: forcing hero panels 1-' & $heroCount & ' visible for live monitoring')
+	CloseAllPanels()
+	Sleep(120 + GetPing())
+	ToggleHeroPanel(1)
+	Sleep(120 + GetPing())
+	Send($FROGGY_HERO2_KEY)
+	Sleep(120 + GetPing())
+	ToggleHeroPanel(3)
+	Sleep(120 + GetPing())
+	Local $extraHeroes = $heroCount - 3
+	If $extraHeroes > 0 Then
+		Local $keys = StringSplit($FROGGY_HERO_PANEL_KEYS, "|")
+		For $i = 1 To ($extraHeroes < 4 ? $extraHeroes : 4)
+			Send($keys[$i])
+			Sleep(120 + GetPing())
+		Next
+	EndIf
 EndFunc
 
 
@@ -246,7 +497,19 @@ Func ClearFroggyFloor2()
 	Info('Second floor')
 	If IsHardmodeEnabled() Then UseConset()
 
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -719, 11140, 1250)
+	While Not IsAgentInRange(GetMyAgent(), -719, 11140, 1250)
+		If IsPlayerDead() Then
+			RandomSleep(1200)
+			ContinueLoop
+		EndIf
+
+		If IsRunFailed() Then
+			Warn('Froggy Floor 2: wipe detected before incubus exit beacon, recovering and retrying')
+			ResetFailuresCounter()
+			RandomSleep(1500)
+			ContinueLoop
+		EndIf
+
 		If CheckStuck('Froggy Floor 2 - First loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
 		Info('Getting blessing')
@@ -271,7 +534,19 @@ Func ClearFroggyFloor2()
 		MoveAggroAndKillInRange(-719, 11140, 'Triggering incubus cave exit beacon', $FROGGY_AGGRO_RANGE)
 	WEnd
 
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 8398, 4358, 1250)
+	While Not IsAgentInRange(GetMyAgent(), 8398, 4358, 1250)
+		If IsPlayerDead() Then
+			RandomSleep(1200)
+			ContinueLoop
+		EndIf
+
+		If IsRunFailed() Then
+			Warn('Froggy Floor 2: wipe detected in beetle section, recovering and retrying')
+			ResetFailuresCounter()
+			RandomSleep(1500)
+			ContinueLoop
+		EndIf
+
 		If CheckStuck('Froggy Floor 2 - Second loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
@@ -283,7 +558,19 @@ Func ClearFroggyFloor2()
 		MoveAggroAndKillInRange(8398, 4358, 'Triggering beacon 2', $FROGGY_AGGRO_RANGE)
 	WEnd
 
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 19597, -11553, 1250)
+	While Not IsAgentInRange(GetMyAgent(), 19597, -11553, 1250)
+		If IsPlayerDead() Then
+			RandomSleep(1200)
+			ContinueLoop
+		EndIf
+
+		If IsRunFailed() Then
+			Warn('Froggy Floor 2: wipe detected before boss beacon, recovering and retrying')
+			ResetFailuresCounter()
+			RandomSleep(1500)
+			ContinueLoop
+		EndIf
+
 		If CheckStuck('Froggy Floor 2 - Third loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
@@ -317,7 +604,24 @@ Func ClearFroggyFloor2()
 	WEnd
 
 	Local $largeFroggyAggroRange = $RANGE_SPELLCAST + 300
+	Local $bossAreaPasses = 0
+	Local $bossAreaTimer = TimerInit()
+	Local $lastBossAreaWipeCount = $party_failures_count
 	While Not IsRunFailed() And Not IsQuestReward($ID_FROGGY_QUEST)
+		If IsPlayerDead() Then
+			RandomSleep(1200)
+			ContinueLoop
+		EndIf
+
+		If $party_failures_count > $lastBossAreaWipeCount Then
+			$lastBossAreaWipeCount = $party_failures_count
+			$bossAreaPasses = 0
+			Warn('Froggy Floor 2: wipe detected in boss area, extending retry window')
+			RandomSleep(1800)
+			ContinueLoop
+		EndIf
+
+		$bossAreaPasses += 1
 		If CheckStuck('Froggy Floor 2 - Fourth loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
 		Info('------------------------------------')
 		Info('Boss area')
@@ -329,6 +633,12 @@ Func ClearFroggyFloor2()
 		MoveAggroAndKillInRange(14365, -17681, 'Boss fight', $largeFroggyAggroRange)
 		FlagMoveAggroAndKillInRange(15286, -17662, 'All hail! King of the losers!', $largeFroggyAggroRange)
 		FlagMoveAggroAndKillInRange(15804, -19107, 'Oh fuck its huge', $largeFroggyAggroRange)
+		RandomSleep(250)
+
+		If $bossAreaPasses >= 12 And TimerDiff($bossAreaTimer) > 240000 Then
+			Warn('Froggy Floor 2: boss area repeated without quest completion, resetting run')
+			Return $FAIL
+		EndIf
 	WEnd
 	If IsRunFailed() Then Return $FAIL
 

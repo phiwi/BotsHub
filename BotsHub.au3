@@ -1,4 +1,4 @@
-#CS ===========================================================================
+﻿#CS ===========================================================================
 ; Author: caustic-kronos (aka Kronos, Night, Svarog)
 ; Contributor: Gahais
 ; Copyright 2025 caustic-kronos
@@ -41,43 +41,63 @@
 #include 'lib/Build_PW_Heroic-Refrain.au3'
 #include 'lib/BotsHub-GUI.au3'
 
+#include 'src/farms/Brightclaw.au3'
 #include 'src/farms/CoF.au3'
 #include 'src/farms/Corsairs.au3'
 #include 'src/farms/DragonMoss.au3'
 #include 'src/farms/EdenIris.au3'
 #include 'src/farms/Feathers.au3'
+#include 'src/farms/FeathersSin.au3'
 #include 'src/farms/FoWTowerOfCourage.au3'
+#include 'src/farms/UWChamberTraps.au3'
+#include 'src/farms/FocusHanaku.au3'
 #include 'src/farms/Gemstones.au3'
 #include 'src/farms/GemstoneMargonite.au3'
 #include 'src/farms/GemstoneStygian.au3'
 #include 'src/farms/GemstoneTorment.au3'
 #include 'src/farms/JadeBrotherhood.au3'
+#include 'src/farms/MissingDaughter.au3'
 #include 'src/farms/Lightbringer-Sunspear.au3'
 #include 'src/farms/Lightbringer.au3'
 #include 'src/farms/Mantids.au3'
 #include 'src/farms/Kournans.au3'
 #include 'src/farms/Minotaurs.au3'
+#include 'src/farms/OutcastHalcyon.au3'
 #include 'src/farms/Raptors.au3'
 #include 'src/farms/SpiritSlaves.au3'
+#include 'src/farms/SpiritSlavesCustom.au3'
+#include 'src/farms/SpiritSlavesSin.au3'
+#include 'src/farms/SpiritSlavesRangerDerv.au3'
 #include 'src/farms/Vaettirs.au3'
+#include 'src/farms/Vanquish.au3'
+#include 'src/farms/Vanquish Blacktide Lahtenda.au3'
+#include 'src/farms/Warden.au3'
+#include 'src/farms/Wingstorm.au3'
 #include 'src/missions/Deldrimor.au3'
 #include 'src/missions/FoW.au3'
 #include 'src/missions/Froggy.au3'
 #include 'src/missions/GlintChallenge.au3'
-#include 'src/missions/MinisterialCommendations.au3'
+#include 'src/missions/MinisterialCommendationsAny.au3'
+#include 'src/missions/MinisterialCommendationsCustom.au3'
 #include 'src/missions/NexusChallenge.au3'
 #include 'src/missions/SoO.au3'
 #include 'src/missions/SunspearArmor.au3'
 #include 'src/missions/TunnelsOfTheForsaken.au3'
 #include 'src/missions/Underworld.au3'
+#include 'src/missions/UnderworldPlainsTrainer.au3'
 #include 'src/missions/Voltaic.au3'
+#include 'src/missions/VSF Perma Tank.au3'
+#include 'src/missions/VSF Perma Tank Thommis.au3'
 #include 'src/missions/WarSupplyKeiran.au3'
 #include 'src/runs/Boreal.au3'
+#include 'src/runs/OutcastRheasCrater.au3'
 #include 'src/runs/Pongmei.au3'
+#include 'src/runs/PongmeiSin.au3'
 #include 'src/runs/Tasca.au3'
 #include 'src/titles/LDOA.au3'
 #include 'src/utilities/Follower.au3'
 #include 'src/utilities/OmniFarmer.au3'
+#include 'src/utilities/PathActionRecorder.au3'
 #include 'src/utilities/TestSuite.au3'
 #include 'src/vanquishes/Asuran.au3'
 #include 'src/vanquishes/Kurzick.au3'
@@ -96,9 +116,10 @@ Global Const $SUCCESS = 0
 Global Const $FAIL = 1
 Global Const $PAUSE = 2
 
-Global Const $AVAILABLE_FARMS = '|Asuran|Boreal|CoF|Corsairs|Deldrimor|Dragon Moss|Eden Iris|Feathers|Follower|FoW|FoW Tower of Courage|Froggy|Gemstones|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|' & _
-	'Glint Challenge|Jade Brotherhood|Kournans|Kurzick|Kurzick Drazach|Lightbringer & Sunspear|Lightbringer|LDOA|Luxon|Mantids|Ministerial Commendations|Minotaurs|Nexus Challenge|Norn|OmniFarm|Pongmei|' & _
-	'Raptors|SoO|SpiritSlaves|Sunspear Armor|Tasca|TunnelsOfTheForsaken|Underworld|Vaettirs|Vanguard|Voltaic|War Supply Keiran|Storage|Tests|TestSuite|Dynamic execution'
+Global Const $AVAILABLE_FARMS = '|Asuran|Boreal|CoF|Corsairs|Deldrimor|Dragon Moss|Eden Iris|Feathers|Feathers Sin|Follower|FoW|FoW Tower of Courage|Froggy|Gemstones|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|' & _
+	'Focus Hanaku|Glint Challenge|Jade Brotherhood|Kournans|Kurzick|Kurzick Drazach|Lightbringer & Sunspear|Lightbringer|LDOA|Luxon|Mantids|Ministerial Commendations|Ministerial Com. Custom|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Pongmei|Pongmei Sin|' & _
+	'Outcast Halcyon|Outcast Rhea''s Crater|Brightclaw|Wingstorm|Path Recorder|' & _
+	'Raptors|SoO|SpiritSlaves|Spirit Slaves Ele|Spirit Slaves Ranger|Spirit Slaves Sin|Sunspear Armor|Tasca|TunnelsOfTheForsaken|Underworld|Underworld Plains Trainer|UW Chamber Traps|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Warden Farm|War Supply Keiran|Storage|Tests|TestSuite|Dynamic execution'
 
 Global Const $AVAILABLE_DISTRICTS = '|Random|Random EU|Random US|Random Asia|America|China|English|French|German|International|Italian|Japan|Korea|Polish|Russian|Spanish'
 
@@ -516,9 +537,11 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Dragon Moss',					DragonMossFarm,					5,					$DRAGONMOSS_FARM_DURATION)
 	AddFarmToFarmMap(	'Eden Iris',					EdenIrisFarm,					2,					$IRIS_FARM_DURATION)
 	AddFarmToFarmMap(	'Feathers',						FeathersFarm,					10,					$FEATHERS_FARM_DURATION)
+	AddFarmToFarmMap(	'Feathers Sin',						FeathersFarmSin,					10,					$FEATHERS_SIN_FARM_DURATION)
 	AddFarmToFarmMap(	'Follower',						FollowerFarm,					5,					30 * 60 * 1000)
 	AddFarmToFarmMap(	'FoW',							FoWFarm,						15,					$FOW_FARM_DURATION)
 	AddFarmToFarmMap(	'FoW Tower of Courage',			FoWToCFarm,						10,					$FOW_TOC_FARM_DURATION)
+	AddFarmToFarmMap(	'Focus Hanaku',						FocusHanakuFarm,					5,					$HANAKU_FARM_DURATION)
 	AddFarmToFarmMap(	'Froggy',						FroggyFarm,						10,					$FROGGY_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstones',					GemstonesFarm,					10,					$GEMSTONES_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Margonite',			GemstoneMargoniteFarm,			10,					$GEMSTONE_MARGONITE_FARM_DURATION)
@@ -526,6 +549,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Gemstone Torment',				GemstoneTormentFarm,			10,					$GEMSTONE_TORMENT_FARM_DURATION)
 	AddFarmToFarmMap(	'Glint Challenge',				GlintChallengeFarm,				5,					$GLINT_CHALLENGE_DURATION)
 	AddFarmToFarmMap(	'Jade Brotherhood',				JadeBrotherhoodFarm,			5,					$JADEBROTHERHOOD_FARM_DURATION)
+	AddFarmToFarmMap(	'Missing Daughter',				MissingDaughterFarm,			5,					$MISSING_DAUGHTER_FARM_DURATION)
 	AddFarmToFarmMap(	'Kournans',						KournansFarm,					5,					$KOURNANS_FARM_DURATION)
 	AddFarmToFarmMap(	'Kurzick',						KurzickFactionFarm,				15,					$KURZICKS_FARM_DURATION)
 	AddFarmToFarmMap(	'Kurzick Drazach',				KurzickFactionFarmDrazach,		10,					$KURZICKS_FARM_DRAZACH_DURATION)
@@ -535,21 +559,38 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Luxon',						LuxonFactionFarm,				10,					$LUXONS_FARM_DURATION)
 	AddFarmToFarmMap(	'Mantids',						MantidsFarm,					5,					$MANTIDS_FARM_DURATION)
 	AddFarmToFarmMap(	'Ministerial Commendations',	MinisterialCommendationsFarm,	5,					$COMMENDATIONS_FARM_DURATION)
+	AddFarmToFarmMap(	'Ministerial Com. Custom',	MinisterialCommendationsCustomFarm,	5,					$COMMENDATIONS_CUSTOM_FARM_DURATION)
 	AddFarmToFarmMap(	'Minotaurs',					MinotaursFarm,					5,					$MINOTAURS_FARM_DURATION)
 	AddFarmToFarmMap(	'Nexus Challenge',				NexusChallengeFarm,				5,					$NEXUS_CHALLENGE_FARM_DURATION)
 	AddFarmToFarmMap(	'Norn',							NornTitleFarm,					5,					$NORN_FARM_DURATION)
 	AddFarmToFarmMap(	'OmniFarm',						OmniFarm,						5,					5 * 60 * 1000)
+	AddFarmToFarmMap(	'Outcast Halcyon',					OutcastHalcyonFarm,				5,					$OUTCAST_HALCYON_FARM_DURATION)
+	AddFarmToFarmMap(	'Outcast Rhea''s Crater',			OutcastRheasCraterChestFarm,		5,					$OUTCAST_RHEAS_CRATER_FARM_DURATION)
 	AddFarmToFarmMap(	'Pongmei',						PongmeiChestFarm,				5,					$PONGMEI_FARM_DURATION)
+	AddFarmToFarmMap(	'Pongmei Sin',					PongmeiSinChestFarm,				5,					$PONGMEI_SIN_FARM_DURATION)
+	AddFarmToFarmMap(	'Brightclaw',							BrightclawFarm,					5,					5 * 60 * 1000)
+	AddFarmToFarmMap(	'Wingstorm',							WingstormFarm,					5,					$WINGSTORM_RUN_TIMEOUT_MS)
+	AddFarmToFarmMap(	'Path Recorder',					PathActionRecorderFarm,			0,					$PATH_ACTION_RECORDER_DURATION)
 	AddFarmToFarmMap(	'Raptors',						RaptorsFarm,					5,					$RAPTORS_FARM_DURATION)
 	AddFarmToFarmMap(	'SoO',							SoOFarm,						15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SpiritSlaves',					SpiritSlavesFarm,				5,					$SPIRIT_SLAVES_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves Ele',				SpiritSlavesCustomFarm,			5,					$SPIRIT_SLAVES_CUSTOM_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves Ranger',			SpiritSlavesRangerDervFarm,		5,					$SPIRIT_SLAVES_RANGER_DERV_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves Sin',				SpiritSlavesSinFarm,				5,					$SPIRIT_SLAVES_SIN_FARM_DURATION)
 	AddFarmToFarmMap(	'Sunspear Armor',				SunspearArmorFarm,				5,					$SUNSPEAR_ARMOR_FARM_DURATION)
 	AddFarmToFarmMap(	'Tasca',						TascaChestFarm,					5,					$TASCA_FARM_DURATION)
 	AddFarmToFarmMap(	'TunnelsOfTheForsaken',			TunnelsOfTheForsakenFarm,		5,					$TUNNELS_OF_THE_FORSAKEN_FARM_DURATION)
 	AddFarmToFarmMap(	'Underworld',					UnderworldFarm,					5,					$UW_FARM_DURATION)
+	AddFarmToFarmMap(	'Underworld Plains Trainer',	UnderworldPlainsTrainerFarm,	0,					$UWPT_TARGET_LOOP_DURATION_MS)
+	AddFarmToFarmMap(	'UW Chamber Traps',				UWChamberTrapsFarm,				5,					$UWCT_FARM_DURATION)
 	AddFarmToFarmMap(	'Vaettirs',						VaettirsFarm,					5,					$VAETTIRS_FARM_DURATION)
 	AddFarmToFarmMap(	'Vanguard',						VanguardTitleFarm,				5,					$VANGUARD_TITLE_FARM_DURATION)
+	AddFarmToFarmMap(	'Vanquish Blacktide Lahtenda',		VanquishBlackTideLahtendaFarm,	5,					$VANQBT_RUN_TIMEOUT_MS)
+	AddFarmToFarmMap(	'Vanquish Jokanur Zehlon',			VanquishFarm,					5,					$VANQ_RUN_TIMEOUT_MS)
 	AddFarmToFarmMap(	'Voltaic',						VoltaicFarm,					10,					$VOLTAIC_FARM_DURATION)
+	AddFarmToFarmMap(	'VSF Perma Tank',				VSFPermaTankFarm,				5,					$VSF_PERMA_TANK_FARM_DURATION)
+	AddFarmToFarmMap(	'VSF Perma Tank Thommis',		VSFPermaTankThommisFarm,		5,					$VSF_PERMA_TANK_THOMMIS_FARM_DURATION)
+	AddFarmToFarmMap(	'Warden Farm',					WardenFarm,					5,					$WARDEN_FARM_DURATION)
 	AddFarmToFarmMap(	'War Supply Keiran',			WarSupplyKeiranFarm,			10,					$WAR_SUPPLY_FARM_DURATION)
 	AddFarmToFarmMap(	'Execution',					RunTests,						5,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'Storage',						InventoryManagementBeforeRun,	5,					2 * 60 * 1000)
@@ -565,20 +606,35 @@ Func ResetBotsSetups()
 	$boreal_farm_setup						= False
 	$dm_farm_setup							= False
 	$feathers_farm_setup					= False
+	$feathers_sin_farm_setup			= False
 	$froggy_farm_setup						= False
+	$hanaku_farm_setup						= False
 	$iris_farm_setup						= False
 	$jade_brotherhood_farm_setup			= False
+	$missing_daughter_farm_setup			= False
 	$kournans_farm_setup					= False
 	$ldoa_farm_setup						= False
 	$lightbringer_farm_setup				= False
 	$mantids_farm_setup						= False
+	$outcast_rheas_crater_farm_setup		= False
 	$pongmei_farm_setup						= False
+	$pongmei_sin_farm_setup					= False
 	$raptors_farm_setup						= False
 	$soo_farm_setup							= False
 	$spirit_slaves_farm_setup				= False
+	$spirit_slaves_custom_farm_setup		= False
+	$spirit_slaves_ranger_derv_farm_setup	= False
+	$spirit_slaves_ranger_derv_build_setup	= False
+	$spirit_slaves_sin_farm_setup			= False
 	$tasca_farm_setup						= False
 	$tunnels_of_the_forsaken_farm_setup		= False
 	$vaettirs_farm_setup					= False
+	$vanq_setup_done					= False
+	$vanqbt_setup_done					= False
+	$warden_farm_setup					= False
+	$vsf_setup_done						= False
+	$wingstorm_farm_setup				= False
+	$uwpt_setup_done						= False
 	; Those do not need to be reset - party did not change, build did not change, and there is no need to refresh portal
 	; BUT those bots MUST tp to the correct map on every loop
 	;$cof_farm_setup						= False

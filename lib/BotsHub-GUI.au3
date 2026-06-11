@@ -965,6 +965,10 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $JB_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $JB_HERO_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $JB_FARM_INFORMATIONS)
+		Case 'Missing Daughter'
+			GUICtrlSetData($gui_edit_characterbuilds, $MD_PLAYER_SKILLBAR)
+			GUICtrlSetData($gui_edit_heroesbuilds, $MD_PYRE_SKILLBAR & @CRLF & $MD_XANDRA_SKILLBAR & @CRLF & $MD_MORGAHN_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $MISSING_DAUGHTER_FARM_INFORMATIONS)
 		Case 'Kournans'
 			GUICtrlSetData($gui_edit_characterbuilds, $ELA_KOURNANS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $R_KOURNANS_HERO_SKILLBAR & @CRLF & _
@@ -999,6 +1003,9 @@ Func UpdateFarmDescription($farm)
 		Case 'Ministerial Commendations'
 			GUICtrlSetData($gui_edit_characterbuilds, $DW_COMMENDATIONS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $COMMENDATIONS_FARM_INFORMATIONS)
+		Case 'Ministerial Com. Custom'
+			GUICtrlSetData($gui_edit_characterbuilds, $A_COMMENDATIONS_CUSTOM_FARMER_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $COMMENDATIONS_CUSTOM_FARM_INFORMATIONS)
 		Case 'Minotaurs'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
@@ -1014,6 +1021,9 @@ Func UpdateFarmDescription($farm)
 		Case 'Pongmei'
 			GUICtrlSetData($gui_edit_characterbuilds, $PONGMEI_CHESTRUNNER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $PONGMEI_CHESTRUN_INFORMATIONS)
+		Case 'Pongmei Sin'
+			GUICtrlSetData($gui_edit_characterbuilds, $PONGMEI_SIN_CHESTRUNNER_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $PONGMEI_SIN_CHESTRUN_INFORMATIONS)
 		Case 'Raptors'
 			GUICtrlSetData($gui_edit_characterbuilds, $WN_RAPTORS_FARMER_SKILLBAR & @CRLF & $DN_RAPTORS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $P_RUNNER_HERO_SKILLBAR)
@@ -1039,6 +1049,9 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $UNDERWORLD_FARM_INFORMATIONS)
+		Case 'UW Chamber Traps'
+			GUICtrlSetData($gui_edit_characterbuilds, $UWCT_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $UWCT_FARM_INFORMATIONS)
 		Case 'Vaettirs'
 			GUICtrlSetData($gui_edit_characterbuilds, $AME_VAETTIRS_FARMER_SKILLBAR & @CRLF & _
 				$MEA_VAETTIRS_FARMER_SKILLBAR & @CRLF & $MOA_VAETTIRS_FARMER_SKILLBAR & @CRLF & $EME_VAETTIRS_FARMER_SKILLBAR)

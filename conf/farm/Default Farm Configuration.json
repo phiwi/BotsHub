@@ -1,14 +1,14 @@
 ﻿{
 	"main": {
-		"character": "No character selected",
-		"farm": "Choose a farm",
-		"loot_configuration": "Default Loot Configuration"
+		"character": "A R U Technology",
+		"farm": "Froggy",
+		"loot_configuration": "new"
 	},
 	"run": {
 		"loop_mode": true,
 		"hard_mode": true,
 		"farm_materials_mid_run": false,
-		"consume_consumables": true,
+		"consume_consumables": false,
 		"use_consets": false,
 		"use_scrolls": false,
 		"sort_items": false,

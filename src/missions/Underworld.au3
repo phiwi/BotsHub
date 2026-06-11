@@ -44,7 +44,7 @@ Global Const $UW_FARM_DURATION = 90 * 60 * 1000 ; Runs take about 90 minutes if 
 Global Const $MAX_UW_FARM_DURATION = 150 * 60 * 1000 ; Runs take about 150 minutes if all quests set to True
 
 Global Const $RTA_UNDERWORLD_FARMER_SKILLBAR = 'OAejAqiMpR0gXT+glTfTQTVTdOA'
-Global Const $ART_UNDERWORLD_FARMER_SKILLBAR = 'OwhjAyi84Q0gXT+glTfTQTVTdOA'
+Global Const $ART_UNDERWORLD_FARMER_SKILLBAR = 'OwhjAyi84QDgXT+glTfTQTVTdOA'
 
 Global Const $UNDERWORLD_SUMMON_SPIRITS			= 1
 Global Const $UNDERWORLD_SIGNET_OF_SPIRITS		= 2
@@ -55,7 +55,8 @@ Global Const $UNDERWORLD_ARMOR_OF_UNFEELING		= 6
 Global Const $UNDERWORLD_PAINFUL_BOND			= 7
 Global Const $UNDERWORLD_RECALL					= 8
 
-Global Const $ATTEMPT_REAPER_QUESTS = False ; Set this to True in order for bot to do Reaper quests
+Global Const $ATTEMPT_REAPER_QUESTS = True ; Set this to True in order for bot to do Reaper quests
+;~ Global Const $ATTEMPT_REAPER_QUESTS = False ; Set this to True in order for bot to do Reaper quests
 
 ; Specific Quest Knobs
 Global Const $ENABLE_WRATHFUL_SPIRITS = True ; Quest takes too long and mobs do not drop loot. ~10min
@@ -69,7 +70,8 @@ Global Const $ENABLE_UNWANTED_GUESTS = True ; For UW total completion. ~15 min
 Global Const $ENABLE_THE_NIGHTMAN_COMETH = True ; TODO
 
 Global $underworld_fight_options
-Global $underworld_player_profession = $ID_RITUALIST
+Global $underworld_player_profession = $ID_ASSASSIN
+;~ Global $underworld_player_profession = $ID_RITUALIST
 Global $uw_farm_setup = False
 
 
