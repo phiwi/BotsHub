@@ -22,6 +22,7 @@
 #include '../../lib/GWA2_Headers.au3'
 #include '../../lib/GWA2.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SupportTeam.au3'
 
 Opt('MustDeclareVars', True)
 
@@ -54,6 +55,7 @@ Func SetupSoOFarm()
 	TravelToOutpost($ID_VLOXS_FALLS, $district_name)
 	SwitchToHardModeIfEnabled()
 	SetDisplayedTitle($ID_ASURA_TITLE)
+	SupportTeamOpenHeroPanels('SoO')
 	While Not $soo_farm_setup
 		If RunToShardsOfOrrDungeon() == $FAIL Then ContinueLoop
 		$soo_farm_setup = True

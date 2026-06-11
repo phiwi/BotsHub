@@ -205,6 +205,7 @@ Func SetupTeamFocusHanakuFarm()
 	If HanakuLoadHeroBuildByID($ID_GWEN, 'Gwen', $HANAKU_HERO_GWEN_SKILLBAR, 7) == $FAIL Then Return $FAIL
 	RandomSleep(200)
 	RandomSleep(200)
+	SupportTeamOpenHeroPanels('Focus Hanaku')
 
 	Return $SUCCESS
 EndFunc

@@ -22,6 +22,7 @@
 #include '../../lib/GWA2.au3'
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SupportTeam.au3'
 
 Opt('MustDeclareVars', True)
 
@@ -57,6 +58,7 @@ Func SetupVoltaicFarm()
 	TravelToOutpost($ID_UMBRAL_GROTTO, $district_name)
 	SwitchToHardModeIfEnabled()
 	SetDisplayedTitle($ID_ASURA_TITLE)
+	SupportTeamOpenHeroPanels('Voltaic')
 	$voltaic_farm_setup = True
 	Info('Preparations complete')
 	Return $SUCCESS

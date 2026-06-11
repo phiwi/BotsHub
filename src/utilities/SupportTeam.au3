@@ -58,3 +58,49 @@ Func SupportTeamStabilizeAfterTravel($expectedOutpostID, $maxWaitMs = 10000, $po
 	; Fallback: map loaded but party state not fully stable yet.
 	Return GetMapID() == $expectedOutpostID
 EndFunc
+
+
+Func SupportTeamOpenHeroPanels($contextLabel = 'Support team', $hero2Key = '9', $hero4To7Keys = '5|6|7|8')
+	Local $heroCount = GetHeroCount()
+	If $heroCount <= 0 Then Return
+
+	Local $panelCount = $heroCount < 7 ? $heroCount : 7
+	Info($contextLabel & ': forcing hero panels 1-' & $panelCount & ' visible')
+
+	CloseAllPanels()
+	Sleep(150 + GetPing())
+
+	If $panelCount >= 1 Then
+		ToggleHeroPanel(1)
+		Sleep(130 + GetPing())
+	EndIf
+
+	If $panelCount >= 2 Then
+		SupportTeamSendPanelKey($hero2Key)
+		Sleep(130 + GetPing())
+	EndIf
+
+	If $panelCount >= 3 Then
+		ToggleHeroPanel(3)
+		Sleep(130 + GetPing())
+	EndIf
+
+	Local $extraHeroes = $panelCount - 3
+	If $extraHeroes > 0 Then
+		Local $keys = StringSplit($hero4To7Keys, '|')
+		For $i = 1 To ($extraHeroes < 4 ? $extraHeroes : 4)
+			If $i <= $keys[0] Then
+				SupportTeamSendPanelKey($keys[$i])
+				Sleep(130 + GetPing())
+			EndIf
+		Next
+	EndIf
+EndFunc
+
+
+Func SupportTeamSendPanelKey($key)
+	Local $hWnd = GetWindowHandle()
+	If $hWnd <> 0 Then WinActivate($hWnd)
+	Sleep(80 + GetPing())
+	ControlSend($hWnd, '', '', $key)
+EndFunc

@@ -39,6 +39,7 @@ Global Const $ID_FROGGY_QUEST = $ID_QUEST_GIRIFFS_WAR
 
 Global Const $FROGGY_FARM_DURATION = 40 * 60 * 1000
 Global Const $MAX_FROGGY_FARM_DURATION = 60 * 60 * 1000
+Global Const $FROGGY_HERO_PANELS_TEST_DURATION = 30 * 1000
 Global Const $FROGGY_ASSASSIN_SKILLBAR = 'OwhiAyiMVNNAeNd28N5DWOxMBA'
 Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaXEWYBKmMXEZ4UgpBA'
 ;~ Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaXMXcBKmEZ4UgpZbAA'
@@ -67,6 +68,17 @@ Global $froggy_farm_setup = False
 Func FroggyFarm()
 	If Not $froggy_farm_setup And SetupFroggyFarm() == $FAIL Then Return $PAUSE
 	Return FroggyFarmLoop()
+EndFunc
+
+
+Func FroggyHeroPanelsPseudoFarm()
+	Info('Froggy hero-panel pseudo farm: setup team and expand all hero skill panels')
+	If TravelToOutpost($ID_GADDS_ENCAMPMENT, $district_name) == $FAIL Then Return $PAUSE
+	If SetupFroggyElementalistTeam(True) == $FAIL Then Return $PAUSE
+	ForceFroggyElementalistWeaponSet()
+	FroggyTryOpenHeroPanelsForMonitoring()
+	Info('Froggy hero-panel pseudo farm done')
+	Return $PAUSE
 EndFunc
 
 
@@ -126,7 +138,7 @@ Func SetupFroggyElementalistOverrides()
 EndFunc
 
 
-Func SetupFroggyElementalistTeam()
+Func SetupFroggyElementalistTeam($skipBuildLoad = False)
 	Info('Froggy Elementalist team: Gwen, Norgu, Razah, Master of Whispers, Olias, Livia, Xandra')
 	If FroggyEnsureSoloParty() == $FAIL Then Return $FAIL
 
@@ -149,20 +161,22 @@ Func SetupFroggyElementalistTeam()
 	If GetHeroNumberByHeroID($ID_LIVIA) <> 6 Then Return $FAIL
 	If GetHeroNumberByHeroID($ID_XANDRA) <> 7 Then Return $FAIL
 
-	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE, 1)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE, 2)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE, 3)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE, 4)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_OLIAS_TEMPLATE, 5)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE, 6)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE, 7)
-	RandomSleep(250)
+	If Not $skipBuildLoad Then
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE, 1)
+		RandomSleep(150)
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE, 2)
+		RandomSleep(150)
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE, 3)
+		RandomSleep(150)
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE, 4)
+		RandomSleep(150)
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_OLIAS_TEMPLATE, 5)
+		RandomSleep(150)
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE, 6)
+		RandomSleep(150)
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE, 7)
+		RandomSleep(250)
+	EndIf
 
 	ClearPartyCommands()
 	CancelAllHeroes()
@@ -346,26 +360,7 @@ Global Const $FROGGY_HERO2_KEY = "9"
 Global Const $FROGGY_HERO_PANEL_KEYS = "5|6|7|8"
 
 Func FroggyTryOpenHeroPanelsForMonitoring()
-	Local $heroCount = GetHeroCount()
-	If $heroCount <= 0 Then Return
-
-	Info('Froggy mode: forcing hero panels 1-' & $heroCount & ' visible for live monitoring')
-	CloseAllPanels()
-	Sleep(120 + GetPing())
-	ToggleHeroPanel(1)
-	Sleep(120 + GetPing())
-	Send($FROGGY_HERO2_KEY)
-	Sleep(120 + GetPing())
-	ToggleHeroPanel(3)
-	Sleep(120 + GetPing())
-	Local $extraHeroes = $heroCount - 3
-	If $extraHeroes > 0 Then
-		Local $keys = StringSplit($FROGGY_HERO_PANEL_KEYS, "|")
-		For $i = 1 To ($extraHeroes < 4 ? $extraHeroes : 4)
-			Send($keys[$i])
-			Sleep(120 + GetPing())
-		Next
-	EndIf
+	SupportTeamOpenHeroPanels('Froggy mode', $FROGGY_HERO2_KEY, $FROGGY_HERO_PANEL_KEYS)
 EndFunc
 
 

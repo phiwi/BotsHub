@@ -22,6 +22,7 @@
 #include '../../lib/GWA2.au3'
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SupportTeam.au3'
 
 ; Possible improvements :
 
@@ -58,6 +59,7 @@ Func LuxonFarmSetup()
 	Info('Setting up farm')
 	TravelToOutpost($ID_ASPENWOOD_GATE_LUXON, $district_name)
 	SwitchMode($ID_HARD_MODE)
+	SupportTeamOpenHeroPanels('Luxon')
 	$luxon_farm_setup = True
 	Info('Preparations complete')
 	Return $SUCCESS

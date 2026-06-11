@@ -22,6 +22,7 @@
 #include '../../lib/GWA2.au3'
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SupportTeam.au3'
 
 ; Possible improvements :
 ; - noticed some scenarios where map is not cleared - check whether this can be fixed by adding a few additional locations
@@ -58,6 +59,7 @@ Func KurzickFarmSetup()
 	Info('Setting up farm')
 	TravelToOutpost($ID_HOUSE_ZU_HELTZER, $district_name)
 	SwitchMode($ID_HARD_MODE)
+	SupportTeamOpenHeroPanels('Kurzick')
 
 	$kurzick_farm_setup = True
 	Info('Preparations complete')
