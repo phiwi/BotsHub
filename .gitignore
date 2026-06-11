@@ -1,5 +1,7 @@
 logs/**
 data/**
+doc/path_action_recordings/*.csv
+doc/*_manual_recorder.log
 tests/**
 conf/farm/*
 conf/loot/*
