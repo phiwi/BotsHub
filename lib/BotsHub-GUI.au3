@@ -1024,6 +1024,9 @@ Func UpdateFarmDescription($farm)
 		Case 'Pongmei Sin'
 			GUICtrlSetData($gui_edit_characterbuilds, $PONGMEI_SIN_CHESTRUNNER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $PONGMEI_SIN_CHESTRUN_INFORMATIONS)
+		Case 'Barbarous Shore Sin'
+			GUICtrlSetData($gui_edit_characterbuilds, $BARBAROUS_SHORE_SIN_CHESTRUNNER_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $BARBAROUS_SHORE_SIN_CHESTRUN_INFORMATIONS)
 		Case 'Raptors'
 			GUICtrlSetData($gui_edit_characterbuilds, $WN_RAPTORS_FARMER_SKILLBAR & @CRLF & $DN_RAPTORS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $P_RUNNER_HERO_SKILLBAR)

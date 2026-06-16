@@ -41,6 +41,9 @@ Global Const $PATH_ACTION_RECORDER_DURATION = 30 * 60 * 1000
 Global Const $PATH_ACTION_RECORDER_INTERVAL_MS = 200
 Global Const $PATH_ACTION_RECORDER_STATUS_INTERVAL_MS = 1500
 Global Const $PATH_ACTION_RECORDER_MIN_POS_DELTA = 35
+Global Const $PATH_ACTION_RECORDER_STATIC_SCAN_INTERVAL_MS = 1200
+Global Const $PATH_ACTION_RECORDER_STATIC_SCAN_RANGE = $RANGE_COMPASS
+Global Const $PATH_ACTION_RECORDER_STATIC_SCAN_MAX_ROWS = 8
 Global Const $PATH_ACTION_RECORDER_DP_TO_SF_WINDOW_MS = 7000
 Global Const $PATH_ACTION_RECORDER_HANAKU_MODEL_ID = 4029
 Global Const $PATH_ACTION_RECORDER_LOG_FOLDER = @ScriptDir & '\doc\path_action_recordings\'
@@ -61,6 +64,7 @@ Global $path_action_recorder_last_skill_id = -1
 Global $path_action_recorder_last_target_id = -1
 Global $path_action_recorder_last_map_id = -1
 Global $path_action_recorder_last_status_time = 0
+Global $path_action_recorder_last_static_scan_time = 0
 Global $path_action_recorder_last_dp_cast_time = -1000000
 Global $path_action_recorder_kill_rotation_seen = False
 
@@ -140,6 +144,7 @@ Func StartPathActionRecorder()
 	$path_action_recorder_last_target_id = -1
 	$path_action_recorder_last_map_id = -1
 	$path_action_recorder_last_status_time = 0
+	$path_action_recorder_last_static_scan_time = 0
 	$path_action_recorder_last_dp_cast_time = -1000000
 	$path_action_recorder_kill_rotation_seen = False
 
@@ -157,6 +162,7 @@ Func StartPathActionRecorder()
 	FileWriteLine($path_action_recorder_handle, '# map_id=' & GetMapID() & ';map_type=' & GetMapType())
 	FileWriteLine($path_action_recorder_handle, '# columns: time_ms;event;x;y;hp;energy;map_id;target_id;target_model_id;casting_skill_id;note')
 	FileWriteLine($path_action_recorder_handle, '# HERO_POS uses target_id=hero_agent_id, target_model_id=hero_model_id, note=hero_index=<n>')
+	FileWriteLine($path_action_recorder_handle, '# STATIC_NEAR uses target_id=static_agent_id, target_model_id=gadget_id, note=model=<model_id>;dist=<n>;known_chest=<0/1>')
 	AdlibRegister('PathActionRecorderTick', $PATH_ACTION_RECORDER_INTERVAL_MS)
 	Info('Recorder started: ' & $path_action_recorder_file)
 EndFunc
@@ -244,6 +250,36 @@ Func PathActionRecorderTick()
 		PathActionRecorderWriteHeroPositions($timeMs, $mapID)
 		$path_action_recorder_last_status_time = $timeMs
 	EndIf
+
+	If ($timeMs - $path_action_recorder_last_static_scan_time) >= $PATH_ACTION_RECORDER_STATIC_SCAN_INTERVAL_MS Then
+		PathActionRecorderWriteStaticObjects($timeMs, $x, $y, $hp, $energy, $mapID, $castSkillID)
+		$path_action_recorder_last_static_scan_time = $timeMs
+	EndIf
+EndFunc
+
+
+Func PathActionRecorderWriteStaticObjects($timeMs, $x, $y, $hp, $energy, $mapID, $castSkillID)
+	Local $me = GetMyAgent()
+	If $me == Null Then Return
+
+	Local $agents = GetAgentArray($ID_AGENT_TYPE_STATIC)
+	If Not IsArray($agents) Or UBound($agents) <= 0 Then Return
+
+	Local $rows = 0
+	For $agent In $agents
+		Local $dist = Int(GetDistance($me, $agent))
+		If $dist > $PATH_ACTION_RECORDER_STATIC_SCAN_RANGE Then ContinueLoop
+
+		Local $agentID = DllStructGetData($agent, 'ID')
+		Local $gadgetID = DllStructGetData($agent, 'GadgetID')
+		Local $modelID = DllStructGetData($agent, 'ModelID')
+		Local $knownChest = ($MAP_CHESTS_IDS[$gadgetID] <> Null) ? 1 : 0
+		Local $note = 'model=' & $modelID & ';dist=' & $dist & ';known_chest=' & $knownChest
+		PathActionRecorderWriteEvent($timeMs, 'STATIC_NEAR', $x, $y, $hp, $energy, $mapID, $agentID, $gadgetID, $castSkillID, $note)
+
+		$rows += 1
+		If $rows >= $PATH_ACTION_RECORDER_STATIC_SCAN_MAX_ROWS Then ExitLoop
+	Next
 EndFunc
 
 
