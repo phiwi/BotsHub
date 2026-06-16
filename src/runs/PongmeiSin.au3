@@ -75,6 +75,8 @@ Global Const $PONGMEI_SIN_HERO_SUPPORT_SKILL = 1
 
 Global Const $PONGMEI_SIN_PORTAL_FLAG_X = 25366
 Global Const $PONGMEI_SIN_PORTAL_FLAG_Y = 1524
+Global Const $PONGMEI_SIN_PORTAL_FLAG_VERIFY_RANGE = 380
+Global Const $PONGMEI_SIN_PORTAL_FLAG_MAX_RETRIES = 10
 Global Const $PONGMEI_SIN_MH_CAST_INTERVAL_MS = 1000
 Global Const $PONGMEI_SIN_CAUTERY_CAST_INTERVAL_MS = 5000
 Global Const $PONGMEI_SIN_SUPPORT_DEBUG_VERBOSE = False
@@ -92,6 +94,8 @@ Global $pongmei_sin_tahlkora_index = $PONGMEI_SIN_HERO_TAHLKORA_INDEX
 Global $pongmei_sin_morgahn_index = $PONGMEI_SIN_HERO_MORGAHN_INDEX
 Global $pongmei_sin_mow_index = $PONGMEI_SIN_HERO_MOW_INDEX
 Global $pongmei_sin_olias_index = $PONGMEI_SIN_HERO_OLIAS_INDEX
+Global $pongmei_sin_portal_anchor_x = 0
+Global $pongmei_sin_portal_anchor_y = 0
 
 
 Func PongmeiSinChestFarm()
@@ -111,7 +115,7 @@ Func SetupPongmeiSinChestFarm()
 	SetupPlayerPongmeiSinChestFarm()
 	SetupTeamPongmeiSinChestFarm()
 
-	SwitchToHardModeIfEnabled()
+	SwitchMode($ID_NORMAL_MODE)
 	$pongmei_sin_farm_setup = True
 	Info('Preparations complete')
 	Return $SUCCESS
@@ -202,6 +206,7 @@ Func GoToPongmeiValleySin()
 		RandomSleep(1000)
 		WaitMapLoading($ID_PONGMEI_VALLEY, 10000, 2000)
 	WEnd
+	CapturePongmeiSinPortalAnchor()
 	FlagPongmeiSinSupportHeroesAtPortal()
 EndFunc
 
@@ -218,26 +223,62 @@ Func FlagPongmeiSinSupportHeroesAtPortal()
 	If Not $pongmei_sin_support_enabled Then Return
 	If GetMapID() <> $ID_PONGMEI_VALLEY Then Return
 
-	; Flag exactly at the post-zone spawn point so heroes stay at portal reliably.
-	Local $flagX = $PONGMEI_SIN_PORTAL_FLAG_X
-	Local $flagY = $PONGMEI_SIN_PORTAL_FLAG_Y
-	Local $me = GetMyAgent()
-	If $me <> Null Then
-		$flagX = Int(DllStructGetData($me, 'X'))
-		$flagY = Int(DllStructGetData($me, 'Y'))
+	Local $flagX = $pongmei_sin_portal_anchor_x
+	Local $flagY = $pongmei_sin_portal_anchor_y
+	If $flagX == 0 And $flagY == 0 Then
+		CapturePongmeiSinPortalAnchor()
+		$flagX = $pongmei_sin_portal_anchor_x
+		$flagY = $pongmei_sin_portal_anchor_y
 	EndIf
 
 	SupportTeamDebug($PONGMEI_SIN_SUPPORT_DEBUG_VERBOSE, 'Pongmei support: flag heroes at portal X=' & $flagX & ' Y=' & $flagY)
-	For $i = 1 To 3
-		CommandHero($pongmei_sin_kahmu_index, $flagX, $flagY)
-		CommandHero($pongmei_sin_melonni_index, $flagX, $flagY)
-		CommandHero($pongmei_sin_mox_index, $flagX, $flagY)
-		CommandHero($pongmei_sin_tahlkora_index, $flagX, $flagY)
-		CommandHero($pongmei_sin_morgahn_index, $flagX, $flagY)
-		CommandHero($pongmei_sin_mow_index, $flagX, $flagY)
-		CommandHero($pongmei_sin_olias_index, $flagX, $flagY)
-		RandomSleep(120)
+	For $i = 1 To $PONGMEI_SIN_PORTAL_FLAG_MAX_RETRIES
+		PongmeiSinCommandAllSupportHeroesTo($flagX, $flagY)
+		RandomSleep(140)
+		If PongmeiSinAreAllSupportHeroesAt($flagX, $flagY, $PONGMEI_SIN_PORTAL_FLAG_VERIFY_RANGE) Then Return
 	Next
+	Warn('Pongmei support: not all heroes reached portal flag before run start')
+EndFunc
+
+
+Func CapturePongmeiSinPortalAnchor()
+	If GetMapID() <> $ID_PONGMEI_VALLEY Then Return
+	Local $me = GetMyAgent()
+	If $me == Null Then Return
+	$pongmei_sin_portal_anchor_x = Int(DllStructGetData($me, 'X'))
+	$pongmei_sin_portal_anchor_y = Int(DllStructGetData($me, 'Y'))
+	SupportTeamDebug($PONGMEI_SIN_SUPPORT_DEBUG_VERBOSE, 'Pongmei support: captured portal anchor X=' & $pongmei_sin_portal_anchor_x & ' Y=' & $pongmei_sin_portal_anchor_y)
+EndFunc
+
+
+Func PongmeiSinCommandAllSupportHeroesTo($x, $y)
+	CommandHero($pongmei_sin_kahmu_index, $x, $y)
+	CommandHero($pongmei_sin_melonni_index, $x, $y)
+	CommandHero($pongmei_sin_mox_index, $x, $y)
+	CommandHero($pongmei_sin_tahlkora_index, $x, $y)
+	CommandHero($pongmei_sin_morgahn_index, $x, $y)
+	CommandHero($pongmei_sin_mow_index, $x, $y)
+	CommandHero($pongmei_sin_olias_index, $x, $y)
+EndFunc
+
+
+Func PongmeiSinAreAllSupportHeroesAt($x, $y, $maxDist)
+	If Not PongmeiSinIsHeroAtFlag($pongmei_sin_kahmu_index, $x, $y, $maxDist) Then Return False
+	If Not PongmeiSinIsHeroAtFlag($pongmei_sin_melonni_index, $x, $y, $maxDist) Then Return False
+	If Not PongmeiSinIsHeroAtFlag($pongmei_sin_mox_index, $x, $y, $maxDist) Then Return False
+	If Not PongmeiSinIsHeroAtFlag($pongmei_sin_tahlkora_index, $x, $y, $maxDist) Then Return False
+	If Not PongmeiSinIsHeroAtFlag($pongmei_sin_morgahn_index, $x, $y, $maxDist) Then Return False
+	If Not PongmeiSinIsHeroAtFlag($pongmei_sin_mow_index, $x, $y, $maxDist) Then Return False
+	If Not PongmeiSinIsHeroAtFlag($pongmei_sin_olias_index, $x, $y, $maxDist) Then Return False
+	Return True
+EndFunc
+
+
+Func PongmeiSinIsHeroAtFlag($heroIndex, $x, $y, $maxDist)
+	If $heroIndex <= 0 Then Return False
+	Local $heroAgent = GetAgentByID(GetHeroID($heroIndex))
+	If $heroAgent == Null Then Return False
+	Return GetDistanceToPoint($heroAgent, $x, $y) <= $maxDist
 EndFunc
 
 

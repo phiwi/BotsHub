@@ -94,8 +94,10 @@
 #include 'src/runs/OutcastRheasCrater.au3'
 #include 'src/runs/Pongmei.au3'
 #include 'src/runs/PongmeiSin.au3'
+#include 'src/runs/BarbarousShoreSin.au3'
 #include 'src/runs/Tasca.au3'
 #include 'src/runs/WajjunBazar.au3'
+#include 'src/runs/AmFah600SpiritBond.au3'
 #include 'src/titles/LDOA.au3'
 #include 'src/utilities/Follower.au3'
 #include 'src/utilities/OmniFarmer.au3'
@@ -118,10 +120,10 @@ Global Const $SUCCESS = 0
 Global Const $FAIL = 1
 Global Const $PAUSE = 2
 
-Global Const $AVAILABLE_FARMS = '|Asuran|Boreal|CoF|Corsairs|Deldrimor|Dragon Moss|Eden Iris|Feathers|Feathers Sin|Follower|FoW|FoW Tower of Courage|Froggy|Froggy Hero Panels Test|Gemstones|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|' & _
-	'Focus Hanaku|Glint Challenge|Jade Brotherhood|Kournans|Kurzick|Kurzick Drazach|Lightbringer & Sunspear|Lightbringer|LDOA|Luxon|Mantids|Ministerial Commendations|Ministerial Com. Custom|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Pongmei|Pongmei Sin|' & _
-	'Outcast Halcyon|Outcast Rhea''s Crater|Brightclaw|Wingstorm|Path Recorder|' & _
-	'Raptors|SoO|Spirit Slaves Ranger|Spirit Slaves Warrior|Sunspear Armor|Tasca|TunnelsOfTheForsaken|Underworld|Underworld Plains Trainer|UW Chamber Traps|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|Warden Farm|War Supply Keiran|Storage|Tests|TestSuite|Dynamic execution'
+Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Follower|Focus Hanaku|FoW|FoW Tower of Courage|Froggy|Froggy Hero Panels Test|' & _
+	'Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kournans|Kurzick|Kurzick Drazach|LDOA|Lightbringer|Lightbringer & Sunspear|Luxon|Mantids|Ministerial Com. Custom|Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|' & _
+	'Path Recorder|Pongmei|Pongmei Sin|Raptors|SoO|Spirit Slaves Ranger|Spirit Slaves Warrior|Storage|Sunspear Armor|Tasca|TestSuite|Tests|TunnelsOfTheForsaken|Underworld|Underworld Plains Trainer|UW Chamber Traps|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|' & _
+	'Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
 
 Global Const $AVAILABLE_DISTRICTS = '|Random|Random EU|Random US|Random Asia|America|China|English|French|German|International|Italian|Japan|Korea|Polish|Russian|Spanish'
 
@@ -571,6 +573,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Outcast Rhea''s Crater',			OutcastRheasCraterChestFarm,		5,					$OUTCAST_RHEAS_CRATER_FARM_DURATION)
 	AddFarmToFarmMap(	'Pongmei',						PongmeiChestFarm,				5,					$PONGMEI_FARM_DURATION)
 	AddFarmToFarmMap(	'Pongmei Sin',					PongmeiSinChestFarm,				5,					$PONGMEI_SIN_FARM_DURATION)
+	AddFarmToFarmMap(	'Barbarous Shore Sin',			BarbarousShoreSinChestFarm,		5,					$BARBAROUS_SHORE_SIN_FARM_DURATION)
 	AddFarmToFarmMap(	'Brightclaw',							BrightclawFarm,					5,					5 * 60 * 1000)
 	AddFarmToFarmMap(	'Wingstorm',							WingstormFarm,					5,					$WINGSTORM_RUN_TIMEOUT_MS)
 	AddFarmToFarmMap(	'Path Recorder',					PathActionRecorderFarm,			0,					$PATH_ACTION_RECORDER_DURATION)
@@ -584,6 +587,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Sunspear Armor',				SunspearArmorFarm,				5,					$SUNSPEAR_ARMOR_FARM_DURATION)
 	AddFarmToFarmMap(	'Tasca',						TascaChestFarm,					5,					$TASCA_FARM_DURATION)
 	AddFarmToFarmMap(	'Wajjun Bazar',				WajjunBazarRun,					5,					$WAJJUN_BAZAR_FARM_DURATION)
+	AddFarmToFarmMap(	'Am Fah 600 Spirit Bond',	AmFah600SpiritBondRun,			5,					$AMFAH600_SB_FARM_DURATION)
 	AddFarmToFarmMap(	'TunnelsOfTheForsaken',			TunnelsOfTheForsakenFarm,		5,					$TUNNELS_OF_THE_FORSAKEN_FARM_DURATION)
 	AddFarmToFarmMap(	'Underworld',					UnderworldFarm,					5,					$UW_FARM_DURATION)
 	AddFarmToFarmMap(	'Underworld Plains Trainer',	UnderworldPlainsTrainerFarm,	0,					$UWPT_TARGET_LOOP_DURATION_MS)
@@ -636,6 +640,8 @@ Func ResetBotsSetups()
 	$spirit_slaves_warrior_live_vicariously_primed = False
 	$tasca_farm_setup						= False
 	$wajjun_bazar_run_setup				= False
+	$amfah600_sb_setup_done				= False
+	$amfah600_sb_maintained_precast_done	= False
 	$tunnels_of_the_forsaken_farm_setup		= False
 	$vaettirs_farm_setup					= False
 	$vanq_setup_done					= False
@@ -678,7 +684,11 @@ Func GeneralFarmSetup()
 		SetupTeamUsingGlobalSettings()
 	EndIf
 	If $character_name <> '' Then
-		If $run_options_cache['run.go_offline'] Then SetPlayerStatus(0)
+		If $run_options_cache['run.go_offline'] Then
+			SetPlayerStatus(0)
+		Else
+			SetPlayerStatus(3)
+		EndIf
 		If $run_options_cache['run.flash_whisper'] Then EnableWhisperFlash()
 	EndIf
 
