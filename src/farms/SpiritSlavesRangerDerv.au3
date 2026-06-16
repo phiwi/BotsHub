@@ -260,7 +260,7 @@ Func SpiritSlavesRangerDervFarmSouthGroup()
 	MoveTo(-7830, -7860)
 	SpiritSlavesRangerDervCleanseFromCripple()
 	Local $nearbyNow = CountFoesInRangeOfAgent(GetMyAgent(), 950)
-	If $nearbyNow >= 3 Then
+	If $nearbyNow >= 1 Then
 		$forceImmediateEngage = True
 		SpiritSlavesRangerDervLogInfo('South staging: nearby aggro detected (' & $nearbyNow & '), forcing immediate engage')
 	EndIf
@@ -271,7 +271,7 @@ Func SpiritSlavesRangerDervFarmSouthGroup()
 		$foesCount = CountFoesInRangeOfCoords(-7400, -9400, $RANGE_SPELLCAST, SpiritSlavesRangerDervIsPastAggroLine)
 		SpiritSlavesRangerDervCleanseFromCripple()
 		$nearbyNow = CountFoesInRangeOfAgent(GetMyAgent(), 950)
-		If $nearbyNow >= 3 Then
+		If $nearbyNow >= 1 Then
 			$forceImmediateEngage = True
 			SpiritSlavesRangerDervLogInfo('South staging: aggro arrived during wait (' & $nearbyNow & '), engaging now')
 		EndIf
@@ -293,14 +293,14 @@ Func SpiritSlavesRangerDervFarmSouthGroup()
 			SpiritSlavesRangerDervLogWarn('South staging timeout: no aggro acquired near hold spot')
 			Return $FAIL
 		EndIf
+		If $foesCount > 0 Then
+			$forceImmediateEngage = True
+			SpiritSlavesRangerDervLogInfo('South staging: aggro acquired at hold spot (' & $foesCount & '), engaging now')
+		EndIf
 	EndIf
 	If IsPlayerDead() Then Return $FAIL
 	If $forceImmediateEngage Then
-		SpiritSlavesRangerDervLogInfo('South staging: waiting for HP/energy recovery before engage')
-		If SpiritSlavesRangerDervWaitForReengageReadiness() == $FAIL Then
-			SpiritSlavesRangerDervLogWarn('South staging timeout: HP/energy did not recover enough for safe engage')
-			Return $FAIL
-		EndIf
+		SpiritSlavesRangerDervLogInfo('South staging: engaging immediately under pressure')
 	Else
 		If SpiritSlavesRangerDervWaitForEnergy() == $FAIL Then
 			SpiritSlavesRangerDervLogWarn('South staging timeout: energy did not recover to 20 in time')
