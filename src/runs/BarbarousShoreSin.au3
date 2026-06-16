@@ -446,6 +446,11 @@ Func BarbarousShoreSinChestFarmLoop()
 	If $BARBAROUS_SHORE_SIN_ENABLE_ROUTE_REORDER Then BarbarousShoreSinOptimizeWaypointRoute($waypoints)
 	Local $i = 0
 	While $i < $spotCount
+		If IsPlayerDead() Then
+			Warn('Barbarous run: player dead, aborting run for resign/restart')
+			Return $FAIL
+		EndIf
+
 		Info('Running to Spot #' & ($i + 1) & '/' & $spotCount)
 
 		If BarbarousShoreSinOpenChestNearPoint($waypoints[$i][0], $waypoints[$i][1]) Then
@@ -455,6 +460,10 @@ Func BarbarousShoreSinChestFarmLoop()
 		EndIf
 
 		If BarbarousShoreSinRunToWaypointWithBypass($waypoints[$i][0], $waypoints[$i][1]) == $FAIL Then
+			If IsPlayerDead() Then
+				Warn('Barbarous run: player dead while moving, aborting run for resign/restart')
+				Return $FAIL
+			EndIf
 			Warn('Barbarous pathing: skipped blocked spot #' & ($i + 1))
 			$i += 1
 			ContinueLoop
@@ -464,6 +473,11 @@ Func BarbarousShoreSinChestFarmLoop()
 			$openedChests += 1
 			$i = BarbarousShoreSinAdvanceRouteAfterChest($waypoints, $i)
 			ContinueLoop
+		EndIf
+
+		If IsPlayerDead() Then
+			Warn('Barbarous run: player dead after chest interaction, aborting run for resign/restart')
+			Return $FAIL
 		EndIf
 
 		If BarbarousShoreSinOpenChestNearPoint($waypoints[$i][0], $waypoints[$i][1]) Then
