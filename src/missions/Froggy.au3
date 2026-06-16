@@ -40,6 +40,9 @@ Global Const $ID_FROGGY_QUEST = $ID_QUEST_GIRIFFS_WAR
 Global Const $FROGGY_FARM_DURATION = 40 * 60 * 1000
 Global Const $MAX_FROGGY_FARM_DURATION = 60 * 60 * 1000
 Global Const $FROGGY_HERO_PANELS_TEST_DURATION = 30 * 1000
+Global Const $FROGGY_TEAM_ASSEMBLY_PASSES = 4
+Global Const $FROGGY_TEAM_MISSING_FALLBACK_PASSES = 3
+Global Const $FROGGY_TEAM_OUTPOST_RETRIES = 4
 Global Const $FROGGY_ASSASSIN_SKILLBAR = 'OwhiAyiMVNNAeNd28N5DWOxMBA'
 Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaXEWYBKmMXEZ4UgpBA'
 ;~ Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaXMXcBKmEZ4UgpZbAA'
@@ -50,23 +53,46 @@ Global Const $FROGGY_ASSASSIN_HERO_MOW_TEMPLATE = 'OAlkUwG4RZmUMjC4OWN2uzWYVgdA'
 Global Const $FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE = 'OAlkUwG4RZmUMjC4OWNWC4WIegdA'
 Global Const $FROGGY_ASSASSIN_HERO_DUNKORO_TEMPLATE = 'OwAT02HCXyLaj4upe4ua6DC0oBA'
 Global Const $FROGGY_ASSASSIN_HERO_NORGU_TEMPLATE = 'OQREAsIjU8MV5aI/dwPgnWFQDA'
-Global Const $FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE = 'OQREAsIjU8MV5aI/ewPgnWFQDA'
+Global Const $FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE = 'OQREAsIjU8MV5aI/ewPgnWFQDA' ; ESurge
 Global Const $FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE = 'OAhjQoGYIP3hhWVVaO5EeDzxJA'
-;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQBDAqoTNhwpXO4mOEMdZglP'
-;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQBDArwjNngcw0z0VEwpZAiA'
-Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQhkAsC7AGKDNIHM9MdjQcaGgIA'
-Global Const $FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdDBcaG4iB'
-Global Const $FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdDBcaG4iB'
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQBDArwjNngcw0z0VEwpZAiA' ; ESurge
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQhkAsC7AGKDNIHM9MdjQcaGgIA' ; Panic
+Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQN2OGRA' ; Ineptitude
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdDBcaG4iB' ; Esurge
+Global Const $FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; PsychInst
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdDBcaG4iB'
+Global Const $FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB' ; Panic
 Global Const $FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA'
+Global Const $FROGGY_ELEMENTALIST_HERO_DUNKORO_TEMPLATE = 'OwQTcUHDxxnV9xrXEqvLxOI0AA'
+Global Const $FROGGY_ELEMENTALIST_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDeDLg6QhD1Y7YA'
 Global Const $FROGGY_ELEMENTALIST_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA'
 Global Const $FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
-Global Const $FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTr3jLcCNdmWzLGA'
+Global Const $FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE = 'OAOiAyk5gNtePuwJ00ZaNbJA'
+Global Const $FROGGY_ELEMENTALIST_HERO_VEKK_TEMPLATE = 'OgNDwcPPP1CSSARLWPga31VC'
+Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_ID = $ID_MASTER_OF_WHISPERS
+Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_NAME = 'Master of Whispers'
+Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE
+;~ Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_ID = $ID_DUNKORO
+;~ Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_NAME = 'Dunkoro'
+;~ Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_DUNKORO_TEMPLATE
+;~ Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_ID = $ID_LIVIA
+;~ Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_NAME = 'Livia'
+;~ Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE
+Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_ID = $ID_ZHED_SHADOWHOOF
+Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_NAME = 'Zhed Shadowhoof'
+Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_ZHED_TEMPLATE
+;~ Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_ID = $ID_XANDRA
+;~ Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_NAME = 'Xandra'
+;~ Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE
+Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_ID = $ID_VEKK
+Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_NAME = 'Vekk'
+Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_VEKK_TEMPLATE
 
 Global $froggy_farm_setup = False
 
 ;~ Main method to farm Froggy
 Func FroggyFarm()
-	If Not $froggy_farm_setup And SetupFroggyFarm() == $FAIL Then Return $PAUSE
+	If Not $froggy_farm_setup And SetupFroggyFarm() == $FAIL Then Return $FAIL
 	Return FroggyFarmLoop()
 EndFunc
 
@@ -85,7 +111,10 @@ EndFunc
 ;~ Froggy farm setup
 Func SetupFroggyFarm()
 	Info('Setting up farm')
-	TravelToOutpost($ID_GADDS_ENCAMPMENT, $district_name)
+	If TravelToOutpost($ID_GADDS_ENCAMPMENT, $district_name) == $FAIL Then Return $FAIL
+	If Not SupportTeamStabilizeAfterTravel($ID_GADDS_ENCAMPMENT, 10000, 250) Then
+		Warn('Froggy setup: outpost stabilization timed out before team setup')
+	EndIf
 	If SetupFroggyAssassinOverrides() == $FAIL Then Return $FAIL
 	If SetupFroggyElementalistOverrides() == $FAIL Then Return $FAIL
 	ForceFroggyElementalistWeaponSet()
@@ -139,27 +168,27 @@ EndFunc
 
 
 Func SetupFroggyElementalistTeam($skipBuildLoad = False)
-	Info('Froggy Elementalist team: Gwen, Norgu, Razah, Master of Whispers, Olias, Livia, Xandra')
-	If FroggyEnsureSoloParty() == $FAIL Then Return $FAIL
+	Info('Froggy Elementalist team: Gwen, Norgu, Razah, ' & $FROGGY_ELEMENTALIST_FLEX3_HERO_NAME & ', Olias, ' & $FROGGY_ELEMENTALIST_FLEX_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_FLEX2_HERO_NAME)
+	Local $heroIDs[7] = [ _
+		$ID_GWEN, _
+		$ID_NORGU, _
+		$ID_RAZAH, _
+		$FROGGY_ELEMENTALIST_FLEX3_HERO_ID, _
+		$ID_OLIAS, _
+		$FROGGY_ELEMENTALIST_FLEX_HERO_ID, _
+		$FROGGY_ELEMENTALIST_FLEX2_HERO_ID _
+	]
+	Local $heroNames[7] = [ _
+		'Gwen', _
+		'Norgu', _
+		'Razah', _
+		$FROGGY_ELEMENTALIST_FLEX3_HERO_NAME, _
+		'Olias', _
+		$FROGGY_ELEMENTALIST_FLEX_HERO_NAME, _
+		$FROGGY_ELEMENTALIST_FLEX2_HERO_NAME _
+	]
 
-	If FroggyTryAddHero($ID_GWEN, 'Gwen', 2, 'Froggy Elementalist') == $FAIL _
-		Or FroggyTryAddHero($ID_NORGU, 'Norgu', 3, 'Froggy Elementalist') == $FAIL _
-		Or FroggyTryAddHero($ID_RAZAH, 'Razah', 4, 'Froggy Elementalist') == $FAIL _
-		Or FroggyTryAddHero($ID_MASTER_OF_WHISPERS, 'Master of Whispers', 5, 'Froggy Elementalist') == $FAIL _
-		Or FroggyTryAddHero($ID_OLIAS, 'Olias', 6, 'Froggy Elementalist') == $FAIL _
-		Or FroggyTryAddHero($ID_LIVIA, 'Livia', 7, 'Froggy Elementalist') == $FAIL _
-		Or FroggyTryAddHero($ID_XANDRA, 'Xandra', 8, 'Froggy Elementalist') == $FAIL Then
-		Warn('Froggy Elementalist team assembly failed')
-		Return $FAIL
-	EndIf
-
-	If GetHeroNumberByHeroID($ID_GWEN) <> 1 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_NORGU) <> 2 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_RAZAH) <> 3 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_MASTER_OF_WHISPERS) <> 4 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_OLIAS) <> 5 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_LIVIA) <> 6 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_XANDRA) <> 7 Then Return $FAIL
+	If FroggyAssembleFixedTeamWithRecovery($heroIDs, $heroNames, 'Froggy Elementalist') == $FAIL Then Return $FAIL
 
 	If Not $skipBuildLoad Then
 		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE, 1)
@@ -168,13 +197,13 @@ Func SetupFroggyElementalistTeam($skipBuildLoad = False)
 		RandomSleep(150)
 		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE, 3)
 		RandomSleep(150)
-		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE, 4)
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_FLEX3_HERO_TEMPLATE, 4)
 		RandomSleep(150)
 		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_OLIAS_TEMPLATE, 5)
 		RandomSleep(150)
-		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE, 6)
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_FLEX_HERO_TEMPLATE, 6)
 		RandomSleep(150)
-		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE, 7)
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_FLEX2_HERO_TEMPLATE, 7)
 		RandomSleep(250)
 	EndIf
 
@@ -186,26 +215,26 @@ EndFunc
 
 Func SetupFroggySinTeamFromWingstorm()
 	Info('Froggy Assassin team: Gwen, Norgu, Razah, Master of Whispers, Olias, Livia, Dunkoro')
-	If FroggyEnsureSoloParty() == $FAIL Then Return $FAIL
+	Local $heroIDs[7] = [ _
+		$ID_GWEN, _
+		$ID_NORGU, _
+		$ID_RAZAH, _
+		$ID_MASTER_OF_WHISPERS, _
+		$ID_OLIAS, _
+		$ID_LIVIA, _
+		$ID_DUNKORO _
+	]
+	Local $heroNames[7] = [ _
+		'Gwen', _
+		'Norgu', _
+		'Razah', _
+		'Master of Whispers', _
+		'Olias', _
+		'Livia', _
+		'Dunkoro' _
+	]
 
-	If FroggyTryAddHero($ID_GWEN, 'Gwen', 2, 'Froggy Assassin') == $FAIL _
-		Or FroggyTryAddHero($ID_NORGU, 'Norgu', 3, 'Froggy Assassin') == $FAIL _
-		Or FroggyTryAddHero($ID_RAZAH, 'Razah', 4, 'Froggy Assassin') == $FAIL _
-		Or FroggyTryAddHero($ID_MASTER_OF_WHISPERS, 'Master of Whispers', 5, 'Froggy Assassin') == $FAIL _
-		Or FroggyTryAddHero($ID_OLIAS, 'Olias', 6, 'Froggy Assassin') == $FAIL _
-		Or FroggyTryAddHero($ID_LIVIA, 'Livia', 7, 'Froggy Assassin') == $FAIL _
-		Or FroggyTryAddHero($ID_DUNKORO, 'Dunkoro', 8, 'Froggy Assassin') == $FAIL Then
-		Warn('Froggy Assassin team assembly failed')
-		Return $FAIL
-	EndIf
-
-	If GetHeroNumberByHeroID($ID_GWEN) <> 1 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_NORGU) <> 2 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_RAZAH) <> 3 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_MASTER_OF_WHISPERS) <> 4 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_OLIAS) <> 5 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_LIVIA) <> 6 Then Return $FAIL
-	If GetHeroNumberByHeroID($ID_DUNKORO) <> 7 Then Return $FAIL
+	If FroggyAssembleFixedTeamWithRecovery($heroIDs, $heroNames, 'Froggy Assassin') == $FAIL Then Return $FAIL
 
 	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_GWEN_TEMPLATE, 1)
 	RandomSleep(150)
@@ -240,20 +269,111 @@ Func FroggyEnsureSoloParty($maxWaitMs = 9000)
 		LeaveParty(False)
 		RandomSleep(320)
 	WEnd
-	Warn('Froggy Assassin team: party reset timeout. Party=' & GetPartySize() & ', heroes=' & GetHeroCount())
+	Warn('Froggy team: party reset timeout. Party=' & GetPartySize() & ', heroes=' & GetHeroCount())
 	Return $FAIL
 EndFunc
 
 
 Func FroggyTryAddHero($heroID, $heroName, $expectedSize, $teamLabel = 'Froggy team')
-	For $i = 1 To 6
+	For $i = 1 To 7
 		If GetHeroNumberByHeroID($heroID) <> Null Then Return $SUCCESS
 		AddHero($heroID)
-		RandomSleep(350)
-		If GetPartySize() >= $expectedSize Then Return $SUCCESS
+		Local $verifyTimer = TimerInit()
+		While TimerDiff($verifyTimer) < 2200
+			If GetHeroNumberByHeroID($heroID) <> Null Then Return $SUCCESS
+			RandomSleep(120)
+		WEnd
+
+		If Mod($i, 2) == 0 Then
+			SupportTeamStabilizeAfterTravel($ID_GADDS_ENCAMPMENT, 1800, 150)
+		EndIf
 	Next
-	Warn('Could not add ' & $teamLabel & ' hero ' & $heroName & ' (party=' & GetPartySize() & ')')
+	Warn('Could not add ' & $teamLabel & ' hero ' & $heroName & ' after retries (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
 	Return $FAIL
+EndFunc
+
+
+Func FroggyAssembleFixedTeamWithRecovery(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
+	Local $attempt
+	For $attempt = 1 To $FROGGY_TEAM_OUTPOST_RETRIES
+		If $attempt > 1 Then
+			Warn($teamLabel & ' team assembly pass ' & $attempt & ' after outpost refresh')
+			If TravelToOutpost($ID_GADDS_ENCAMPMENT, $district_name) == $FAIL Then Return $FAIL
+			If Not SupportTeamStabilizeAfterTravel($ID_GADDS_ENCAMPMENT, 10000, 250) Then
+				Warn($teamLabel & ' team: outpost stabilization timed out before pass ' & $attempt)
+			EndIf
+		EndIf
+
+		If FroggyEnsureSoloParty() == $FAIL Then Return $FAIL
+		If FroggyAssembleTeamPass($heroIDs, $heroNames, $teamLabel) == $SUCCESS Then Return $SUCCESS
+		Warn($teamLabel & ' team assembly pass ' & $attempt & ' failed, trying targeted missing-hero fallback')
+		If FroggyRetryMissingHeroes($heroIDs, $heroNames, $teamLabel) == $SUCCESS Then Return $SUCCESS
+	Next
+
+	Warn($teamLabel & ' team assembly failed after all recovery passes')
+	FroggyWarnMissingHeroes($heroIDs, $heroNames, $teamLabel)
+	Return $FAIL
+EndFunc
+
+
+Func FroggyAssembleTeamPass(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
+	Local $round
+	Local $i
+	For $round = 1 To $FROGGY_TEAM_ASSEMBLY_PASSES
+		For $i = 0 To UBound($heroIDs) - 1
+			If GetHeroNumberByHeroID($heroIDs[$i]) == Null Then
+				FroggyTryAddHero($heroIDs[$i], $heroNames[$i], 0, $teamLabel)
+			EndIf
+		Next
+
+		If SupportTeamHasExactHeroes($heroIDs, 8) Then Return $SUCCESS
+		Warn($teamLabel & ' team fill round ' & $round & ' incomplete (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
+		SupportTeamStabilizeAfterTravel($ID_GADDS_ENCAMPMENT, 2200, 150)
+	Next
+
+	FroggyWarnMissingHeroes($heroIDs, $heroNames, $teamLabel)
+	Return $FAIL
+EndFunc
+
+
+Func FroggyRetryMissingHeroes(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
+	Local $round
+	Local $i
+	For $round = 1 To $FROGGY_TEAM_MISSING_FALLBACK_PASSES
+		Local $attemptedAny = False
+		For $i = 0 To UBound($heroIDs) - 1
+			If GetHeroNumberByHeroID($heroIDs[$i]) == Null Then
+				$attemptedAny = True
+				Info($teamLabel & ' targeted fallback round ' & $round & ': retrying missing hero ' & $heroNames[$i])
+				FroggyTryAddHero($heroIDs[$i], $heroNames[$i], 0, $teamLabel)
+			EndIf
+		Next
+
+		If SupportTeamHasExactHeroes($heroIDs, 8) Then
+			Info($teamLabel & ' targeted missing-hero fallback succeeded on round ' & $round)
+			Return $SUCCESS
+		EndIf
+
+		If Not $attemptedAny Then ExitLoop
+		SupportTeamStabilizeAfterTravel($ID_GADDS_ENCAMPMENT, 2200, 150)
+	Next
+
+	FroggyWarnMissingHeroes($heroIDs, $heroNames, $teamLabel)
+	Return $FAIL
+EndFunc
+
+
+Func FroggyWarnMissingHeroes(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
+	Local $missing = ''
+	Local $i
+	For $i = 0 To UBound($heroIDs) - 1
+		If GetHeroNumberByHeroID($heroIDs[$i]) == Null Then
+			If $missing <> '' Then $missing &= ', '
+			$missing &= $heroNames[$i]
+		EndIf
+	Next
+	If $missing == '' Then $missing = 'none'
+	Warn($teamLabel & ' missing heroes after pass: ' & $missing & ' (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
 EndFunc
 
 
