@@ -38,6 +38,39 @@ Global Const $ID_SOO_TORCH = 22342
 
 Global Const $SOO_FARM_DURATION = 60 * 60 * 1000
 Global Const $MAX_SOO_FARM_DURATION = 80 * 60 * 1000
+Global Const $SOO_TEAM_ASSEMBLY_PASSES = 4
+Global Const $SOO_TEAM_MISSING_FALLBACK_PASSES = 3
+Global Const $SOO_TEAM_OUTPOST_RETRIES = 4
+
+Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQN2OGRA'
+Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB'
+Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB'
+Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA'
+Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwQTcUHDxxnV9xrXEqvLxOI0AA'
+Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA'
+Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
+Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDeDLg6QhD1Y7YA'
+Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OAOiAyk5gNtePuwJ00ZaNbJA'
+Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNDwcPPP1CSSARLWPga31VC'
+
+Global Const $SOO_FLEX3_HERO_ID = $ID_MASTER_OF_WHISPERS
+Global Const $SOO_FLEX3_HERO_NAME = 'Master of Whispers'
+Global Const $SOO_FLEX3_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
+;~ Global Const $SOO_FLEX3_HERO_ID = $ID_DUNKORO
+;~ Global Const $SOO_FLEX3_HERO_NAME = 'Dunkoro'
+;~ Global Const $SOO_FLEX3_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
+Global Const $SOO_FLEX_HERO_ID = $ID_ZHED_SHADOWHOOF
+Global Const $SOO_FLEX_HERO_NAME = 'Zhed Shadowhoof'
+Global Const $SOO_FLEX_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
+;~ Global Const $SOO_FLEX_HERO_ID = $ID_LIVIA
+;~ Global Const $SOO_FLEX_HERO_NAME = 'Livia'
+;~ Global Const $SOO_FLEX_HERO_TEMPLATE = $SOO_HERO_LIVIA_TEMPLATE
+Global Const $SOO_FLEX2_HERO_ID = $ID_VEKK
+Global Const $SOO_FLEX2_HERO_NAME = 'Vekk'
+Global Const $SOO_FLEX2_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
+;~ Global Const $SOO_FLEX2_HERO_ID = $ID_XANDRA
+;~ Global Const $SOO_FLEX2_HERO_NAME = 'Xandra'
+;~ Global Const $SOO_FLEX2_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
 
 Global $soo_farm_setup = False
 
@@ -53,6 +86,10 @@ EndFunc
 Func SetupSoOFarm()
 	Info('Setting up farm')
 	TravelToOutpost($ID_VLOXS_FALLS, $district_name)
+	If Not SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250) Then
+		Warn('SoO setup: outpost stabilization timed out before team setup')
+	EndIf
+	If SetupSoOFlexibleTeam() == $FAIL Then Return $FAIL
 	SwitchToHardModeIfEnabled()
 	SetDisplayedTitle($ID_ASURA_TITLE)
 	SupportTeamOpenHeroPanels('SoO')
@@ -62,6 +99,170 @@ Func SetupSoOFarm()
 	WEnd
 	Info('Preparations complete')
 	Return $SUCCESS
+EndFunc
+
+
+Func SetupSoOFlexibleTeam()
+	Info('SoO team: Gwen, Norgu, Razah, ' & $SOO_FLEX3_HERO_NAME & ', Olias, ' & $SOO_FLEX_HERO_NAME & ', ' & $SOO_FLEX2_HERO_NAME)
+	Local $heroIDs[7] = [ _
+		$ID_GWEN, _
+		$ID_NORGU, _
+		$ID_RAZAH, _
+		$SOO_FLEX3_HERO_ID, _
+		$ID_OLIAS, _
+		$SOO_FLEX_HERO_ID, _
+		$SOO_FLEX2_HERO_ID _
+	]
+	Local $heroNames[7] = [ _
+		'Gwen', _
+		'Norgu', _
+		'Razah', _
+		$SOO_FLEX3_HERO_NAME, _
+		'Olias', _
+		$SOO_FLEX_HERO_NAME, _
+		$SOO_FLEX2_HERO_NAME _
+	]
+
+	If SoOAssembleFixedTeamWithRecovery($heroIDs, $heroNames, 'SoO') == $FAIL Then Return $FAIL
+
+	LoadSkillTemplate($SOO_HERO_GWEN_TEMPLATE, 1)
+	RandomSleep(150)
+	LoadSkillTemplate($SOO_HERO_NORGU_TEMPLATE, 2)
+	RandomSleep(150)
+	LoadSkillTemplate($SOO_HERO_RAZAH_TEMPLATE, 3)
+	RandomSleep(150)
+	LoadSkillTemplate($SOO_FLEX3_HERO_TEMPLATE, 4)
+	RandomSleep(150)
+	LoadSkillTemplate($SOO_HERO_OLIAS_TEMPLATE, 5)
+	RandomSleep(150)
+	LoadSkillTemplate($SOO_FLEX_HERO_TEMPLATE, 6)
+	RandomSleep(150)
+	LoadSkillTemplate($SOO_FLEX2_HERO_TEMPLATE, 7)
+	RandomSleep(250)
+
+	ClearPartyCommands()
+	CancelAllHeroes()
+	Return $SUCCESS
+EndFunc
+
+
+Func SoOEnsureSoloParty($maxWaitMs = 9000)
+	Local $timer = TimerInit()
+	SupportTeamKickAllHeroesByIDSweep()
+	KickAllHeroes()
+	LeaveParty(False)
+	While TimerDiff($timer) < $maxWaitMs
+		If GetPartySize() <= 1 Then Return $SUCCESS
+		SupportTeamKickAllHeroesByIDSweep()
+		KickAllHeroes()
+		LeaveParty(False)
+		RandomSleep(320)
+	WEnd
+	Warn('SoO team: party reset timeout. Party=' & GetPartySize() & ', heroes=' & GetHeroCount())
+	Return $FAIL
+EndFunc
+
+
+Func SoOTryAddHero($heroID, $heroName, $teamLabel = 'SoO')
+	For $i = 1 To 7
+		If GetHeroNumberByHeroID($heroID) <> Null Then Return $SUCCESS
+		AddHero($heroID)
+		Local $verifyTimer = TimerInit()
+		While TimerDiff($verifyTimer) < 2200
+			If GetHeroNumberByHeroID($heroID) <> Null Then Return $SUCCESS
+			RandomSleep(120)
+		WEnd
+
+		If Mod($i, 2) == 0 Then
+			SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 1800, 150)
+		EndIf
+	Next
+	Warn('Could not add ' & $teamLabel & ' hero ' & $heroName & ' after retries (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
+	Return $FAIL
+EndFunc
+
+
+Func SoOAssembleFixedTeamWithRecovery(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
+	Local $attempt
+	For $attempt = 1 To $SOO_TEAM_OUTPOST_RETRIES
+		If $attempt > 1 Then
+			Warn($teamLabel & ' team assembly pass ' & $attempt & ' after outpost refresh')
+			If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
+			If Not SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250) Then
+				Warn($teamLabel & ' team: outpost stabilization timed out before pass ' & $attempt)
+			EndIf
+		EndIf
+
+		If SoOEnsureSoloParty() == $FAIL Then Return $FAIL
+		If SoOAssembleTeamPass($heroIDs, $heroNames, $teamLabel) == $SUCCESS Then Return $SUCCESS
+		Warn($teamLabel & ' team assembly pass ' & $attempt & ' failed, trying targeted missing-hero fallback')
+		If SoORetryMissingHeroes($heroIDs, $heroNames, $teamLabel) == $SUCCESS Then Return $SUCCESS
+	Next
+
+	Warn($teamLabel & ' team assembly failed after all recovery passes')
+	SoOWarnMissingHeroes($heroIDs, $heroNames, $teamLabel)
+	Return $FAIL
+EndFunc
+
+
+Func SoOAssembleTeamPass(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
+	Local $round
+	Local $i
+	For $round = 1 To $SOO_TEAM_ASSEMBLY_PASSES
+		For $i = 0 To UBound($heroIDs) - 1
+			If GetHeroNumberByHeroID($heroIDs[$i]) == Null Then
+				SoOTryAddHero($heroIDs[$i], $heroNames[$i], $teamLabel)
+			EndIf
+		Next
+
+		If SupportTeamHasExactHeroes($heroIDs, 8) Then Return $SUCCESS
+		Warn($teamLabel & ' team fill round ' & $round & ' incomplete (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
+		SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 2200, 150)
+	Next
+
+	SoOWarnMissingHeroes($heroIDs, $heroNames, $teamLabel)
+	Return $FAIL
+EndFunc
+
+
+Func SoORetryMissingHeroes(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
+	Local $round
+	Local $i
+	For $round = 1 To $SOO_TEAM_MISSING_FALLBACK_PASSES
+		Local $attemptedAny = False
+		For $i = 0 To UBound($heroIDs) - 1
+			If GetHeroNumberByHeroID($heroIDs[$i]) == Null Then
+				$attemptedAny = True
+				Info($teamLabel & ' targeted fallback round ' & $round & ': retrying missing hero ' & $heroNames[$i])
+				SoOTryAddHero($heroIDs[$i], $heroNames[$i], $teamLabel)
+			EndIf
+		Next
+
+		If SupportTeamHasExactHeroes($heroIDs, 8) Then
+			Info($teamLabel & ' targeted missing-hero fallback succeeded on round ' & $round)
+			Return $SUCCESS
+		EndIf
+
+		If Not $attemptedAny Then ExitLoop
+		SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 2200, 150)
+	Next
+
+	SoOWarnMissingHeroes($heroIDs, $heroNames, $teamLabel)
+	Return $FAIL
+EndFunc
+
+
+Func SoOWarnMissingHeroes(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
+	Local $missing = ''
+	Local $i
+	For $i = 0 To UBound($heroIDs) - 1
+		If GetHeroNumberByHeroID($heroIDs[$i]) == Null Then
+			If $missing <> '' Then $missing &= ', '
+			$missing &= $heroNames[$i]
+		EndIf
+	Next
+	If $missing == '' Then $missing = 'none'
+	Warn($teamLabel & ' missing heroes after pass: ' & $missing & ' (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
 EndFunc
 
 
