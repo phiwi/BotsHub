@@ -896,6 +896,7 @@
 			}
 		},
 		"Armor salvageables": {
+			"White": false,
 			"Blue": true,
 			"Purple": true,
 			"Gold": true
@@ -2422,6 +2423,7 @@
 			}
 		},
 		"Armor salvageables": {
+			"White": false,
 			"Blue": false,
 			"Purple": false,
 			"Gold": false
@@ -3181,6 +3183,7 @@
 			}
 		},
 		"Armor salvageables": {
+			"White": true,
 			"Blue": true,
 			"Purple": true,
 			"Gold": true
@@ -4188,6 +4191,7 @@
 			}
 		},
 		"Armor salvageables": {
+			"White": false,
 			"Blue": false,
 			"Purple": false,
 			"Gold": false

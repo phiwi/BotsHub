@@ -225,12 +225,12 @@ EndFunc
 
 
 ;~ Team member has too much malus
-Func TeamHasTooMuchMalus()
+Func GetTeamMemberWithTooMuchMalus()
 	Local $party = GetParty()
-	For $i = 0 To UBound($party)
-		If GetMorale($i) < 0 Then Return True
+	For $i = UBound($party) - 1 To 0 Step -1
+		If GetMorale($i) < 0 Then Return $i
 	Next
-	Return False
+	Return -1
 EndFunc
 #EndRegion Party
 
@@ -326,7 +326,7 @@ EndFunc
 Func GetIntoTeamRange($teamSize = 8, $range = $RANGE_EARSHOT, $maxWait = 50)
 	Local $i = 0
 	While CountTeamInRangeOfAgent(GetMyAgent(), $range) < $teamSize And $i < $maxWait
-		Sleep(200)
+		Sleep(250)
 		$i += 1
 		If IsPlayerDead() Then ExitLoop
 	WEnd
@@ -338,7 +338,7 @@ Func MoveToMiddleOfPartyWithTimeout($timeOut)
 	Local $me = GetMyAgent()
 	Local $timer = TimerInit()
 	Local $position = FindMiddleOfParty()
-	Move($position[0], $position[1], 0)
+	Move($position[0], $position[1])
 	While GetDistanceToPoint($me, $position[0], $position[1]) > $RANGE_ADJACENT And TimerDiff($timer) < $timeOut
 		$position = FindMiddleOfParty()
 		RandomSleep(500)
@@ -628,6 +628,30 @@ Func GetNearestAgentToAgent($targetAgent, $agentType = $ID_AGENT_TYPE_NPC, $rang
 
 	SetExtended(Sqrt($nearestDistance))
 	Return $nearestAgent
+EndFunc
+
+
+;~ Returns the nearest agent to specified target agent. $agentFilter is a function which returns True for the agents that should be considered, False for those to skip
+Func GetFurthestAgentToAgent($targetAgent, $agentType = $ID_AGENT_TYPE_NPC, $range = $RANGE_COMPASS, $agentFilter = Null)
+	Local $furthestAgent = Null, $distance = Null, $furthestDistance = -1
+	Local $agents = GetAgentArray($agentType)
+	Local $targetAgentID = DllStructGetData($targetAgent, 'ID')
+	Local $ownID = DllStructGetData(GetMyAgent(), 'ID')
+
+	For $agent In $agents
+		If DllStructGetData($agent, 'ID') == $targetAgentID Then ContinueLoop
+		If DllStructGetData($agent, 'ID') == $ownID Then ContinueLoop
+		If $agentFilter <> Null And Not $agentFilter($agent) Then ContinueLoop
+		$distance = GetDistance($targetAgent, $agent)
+		If $distance > $range Then ContinueLoop
+		If $distance > $furthestDistance Then
+			$furthestAgent = $agent
+			$furthestDistance = $distance
+		EndIf
+	Next
+
+	SetExtended(Sqrt($furthestDistance))
+	Return $furthestAgent
 EndFunc
 
 
