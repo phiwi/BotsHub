@@ -342,14 +342,20 @@ EndFunc
 ;~ Find character names by scanning memory
 Func ScanForCharname($processHandle)
 	Local $scannedMemory = ScanMemoryForPattern($processHandle, BinaryToString('0x6A145668'))
-	; If you have issues finding your character name, tries this line instead of the previous one :
-	;Local $scannedMemory = ScanMemoryForPattern($processHandle, BinaryToString('0x00E20878'))
+	If Not IsArray($scannedMemory) Or UBound($scannedMemory) < 3 Then
+		$scannedMemory = ScanMemoryForPattern($processHandle, BinaryToString('0x6A14FF751868'))
+	EndIf
+	If Not IsArray($scannedMemory) Or UBound($scannedMemory) < 3 Then
+		$scannedMemory = ScanMemoryForPattern($processHandle, BinaryToString('0x00E20878'))
+		If Not IsArray($scannedMemory) Or UBound($scannedMemory) < 3 Then Return ''
+	EndIf
 	Local $baseAddress = $scannedMemory[1]
 	Local $matchOffset = $scannedMemory[2]
 	Local $tmpAddress = $baseAddress + $matchOffset - 1
 	Local $buffer = SafeDllStructCreate('ptr')
 	SafeDllCall13($kernel_handle, 'int', 'ReadProcessMemory', 'int', $processHandle, 'int', $tmpAddress + 4, 'ptr', DllStructGetPtr($buffer), 'int', DllStructGetSize($buffer), 'int', 0)
 	Local $characterName = DllStructGetData($buffer, 1)
+	If $characterName == 0 Then Return ''
 	Return MemoryRead($processHandle, $characterName, 'wchar[30]')
 EndFunc
 
@@ -472,6 +478,7 @@ EndFunc
 Func GetGameProcessBaseAddress()
 	Debug('Getting game base address (PE excluded)')
 	Local $scannedMemory = ScanMemoryForPattern(GetProcessHandle(), BinaryToString('0x558BEC83EC105356578B7D0833F63BFE'))
+	If Not IsArray($scannedMemory) Or UBound($scannedMemory) < 1 Then Return 0
 	Return $scannedMemory[0]
 EndFunc
 
