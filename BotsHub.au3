@@ -276,25 +276,32 @@ Func RunFarmLoop()
 	; Farm Name;Farm function;Inventory space;Farm duration
 	Local $farm = $farm_map[$farm_name]
 	Local $inventorySpaceNeeded = $farm[2]
+	Local $sooSafetyBypassInventory = ($farm_name == 'SoO' And $soo_skip_next_inventory_management)
+	If $sooSafetyBypassInventory Then
+		Warn('SoO safety mode: skipping this cycle inventory management after critical failure recovery')
+		$soo_skip_next_inventory_management = False
+	EndIf
 
 	; No authentication: skip global farm setup and inventory management
 	If $character_name <> '' Then
 		; Must do mid-run inventory management before normal one else we will go back to town
-		If $inventorySpaceNeeded <> 0 And $run_options_cache['run.farm_materials_mid_run'] Then
+		If Not $sooSafetyBypassInventory And $inventorySpaceNeeded <> 0 And $run_options_cache['run.farm_materials_mid_run'] Then
 			Local $resetRequired = InventoryManagementMidRun()
 			If $resetRequired Then ResetBotsSetups()
 		EndIf
 
 		; During pickup, items will be moved to equipment bag (if used) when first 3 bags are full
 		; So bag 5 will always fill before 4 - hence we can count items up to bag 4
-		If (CountSlots(1, _Min($bags_count, 4)) < $inventorySpaceNeeded) Then
+		If Not $sooSafetyBypassInventory And (CountSlots(1, _Min($bags_count, 4)) < $inventorySpaceNeeded) Then
 			InventoryManagementBeforeRun()
 		EndIf
 		; Inventory management did not clean up inventory - we pause
-		If (CountSlots(1, $bags_count) < $inventorySpaceNeeded) Then
+		If Not $sooSafetyBypassInventory And (CountSlots(1, $bags_count) < $inventorySpaceNeeded) Then
 			Notice('Inventory full, pausing.')
 			ResetBotsSetups()
 			$runtime_status = 'WILL_PAUSE'
+		ElseIf $sooSafetyBypassInventory And (CountSlots(1, $bags_count) < $inventorySpaceNeeded) Then
+			Warn('SoO safety mode: inventory below target but skipping stash/sell once to avoid unstable sequence')
 		EndIf
 
 		; Global farm setup

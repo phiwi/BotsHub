@@ -41,19 +41,27 @@ Global Const $MAX_SOO_FARM_DURATION = 80 * 60 * 1000
 Global Const $SOO_TEAM_ASSEMBLY_PASSES = 4
 Global Const $SOO_TEAM_MISSING_FALLBACK_PASSES = 3
 Global Const $SOO_TEAM_OUTPOST_RETRIES = 4
+Global Const $SOO_SETUP_RECOVERY_COOLDOWN_MS = 12000
+Global Const $SOO_SETUP_RUN_TO_DUNGEON_RETRIES = 3
+Global Const $SOO_RUN_TO_DUNGEON_TIMEOUT_MS = 15 * 60 * 1000
+Global Const $SOO_FLOOR3_SECOND_LOOP_TIMEOUT_MS = 25 * 60 * 1000
+Global Const $SOO_CONSECUTIVE_FAIL_GUARD_THRESHOLD = 3
+Global Const $SOO_CONSECUTIVE_FAIL_GUARD_COOLDOWN_MS = 45000
 
 Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQN2OGRA'
-Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB'
+Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; PsychicInst
+;~ Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKzJY6lDupDBTXG4iB' ; Esurge
 Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB'
-Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYazPSxVNgeETffEaRVV1NA' ; Healer's Boon
+Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
 Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwQTcUHDxxnV9xrXEqvLxOI0AA'
 Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA'
 Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
 ;~ Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljkwMpZOpidI0npdK6z74aMA' ; EarthMagic
-Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDeDLgKNhD1Y7YA' ; BlindingS
+Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
 Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OAOiAyk5gNtePuwJ00ZaNbJA'
-Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNDwcPPP1CSSARLWPga31VC'
+;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1Do2dNgA' ; Ether Renewal Prot
+Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 
 Global Const $SOO_FLEX3_HERO_ID = $ID_MASTER_OF_WHISPERS
 Global Const $SOO_FLEX3_HERO_NAME = 'Master of Whispers'
@@ -75,31 +83,114 @@ Global Const $SOO_FLEX2_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
 ;~ Global Const $SOO_FLEX2_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
 
 Global $soo_farm_setup = False
+Global $soo_consecutive_run_failures = 0
+Global $soo_skip_next_inventory_management = False
 
 
 ;~ Main method to farm SoO
 Func SoOFarm()
-	If Not $soo_farm_setup Then SetupSoOFarm()
-	Return SoOFarmLoop()
+	Local $result = $FAIL
+	If Not $soo_farm_setup Then
+		If SetupSoOFarm() == $FAIL Then
+			SoOHandleRunFailure('setup failed')
+			Return $FAIL
+		EndIf
+	EndIf
+
+	$result = SoOFarmLoop()
+	If $result == $SUCCESS Then
+		SoOHandleRunSuccess()
+	Else
+		SoOHandleRunFailure('run failed')
+	EndIf
+	Return $result
+EndFunc
+
+
+Func SoOHandleRunSuccess()
+	If $soo_consecutive_run_failures > 0 Then
+		Info('SoO crash guard: run succeeded, resetting consecutive failure counter from ' & $soo_consecutive_run_failures)
+	EndIf
+	$soo_consecutive_run_failures = 0
+	$soo_skip_next_inventory_management = False
+EndFunc
+
+
+Func SoOHandleRunFailure($reason)
+	$soo_consecutive_run_failures += 1
+	Warn('SoO crash guard: consecutive failure ' & $soo_consecutive_run_failures & '/' & $SOO_CONSECUTIVE_FAIL_GUARD_THRESHOLD & ' (' & $reason & ')')
+	If $soo_consecutive_run_failures < $SOO_CONSECUTIVE_FAIL_GUARD_THRESHOLD Then Return
+
+	Warn('SoO crash guard: threshold reached, starting cooldown and forced outpost refresh')
+	Sleep($SOO_CONSECUTIVE_FAIL_GUARD_COOLDOWN_MS)
+
+	$soo_farm_setup = False
+	$soo_skip_next_inventory_management = True
+	ResetFailuresCounter()
+
+	If TravelToOutpost($ID_EYE_OF_THE_NORTH, $district_name) == $FAIL Then
+		Warn('SoO crash guard: failed to travel to Eye of The North during recovery')
+	Else
+		SupportTeamStabilizeAfterTravel($ID_EYE_OF_THE_NORTH, 10000, 250)
+	EndIf
+
+	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then
+		Warn('SoO crash guard: failed to travel back to Vloxs Falls during recovery')
+	Else
+		SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250)
+		SoOEnsureSoloParty(12000)
+	EndIf
+
+	$soo_consecutive_run_failures = 0
+	Warn('SoO crash guard: recovery completed, counter reset')
 EndFunc
 
 
 ;~ SoO farm setup
 Func SetupSoOFarm()
 	Info('Setting up farm')
-	TravelToOutpost($ID_VLOXS_FALLS, $district_name)
+	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
 	If Not SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250) Then
 		Warn('SoO setup: outpost stabilization timed out before team setup')
 	EndIf
-	If SetupSoOFlexibleTeam() == $FAIL Then Return $FAIL
+	If SetupSoOFlexibleTeam() == $FAIL Then
+		SoORecoverAfterTeamSetupFailure()
+		Return $FAIL
+	EndIf
 	SwitchToHardModeIfEnabled()
 	SetDisplayedTitle($ID_ASURA_TITLE)
 	SupportTeamOpenHeroPanels('SoO')
-	While Not $soo_farm_setup
-		If RunToShardsOfOrrDungeon() == $FAIL Then ContinueLoop
-		$soo_farm_setup = True
-	WEnd
+	For $attempt = 1 To $SOO_SETUP_RUN_TO_DUNGEON_RETRIES
+		If RunToShardsOfOrrDungeon() == $SUCCESS Then
+			$soo_farm_setup = True
+			ExitLoop
+		EndIf
+
+		Warn('SoO setup: failed to reach Shards of Orr on attempt ' & $attempt & '/' & $SOO_SETUP_RUN_TO_DUNGEON_RETRIES)
+		If $attempt < $SOO_SETUP_RUN_TO_DUNGEON_RETRIES Then
+			Sleep(2000)
+			If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
+			SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250)
+		EndIf
+	Next
+	If Not $soo_farm_setup Then
+		Warn('SoO setup aborted: could not reach Shards of Orr after bounded retries')
+		Return $FAIL
+	EndIf
 	Info('Preparations complete')
+	Return $SUCCESS
+EndFunc
+
+
+Func SoORecoverAfterTeamSetupFailure()
+	Warn('SoO setup recovery: cooling down before next attempt')
+	Sleep($SOO_SETUP_RECOVERY_COOLDOWN_MS)
+	Warn('SoO setup recovery: refreshing Vloxs Falls outpost state')
+	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
+	If Not SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250) Then
+		Warn('SoO setup recovery: outpost stabilization timed out after refresh')
+		Return $FAIL
+	EndIf
 	Return $SUCCESS
 EndFunc
 
@@ -126,25 +217,70 @@ Func SetupSoOFlexibleTeam()
 	]
 
 	If SoOAssembleFixedTeamWithRecovery($heroIDs, $heroNames, 'SoO') == $FAIL Then Return $FAIL
+	If GetMapID() <> $ID_VLOXS_FALLS Or GetMapType() <> $ID_OUTPOST Then
+		Warn('SoO team setup aborted: invalid map context before template load (map=' & GetMapID() & ', type=' & GetMapType() & ')')
+		Return $FAIL
+	EndIf
+	If Not SupportTeamHasExactHeroes($heroIDs, 8) Or GetHeroCount() < 7 Then
+		Warn('SoO team setup aborted: incomplete hero team before template load (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
+		SoOWarnMissingHeroes($heroIDs, $heroNames, 'SoO')
+		Return $FAIL
+	EndIf
 
-	LoadSkillTemplate($SOO_HERO_GWEN_TEMPLATE, 1)
-	RandomSleep(150)
-	LoadSkillTemplate($SOO_HERO_NORGU_TEMPLATE, 2)
-	RandomSleep(150)
-	LoadSkillTemplate($SOO_HERO_RAZAH_TEMPLATE, 3)
-	RandomSleep(150)
-	LoadSkillTemplate($SOO_FLEX3_HERO_TEMPLATE, 4)
-	RandomSleep(150)
-	LoadSkillTemplate($SOO_HERO_OLIAS_TEMPLATE, 5)
-	RandomSleep(150)
-	LoadSkillTemplate($SOO_FLEX_HERO_TEMPLATE, 6)
-	RandomSleep(150)
-	LoadSkillTemplate($SOO_FLEX2_HERO_TEMPLATE, 7)
+	If SoOLoadHeroTemplateByID($ID_GWEN, 'Gwen', $SOO_HERO_GWEN_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($ID_NORGU, 'Norgu', $SOO_HERO_NORGU_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($ID_RAZAH, 'Razah', $SOO_HERO_RAZAH_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($SOO_FLEX3_HERO_ID, $SOO_FLEX3_HERO_NAME, $SOO_FLEX3_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($ID_OLIAS, 'Olias', $SOO_HERO_OLIAS_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($SOO_FLEX_HERO_ID, $SOO_FLEX_HERO_NAME, $SOO_FLEX_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($SOO_FLEX2_HERO_ID, $SOO_FLEX2_HERO_NAME, $SOO_FLEX2_HERO_TEMPLATE) == $FAIL Then Return $FAIL
 	RandomSleep(250)
 
 	ClearPartyCommands()
 	CancelAllHeroes()
 	Return $SUCCESS
+EndFunc
+
+
+Func SoOLoadHeroTemplateByID($heroID, $heroName, $templateCode)
+	Local $heroIndex = GetHeroNumberByHeroID($heroID)
+	If $heroIndex == Null Then
+		Warn('SoO team setup aborted: hero index not found for ' & $heroName)
+		Return $FAIL
+	EndIf
+	Local $heroPrimaryProfession = GetHeroProfession($heroIndex)
+	Local $templatePrimaryProfession = SoOGetTemplatePrimaryProfession($templateCode)
+	If $templatePrimaryProfession > 0 And $templatePrimaryProfession <> $heroPrimaryProfession Then
+		Warn('SoO template mismatch before load: hero=' & $heroName & ' (heroID=' & $heroID & ', heroIndex=' & $heroIndex & ', heroProf=' & $heroPrimaryProfession & ', templateProf=' & $templatePrimaryProfession & ')')
+	ElseIf $templatePrimaryProfession <= 0 Then
+		Warn('SoO template diagnostics: could not parse template profession for ' & $heroName & ' (heroID=' & $heroID & ', heroIndex=' & $heroIndex & ')')
+	EndIf
+	LoadSkillTemplate($templateCode, $heroIndex)
+	RandomSleep(150)
+	Return $SUCCESS
+EndFunc
+
+
+Func SoOGetTemplatePrimaryProfession($templateCode)
+	If $templateCode == '' Then Return -1
+
+	Local $bin64 = ''
+	Local $i
+	For $i = 1 To StringLen($templateCode)
+		$bin64 &= Base64ToBin64(StringMid($templateCode, $i, 1))
+	Next
+
+	If StringLen($bin64) < 10 Then Return -1
+
+	Local $templateType = Bin64ToDec(StringLeft($bin64, 4))
+	If $templateType <> 14 Then Return -1
+
+	$bin64 = StringTrimLeft($bin64, 8)
+	Local $professionBits = Bin64ToDec(StringLeft($bin64, 2)) * 2 + 4
+	$bin64 = StringTrimLeft($bin64, 2)
+	If StringLen($bin64) < $professionBits Then Return -1
+
+	Return Bin64ToDec(StringLeft($bin64, $professionBits))
 EndFunc
 
 
@@ -211,11 +347,20 @@ Func SoOAssembleTeamPass(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
 	Local $round
 	Local $i
 	For $round = 1 To $SOO_TEAM_ASSEMBLY_PASSES
+		Local $attemptedAdds = 0
+		Local $successfulAdds = 0
 		For $i = 0 To UBound($heroIDs) - 1
 			If GetHeroNumberByHeroID($heroIDs[$i]) == Null Then
-				SoOTryAddHero($heroIDs[$i], $heroNames[$i], $teamLabel)
+				$attemptedAdds += 1
+				If SoOTryAddHero($heroIDs[$i], $heroNames[$i], $teamLabel) == $SUCCESS Then $successfulAdds += 1
 			EndIf
 		Next
+
+		If $attemptedAdds > 0 And $successfulAdds == 0 Then
+			Warn($teamLabel & ' team fill round ' & $round & ' failed: could not add any missing hero (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
+			SoOWarnMissingHeroes($heroIDs, $heroNames, $teamLabel)
+			Return $FAIL
+		EndIf
 
 		If SupportTeamHasExactHeroes($heroIDs, 8) Then Return $SUCCESS
 		Warn($teamLabel & ' team fill round ' & $round & ' incomplete (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
@@ -270,8 +415,9 @@ EndFunc
 
 ;~ Run to Shards of Orr through Arbor Bay
 Func RunToShardsOfOrrDungeon()
-	TravelToOutpost($ID_VLOXS_FALLS, $district_name)
+	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
 	ResetFailuresCounter()
+	Local $routeTimer = TimerInit()
 
 	Info('Making way to portal')
 	MoveTo(16448, 14830)
@@ -288,11 +434,35 @@ Func RunToShardsOfOrrDungeon()
 	Info('Making way to Shards of Orr')
 	MoveTo(16327, 11607)
 	GoToNPC(GetNearestNPCToCoords(16362, 11627))
-	RandomSleep(250)
-	Dialog(0x84)
-	RandomSleep(500)
+	Local $enteredArborBay = False
+	For $entryTry = 1 To 3
+		RandomSleep(250)
+		Dialog(0x84)
+		RandomSleep(500)
+		If WaitMapLoading($ID_ARBOR_BAY, 8000, 250) Then
+			$enteredArborBay = True
+			ExitLoop
+		EndIf
+		Warn('SoO: failed to enter Arbor Bay on try ' & $entryTry & ', retrying NPC interaction')
+		MoveTo(16327, 11607)
+		GoToNPC(GetNearestNPCToCoords(16362, 11627))
+	Next
+	If Not $enteredArborBay Then
+		Warn('SoO: could not enter Arbor Bay, aborting run-to-dungeon sequence')
+		AdlibUnRegister('TrackPartyStatus')
+		Return $FAIL
+	EndIf
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 11156, -17802, 1250)
+		If TimerDiff($routeTimer) > $SOO_RUN_TO_DUNGEON_TIMEOUT_MS Then
+			Warn('SoO setup route timed out while moving through Arbor Bay')
+			AdlibUnRegister('TrackPartyStatus')
+			Return $FAIL
+		EndIf
+		If CheckStuck('SoO Setup - Route to Shards of Orr', $SOO_RUN_TO_DUNGEON_TIMEOUT_MS) == $FAIL Then
+			AdlibUnRegister('TrackPartyStatus')
+			Return $FAIL
+		EndIf
 		WaitUntilPartyAlive()
 		MoveAggroAndKillInRange(13122, 10437, '1', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(10668, 6530, '2', $SOO_AGGRO_RANGE)
@@ -673,6 +843,7 @@ Func ClearSoOFloor3()
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 1100, 7100, 1250)
 		If CheckStuck('SoO Floor 3 - First loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
+		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then UseConset()
 		UseMoraleConsumableIfNeeded()
 		Info('Getting blessing')
 		GoToNPC(GetNearestNPCToCoords(17544, 18810))
@@ -696,8 +867,9 @@ Func ClearSoOFloor3()
 	WEnd
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -8650, 9200, 1250)
-		If CheckStuck('SoO Floor 3 - Second loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
+		If CheckStuck('SoO Floor 3 - Second loop', $SOO_FLOOR3_SECOND_LOOP_TIMEOUT_MS) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
+		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then UseConset()
 		UseMoraleConsumableIfNeeded()
 		MoveAggroAndKillInRange(-2300, 8000, 'Triggering beacon 2', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-4500, 6500, '1', $SOO_AGGRO_RANGE)
@@ -780,6 +952,7 @@ Func ClearSoOFloor3()
 	While Not IsRunFailed() And Not IsQuestReward($ID_QUEST_LOST_SOULS)
 		If CheckStuck('SoO Floor 3 - Third loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
+		If IsHardmodeEnabled() Then UseConset()
 		MoveAggroAndKillInRange(-9850, 7600, 'Going back to secure door opening in case run failed 1', $largerSoOAggroRange)
 		MoveAggroAndKillInRange(-9200, 6000, 'Going back to secure door opening in case run failed 2', $largerSoOAggroRange)
 
@@ -800,7 +973,12 @@ Func ClearSoOFloor3()
 		FlagMoveAggroAndKillInRange(-15850, 17500, '8', $largerSoOAggroRange)
 		Sleep(1000)
 	WEnd
-	If IsRunFailed() Then Return $FAIL
+	Local $hasQuestReward = IsQuestReward($ID_QUEST_LOST_SOULS)
+	If IsRunFailed() And Not $hasQuestReward Then Return $FAIL
+	If $hasQuestReward Then
+		; If boss is dead and reward is available, do not let old wipe counter skip chest looting.
+		ResetFailuresCounter()
+	EndIf
 
 	; Doubled to try securing the looting
 	For $i = 1 To 2
