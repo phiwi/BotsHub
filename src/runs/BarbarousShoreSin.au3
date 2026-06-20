@@ -78,8 +78,10 @@ Global Const $BARBAROUS_SHORE_SIN_MH_CAST_INTERVAL_MS = 1000
 Global Const $BARBAROUS_SHORE_SIN_CAUTERY_CAST_INTERVAL_MS = 5000
 Global Const $BARBAROUS_SHORE_SIN_SUPPORT_DEBUG_VERBOSE = False
 Global Const $BARBAROUS_SHORE_SIN_SF_RECAST_BUFFER_MS = 5000
+Global Const $BARBAROUS_SHORE_SIN_SF_DETERMINISTIC_RECAST_MS = 1200
 Global Const $BARBAROUS_SHORE_SIN_SF_ENERGY_RESERVE = 20
-Global Const $BARBAROUS_SHORE_SIN_SF_PRECAST_ENERGY = 20
+Global Const $BARBAROUS_SHORE_SIN_SF_PRECAST_ENERGY = 32
+Global Const $BARBAROUS_SHORE_SIN_SF_PRECAST_WINDOW_MS = 1200
 Global Const $BARBAROUS_SHORE_SIN_SF_PRECAST_COOLDOWN_MS = 900
 Global Const $BARBAROUS_SHORE_SIN_SPRINT_MIN_ENERGY = 12
 Global Const $BARBAROUS_SHORE_SIN_UTILITY_MIN_ENERGY = 25
@@ -93,14 +95,20 @@ Global Const $BARBAROUS_SHORE_SIN_CHEST_OPEN_RANGE = $RANGE_COMPASS + 300
 Global Const $BARBAROUS_SHORE_SIN_LIVE_CHEST_SCAN_INTERVAL_MS = 700
 Global Const $BARBAROUS_SHORE_SIN_STUCK_MIN_MOVEMENT = 20
 Global Const $BARBAROUS_SHORE_SIN_STUCK_TICKS = 4
+Global Const $BARBAROUS_SHORE_SIN_ENCIRCLE_FOE_RANGE = 260
+Global Const $BARBAROUS_SHORE_SIN_ENCIRCLE_FOE_COUNT = 4
+Global Const $BARBAROUS_SHORE_SIN_ENCIRCLE_ESCAPE_COOLDOWN_MS = 1400
 Global Const $BARBAROUS_SHORE_SIN_DARK_ESCAPE_AFTER_DASH_MS = 2200
 Global Const $BARBAROUS_SHORE_SIN_DASH_AFTER_DARK_ESCAPE_MS = 10000
+Global Const $BARBAROUS_SHORE_SIN_DASH_AFTER_DARK_ESCAPE_FAST_MS = 3200
 Global Const $BARBAROUS_SHORE_SIN_BYPASS_SIDE_STEP = 520
 Global Const $BARBAROUS_SHORE_SIN_BYPASS_TARGET_STEP = 340
 Global Const $BARBAROUS_SHORE_SIN_ROUTE_OPTIMIZE_WINDOW = 8
 Global Const $BARBAROUS_SHORE_SIN_ROUTE_2OPT_WINDOW = 10
 Global Const $BARBAROUS_SHORE_SIN_ROUTE_2OPT_PASSES = 2
 Global Const $BARBAROUS_SHORE_SIN_ROUTE_2OPT_MARGIN_SQ = 250000
+Global Const $BARBAROUS_SHORE_SIN_REJOIN_MAX_SKIP = 2
+Global Const $BARBAROUS_SHORE_SIN_NO_PROGRESS_FAILS_BEFORE_BYPASS = 3
 Global Const $BARBAROUS_SHORE_SIN_ENABLE_ROUTE_REORDER = False
 Global Const $BARBAROUS_SHORE_SIN_TIMING_LOG = True
 Global Const $BARBAROUS_SHORE_SIN_SKIP_HERO_TEMPLATE_LOAD = True
@@ -124,6 +132,8 @@ Global $barbarous_shore_sin_portal_anchor_y = 0
 Global $barbarous_shore_sin_last_chest_x = 0
 Global $barbarous_shore_sin_last_chest_y = 0
 Global $barbarous_shore_sin_has_last_chest = False
+Global $barbarous_shore_sin_skip_prescan_idx = -1
+Global $barbarous_shore_sin_live_chest_opened = False
 
 
 Func BarbarousShoreSinChestFarm()
@@ -337,14 +347,16 @@ Func BarbarousShoreSinTryCastSfChain($context)
 
 	BarbarousShoreSinLogSF('refresh_attempt', 0, $energy, 'ctx=' & $context)
 	Local $castedDp = False
-	If IsRecharged($BARBAROUS_SHORE_SIN_DEADLY_PARADOX) And $energy >= 25 Then
+	If IsRecharged($BARBAROUS_SHORE_SIN_DEADLY_PARADOX) Then
+		If $energy < 25 Then
+			BarbarousShoreSinLogSF('refresh_wait_dp_energy', 0, $energy, 'ctx=' & $context)
+			Return False
+		EndIf
 		UseSkillEx($BARBAROUS_SHORE_SIN_DEADLY_PARADOX)
 		RandomSleep(20)
 		$castedDp = True
 		$energy = GetEnergy()
 		BarbarousShoreSinLogSF('cast_dp', 0, $energy, 'ctx=' & $context)
-	ElseIf IsRecharged($BARBAROUS_SHORE_SIN_DEADLY_PARADOX) And $energy < 25 Then
-		BarbarousShoreSinLogSF('dp_blocked_energy', 0, $energy, 'ctx=' & $context)
 	EndIf
 
 	UseSkillEx($BARBAROUS_SHORE_SIN_SHADOWFORM)
@@ -359,29 +371,28 @@ Func BarbarousShoreSinTryPrecastSf($context, $sfRemaining)
 	Local Static $lastPrecast = 0
 	If GetEffect($ID_SHADOW_FORM) == Null Then Return False
 	If Not IsRecharged($BARBAROUS_SHORE_SIN_SHADOWFORM) Then Return False
-	If $sfRemaining > $BARBAROUS_SHORE_SIN_SF_RECAST_BUFFER_MS Then Return False
+	If $sfRemaining > $BARBAROUS_SHORE_SIN_SF_PRECAST_WINDOW_MS Then Return False
 	If $lastPrecast <> 0 And TimerDiff($lastPrecast) < $BARBAROUS_SHORE_SIN_SF_PRECAST_COOLDOWN_MS Then Return False
 
 	Local $energy = GetEnergy()
 	Local $dpReady = IsRecharged($BARBAROUS_SHORE_SIN_DEADLY_PARADOX)
-	Local $urgentRecast = $sfRemaining <= 1500
-	Local $requiredEnergy = $dpReady And Not $urgentRecast ? 25 : $BARBAROUS_SHORE_SIN_SF_PRECAST_ENERGY
+	If Not $dpReady Then
+		BarbarousShoreSinLogSF('precast_blocked_dp_recharge', $sfRemaining, $energy, 'ctx=' & $context)
+		Return False
+	EndIf
+	Local $requiredEnergy = 25
 	If $energy < $requiredEnergy Then
 		BarbarousShoreSinLogSF('precast_blocked_energy', $sfRemaining, $energy, 'ctx=' & $context & ';need=' & $requiredEnergy)
 		Return False
 	EndIf
 
 	BarbarousShoreSinLogSF('precast_attempt', $sfRemaining, $energy, 'ctx=' & $context)
-	Local $castedDp = False
-	If $dpReady And Not $urgentRecast And $energy >= 25 Then
-		UseSkillEx($BARBAROUS_SHORE_SIN_DEADLY_PARADOX)
-		RandomSleep(15)
-		$castedDp = True
-	EndIf
+	UseSkillEx($BARBAROUS_SHORE_SIN_DEADLY_PARADOX)
+	RandomSleep(20)
 	UseSkillEx($BARBAROUS_SHORE_SIN_SHADOWFORM)
 	$lastPrecast = TimerInit()
 	Local $hasSf = GetEffect($ID_SHADOW_FORM) <> Null
-	BarbarousShoreSinLogSF('precast_cast', $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0, GetEnergy(), 'ctx=' & $context & ';dp=' & ($castedDp ? '1' : '0'))
+	BarbarousShoreSinLogSF('precast_cast', $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0, GetEnergy(), 'ctx=' & $context & ';dp=1')
 	Return $hasSf
 EndFunc
 
@@ -566,12 +577,23 @@ Func BarbarousShoreSinChestFarmLoop()
 
 		Info('Running to Spot #' & ($i + 1) & '/' & $spotCount)
 
-		If BarbarousShoreSinOpenChestNearPoint($waypoints[$i][0], $waypoints[$i][1]) Then
-			$openedChests += 1
-			$i = BarbarousShoreSinAdvanceRouteAfterChest($waypoints, $i)
-			ContinueLoop
+		If $barbarous_shore_sin_skip_prescan_idx == $i Then
+			Info('Barbarous pathing: skip immediate chest prescan at resumed waypoint #' & ($i + 1))
+			$barbarous_shore_sin_skip_prescan_idx = -1
+			Local $realignIdx = BarbarousShoreSinFindBestForwardJoinPoint($waypoints, $i, False)
+			If $realignIdx > $i Then
+				Info('Barbarous pathing: forward realign after chest from #' & ($i + 1) & ' to #' & ($realignIdx + 1))
+				$i = $realignIdx
+			EndIf
+		Else
+			If BarbarousShoreSinOpenChestNearPoint($waypoints[$i][0], $waypoints[$i][1]) Then
+				$openedChests += 1
+				$i = BarbarousShoreSinAdvanceRouteAfterChest($waypoints, $i)
+				ContinueLoop
+			EndIf
 		EndIf
 
+		$barbarous_shore_sin_live_chest_opened = False
 		If BarbarousShoreSinRunToWaypointWithBypass($waypoints[$i][0], $waypoints[$i][1]) == $FAIL Then
 			If IsPlayerDead() Then
 				Warn('Barbarous run: player dead while moving, aborting run for resign/restart')
@@ -579,6 +601,13 @@ Func BarbarousShoreSinChestFarmLoop()
 			EndIf
 			Warn('Barbarous pathing: skipped blocked spot #' & ($i + 1))
 			$i += 1
+			ContinueLoop
+		EndIf
+
+		If $barbarous_shore_sin_live_chest_opened Then
+			$barbarous_shore_sin_live_chest_opened = False
+			$openedChests += 1
+			$i = BarbarousShoreSinAdvanceRouteAfterChest($waypoints, $i)
 			ContinueLoop
 		EndIf
 
@@ -712,7 +741,7 @@ Func BarbarousShoreSinOpenChestNearPoint($x, $y)
 	Local $chestY = DllStructGetData($chest, 'Y')
 	If BarbarousShoreSinRunToWaypointWithBypass($chestX, $chestY) == $FAIL Then Return False
 	If FindAndOpenChests($BARBAROUS_SHORE_SIN_CHEST_OPEN_RANGE, DefendWhileOpeningChestsBarbarousShoreSin) Then
-		BarbarousShoreSinSetLastChestAnchor($chestX, $chestY)
+		BarbarousShoreSinCaptureCurrentPositionAsChestAnchor()
 		Return True
 	EndIf
 	Return False
@@ -758,6 +787,7 @@ EndFunc
 Func BarbarousShoreSinAdvanceRouteAfterChest(ByRef $waypoints, $currentIdx)
 	Local $nextIdx = BarbarousShoreSinFindNextWaypointFromChestAnchor($waypoints, $currentIdx)
 	If $nextIdx < 0 Then Return UBound($waypoints)
+	$barbarous_shore_sin_skip_prescan_idx = $nextIdx
 	Info('Barbarous pathing: resume from chest anchor to next waypoint #' & ($nextIdx + 1) & ' (was #' & ($currentIdx + 1) & ')')
 	Return $nextIdx
 EndFunc
@@ -776,11 +806,15 @@ Func BarbarousShoreSinFindNextWaypointFromChestAnchor(ByRef $waypoints, $current
 		$anchorY = DllStructGetData($me, 'Y')
 	EndIf
 
-	Local $bestSeg = 0
+	Local $startSeg = $currentIdx
+	If $startSeg < 0 Then $startSeg = 0
+	If $startSeg > ($count - 2) Then $startSeg = $count - 2
+
+	Local $bestSeg = $startSeg
 	Local $bestDistSq = 1e+30
 
 	Local $i
-	For $i = 0 To $count - 2
+	For $i = $startSeg To $count - 2
 		Local $distSq = BarbarousShoreSinPointToSegmentDistanceSq($anchorX, $anchorY, $waypoints[$i][0], $waypoints[$i][1], $waypoints[$i + 1][0], $waypoints[$i + 1][1])
 		If $distSq < $bestDistSq Then
 			$bestDistSq = $distSq
@@ -789,7 +823,14 @@ Func BarbarousShoreSinFindNextWaypointFromChestAnchor(ByRef $waypoints, $current
 	Next
 
 	Local $nextIdx = $bestSeg + 1
+	If $nextIdx <= $currentIdx Then $nextIdx = $currentIdx + 1
+	Local $maxForwardIdx = $currentIdx + $BARBAROUS_SHORE_SIN_REJOIN_MAX_SKIP
+	If $nextIdx > $maxForwardIdx Then
+		Info('Barbarous pathing: capped chest rejoin jump from #' & ($nextIdx + 1) & ' to #' & ($maxForwardIdx + 1))
+		$nextIdx = $maxForwardIdx
+	EndIf
 	If $nextIdx >= $count Then $nextIdx = $count - 1
+	Info('Barbarous pathing: anchor=' & Int($anchorX) & ',' & Int($anchorY) & ';start_wp=' & ($startSeg + 1) & ';chosen_wp=' & ($nextIdx + 1))
 	$barbarous_shore_sin_has_last_chest = False
 	Return $nextIdx
 EndFunc
@@ -809,7 +850,7 @@ Func BarbarousShoreSinCaptureCurrentPositionAsChestAnchor()
 EndFunc
 
 
-Func BarbarousShoreSinFindBestForwardJoinPoint(ByRef $waypoints, $startIdx)
+Func BarbarousShoreSinFindBestForwardJoinPoint(ByRef $waypoints, $startIdx, $moveToJoin = True)
 	Local $me = GetMyAgent()
 	If $me == Null Then Return -1
 
@@ -834,7 +875,7 @@ Func BarbarousShoreSinFindBestForwardJoinPoint(ByRef $waypoints, $startIdx)
 	Local $joinIdx = $bestSeg + 1
 	If $joinIdx >= $count Then $joinIdx = $count - 1
 
-	If GetDistanceToPoint($me, $waypoints[$joinIdx][0], $waypoints[$joinIdx][1]) > 120 Then
+	If $moveToJoin And GetDistanceToPoint($me, $waypoints[$joinIdx][0], $waypoints[$joinIdx][1]) > 120 Then
 		AssassinRunBarbarousShore($waypoints[$joinIdx][0], $waypoints[$joinIdx][1])
 	EndIf
 	Return $joinIdx
@@ -870,8 +911,10 @@ Func AssassinRunBarbarousShore($x, $y)
 	Local Static $lastDashUse = 0
 	Local Static $lastDarkEscapeUse = 0
 	Local Static $lastChestScan = 0
+	Local Static $lastEncircleEscape = 0
 	Local $lastDistanceToTarget = GetDistanceToPoint($me, $x, $y)
 	Local $noProgressTicks = 0
+	Local $noProgressRecoveryFails = 0
 	IsPlayerStuck(Default, Default, True)
 
 	While GetDistanceToPoint($me, $x, $y) > 100 And $blockedCounter < 15
@@ -884,12 +927,14 @@ Func AssassinRunBarbarousShore($x, $y)
 
 		If Not $hasSf Then
 			$hasSf = BarbarousShoreSinTryCastSfChain('move')
+			If $hasSf Then $sprintCastThisTick = True
 			$sfRemaining = $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0
 			$energyNow = GetEnergy()
 		EndIf
 
 		If $hasSf Then
 			If BarbarousShoreSinTryPrecastSf('move', $sfRemaining) Then
+				$sprintCastThisTick = True
 				$hasSf = GetEffect($ID_SHADOW_FORM) <> Null
 				$sfRemaining = $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0
 				$energyNow = GetEnergy()
@@ -899,7 +944,14 @@ Func AssassinRunBarbarousShore($x, $y)
 		If $lastChestScan == 0 Or TimerDiff($lastChestScan) >= $BARBAROUS_SHORE_SIN_LIVE_CHEST_SCAN_INTERVAL_MS Then
 			If FindAndOpenChests($BARBAROUS_SHORE_SIN_CHEST_OPEN_RANGE, DefendWhileOpeningChestsBarbarousShoreSin) Then
 				$blockedCounter = 0
-				Move($x, $y)
+				BarbarousShoreSinCaptureCurrentPositionAsChestAnchor()
+				If GetHealth() < 95 And IsRecharged($BARBAROUS_SHORE_SIN_HEART_OF_SHADOW) And GetEnergy() >= 5 Then
+					UseSkillEx($BARBAROUS_SHORE_SIN_HEART_OF_SHADOW, GetMyAgent())
+					BarbarousShoreSinLogSF('emergency_hos_after_live_chest', $sfRemaining, GetEnergy(), 'ctx=move')
+				EndIf
+				$barbarous_shore_sin_live_chest_opened = True
+				Info('Barbarous pathing: chest opened during move, rejoin route instead of returning to old target')
+				Return $SUCCESS
 			EndIf
 			$lastChestScan = TimerInit()
 		EndIf
@@ -922,17 +974,23 @@ Func AssassinRunBarbarousShore($x, $y)
 		Local $sprintMinEnergy = $BARBAROUS_SHORE_SIN_SPRINT_MIN_ENERGY
 		If IsRecharged($BARBAROUS_SHORE_SIN_SHADOWFORM) Then $sprintMinEnergy = 20
 		If IsRecharged($BARBAROUS_SHORE_SIN_SHADOWFORM) And IsRecharged($BARBAROUS_SHORE_SIN_DEADLY_PARADOX) Then $sprintMinEnergy = 25
+		If $hasSf And $sfRemaining <= $BARBAROUS_SHORE_SIN_SF_RECAST_BUFFER_MS Then $sprintMinEnergy = 30
+		If $hasSf And $sfRemaining <= $BARBAROUS_SHORE_SIN_SF_DETERMINISTIC_RECAST_MS Then $sprintMinEnergy = 35
 		If $hasSf And IsRecharged($BARBAROUS_SHORE_SIN_SHADOWFORM) And $sfRemaining <= $BARBAROUS_SHORE_SIN_SF_CRITICAL_WINDOW_MS Then
 			Local $sfUrgentReserve = IsRecharged($BARBAROUS_SHORE_SIN_DEADLY_PARADOX) ? 25 : 20
 			If $sprintMinEnergy < $sfUrgentReserve Then $sprintMinEnergy = $sfUrgentReserve
 		EndIf
 		Local $hasDwarven = GetEffect($ID_DWARVEN_STABILITY) <> Null
-		If $hasSf And $hasDwarven And $energyNow >= $sprintMinEnergy And IsPlayerMoving() Then
+		Local $dashAfterDarkEscapeMs = $BARBAROUS_SHORE_SIN_DASH_AFTER_DARK_ESCAPE_MS
+		If $hasSf And $sfRemaining > $BARBAROUS_SHORE_SIN_SF_RECAST_BUFFER_MS And $energyNow >= 35 Then
+			$dashAfterDarkEscapeMs = $BARBAROUS_SHORE_SIN_DASH_AFTER_DARK_ESCAPE_FAST_MS
+		EndIf
+		If Not $sprintCastThisTick And $hasSf And $hasDwarven And $energyNow >= $sprintMinEnergy And IsPlayerMoving() Then
 			If IsRecharged($BARBAROUS_SHORE_SIN_DARK_ESCAPE) And ($lastDashUse == 0 Or TimerDiff($lastDashUse) >= $BARBAROUS_SHORE_SIN_DARK_ESCAPE_AFTER_DASH_MS) Then
 				UseSkillEx($BARBAROUS_SHORE_SIN_DARK_ESCAPE)
 				$lastDarkEscapeUse = TimerInit()
 				$sprintCastThisTick = True
-			ElseIf IsRecharged($BARBAROUS_SHORE_SIN_DASH) And ($lastDarkEscapeUse == 0 Or TimerDiff($lastDarkEscapeUse) >= $BARBAROUS_SHORE_SIN_DASH_AFTER_DARK_ESCAPE_MS) Then
+			ElseIf IsRecharged($BARBAROUS_SHORE_SIN_DASH) And ($lastDarkEscapeUse == 0 Or TimerDiff($lastDarkEscapeUse) >= $dashAfterDarkEscapeMs) Then
 				UseSkillEx($BARBAROUS_SHORE_SIN_DASH)
 				$lastDashUse = TimerInit()
 				$sprintCastThisTick = True
@@ -962,6 +1020,7 @@ Func AssassinRunBarbarousShore($x, $y)
 		Local $distanceNow = GetDistanceToPoint($me, $x, $y)
 		If $distanceNow <= ($lastDistanceToTarget - 35) Then
 			$noProgressTicks = 0
+			$noProgressRecoveryFails = 0
 		Else
 			$noProgressTicks += 1
 		EndIf
@@ -983,13 +1042,20 @@ Func AssassinRunBarbarousShore($x, $y)
 		; Trigger recovery also when movement exists but distance does not improve
 		; (classic "running into bodyblock" case).
 		If $noProgressTicks >= 5 Then
-			Warn('Barbarous unstuck: no progress while moving, forcing recovery')
+			Warn('Barbarous unstuck: no progress while moving, forcing recovery;dist=' & Int($distanceNow) & ';e=' & Round($energyNow, 1) & ';sf=' & Int($sfRemaining))
 			If BarbarousShoreSinTryBreakBodyblock($x, $y) Then
 				$blockedCounter = 0
 				$noProgressTicks = 0
+				$noProgressRecoveryFails = 0
 				IsPlayerStuck(Default, Default, True)
 				Move($x, $y)
 			Else
+				$noProgressRecoveryFails += 1
+				Warn('Barbarous unstuck: break bodyblock failed, reissuing target move')
+				If $noProgressRecoveryFails >= $BARBAROUS_SHORE_SIN_NO_PROGRESS_FAILS_BEFORE_BYPASS Then
+					Warn('Barbarous pathing: giving up direct lane after repeated no-progress recoveries; triggering side bypass')
+					Return $FAIL
+				EndIf
 				; Hard fallback: reissue destination move to resume after manual/partial release.
 				Move($x, $y)
 				$noProgressTicks = 3
@@ -1008,6 +1074,24 @@ Func AssassinRunBarbarousShore($x, $y)
 			Local $npc = GetNPCInTheBackBarbarousShoreSin($x, $y)
 			If $npc == Null Then $npc = $me
 			UseSkillEx($BARBAROUS_SHORE_SIN_HEART_OF_SHADOW, $npc)
+		EndIf
+
+		Local $nearbyFoes = CountNearbyFoesBarbarousShoreSin($BARBAROUS_SHORE_SIN_ENCIRCLE_FOE_RANGE)
+		If $hasSf And $nearbyFoes >= $BARBAROUS_SHORE_SIN_ENCIRCLE_FOE_COUNT And GetHealth() <= 85 Then
+			If $lastEncircleEscape == 0 Or TimerDiff($lastEncircleEscape) >= $BARBAROUS_SHORE_SIN_ENCIRCLE_ESCAPE_COOLDOWN_MS Then
+				Warn('Barbarous unstuck: encircled by foes=' & $nearbyFoes & ';hp=' & Int(GetHealth()) & ';forcing escape break')
+				$lastEncircleEscape = TimerInit()
+				If BarbarousShoreSinTryBreakBodyblock($x, $y) Then
+					$blockedCounter = 0
+					$noProgressTicks = 0
+					$noProgressRecoveryFails = 0
+					IsPlayerStuck(Default, Default, True)
+					Move($x, $y)
+				ElseIf GetHealth() <= 70 Then
+					Warn('Barbarous pathing: encircle break failed at low hp, forcing bypass path')
+					Return $FAIL
+				EndIf
+			EndIf
 		EndIf
 
 		RandomSleep(250)
@@ -1080,6 +1164,15 @@ Func AreFoesInFrontBarbarousShoreSin($x, $y)
 		If (GetDistanceToPoint($me, $x, $y) - GetDistanceToPoint($foe, $x, $y)) > 0 Then Return True
 	Next
 	Return False
+EndFunc
+
+
+Func CountNearbyFoesBarbarousShoreSin($range)
+	Local $me = GetMyAgent()
+	If $me == Null Then Return 0
+	Local $foes = GetFoesInRangeOfAgent($me, $range)
+	If Not IsArray($foes) Then Return 0
+	Return UBound($foes)
 EndFunc
 
 
