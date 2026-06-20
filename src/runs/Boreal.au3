@@ -77,6 +77,7 @@ Global Const $BOREAL_HERO_CAUTERY_CAST_INTERVAL_MS = 5000
 Global Const $BOREAL_PORTAL_FLAG_FALLBACK_X = 3986
 Global Const $BOREAL_PORTAL_FLAG_FALLBACK_Y = -27642
 Global Const $BOREAL_SUPPORT_DEBUG_VERBOSE = False
+Global Const $BOREAL_WAYPOINT_RETRY_COUNT = 1
 
 ; global variable to remember player's profession in setup
 Global $boreal_player_profession = $ID_ASSASSIN
@@ -151,9 +152,7 @@ Func BorealTravelToOutpost($preferredDistrict)
 	For $h = 0 To UBound($hubs) - 1
 		If TravelToOutpost($hubs[$h], 'Random') == $SUCCESS Then
 			RandomSleep(700)
-			For $i = 0 To UBound($districts) - 1
-				If TravelToOutpost($ID_BOREAL_STATION, $districts[$i]) == $SUCCESS Then Return $SUCCESS
-			Next
+			If TravelToOutpost($ID_BOREAL_STATION, 'Random') == $SUCCESS Then Return $SUCCESS
 		EndIf
 	Next
 
@@ -410,15 +409,15 @@ Func BorealChestFarmLoop()
 
 	; Run to the first spot and open chests there
 	Info('Running to Spot #1')
-	If BorealChestRun(2728, -25294) == $FAIL Then Return $FAIL
-	If BorealChestRun(2900, -22272) == $FAIL Then Return $FAIL
-	If BorealChestRun(-1000, -19801) == $FAIL Then Return $FAIL
-	If BorealChestRun(-2570, -17208) == $FAIL Then Return $FAIL
+	If BorealChestRunWithRetry(2728, -25294, 'Spot #1a') == $FAIL Then Return $FAIL
+	If BorealChestRunWithRetry(2900, -22272, 'Spot #1b') == $FAIL Then Return $FAIL
+	If BorealChestRunWithRetry(-1000, -19801, 'Spot #1c') == $FAIL Then Return $FAIL
+	If BorealChestRunWithRetry(-2570, -17208, 'Spot #1d') == $FAIL Then Return $FAIL
 	$openedChests += FindAndOpenChests($RANGE_COMPASS, BorealSpeedRun, BorealUnblock) ? 1 : 0
 
 	; Run to the second spot and count all chests in compass range
 	Info('Running to Spot #2 and counting chests')
-	If BorealChestRun(-4218, -15219) == $FAIL Then Return $FAIL
+	If BorealChestRunWithRetry(-4218, -15219, 'Spot #2') == $FAIL Then Return $FAIL
 	$totalChestsCount = CountChestsInCompassRange()
 	Info('Total amount of chests here: ' & $totalChestsCount)
 
@@ -427,12 +426,25 @@ Func BorealChestFarmLoop()
 		Info('Running to Spot #' & (2+$i))
 		$openedChests += FindAndOpenChests($RANGE_COMPASS, BorealSpeedRun, BorealUnblock) ? 1 : 0
 		If $openedChests == $totalChestsCount Then ExitLoop
-		If BorealChestRun(-4218, -15219) == $FAIL Then Return $FAIL
+		If BorealChestRunWithRetry(-4218, -15219, 'Spot #2 return') == $FAIL Then Return $FAIL
 	Next
 
 	Info('Opened ' & $openedChests & '/' & $totalChestsCount & ' chests.')
 	; Result cannot be considered a failure if no chests were found
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
+EndFunc
+
+
+Func BorealChestRunWithRetry($X, $Y, $label, $retryCount = $BOREAL_WAYPOINT_RETRY_COUNT)
+	For $attempt = 0 To $retryCount
+		If BorealChestRun($X, $Y) == $SUCCESS Then Return $SUCCESS
+		If $attempt < $retryCount Then
+			Warn('Boreal waypoint failed at ' & $label & ', retry ' & ($attempt + 1) & '/' & $retryCount)
+			RandomSleep(400)
+		EndIf
+	Next
+	Warn('Boreal waypoint failed at ' & $label & ' after retries')
+	Return $FAIL
 EndFunc
 
 
