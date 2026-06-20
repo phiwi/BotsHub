@@ -3,34 +3,35 @@
 set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
-DEFAULT_REMOTE="upstream"
-DEFAULT_UPSTREAM_BRANCH="master"
-MODE="merge"
-REMOTE="$DEFAULT_REMOTE"
-UPSTREAM_BRANCH="$DEFAULT_UPSTREAM_BRANCH"
-PUSH_AFTER_SYNC=false
-PUSH_REMOTE="origin"
+SOURCE_REMOTE="origin"
+SOURCE_BRANCH="master"
+FORK_REMOTE="upstream"
+PUSH_TO_FORK=false
 
 print_usage() {
   cat <<'EOF'
-Safely integrate updates from an upstream remote into the current branch.
+Simple and safe sync helper.
+
+Default behavior:
+- stash local changes when needed
+- fetch origin
+- merge origin/master into current branch
+- restore stash
 
 Usage:
   safe-upstream-sync.sh [options]
 
 Options:
-  --remote <name>       Upstream remote name (default: upstream)
-  --branch <name>       Upstream branch name (default: master)
-  --rebase              Rebase current branch onto remote/branch
-  --merge               Merge remote/branch into current branch (default)
-  --push                Push current branch after successful sync
-  --push-remote <name>  Remote used with --push (default: origin)
+  --source <name>       Source remote to fetch/merge from (default: origin)
+  --branch <name>       Source branch to merge (default: master)
+  --push                Push current branch after sync
+  --fork-remote <name>  Push target for --push (default: upstream)
   -h, --help            Show this help
 
 Examples:
   ./scripts/safe-upstream-sync.sh
-  ./scripts/safe-upstream-sync.sh --rebase
-  ./scripts/safe-upstream-sync.sh --remote origin --branch master --push --push-remote upstream
+  ./scripts/safe-upstream-sync.sh --push
+  ./scripts/safe-upstream-sync.sh --source origin --branch master --push --fork-remote upstream
 EOF
 }
 
@@ -45,31 +46,23 @@ fail() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --remote)
-      [[ $# -ge 2 ]] || fail "Missing value for --remote"
-      REMOTE="$2"
+    --source)
+      [[ $# -ge 2 ]] || fail "Missing value for --source"
+      SOURCE_REMOTE="$2"
       shift 2
       ;;
     --branch)
       [[ $# -ge 2 ]] || fail "Missing value for --branch"
-      UPSTREAM_BRANCH="$2"
+      SOURCE_BRANCH="$2"
       shift 2
       ;;
-    --rebase)
-      MODE="rebase"
-      shift
-      ;;
-    --merge)
-      MODE="merge"
-      shift
-      ;;
     --push)
-      PUSH_AFTER_SYNC=true
+      PUSH_TO_FORK=true
       shift
       ;;
-    --push-remote)
-      [[ $# -ge 2 ]] || fail "Missing value for --push-remote"
-      PUSH_REMOTE="$2"
+    --fork-remote)
+      [[ $# -ge 2 ]] || fail "Missing value for --fork-remote"
+      FORK_REMOTE="$2"
       shift 2
       ;;
     -h|--help)
@@ -87,7 +80,7 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || fail "Not inside a git re
 CURRENT_BRANCH="$(git branch --show-current)"
 [[ -n "$CURRENT_BRANCH" ]] || fail "Detached HEAD is not supported. Checkout a branch first."
 
-git remote get-url "$REMOTE" >/dev/null 2>&1 || fail "Remote '$REMOTE' does not exist"
+git remote get-url "$SOURCE_REMOTE" >/dev/null 2>&1 || fail "Source remote '$SOURCE_REMOTE' does not exist"
 
 STASH_CREATED=false
 STASH_LABEL="safe-upstream-sync $(date +%Y-%m-%dT%H:%M:%S)"
@@ -120,38 +113,28 @@ restore_stash() {
   return 0
 }
 
-log "Fetching '$REMOTE'..."
-git fetch "$REMOTE" --prune
+log "Fetching '$SOURCE_REMOTE'..."
+git fetch "$SOURCE_REMOTE" --prune
 
-UPSTREAM_REF="$REMOTE/$UPSTREAM_BRANCH"
-git rev-parse --verify "$UPSTREAM_REF" >/dev/null 2>&1 || fail "Upstream ref '$UPSTREAM_REF' not found"
+SOURCE_REF="$SOURCE_REMOTE/$SOURCE_BRANCH"
+git rev-parse --verify "$SOURCE_REF" >/dev/null 2>&1 || fail "Source ref '$SOURCE_REF' not found"
 
-if [[ "$MODE" == "rebase" ]]; then
-  log "Rebasing '$CURRENT_BRANCH' onto '$UPSTREAM_REF'..."
-  if ! git rebase "$UPSTREAM_REF"; then
-    echo "[$SCRIPT_NAME] ERROR: Rebase failed." >&2
-    echo "[$SCRIPT_NAME] Resolve conflicts, then run 'git rebase --continue' or 'git rebase --abort'" >&2
-    echo "[$SCRIPT_NAME] Stash was NOT popped. Re-apply manually after rebase completes." >&2
-    exit 1
-  fi
-else
-  log "Merging '$UPSTREAM_REF' into '$CURRENT_BRANCH'..."
-  if ! git merge --no-edit "$UPSTREAM_REF"; then
-    echo "[$SCRIPT_NAME] ERROR: Merge failed." >&2
-    echo "[$SCRIPT_NAME] Resolve conflicts, then run 'git merge --continue' or 'git merge --abort'" >&2
-    echo "[$SCRIPT_NAME] Stash was NOT popped. Re-apply manually after merge completes." >&2
-    exit 1
-  fi
+log "Merging '$SOURCE_REF' into '$CURRENT_BRANCH'..."
+if ! git merge --no-edit "$SOURCE_REF"; then
+  echo "[$SCRIPT_NAME] ERROR: Merge failed." >&2
+  echo "[$SCRIPT_NAME] Resolve conflicts, then run 'git merge --continue' or 'git merge --abort'" >&2
+  echo "[$SCRIPT_NAME] Stash was NOT popped. Re-apply manually after merge completes." >&2
+  exit 1
 fi
 
 if ! restore_stash; then
   fail "Sync succeeded but stash restore needs manual conflict resolution"
 fi
 
-if [[ "$PUSH_AFTER_SYNC" == true ]]; then
-  git remote get-url "$PUSH_REMOTE" >/dev/null 2>&1 || fail "Push remote '$PUSH_REMOTE' does not exist"
-  log "Pushing '$CURRENT_BRANCH' to '$PUSH_REMOTE'..."
-  git push "$PUSH_REMOTE" "$CURRENT_BRANCH"
+if [[ "$PUSH_TO_FORK" == true ]]; then
+  git remote get-url "$FORK_REMOTE" >/dev/null 2>&1 || fail "Fork remote '$FORK_REMOTE' does not exist"
+  log "Pushing '$CURRENT_BRANCH' to '$FORK_REMOTE'..."
+  git push "$FORK_REMOTE" "$CURRENT_BRANCH"
 fi
 
-log "Done. '$CURRENT_BRANCH' is synchronized with '$UPSTREAM_REF'."
+log "Done. '$CURRENT_BRANCH' is synchronized with '$SOURCE_REF'."
