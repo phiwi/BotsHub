@@ -25,7 +25,7 @@
 Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
-Global Const $AE_FEATHERS_SIN_SKILLBAR = 'OwZTgGF/5R6rzOgIDfRObXMMAA'
+Global Const $AE_FEATHERS_SIN_SKILLBAR = 'OwpjMipsqSDYVXNXabdfHQEQ1gA'
 Global Const $FEATHERS_SIN_FARM_DURATION = (8 * 60 + 20) * 1000
 Global Const $FEATHERS_SIN_WEAPON_SET = 3
 Global Const $FEATHERS_SIN_MORGAHN_HERO_ID = $ID_GENERAL_MORGAHN

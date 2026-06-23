@@ -48,6 +48,7 @@
 #include 'src/farms/EdenIris.au3'
 #include 'src/farms/Feathers.au3'
 #include 'src/farms/FeathersSin.au3'
+#include 'src/farms/FeathersSinDerv.au3'
 #include 'src/farms/FoWTowerOfCourage.au3'
 #include 'src/farms/UWChamberTraps.au3'
 #include 'src/farms/FocusHanaku.au3'
@@ -120,7 +121,7 @@ Global Const $SUCCESS = 0
 Global Const $FAIL = 1
 Global Const $PAUSE = 2
 
-Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Follower|Focus Hanaku|FoW|FoW Tower of Courage|Froggy|Froggy Hero Panels Test|' & _
+Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Derv|Follower|Focus Hanaku|FoW|FoW Tower of Courage|Froggy|Froggy Hero Panels Test|' & _
 	'Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kournans|Kurzick|Kurzick Drazach|LDOA|Lightbringer|Lightbringer & Sunspear|Luxon|Mantids|Ministerial Com. Custom|Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|' & _
 	'Path Recorder|Pongmei|Pongmei Sin|Raptors|SoO|Spirit Slaves Ranger|Spirit Slaves Warrior|Storage|Sunspear Armor|Tasca|TestSuite|Tests|TunnelsOfTheForsaken|Underworld|Underworld Plains Trainer|UW Chamber Traps|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|' & _
 	'Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
@@ -549,6 +550,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Eden Iris',					EdenIrisFarm,					2,					$IRIS_FARM_DURATION)
 	AddFarmToFarmMap(	'Feathers',						FeathersFarm,					10,					$FEATHERS_FARM_DURATION)
 	AddFarmToFarmMap(	'Feathers Sin',						FeathersFarmSin,					10,					$FEATHERS_SIN_FARM_DURATION)
+	AddFarmToFarmMap(	'Feathers Sin Derv',				FeathersFarmSinDerv,				10,					$FEATHERS_SIN_DERV_FARM_DURATION)
 	AddFarmToFarmMap(	'Follower',						FollowerFarm,					5,					30 * 60 * 1000)
 	AddFarmToFarmMap(	'FoW',							FoWFarm,						15,					$FOW_FARM_DURATION)
 	AddFarmToFarmMap(	'FoW Tower of Courage',			FoWToCFarm,						10,					$FOW_TOC_FARM_DURATION)
@@ -623,6 +625,7 @@ Func ResetBotsSetups()
 	$dm_farm_setup							= False
 	$feathers_farm_setup					= False
 	$feathers_sin_farm_setup			= False
+	$feathers_sin_derv_farm_setup		= False
 	$froggy_farm_setup						= False
 	$hanaku_farm_setup						= False
 	$iris_farm_setup						= False
