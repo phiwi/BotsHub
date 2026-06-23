@@ -81,14 +81,25 @@ Global Const $BARBAROUS_SHORE_SIN_SF_RECAST_BUFFER_MS = 5000
 Global Const $BARBAROUS_SHORE_SIN_SF_DETERMINISTIC_RECAST_MS = 1200
 Global Const $BARBAROUS_SHORE_SIN_SF_ENERGY_RESERVE = 20
 Global Const $BARBAROUS_SHORE_SIN_SF_PRECAST_ENERGY = 32
-Global Const $BARBAROUS_SHORE_SIN_SF_PRECAST_WINDOW_MS = 1200
+Global Const $BARBAROUS_SHORE_SIN_SF_PRECAST_WINDOW_MS = 1700
 Global Const $BARBAROUS_SHORE_SIN_SF_PRECAST_COOLDOWN_MS = 900
+Global Const $BARBAROUS_SHORE_SIN_SF_DP_CHAIN_ENERGY = 32
+Global Const $BARBAROUS_SHORE_SIN_CHEST_SAFE_SF_MIN_MS = 2500
 Global Const $BARBAROUS_SHORE_SIN_SPRINT_MIN_ENERGY = 12
 Global Const $BARBAROUS_SHORE_SIN_UTILITY_MIN_ENERGY = 25
+Global Const $BARBAROUS_SHORE_SIN_IAU_MIN_ENERGY = 5
+Global Const $BARBAROUS_SHORE_SIN_LOW_HP_HOS_THRESHOLD = 85
+Global Const $BARBAROUS_SHORE_SIN_LOW_HP_DC_THRESHOLD = 92
+Global Const $BARBAROUS_SHORE_SIN_SPRINT_BLOCK_LOG_INTERVAL_MS = 1200
+Global Const $BARBAROUS_SHORE_SIN_SF_URGENT_WINDOW_MS = 4000
+Global Const $BARBAROUS_SHORE_SIN_SF_URGENT_RESERVE = 30
+Global Const $BARBAROUS_SHORE_SIN_SF_CAST_RETRY_DELAY_MS = 120
 Global Const $BARBAROUS_SHORE_SIN_SF_CRITICAL_WINDOW_MS = 9000
 Global Const $BARBAROUS_SHORE_SIN_SF_LOGGING = True
 Global Const $BARBAROUS_SHORE_SIN_SF_LOG_INTERVAL_MS = 1200
 Global Const $BARBAROUS_SHORE_SIN_SF_GAP_WARN_MS = 700
+Global Const $BARBAROUS_SHORE_SIN_SF_EFFECT_SANITY_MAX_MS = 60000
+Global Const $BARBAROUS_SHORE_SIN_SF_FALLBACK_DURATION_MS = 20000
 Global Const $BARBAROUS_SHORE_SIN_DWARVEN_UPKEEP_BUFFER_MS = 2500
 Global Const $BARBAROUS_SHORE_SIN_CHEST_HOTSPOT_RANGE = $RANGE_COMPASS + 450
 Global Const $BARBAROUS_SHORE_SIN_CHEST_OPEN_RANGE = $RANGE_COMPASS + 300
@@ -134,6 +145,8 @@ Global $barbarous_shore_sin_last_chest_y = 0
 Global $barbarous_shore_sin_has_last_chest = False
 Global $barbarous_shore_sin_skip_prescan_idx = -1
 Global $barbarous_shore_sin_live_chest_opened = False
+Global $barbarous_shore_sin_last_sf_apply_tick = 0
+Global $barbarous_shore_sin_sf_active_seen = False
 
 
 Func BarbarousShoreSinChestFarm()
@@ -332,6 +345,46 @@ Func BarbarousShoreSinTrackSFState($sfRemaining, $energy, $context)
 EndFunc
 
 
+Func BarbarousShoreSinGetReliableSfRemaining()
+	Local $hasSf = GetEffect($ID_SHADOW_FORM) <> Null
+	If Not $hasSf Then
+		$barbarous_shore_sin_sf_active_seen = False
+		Return 0
+	EndIf
+
+	Local $rawRemaining = GetEffectTimeRemaining($ID_SHADOW_FORM)
+	Local $fallbackRemaining = 0
+	If $barbarous_shore_sin_last_sf_apply_tick <> 0 Then
+		$fallbackRemaining = $BARBAROUS_SHORE_SIN_SF_FALLBACK_DURATION_MS - TimerDiff($barbarous_shore_sin_last_sf_apply_tick)
+		If $fallbackRemaining < 0 Then $fallbackRemaining = 0
+	EndIf
+
+	If $rawRemaining > 0 And $rawRemaining <= $BARBAROUS_SHORE_SIN_SF_EFFECT_SANITY_MAX_MS Then
+		If Not $barbarous_shore_sin_sf_active_seen Then
+			$barbarous_shore_sin_last_sf_apply_tick = TimerInit()
+			$barbarous_shore_sin_sf_active_seen = True
+			$fallbackRemaining = $BARBAROUS_SHORE_SIN_SF_FALLBACK_DURATION_MS
+		EndIf
+
+		; Some map situations report SF remaining as 1ms while the effect is clearly still active.
+		; Prefer fallback timing in that case so sprint/defense logic does not collapse.
+		If $rawRemaining <= $BARBAROUS_SHORE_SIN_SF_PRECAST_WINDOW_MS And $fallbackRemaining > ($BARBAROUS_SHORE_SIN_SF_PRECAST_WINDOW_MS + 700) Then
+			Return $fallbackRemaining
+		EndIf
+		Return $rawRemaining
+	EndIf
+
+	If $barbarous_shore_sin_last_sf_apply_tick == 0 Then
+		$barbarous_shore_sin_last_sf_apply_tick = TimerInit()
+		$barbarous_shore_sin_sf_active_seen = True
+		Return $BARBAROUS_SHORE_SIN_SF_FALLBACK_DURATION_MS
+	EndIf
+
+	If $fallbackRemaining < 0 Then Return 0
+	Return $fallbackRemaining
+EndFunc
+
+
 Func BarbarousShoreSinTryCastSfChain($context)
 	If GetEffect($ID_SHADOW_FORM) <> Null Then Return True
 
@@ -348,20 +401,32 @@ Func BarbarousShoreSinTryCastSfChain($context)
 	BarbarousShoreSinLogSF('refresh_attempt', 0, $energy, 'ctx=' & $context)
 	Local $castedDp = False
 	If IsRecharged($BARBAROUS_SHORE_SIN_DEADLY_PARADOX) Then
-		If $energy < 25 Then
-			BarbarousShoreSinLogSF('refresh_wait_dp_energy', 0, $energy, 'ctx=' & $context)
-			Return False
+		If $energy >= $BARBAROUS_SHORE_SIN_SF_DP_CHAIN_ENERGY Then
+			UseSkillEx($BARBAROUS_SHORE_SIN_DEADLY_PARADOX)
+			RandomSleep(20)
+			$castedDp = True
+			$energy = GetEnergy()
+			BarbarousShoreSinLogSF('cast_dp', 0, $energy, 'ctx=' & $context)
+		Else
+			BarbarousShoreSinLogSF('refresh_skip_dp_low_energy', 0, $energy, 'ctx=' & $context)
 		EndIf
-		UseSkillEx($BARBAROUS_SHORE_SIN_DEADLY_PARADOX)
-		RandomSleep(20)
-		$castedDp = True
-		$energy = GetEnergy()
-		BarbarousShoreSinLogSF('cast_dp', 0, $energy, 'ctx=' & $context)
 	EndIf
 
 	UseSkillEx($BARBAROUS_SHORE_SIN_SHADOWFORM)
+	RandomSleep($BARBAROUS_SHORE_SIN_SF_CAST_RETRY_DELAY_MS)
 	$energy = GetEnergy()
 	Local $hasSf = GetEffect($ID_SHADOW_FORM) <> Null
+	If Not $hasSf And IsRecharged($BARBAROUS_SHORE_SIN_SHADOWFORM) And $energy >= 5 Then
+		BarbarousShoreSinLogSF('cast_sf_retry', 0, $energy, 'ctx=' & $context)
+		UseSkillEx($BARBAROUS_SHORE_SIN_SHADOWFORM)
+		RandomSleep($BARBAROUS_SHORE_SIN_SF_CAST_RETRY_DELAY_MS)
+		$energy = GetEnergy()
+		$hasSf = GetEffect($ID_SHADOW_FORM) <> Null
+	EndIf
+	If $hasSf Then
+		$barbarous_shore_sin_last_sf_apply_tick = TimerInit()
+		$barbarous_shore_sin_sf_active_seen = True
+	EndIf
 	BarbarousShoreSinLogSF('cast_sf', $hasSf ? 1 : 0, $energy, 'ctx=' & $context & ';dp=' & ($castedDp ? '1' : '0'))
 	Return $hasSf
 EndFunc
@@ -376,23 +441,37 @@ Func BarbarousShoreSinTryPrecastSf($context, $sfRemaining)
 
 	Local $energy = GetEnergy()
 	Local $dpReady = IsRecharged($BARBAROUS_SHORE_SIN_DEADLY_PARADOX)
-	If Not $dpReady Then
-		BarbarousShoreSinLogSF('precast_blocked_dp_recharge', $sfRemaining, $energy, 'ctx=' & $context)
-		Return False
-	EndIf
-	Local $requiredEnergy = 25
-	If $energy < $requiredEnergy Then
-		BarbarousShoreSinLogSF('precast_blocked_energy', $sfRemaining, $energy, 'ctx=' & $context & ';need=' & $requiredEnergy)
+	If $energy < 20 Then
+		BarbarousShoreSinLogSF('precast_blocked_energy', $sfRemaining, $energy, 'ctx=' & $context & ';need=20')
 		Return False
 	EndIf
 
 	BarbarousShoreSinLogSF('precast_attempt', $sfRemaining, $energy, 'ctx=' & $context)
-	UseSkillEx($BARBAROUS_SHORE_SIN_DEADLY_PARADOX)
-	RandomSleep(20)
+	Local $castedDp = False
+	If $dpReady And $energy >= $BARBAROUS_SHORE_SIN_SF_PRECAST_ENERGY Then
+		UseSkillEx($BARBAROUS_SHORE_SIN_DEADLY_PARADOX)
+		RandomSleep(20)
+		$castedDp = True
+	ElseIf $dpReady Then
+		BarbarousShoreSinLogSF('precast_skip_dp_low_energy', $sfRemaining, $energy, 'ctx=' & $context)
+	Else
+		BarbarousShoreSinLogSF('precast_sf_only_dp_recharge', $sfRemaining, $energy, 'ctx=' & $context)
+	EndIf
 	UseSkillEx($BARBAROUS_SHORE_SIN_SHADOWFORM)
+	RandomSleep($BARBAROUS_SHORE_SIN_SF_CAST_RETRY_DELAY_MS)
 	$lastPrecast = TimerInit()
 	Local $hasSf = GetEffect($ID_SHADOW_FORM) <> Null
-	BarbarousShoreSinLogSF('precast_cast', $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0, GetEnergy(), 'ctx=' & $context & ';dp=1')
+	If Not $hasSf And IsRecharged($BARBAROUS_SHORE_SIN_SHADOWFORM) And GetEnergy() >= 5 Then
+		BarbarousShoreSinLogSF('precast_retry_sf_only', $sfRemaining, GetEnergy(), 'ctx=' & $context)
+		UseSkillEx($BARBAROUS_SHORE_SIN_SHADOWFORM)
+		RandomSleep($BARBAROUS_SHORE_SIN_SF_CAST_RETRY_DELAY_MS)
+		$hasSf = GetEffect($ID_SHADOW_FORM) <> Null
+	EndIf
+	If $hasSf Then
+		$barbarous_shore_sin_last_sf_apply_tick = TimerInit()
+		$barbarous_shore_sin_sf_active_seen = True
+	EndIf
+	BarbarousShoreSinLogSF('precast_cast', $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0, GetEnergy(), 'ctx=' & $context & ';dp=' & ($castedDp ? '1' : '0'))
 	Return $hasSf
 EndFunc
 
@@ -734,6 +813,7 @@ EndFunc
 
 
 Func BarbarousShoreSinOpenChestNearPoint($x, $y)
+	If Not BarbarousShoreSinCanOpenChestNow('near_point') Then Return False
 	Local $chest = ScanForChests($BARBAROUS_SHORE_SIN_CHEST_HOTSPOT_RANGE, True, $x, $y)
 	If $chest == Null Then Return False
 
@@ -745,6 +825,30 @@ Func BarbarousShoreSinOpenChestNearPoint($x, $y)
 		Return True
 	EndIf
 	Return False
+EndFunc
+
+
+Func BarbarousShoreSinCanOpenChestNow($context)
+	Local Static $lastUnsafeLog = 0
+	Local $hasSf = GetEffect($ID_SHADOW_FORM) <> Null
+	If Not $hasSf Then
+		If $lastUnsafeLog == 0 Or TimerDiff($lastUnsafeLog) >= 1500 Then
+			BarbarousShoreSinLogSF('skip_chest_no_sf', 0, GetEnergy(), 'ctx=' & $context)
+			$lastUnsafeLog = TimerInit()
+		EndIf
+		Return False
+	EndIf
+
+	Local $sfRemaining = BarbarousShoreSinGetReliableSfRemaining()
+	If $sfRemaining <= $BARBAROUS_SHORE_SIN_CHEST_SAFE_SF_MIN_MS And Not IsRecharged($BARBAROUS_SHORE_SIN_SHADOWFORM) Then
+		If $lastUnsafeLog == 0 Or TimerDiff($lastUnsafeLog) >= 1500 Then
+			BarbarousShoreSinLogSF('skip_chest_unsafe_sf', $sfRemaining, GetEnergy(), 'ctx=' & $context)
+			$lastUnsafeLog = TimerInit()
+		EndIf
+		Return False
+	EndIf
+
+	Return True
 EndFunc
 
 
@@ -912,6 +1016,7 @@ Func AssassinRunBarbarousShore($x, $y)
 	Local Static $lastDarkEscapeUse = 0
 	Local Static $lastChestScan = 0
 	Local Static $lastEncircleEscape = 0
+	Local Static $lastSprintBlockedLog = 0
 	Local $lastDistanceToTarget = GetDistanceToPoint($me, $x, $y)
 	Local $noProgressTicks = 0
 	Local $noProgressRecoveryFails = 0
@@ -920,7 +1025,7 @@ Func AssassinRunBarbarousShore($x, $y)
 	While GetDistanceToPoint($me, $x, $y) > 100 And $blockedCounter < 15
 		TickBarbarousShoreSinHeroSupportCasts()
 		Local $hasSf = GetEffect($ID_SHADOW_FORM) <> Null
-		Local $sfRemaining = $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0
+		Local $sfRemaining = BarbarousShoreSinGetReliableSfRemaining()
 		Local $energyNow = GetEnergy()
 		Local $sprintCastThisTick = False
 		BarbarousShoreSinTrackSFState($sfRemaining, $energyNow, 'move')
@@ -928,7 +1033,8 @@ Func AssassinRunBarbarousShore($x, $y)
 		If Not $hasSf Then
 			$hasSf = BarbarousShoreSinTryCastSfChain('move')
 			If $hasSf Then $sprintCastThisTick = True
-			$sfRemaining = $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0
+			If Not $hasSf Then BarbarousShoreSinTryEmergencyNoSfSurvival('move', $x, $y)
+			$sfRemaining = BarbarousShoreSinGetReliableSfRemaining()
 			$energyNow = GetEnergy()
 		EndIf
 
@@ -936,13 +1042,13 @@ Func AssassinRunBarbarousShore($x, $y)
 			If BarbarousShoreSinTryPrecastSf('move', $sfRemaining) Then
 				$sprintCastThisTick = True
 				$hasSf = GetEffect($ID_SHADOW_FORM) <> Null
-				$sfRemaining = $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0
+				$sfRemaining = BarbarousShoreSinGetReliableSfRemaining()
 				$energyNow = GetEnergy()
 			EndIf
 		EndIf
 
 		If $lastChestScan == 0 Or TimerDiff($lastChestScan) >= $BARBAROUS_SHORE_SIN_LIVE_CHEST_SCAN_INTERVAL_MS Then
-			If FindAndOpenChests($BARBAROUS_SHORE_SIN_CHEST_OPEN_RANGE, DefendWhileOpeningChestsBarbarousShoreSin) Then
+			If BarbarousShoreSinCanOpenChestNow('live_scan') And FindAndOpenChests($BARBAROUS_SHORE_SIN_CHEST_OPEN_RANGE, DefendWhileOpeningChestsBarbarousShoreSin) Then
 				$blockedCounter = 0
 				BarbarousShoreSinCaptureCurrentPositionAsChestAnchor()
 				If GetHealth() < 95 And IsRecharged($BARBAROUS_SHORE_SIN_HEART_OF_SHADOW) And GetEnergy() >= 5 Then
@@ -960,12 +1066,42 @@ Func AssassinRunBarbarousShore($x, $y)
 		$energyNow = GetEnergy()
 		Local $sfReserve = IsRecharged($BARBAROUS_SHORE_SIN_DEADLY_PARADOX) ? 25 : 20
 		If Not IsRecharged($BARBAROUS_SHORE_SIN_SHADOWFORM) Then $sfReserve = 0
-		If $hasSf And GetEffectTimeRemaining($ID_DWARVEN_STABILITY) <= $BARBAROUS_SHORE_SIN_DWARVEN_UPKEEP_BUFFER_MS And IsRecharged($BARBAROUS_SHORE_SIN_DWARVEN_STABILITY) Then
+		Local $sfUrgent = $hasSf And IsRecharged($BARBAROUS_SHORE_SIN_SHADOWFORM) And $sfRemaining <= $BARBAROUS_SHORE_SIN_SF_URGENT_WINDOW_MS
+		If $sfUrgent And $sfReserve < $BARBAROUS_SHORE_SIN_SF_URGENT_RESERVE Then $sfReserve = $BARBAROUS_SHORE_SIN_SF_URGENT_RESERVE
+		Local $hasDwarven = GetEffect($ID_DWARVEN_STABILITY) <> Null
+		Local $justReappliedDwarven = False
+
+		; Hard guard: never allow 4/6 without active 3.
+		If $hasSf And Not $hasDwarven And Not $sfUrgent And IsRecharged($BARBAROUS_SHORE_SIN_DWARVEN_STABILITY) Then
 			If ($energyNow - 5) >= $sfReserve Then
 				UseSkillEx($BARBAROUS_SHORE_SIN_DWARVEN_STABILITY)
 				$energyNow = GetEnergy()
+				$justReappliedDwarven = True
+			Else
+				BarbarousShoreSinLogSF('dwarven_missing_blocked_energy', $sfRemaining, $energyNow, 'ctx=move;reserve=' & $sfReserve)
+			EndIf
+		EndIf
+
+		$hasDwarven = GetEffect($ID_DWARVEN_STABILITY) <> Null
+		If $hasSf And Not $sfUrgent And GetEffectTimeRemaining($ID_DWARVEN_STABILITY) <= $BARBAROUS_SHORE_SIN_DWARVEN_UPKEEP_BUFFER_MS And IsRecharged($BARBAROUS_SHORE_SIN_DWARVEN_STABILITY) Then
+			If ($energyNow - 5) >= $sfReserve Then
+				UseSkillEx($BARBAROUS_SHORE_SIN_DWARVEN_STABILITY)
+				$energyNow = GetEnergy()
+				$justReappliedDwarven = True
 			Else
 				BarbarousShoreSinLogSF('dwarven_blocked_energy', $hasSf ? 1 : 0, $energyNow, 'ctx=move;reserve=' & $sfReserve)
+			EndIf
+		EndIf
+
+		; Priority rule: anti-cripple (5) comes before sprint skills (4/6).
+		If $hasSf And IsRecharged($BARBAROUS_SHORE_SIN_I_AM_UNSTOPPABLE) And GetEffect($ID_CRIPPLED) <> Null Then
+			If ($energyNow - $BARBAROUS_SHORE_SIN_IAU_MIN_ENERGY) >= $sfReserve Then
+				UseSkillEx($BARBAROUS_SHORE_SIN_I_AM_UNSTOPPABLE)
+				$energyNow = GetEnergy()
+				$sprintCastThisTick = True
+				BarbarousShoreSinLogSF('cast_iau_priority', $sfRemaining, $energyNow, 'ctx=move')
+			Else
+				BarbarousShoreSinLogSF('iau_blocked_energy', $sfRemaining, $energyNow, 'ctx=move;reserve=' & $sfReserve)
 			EndIf
 		EndIf
 
@@ -980,12 +1116,39 @@ Func AssassinRunBarbarousShore($x, $y)
 			Local $sfUrgentReserve = IsRecharged($BARBAROUS_SHORE_SIN_DEADLY_PARADOX) ? 25 : 20
 			If $sprintMinEnergy < $sfUrgentReserve Then $sprintMinEnergy = $sfUrgentReserve
 		EndIf
-		Local $hasDwarven = GetEffect($ID_DWARVEN_STABILITY) <> Null
+		$hasDwarven = GetEffect($ID_DWARVEN_STABILITY) <> Null
 		Local $dashAfterDarkEscapeMs = $BARBAROUS_SHORE_SIN_DASH_AFTER_DARK_ESCAPE_MS
 		If $hasSf And $sfRemaining > $BARBAROUS_SHORE_SIN_SF_RECAST_BUFFER_MS And $energyNow >= 35 Then
 			$dashAfterDarkEscapeMs = $BARBAROUS_SHORE_SIN_DASH_AFTER_DARK_ESCAPE_FAST_MS
 		EndIf
-		If Not $sprintCastThisTick And $hasSf And $hasDwarven And $energyNow >= $sprintMinEnergy And IsPlayerMoving() Then
+		; Hard guard: do not cast sprint in the SF recast window, and never in the same tick where 3 was just refreshed.
+		Local $canCastSprint = Not $sprintCastThisTick And $hasSf And $hasDwarven And Not $justReappliedDwarven _
+			And $sfRemaining > $BARBAROUS_SHORE_SIN_SF_PRECAST_WINDOW_MS And $energyNow >= $sprintMinEnergy And IsPlayerMoving()
+		If Not $canCastSprint Then
+			If $lastSprintBlockedLog == 0 Or TimerDiff($lastSprintBlockedLog) >= $BARBAROUS_SHORE_SIN_SPRINT_BLOCK_LOG_INTERVAL_MS Then
+				Local $sprintBlockReason = ''
+				If $sprintCastThisTick Then
+					$sprintBlockReason = 'casted_other'
+				ElseIf Not $hasSf Then
+					$sprintBlockReason = 'no_sf'
+				ElseIf Not $hasDwarven Then
+					$sprintBlockReason = 'no_dwarven'
+				ElseIf $justReappliedDwarven Then
+					$sprintBlockReason = 'fresh_dwarven'
+				ElseIf $sfRemaining <= $BARBAROUS_SHORE_SIN_SF_PRECAST_WINDOW_MS Then
+					$sprintBlockReason = 'sf_recast_window'
+				ElseIf $energyNow < $sprintMinEnergy Then
+					$sprintBlockReason = 'energy<' & $sprintMinEnergy
+				ElseIf Not IsPlayerMoving() Then
+					$sprintBlockReason = 'not_moving'
+				Else
+					$sprintBlockReason = 'other'
+				EndIf
+				BarbarousShoreSinLogSF('sprint_blocked', $sfRemaining, $energyNow, 'ctx=move;reason=' & $sprintBlockReason)
+				$lastSprintBlockedLog = TimerInit()
+			EndIf
+		EndIf
+		If $canCastSprint Then
 			If IsRecharged($BARBAROUS_SHORE_SIN_DARK_ESCAPE) And ($lastDashUse == 0 Or TimerDiff($lastDashUse) >= $BARBAROUS_SHORE_SIN_DARK_ESCAPE_AFTER_DASH_MS) Then
 				UseSkillEx($BARBAROUS_SHORE_SIN_DARK_ESCAPE)
 				$lastDarkEscapeUse = TimerInit()
@@ -997,21 +1160,24 @@ Func AssassinRunBarbarousShore($x, $y)
 			EndIf
 		EndIf
 
-		If $hasSf And $energyNow >= $BARBAROUS_SHORE_SIN_UTILITY_MIN_ENERGY And IsRecharged($BARBAROUS_SHORE_SIN_I_AM_UNSTOPPABLE) And GetEffect($ID_CRIPPLED) <> Null Then
-			UseSkillEx($BARBAROUS_SHORE_SIN_I_AM_UNSTOPPABLE)
-			$energyNow = GetEnergy()
-		EndIf
-
-		If $hasSf And GetHealth() < 100 And $energyNow >= $BARBAROUS_SHORE_SIN_UTILITY_MIN_ENERGY And IsRecharged($BARBAROUS_SHORE_SIN_DEATHS_CHARGE) Then
-			Local $target = GetTargetForDeathsChargeBarbarousShoreSin($x, $y, 700)
-			If $target <> Null Then
-				UseSkillEx($BARBAROUS_SHORE_SIN_DEATHS_CHARGE, $target)
+		If $hasSf And $sfRemaining > $BARBAROUS_SHORE_SIN_SF_PRECAST_WINDOW_MS Then
+			Local $hp = GetHealth()
+			If $hp <= $BARBAROUS_SHORE_SIN_LOW_HP_HOS_THRESHOLD And IsRecharged($BARBAROUS_SHORE_SIN_HEART_OF_SHADOW) And $energyNow >= 5 Then
+				Local $npc = GetNPCInTheBackBarbarousShoreSin($x, $y)
+				If $npc == Null Then $npc = $me
+				UseSkillEx($BARBAROUS_SHORE_SIN_HEART_OF_SHADOW, $npc)
 				$energyNow = GetEnergy()
+			ElseIf $hp <= $BARBAROUS_SHORE_SIN_LOW_HP_DC_THRESHOLD And IsRecharged($BARBAROUS_SHORE_SIN_DEATHS_CHARGE) And $energyNow >= 5 Then
+				Local $target = GetTargetForDeathsChargeBarbarousShoreSin($x, $y, 700)
+				If $target <> Null Then
+					UseSkillEx($BARBAROUS_SHORE_SIN_DEATHS_CHARGE, $target)
+					$energyNow = GetEnergy()
+				EndIf
 			EndIf
 		EndIf
 
 		$hasSf = GetEffect($ID_SHADOW_FORM) <> Null
-		$sfRemaining = $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0
+		$sfRemaining = BarbarousShoreSinGetReliableSfRemaining()
 		$energyNow = GetEnergy()
 
 		$energy = GetEnergy()
@@ -1052,6 +1218,13 @@ Func AssassinRunBarbarousShore($x, $y)
 			Else
 				$noProgressRecoveryFails += 1
 				Warn('Barbarous unstuck: break bodyblock failed, reissuing target move')
+				If BarbarousShoreSinTryDeathsChargeFallback($x, $y, 'no_progress') Then
+					$blockedCounter = 0
+					$noProgressTicks = 2
+					$noProgressRecoveryFails = 0
+					Move($x, $y)
+					ContinueLoop
+				EndIf
 				If $noProgressRecoveryFails >= $BARBAROUS_SHORE_SIN_NO_PROGRESS_FAILS_BEFORE_BYPASS Then
 					Warn('Barbarous pathing: giving up direct lane after repeated no-progress recoveries; triggering side bypass')
 					Return $FAIL
@@ -1066,6 +1239,11 @@ Func AssassinRunBarbarousShore($x, $y)
 			If BarbarousShoreSinTryBreakBodyblock($x, $y) Then
 				$blockedCounter = 0
 				$noProgressTicks = 0
+				IsPlayerStuck(Default, Default, True)
+				Move($x, $y)
+			ElseIf BarbarousShoreSinTryDeathsChargeFallback($x, $y, 'stuck_check') Then
+				$blockedCounter = 0
+				$noProgressTicks = 2
 				IsPlayerStuck(Default, Default, True)
 				Move($x, $y)
 			EndIf
@@ -1096,8 +1274,7 @@ Func AssassinRunBarbarousShore($x, $y)
 
 		RandomSleep(250)
 		$me = GetMyAgent()
-		$hasSf = GetEffect($ID_SHADOW_FORM) <> Null
-		BarbarousShoreSinTrackSFState($hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0, GetEnergy(), 'move_post')
+		BarbarousShoreSinTrackSFState(BarbarousShoreSinGetReliableSfRemaining(), GetEnergy(), 'move_post')
 		If IsPlayerDead() Then Return $FAIL
 	WEnd
 	$me = GetMyAgent()
@@ -1126,13 +1303,7 @@ Func BarbarousShoreSinTryBreakBodyblock($targetX, $targetY)
 		$energy = GetEnergy()
 	EndIf
 
-	If IsRecharged($BARBAROUS_SHORE_SIN_DEATHS_CHARGE) And $energy >= 5 Then
-		Local $target = GetTargetForDeathsChargeBarbarousShoreSin($targetX, $targetY, 550)
-		If $target <> Null Then
-			UseSkillEx($BARBAROUS_SHORE_SIN_DEATHS_CHARGE, $target)
-			RandomSleep(90)
-		EndIf
-	EndIf
+	BarbarousShoreSinTryDeathsChargeFallback($targetX, $targetY, 'unstuck')
 
 	Local $myX = DllStructGetData($me, 'X')
 	Local $myY = DllStructGetData($me, 'Y')
@@ -1153,6 +1324,24 @@ Func BarbarousShoreSinTryBreakBodyblock($targetX, $targetY)
 	$me = GetMyAgent()
 	If $me == Null Then Return False
 	Return ComputeDistance($startX, $startY, DllStructGetData($me, 'X'), DllStructGetData($me, 'Y')) >= 120
+EndFunc
+
+
+Func BarbarousShoreSinTryDeathsChargeFallback($targetX, $targetY, $context)
+	If Not IsRecharged($BARBAROUS_SHORE_SIN_DEATHS_CHARGE) Or GetEnergy() < 5 Then Return False
+
+	Local $leadDistances[] = [900, 700, 550, 400, 250]
+	For $lead In $leadDistances
+		Local $target = GetTargetForDeathsChargeBarbarousShoreSin($targetX, $targetY, $lead)
+		If $target <> Null Then
+			UseSkillEx($BARBAROUS_SHORE_SIN_DEATHS_CHARGE, $target)
+			BarbarousShoreSinLogSF('unstuck_cast_dc', 0, GetEnergy(), 'ctx=' & $context & ';lead=' & $lead)
+			RandomSleep(90)
+			Return True
+		EndIf
+	Next
+
+	Return False
 EndFunc
 
 
@@ -1225,19 +1414,22 @@ Func DefendWhileOpeningChestsBarbarousShoreSin()
 	TickBarbarousShoreSinHeroSupportCasts()
 	Local $nearestFoe = GetNearestEnemyToAgent(GetMyAgent())
 	Local $hasSf = GetEffect($ID_SHADOW_FORM) <> Null
-	Local $sfRemaining = $hasSf ? GetEffectTimeRemaining($ID_SHADOW_FORM) : 0
+	Local $sfRemaining = BarbarousShoreSinGetReliableSfRemaining()
 	Local $energy = GetEnergy()
 	BarbarousShoreSinTrackSFState($sfRemaining, $energy, 'chest')
 
 	If Not $hasSf Then
 		BarbarousShoreSinTryCastSfChain('chest')
 		$hasSf = GetEffect($ID_SHADOW_FORM) <> Null
+		If Not $hasSf Then BarbarousShoreSinTryEmergencyNoSfSurvival('chest')
+		$sfRemaining = BarbarousShoreSinGetReliableSfRemaining()
 		$energy = GetEnergy()
 	EndIf
 
 	If $hasSf Then
 		BarbarousShoreSinTryPrecastSf('chest', $sfRemaining)
 		$hasSf = GetEffect($ID_SHADOW_FORM) <> Null
+		$sfRemaining = BarbarousShoreSinGetReliableSfRemaining()
 		$energy = GetEnergy()
 	EndIf
 
@@ -1246,5 +1438,38 @@ Func DefendWhileOpeningChestsBarbarousShoreSin()
 	If $hasSf And GetEnergy() >= $BARBAROUS_SHORE_SIN_UTILITY_MIN_ENERGY And IsRecharged($BARBAROUS_SHORE_SIN_I_AM_UNSTOPPABLE) And GetEffect($ID_CRIPPLED) <> Null Then UseSkillEx($BARBAROUS_SHORE_SIN_I_AM_UNSTOPPABLE)
 	If Not $hasSf And GetDistance(GetMyAgent(), $nearestFoe) < ($RANGE_SPELLCAST + 200) Then
 		BarbarousShoreSinTryCastSfChain('chest_enemy')
+		If GetEffect($ID_SHADOW_FORM) == Null Then BarbarousShoreSinTryEmergencyNoSfSurvival('chest_enemy')
+	EndIf
+EndFunc
+
+
+Func BarbarousShoreSinTryEmergencyNoSfSurvival($context, $targetX = 0, $targetY = 0)
+	Local Static $lastEmergencyTick = 0
+	If $lastEmergencyTick <> 0 And TimerDiff($lastEmergencyTick) < 450 Then Return
+	$lastEmergencyTick = TimerInit()
+
+	Local $energy = GetEnergy()
+	If IsRecharged($BARBAROUS_SHORE_SIN_I_AM_UNSTOPPABLE) And GetEffect($ID_CRIPPLED) <> Null And $energy >= $BARBAROUS_SHORE_SIN_IAU_MIN_ENERGY Then
+		UseSkillEx($BARBAROUS_SHORE_SIN_I_AM_UNSTOPPABLE)
+		BarbarousShoreSinLogSF('no_sf_cast_iau', 0, GetEnergy(), 'ctx=' & $context)
+	EndIf
+
+	$energy = GetEnergy()
+	If IsRecharged($BARBAROUS_SHORE_SIN_DARK_ESCAPE) And $energy >= 5 Then
+		UseSkillEx($BARBAROUS_SHORE_SIN_DARK_ESCAPE)
+		BarbarousShoreSinLogSF('no_sf_cast_dark_escape', 0, GetEnergy(), 'ctx=' & $context)
+	ElseIf IsRecharged($BARBAROUS_SHORE_SIN_DASH) And $energy >= 5 Then
+		UseSkillEx($BARBAROUS_SHORE_SIN_DASH)
+		BarbarousShoreSinLogSF('no_sf_cast_dash', 0, GetEnergy(), 'ctx=' & $context)
+	EndIf
+
+	If GetHealth() <= $BARBAROUS_SHORE_SIN_LOW_HP_HOS_THRESHOLD And IsRecharged($BARBAROUS_SHORE_SIN_HEART_OF_SHADOW) And GetEnergy() >= 5 Then
+		Local $target = GetMyAgent()
+		If $targetX <> 0 Or $targetY <> 0 Then
+			Local $npc = GetNPCInTheBackBarbarousShoreSin($targetX, $targetY)
+			If $npc <> Null Then $target = $npc
+		EndIf
+		UseSkillEx($BARBAROUS_SHORE_SIN_HEART_OF_SHADOW, $target)
+		BarbarousShoreSinLogSF('no_sf_cast_hos', 0, GetEnergy(), 'ctx=' & $context)
 	EndIf
 EndFunc

@@ -115,7 +115,7 @@ Func SetupPongmeiSinChestFarm()
 	SetupPlayerPongmeiSinChestFarm()
 	SetupTeamPongmeiSinChestFarm()
 
-	SwitchMode($ID_NORMAL_MODE)
+	SwitchToHardModeIfEnabled()
 	$pongmei_sin_farm_setup = True
 	Info('Preparations complete')
 	Return $SUCCESS
