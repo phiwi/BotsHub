@@ -32,6 +32,9 @@ Global Const $FEATHERS_SIN_DERV_WEAPON_SET = 4
 Global Const $FEATHERS_SIN_DERV_RECOVER_TARGET_ENERGY = 37
 Global Const $FEATHERS_SIN_DERV_RECOVER_TARGET_HP = 455
 Global Const $FEATHERS_SIN_DERV_RECOVER_TIMEOUT_MS = 30000
+Global Const $FEATHERS_SIN_DERV_ONSLAUGHT_UPKEEP_BUFFER_MS = 1200
+Global Const $FEATHERS_SIN_DERV_ONSLAUGHT_UPKEEP_TIMER_MS = 11000
+Global Const $FEATHERS_SIN_DERV_ONSLAUGHT_LOG_THROTTLE_MS = 3000
 Global Const $FEATHERS_SIN_DERV_UPKEEP_SOD_BUFFER_MS = 5000
 Global Const $FEATHERS_SIN_DERV_UPKEEP_WOP_BUFFER_MS = 5000
 Global Const $FEATHERS_SIN_DERV_UPKEEP_CA_BUFFER_MS = 3500
@@ -62,11 +65,21 @@ Global Const $FEATHERS_SIN_DERV_MODELID_SENSALI_CUTTER = 3999
 
 Global $feathers_sin_derv_farm_setup = False
 Global $feathers_sin_derv_upkeep_enabled = False
+Global $feathers_sin_derv_first_spot_sprint_enabled = False
+Global $feathers_sin_derv_first_spot_onslaught_casted_once = False
+Global $feathers_sin_derv_first_spot_onslaught_timer = TimerInit()
+Global $feathers_sin_derv_first_spot_onslaught_log_timer = TimerInit()
+Global $feathers_sin_derv_first_spot_sprint_logged_start = False
 
 
 Func FeathersFarmSinDerv()
 	If Not $feathers_sin_derv_farm_setup And SetupFeathersSinDervFarm() == $FAIL Then Return $PAUSE
 	$feathers_sin_derv_upkeep_enabled = False
+	$feathers_sin_derv_first_spot_sprint_enabled = True
+	$feathers_sin_derv_first_spot_onslaught_casted_once = False
+	$feathers_sin_derv_first_spot_onslaught_timer = TimerInit()
+	$feathers_sin_derv_first_spot_onslaught_log_timer = TimerInit()
+	$feathers_sin_derv_first_spot_sprint_logged_start = False
 
 	FeathersSinDervGoToJayaBluffs()
 	Local $result = FeathersSinDervFarmLoop()
@@ -132,9 +145,13 @@ Func FeathersSinDervFarmLoop()
 
 	Info('Running to Sensali.')
 	UseConsumable($ID_BIRTHDAY_CUPCAKE)
+	FeathersSinDervMaintainFirstSpotSprint('route_1')
 	MoveTo(9000, -12680)
+	FeathersSinDervMaintainFirstSpotSprint('route_2')
 	MoveTo(7588, -10609)
+	FeathersSinDervMaintainFirstSpotSprint('route_3')
 	MoveTo(2900, -9700)
+	FeathersSinDervMaintainFirstSpotSprint('route_4')
 	MoveTo(1540, -6995)
 	Info('Farming Sensali (Sin/Derv).')
 	If FeathersSinDervRunSpot(-472, -4342, False, 5 * 60 * 1000, False) == $FAIL Then Return $FAIL
@@ -210,6 +227,8 @@ Func FeathersSinDervMoveKill($x, $y, $waitForSettle = True, $timeout = 5 * 60 * 
 		EndIf
 		If IsPlayerDead() Then Return $FAIL
 
+		FeathersSinDervMaintainFirstSpotSprint('move_to_spot')
+
 		If $feathers_sin_derv_upkeep_enabled Then FeathersSinDervMaintainDefense()
 
 		$me = GetMyAgent()
@@ -254,23 +273,16 @@ Func FeathersSinDervKill($waitForSettle = True)
 	Local $stuckCount = 0
 
 	CheckAndSendStuckCommand()
-	If IsRecharged($FEATHERS_SIN_DERV_GRENTHS_FINGERS) Then
-		UseSkillEx($FEATHERS_SIN_DERV_GRENTHS_FINGERS)
-		$feathers_sin_derv_upkeep_enabled = True
-	EndIf
 
 	If $waitForSettle Then
 		If Not FeathersSinDervWaitForSettle() Then Return $FAIL
 	EndIf
 
 	CheckAndSendStuckCommand()
+	$feathers_sin_derv_upkeep_enabled = True
 	FeathersSinDervMaintainDefense(True)
 	Local $target = GetNearestEnemyToAgent(GetMyAgent())
 	ChangeWeaponSet($FEATHERS_SIN_DERV_WEAPON_SET)
-	If $target <> Null Then
-		ChangeTarget($target)
-		Attack($target)
-	EndIf
 
 	If IsRecharged($FEATHERS_SIN_DERV_ONSLAUGHT) Then UseSkillEx($FEATHERS_SIN_DERV_ONSLAUGHT)
 	If IsRecharged($FEATHERS_SIN_DERV_GRENTHS_AURA) Then UseSkillEx($FEATHERS_SIN_DERV_GRENTHS_AURA)
@@ -294,11 +306,7 @@ Func FeathersSinDervKill($waitForSettle = True)
 		EndIf
 		If IsPlayerDead() Then Return $FAIL
 
-		If $target == Null Or GetIsDead($target) Then $target = GetNearestEnemyToAgent(GetMyAgent())
-		If $target <> Null Then
-			ChangeTarget($target)
-			Attack($target)
-		EndIf
+		$target = GetNearestEnemyToAgent(GetMyAgent())
 		FeathersSinDervMaintainDefense()
 		If IsRecharged($FEATHERS_SIN_DERV_GRENTHS_AURA) Then UseSkillEx($FEATHERS_SIN_DERV_GRENTHS_AURA)
 		If IsRecharged($FEATHERS_SIN_DERV_GRENTHS_FINGERS) And CountFoesInRangeOfAgent(GetMyAgent(), 300, FeathersSinDervIsSensali) > 1 Then UseSkillEx($FEATHERS_SIN_DERV_GRENTHS_FINGERS)
@@ -315,8 +323,8 @@ Func FeathersSinDervKill($waitForSettle = True)
 			CheckAndSendStuckCommand()
 		EndIf
 
-		If $target <> Null Then Attack($target)
-		Sleep(100)
+		Sleep(250)
+		Attack($target)
 	WEnd
 
 	RandomSleep(500)
@@ -337,7 +345,6 @@ Func FeathersSinDervWaitForSettle($timeout = 10000)
 		If IsPlayerDead() Then Return False
 		If DllStructGetData($me, 'HealthPercent') < 0.7 Then Return True
 		FeathersSinDervMaintainDefense()
-		If IsRecharged($FEATHERS_SIN_DERV_GRENTHS_FINGERS) Then UseSkillEx($FEATHERS_SIN_DERV_GRENTHS_FINGERS)
 		Sleep(250)
 		$me = GetMyAgent()
 		$target = GetFurthestNPCInRangeOfCoords($ID_ALLEGIANCE_FOE, DllStructGetData($me, 'X'), DllStructGetData($me, 'Y'), $RANGE_EARSHOT)
@@ -350,7 +357,6 @@ Func FeathersSinDervWaitForSettle($timeout = 10000)
 		If IsPlayerDead() Then Return False
 		If DllStructGetData($me, 'HealthPercent') < 0.7 Then Return True
 		FeathersSinDervMaintainDefense()
-		If IsRecharged($FEATHERS_SIN_DERV_GRENTHS_FINGERS) Then UseSkillEx($FEATHERS_SIN_DERV_GRENTHS_FINGERS)
 		Sleep(250)
 		$me = GetMyAgent()
 		$target = GetFurthestNPCInRangeOfCoords($ID_ALLEGIANCE_FOE, DllStructGetData($me, 'X'), DllStructGetData($me, 'Y'), $RANGE_EARSHOT)
@@ -369,6 +375,7 @@ EndFunc
 
 Func FeathersSinDervMaintainDefense($forceShroud = False)
 	If Not $feathers_sin_derv_upkeep_enabled Then Return
+	$feathers_sin_derv_first_spot_sprint_enabled = False
 
 	Local $sodRemaining = FeathersSinDervGetBestEffectTimeRemaining($ID_SHROUD_OF_DISTRESS, $ID_SHROUD_OF_DISTRESS_PVP)
 	Local $wopRemaining = FeathersSinDervGetBestEffectTimeRemaining($ID_WAY_OF_PERFECTION)
@@ -384,6 +391,39 @@ Func FeathersSinDervMaintainDefense($forceShroud = False)
 
 	If $caRemaining <= $FEATHERS_SIN_DERV_UPKEEP_CA_BUFFER_MS Then
 		If IsRecharged($FEATHERS_SIN_DERV_CRITICAL_AGILITY) Then UseSkillEx($FEATHERS_SIN_DERV_CRITICAL_AGILITY)
+	EndIf
+EndFunc
+
+
+Func FeathersSinDervMaintainFirstSpotSprint($context = '')
+	If Not $feathers_sin_derv_first_spot_sprint_enabled Then Return
+
+	If Not $feathers_sin_derv_first_spot_sprint_logged_start Then
+		Info('First-spot sprint active: maintaining Onslaught until upkeep starts')
+		$feathers_sin_derv_first_spot_sprint_logged_start = True
+	EndIf
+
+	Local $onslaughtRemaining = FeathersSinDervGetBestEffectTimeRemaining($ID_ONSLAUGHT, $ID_ONSLAUGHT_PVP)
+	Local $needOnslaught = False
+	If Not $feathers_sin_derv_first_spot_onslaught_casted_once Then
+		$needOnslaught = True
+	ElseIf $onslaughtRemaining <= $FEATHERS_SIN_DERV_ONSLAUGHT_UPKEEP_BUFFER_MS Then
+		$needOnslaught = True
+	ElseIf TimerDiff($feathers_sin_derv_first_spot_onslaught_timer) >= $FEATHERS_SIN_DERV_ONSLAUGHT_UPKEEP_TIMER_MS Then
+		$needOnslaught = True
+	EndIf
+
+	If Not $needOnslaught Then Return
+
+	If IsRecharged($FEATHERS_SIN_DERV_ONSLAUGHT) Then
+		Info('First-spot sprint: casting Onslaught' & ($context == '' ? '' : ' (' & $context & ')'))
+		UseSkillEx($FEATHERS_SIN_DERV_ONSLAUGHT)
+		$feathers_sin_derv_first_spot_onslaught_casted_once = True
+		$feathers_sin_derv_first_spot_onslaught_timer = TimerInit()
+		$feathers_sin_derv_first_spot_onslaught_log_timer = TimerInit()
+	ElseIf TimerDiff($feathers_sin_derv_first_spot_onslaught_log_timer) >= $FEATHERS_SIN_DERV_ONSLAUGHT_LOG_THROTTLE_MS Then
+		Info('First-spot sprint: Onslaught not recharged yet' & ($context == '' ? '' : ' (' & $context & ')'))
+		$feathers_sin_derv_first_spot_onslaught_log_timer = TimerInit()
 	EndIf
 EndFunc
 
