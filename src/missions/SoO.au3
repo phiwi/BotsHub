@@ -47,8 +47,14 @@ Global Const $SOO_RUN_TO_DUNGEON_TIMEOUT_MS = 15 * 60 * 1000
 Global Const $SOO_FLOOR3_SECOND_LOOP_TIMEOUT_MS = 25 * 60 * 1000
 Global Const $SOO_CONSECUTIVE_FAIL_GUARD_THRESHOLD = 3
 Global Const $SOO_CONSECUTIVE_FAIL_GUARD_COOLDOWN_MS = 45000
+Global Const $SOO_EXPLORE_ESCAPE_ATTEMPTS = 2
+Global Const $SOO_EXPLORE_ESCAPE_WAIT_MS = 3500
+Global Const $SOO_TEMPLATE_LOAD_RETRIES = 3
 
-Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQN2OGRA'
+;~ Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQN2OGRA'
+;~ Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArAZAEBA' Ineptitude
+;~ Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQP1KARA' ; Frust + Clums
+Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJgTQGARA'
 Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; PsychicInst
 ;~ Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKzJY6lDupDBTXG4iB' ; Esurge
 Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB'
@@ -62,25 +68,44 @@ Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
 Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OAOiAyk5gNtePuwJ00ZaNbJA'
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1Do2dNgA' ; Ether Renewal Prot
 Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
+Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Burning Variant
 
-Global Const $SOO_FLEX3_HERO_ID = $ID_MASTER_OF_WHISPERS
-Global Const $SOO_FLEX3_HERO_NAME = 'Master of Whispers'
-Global Const $SOO_FLEX3_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
-;~ Global Const $SOO_FLEX3_HERO_ID = $ID_DUNKORO
-;~ Global Const $SOO_FLEX3_HERO_NAME = 'Dunkoro'
-;~ Global Const $SOO_FLEX3_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
-Global Const $SOO_FLEX_HERO_ID = $ID_ZHED_SHADOWHOOF
-Global Const $SOO_FLEX_HERO_NAME = 'Zhed Shadowhoof'
-Global Const $SOO_FLEX_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
-;~ Global Const $SOO_FLEX_HERO_ID = $ID_LIVIA
-;~ Global Const $SOO_FLEX_HERO_NAME = 'Livia'
-;~ Global Const $SOO_FLEX_HERO_TEMPLATE = $SOO_HERO_LIVIA_TEMPLATE
-Global Const $SOO_FLEX2_HERO_ID = $ID_VEKK
-Global Const $SOO_FLEX2_HERO_NAME = 'Vekk'
-Global Const $SOO_FLEX2_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
-;~ Global Const $SOO_FLEX2_HERO_ID = $ID_XANDRA
-;~ Global Const $SOO_FLEX2_HERO_NAME = 'Xandra'
-;~ Global Const $SOO_FLEX2_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
+Global Const $SOO_SLOT1_HERO_ID = $ID_GWEN
+Global Const $SOO_SLOT1_HERO_NAME = 'Gwen'
+Global Const $SOO_SLOT1_HERO_TEMPLATE = $SOO_HERO_GWEN_TEMPLATE
+
+Global Const $SOO_SLOT2_HERO_ID = $ID_NORGU
+Global Const $SOO_SLOT2_HERO_NAME = 'Norgu'
+Global Const $SOO_SLOT2_HERO_TEMPLATE = $SOO_HERO_NORGU_TEMPLATE
+
+Global Const $SOO_SLOT3_HERO_ID = $ID_RAZAH
+Global Const $SOO_SLOT3_HERO_NAME = 'Razah'
+Global Const $SOO_SLOT3_HERO_TEMPLATE = $SOO_HERO_RAZAH_TEMPLATE
+
+Global Const $SOO_SLOT4_HERO_ID = $ID_MASTER_OF_WHISPERS
+Global Const $SOO_SLOT4_HERO_NAME = 'Master of Whispers'
+Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
+;~ Global Const $SOO_SLOT4_HERO_ID = $ID_DUNKORO
+;~ Global Const $SOO_SLOT4_HERO_NAME = 'Dunkoro'
+;~ Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
+
+Global Const $SOO_SLOT5_HERO_ID = $ID_OLIAS
+Global Const $SOO_SLOT5_HERO_NAME = 'Olias'
+Global Const $SOO_SLOT5_HERO_TEMPLATE = $SOO_HERO_OLIAS_TEMPLATE
+
+Global Const $SOO_SLOT6_HERO_ID = $ID_ACOLYTE_SOUSUKE
+Global Const $SOO_SLOT6_HERO_NAME = 'Acolyte Sousuke'
+Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_SOUSUKE_TEMPLATE
+;~ Global Const $SOO_SLOT6_HERO_ID = $ID_ZHED_SHADOWHOOF
+;~ Global Const $SOO_SLOT6_HERO_NAME = 'Zhed Shadowhoof'
+;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
+
+Global Const $SOO_SLOT7_HERO_ID = $ID_VEKK
+Global Const $SOO_SLOT7_HERO_NAME = 'Vekk'
+Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
+;~ Global Const $SOO_SLOT7_HERO_ID = $ID_XANDRA
+;~ Global Const $SOO_SLOT7_HERO_NAME = 'Xandra'
+;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
 
 Global $soo_farm_setup = False
 Global $soo_consecutive_run_failures = 0
@@ -91,8 +116,10 @@ Global $soo_skip_next_inventory_management = False
 Func SoOFarm()
 	Local $result = $FAIL
 	If Not $soo_farm_setup Then
-		If SetupSoOFarm() == $FAIL Then
+		Local $setupResult = SetupSoOFarm()
+		If $setupResult <> $SUCCESS Then
 			SoOHandleRunFailure('setup failed')
+			If $setupResult == $PAUSE Then Return $PAUSE
 			Return $FAIL
 		EndIf
 	EndIf
@@ -128,6 +155,13 @@ Func SoOHandleRunFailure($reason)
 	$soo_skip_next_inventory_management = True
 	ResetFailuresCounter()
 
+	Local $escapeResult = SoOEnsureOutpostContext($ID_VLOXS_FALLS, 'SoO crash guard')
+	If $escapeResult <> $SUCCESS Then
+		$soo_consecutive_run_failures = 0
+		Warn('SoO crash guard: recovery aborted due to explorable-map lock')
+		Return
+	EndIf
+
 	If TravelToOutpost($ID_EYE_OF_THE_NORTH, $district_name) == $FAIL Then
 		Warn('SoO crash guard: failed to travel to Eye of The North during recovery')
 	Else
@@ -149,6 +183,8 @@ EndFunc
 ;~ SoO farm setup
 Func SetupSoOFarm()
 	Info('Setting up farm')
+	Local $escapeResult = SoOEnsureOutpostContext($ID_VLOXS_FALLS, 'SoO setup')
+	If $escapeResult <> $SUCCESS Then Return $escapeResult
 	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
 	If Not SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250) Then
 		Warn('SoO setup: outpost stabilization timed out before team setup')
@@ -182,6 +218,29 @@ Func SetupSoOFarm()
 EndFunc
 
 
+Func SoOEnsureOutpostContext($preferredOutpostID, $contextLabel = 'SoO')
+	If GetMapType() == $ID_OUTPOST Then Return $SUCCESS
+
+	Local $currentMapID = GetMapID()
+	Warn($contextLabel & ': player not in outpost (map=' & $currentMapID & '), trying resign/return escape')
+
+	For $attempt = 1 To $SOO_EXPLORE_ESCAPE_ATTEMPTS
+		Resign()
+		Sleep($SOO_EXPLORE_ESCAPE_WAIT_MS)
+		ReturnToOutpost()
+		Sleep(1000)
+
+		If WaitMapLoading($preferredOutpostID, 10000, 1000) Then Return $SUCCESS
+		If GetMapType() == $ID_OUTPOST Then Return $SUCCESS
+
+		Warn($contextLabel & ': resign/return escape attempt ' & $attempt & '/' & $SOO_EXPLORE_ESCAPE_ATTEMPTS & ' failed (map=' & GetMapID() & ')')
+	Next
+
+	Error($contextLabel & ': could not recover outpost context from map=' & GetMapID() & '; pausing for manual intervention')
+	Return $PAUSE
+EndFunc
+
+
 Func SoORecoverAfterTeamSetupFailure()
 	Warn('SoO setup recovery: cooling down before next attempt')
 	Sleep($SOO_SETUP_RECOVERY_COOLDOWN_MS)
@@ -196,24 +255,24 @@ EndFunc
 
 
 Func SetupSoOFlexibleTeam()
-	Info('SoO team: Gwen, Norgu, Razah, ' & $SOO_FLEX3_HERO_NAME & ', Olias, ' & $SOO_FLEX_HERO_NAME & ', ' & $SOO_FLEX2_HERO_NAME)
+	Info('SoO team: ' & $SOO_SLOT1_HERO_NAME & ', ' & $SOO_SLOT2_HERO_NAME & ', ' & $SOO_SLOT3_HERO_NAME & ', ' & $SOO_SLOT4_HERO_NAME & ', ' & $SOO_SLOT5_HERO_NAME & ', ' & $SOO_SLOT6_HERO_NAME & ', ' & $SOO_SLOT7_HERO_NAME)
 	Local $heroIDs[7] = [ _
-		$ID_GWEN, _
-		$ID_NORGU, _
-		$ID_RAZAH, _
-		$SOO_FLEX3_HERO_ID, _
-		$ID_OLIAS, _
-		$SOO_FLEX_HERO_ID, _
-		$SOO_FLEX2_HERO_ID _
+		$SOO_SLOT1_HERO_ID, _
+		$SOO_SLOT2_HERO_ID, _
+		$SOO_SLOT3_HERO_ID, _
+		$SOO_SLOT4_HERO_ID, _
+		$SOO_SLOT5_HERO_ID, _
+		$SOO_SLOT6_HERO_ID, _
+		$SOO_SLOT7_HERO_ID _
 	]
 	Local $heroNames[7] = [ _
-		'Gwen', _
-		'Norgu', _
-		'Razah', _
-		$SOO_FLEX3_HERO_NAME, _
-		'Olias', _
-		$SOO_FLEX_HERO_NAME, _
-		$SOO_FLEX2_HERO_NAME _
+		$SOO_SLOT1_HERO_NAME, _
+		$SOO_SLOT2_HERO_NAME, _
+		$SOO_SLOT3_HERO_NAME, _
+		$SOO_SLOT4_HERO_NAME, _
+		$SOO_SLOT5_HERO_NAME, _
+		$SOO_SLOT6_HERO_NAME, _
+		$SOO_SLOT7_HERO_NAME _
 	]
 
 	If SoOAssembleFixedTeamWithRecovery($heroIDs, $heroNames, 'SoO') == $FAIL Then Return $FAIL
@@ -227,13 +286,13 @@ Func SetupSoOFlexibleTeam()
 		Return $FAIL
 	EndIf
 
-	If SoOLoadHeroTemplateByID($ID_GWEN, 'Gwen', $SOO_HERO_GWEN_TEMPLATE) == $FAIL Then Return $FAIL
-	If SoOLoadHeroTemplateByID($ID_NORGU, 'Norgu', $SOO_HERO_NORGU_TEMPLATE) == $FAIL Then Return $FAIL
-	If SoOLoadHeroTemplateByID($ID_RAZAH, 'Razah', $SOO_HERO_RAZAH_TEMPLATE) == $FAIL Then Return $FAIL
-	If SoOLoadHeroTemplateByID($SOO_FLEX3_HERO_ID, $SOO_FLEX3_HERO_NAME, $SOO_FLEX3_HERO_TEMPLATE) == $FAIL Then Return $FAIL
-	If SoOLoadHeroTemplateByID($ID_OLIAS, 'Olias', $SOO_HERO_OLIAS_TEMPLATE) == $FAIL Then Return $FAIL
-	If SoOLoadHeroTemplateByID($SOO_FLEX_HERO_ID, $SOO_FLEX_HERO_NAME, $SOO_FLEX_HERO_TEMPLATE) == $FAIL Then Return $FAIL
-	If SoOLoadHeroTemplateByID($SOO_FLEX2_HERO_ID, $SOO_FLEX2_HERO_NAME, $SOO_FLEX2_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($SOO_SLOT1_HERO_ID, $SOO_SLOT1_HERO_NAME, $SOO_SLOT1_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($SOO_SLOT2_HERO_ID, $SOO_SLOT2_HERO_NAME, $SOO_SLOT2_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($SOO_SLOT3_HERO_ID, $SOO_SLOT3_HERO_NAME, $SOO_SLOT3_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($SOO_SLOT4_HERO_ID, $SOO_SLOT4_HERO_NAME, $SOO_SLOT4_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($SOO_SLOT5_HERO_ID, $SOO_SLOT5_HERO_NAME, $SOO_SLOT5_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($SOO_SLOT6_HERO_ID, $SOO_SLOT6_HERO_NAME, $SOO_SLOT6_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+	If SoOLoadHeroTemplateByID($SOO_SLOT7_HERO_ID, $SOO_SLOT7_HERO_NAME, $SOO_SLOT7_HERO_TEMPLATE) == $FAIL Then Return $FAIL
 	RandomSleep(250)
 
 	ClearPartyCommands()
@@ -243,21 +302,54 @@ EndFunc
 
 
 Func SoOLoadHeroTemplateByID($heroID, $heroName, $templateCode)
-	Local $heroIndex = GetHeroNumberByHeroID($heroID)
-	If $heroIndex == Null Then
-		Warn('SoO team setup aborted: hero index not found for ' & $heroName)
-		Return $FAIL
-	EndIf
-	Local $heroPrimaryProfession = GetHeroProfession($heroIndex)
 	Local $templatePrimaryProfession = SoOGetTemplatePrimaryProfession($templateCode)
-	If $templatePrimaryProfession > 0 And $templatePrimaryProfession <> $heroPrimaryProfession Then
-		Warn('SoO template mismatch before load: hero=' & $heroName & ' (heroID=' & $heroID & ', heroIndex=' & $heroIndex & ', heroProf=' & $heroPrimaryProfession & ', templateProf=' & $templatePrimaryProfession & ')')
-	ElseIf $templatePrimaryProfession <= 0 Then
-		Warn('SoO template diagnostics: could not parse template profession for ' & $heroName & ' (heroID=' & $heroID & ', heroIndex=' & $heroIndex & ')')
+	If $templatePrimaryProfession <= 0 Then
+		Warn('SoO template diagnostics: could not parse template profession for ' & $heroName & ' (heroID=' & $heroID & ')')
 	EndIf
-	LoadSkillTemplate($templateCode, $heroIndex)
-	RandomSleep(150)
-	Return $SUCCESS
+
+	For $attempt = 1 To $SOO_TEMPLATE_LOAD_RETRIES
+		Local $heroIndex = GetHeroNumberByHeroID($heroID)
+		If $heroIndex == Null Then
+			Warn('SoO team setup: hero index not found for ' & $heroName & ' on template attempt ' & $attempt & '/' & $SOO_TEMPLATE_LOAD_RETRIES)
+			SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 1200, 120)
+			ContinueLoop
+		EndIf
+
+		Local $heroPrimaryProfession = GetHeroProfession($heroIndex)
+		If $templatePrimaryProfession > 0 And $templatePrimaryProfession <> $heroPrimaryProfession Then
+			Warn('SoO template mismatch before load: hero=' & $heroName & ' (heroID=' & $heroID & ', heroIndex=' & $heroIndex & ', heroProf=' & $heroPrimaryProfession & ', templateProf=' & $templatePrimaryProfession & ')')
+			SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 1200, 120)
+			ContinueLoop
+		EndIf
+
+		LoadSkillTemplate($templateCode, $heroIndex)
+		RandomSleep(220)
+
+		If Not SoORequiresStrictTemplateVerify($heroID) Then Return $SUCCESS
+		If SoOHeroHasAssignedAttributes($heroIndex) Then Return $SUCCESS
+
+		Warn('SoO template strict check failed for ' & $heroName & ' on attempt ' & $attempt & '/' & $SOO_TEMPLATE_LOAD_RETRIES & ' (heroIndex=' & $heroIndex & ', map=' & GetMapID() & ')')
+		SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 1400, 120)
+	Next
+
+	Warn('SoO team setup aborted: could not apply template for ' & $heroName & ' after retries')
+	Return $FAIL
+EndFunc
+
+
+Func SoORequiresStrictTemplateVerify($heroID)
+	Return $heroID == $ID_VEKK
+EndFunc
+
+
+Func SoOHeroHasAssignedAttributes($heroIndex)
+	Local $heroProfession = GetHeroProfession($heroIndex)
+	If $heroProfession <= 0 Then Return False
+
+	Local $primaryAttribute = GetProfPrimaryAttribute($heroProfession)
+	If $primaryAttribute <= 0 Then Return False
+
+	Return GetAttributeByID($primaryAttribute, False, $heroIndex) > 0
 EndFunc
 
 
@@ -866,8 +958,13 @@ Func ClearSoOFloor3()
 		MoveAggroAndKillInRange(1100, 7100, '12', $SOO_AGGRO_RANGE)
 	WEnd
 
+	Local $floor3SecondLoopTimer = TimerInit()
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -8650, 9200, 1250)
-		If CheckStuck('SoO Floor 3 - Second loop', $SOO_FLOOR3_SECOND_LOOP_TIMEOUT_MS) == $FAIL Then Return $FAIL
+		If CheckStuck('SoO Floor 3 - Second loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
+		If TimerDiff($floor3SecondLoopTimer) > $SOO_FLOOR3_SECOND_LOOP_TIMEOUT_MS Then
+			Error('Bot appears to be stuck at: SoO Floor 3 - Second loop. Restarting run.')
+			Return $FAIL
+		EndIf
 		WaitUntilPartyAlive()
 		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then UseConset()
 		UseMoraleConsumableIfNeeded()
