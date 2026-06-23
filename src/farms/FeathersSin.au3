@@ -25,8 +25,11 @@
 Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
-Global Const $AE_FEATHERS_SIN_SKILLBAR = 'OwZTgGF/5R6rzOgIDfxuInNMAA'
+Global Const $AE_FEATHERS_SIN_SKILLBAR = 'OwZTgGF/5R6rzOgIDfRObXMMAA'
 Global Const $FEATHERS_SIN_FARM_DURATION = (8 * 60 + 20) * 1000
+Global Const $FEATHERS_SIN_WEAPON_SET = 3
+Global Const $FEATHERS_SIN_MORGAHN_HERO_ID = $ID_GENERAL_MORGAHN
+Global Const $FEATHERS_SIN_MORGAHN_TEMPLATE = 'OQijEymM6M84dsJ+GTvrx+4hNA'
 
 Global Const $FEATHERS_SIN_GLYPH_SWIFTNESS = 1
 Global Const $FEATHERS_SIN_SHADOW_FORM = 2
@@ -36,8 +39,8 @@ Global Const $FEATHERS_SIN_MARK = 5
 Global Const $FEATHERS_SIN_METEOR = 6
 Global Const $FEATHERS_SIN_BED_OF_COALS = 7
 Global Const $FEATHERS_SIN_LAVA_FONT = 8
-Global Const $FEATHERS_SIN_MORGAHN_ENDURING_HARMONY = 5
-Global Const $FEATHERS_SIN_MORGAHN_MAKE_HASTE = 7
+Global Const $FEATHERS_SIN_MORGAHN_ENDURING_HARMONY = 3
+Global Const $FEATHERS_SIN_MORGAHN_MAKE_HASTE = 4
 
 Global Const $FEATHERS_SIN_MODELID_SENSALI_CLAW = 3995
 Global Const $FEATHERS_SIN_MODELID_SENSALI_DARKFEATHER = 3997
@@ -88,7 +91,7 @@ Func SetupFeathersSinFarm()
 	If TravelToOutpost($ID_SEITUNG_HARBOR, $district_name) == $FAIL Then Return $FAIL
 	SwitchMode($ID_NORMAL_MODE)
 	If SetupPlayerFeathersSinFarm() == $FAIL Then Return $FAIL
-	LeaveParty()
+	If SetupTeamFeathersSinFarm() == $FAIL Then Return $FAIL
 	$feathers_sin_farm_setup = True
 	Info('Preparations complete')
 	Return $SUCCESS
@@ -101,10 +104,35 @@ Func SetupPlayerFeathersSinFarm()
 		Warn('Should run this farm as assassin')
 		Return $FAIL
 	EndIf
-	; Build is configured manually by user; keep auto-load disabled.
-	; LoadSkillTemplate($AE_FEATHERS_SIN_SKILLBAR)
+	LoadSkillTemplate($AE_FEATHERS_SIN_SKILLBAR)
 	RandomSleep(250)
+	ChangeWeaponSet($FEATHERS_SIN_WEAPON_SET)
+	RandomSleep(120)
 	Return $SUCCESS
+EndFunc
+
+
+Func SetupTeamFeathersSinFarm()
+	Info('Setting up Morgahn support hero')
+	LeaveParty()
+	RandomSleep(200)
+
+	For $attempt = 1 To 5
+		Local $morgahnIndex = GetHeroNumberByHeroID($FEATHERS_SIN_MORGAHN_HERO_ID)
+		If $morgahnIndex == Null Then
+			AddHero($FEATHERS_SIN_MORGAHN_HERO_ID)
+			RandomSleep(220)
+			ContinueLoop
+		EndIf
+
+		LoadSkillTemplate($FEATHERS_SIN_MORGAHN_TEMPLATE, $morgahnIndex)
+		RandomSleep(220)
+		$feathers_sin_morgahn_index_cache = $morgahnIndex
+		Return $SUCCESS
+	Next
+
+	Warn('Could not add/configure Morgahn support hero')
+	Return $FAIL
 EndFunc
 
 
