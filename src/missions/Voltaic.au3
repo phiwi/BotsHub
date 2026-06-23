@@ -40,42 +40,66 @@ Global Const $VOLTAIC_TEAM_ASSEMBLY_PASSES = 4
 Global Const $VOLTAIC_TEAM_MISSING_FALLBACK_PASSES = 3
 Global Const $VOLTAIC_TEAM_OUTPOST_RETRIES = 4
 
-Global Const $VOLTAIC_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQN2OGRA'
-Global Const $VOLTAIC_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB'
-Global Const $VOLTAIC_HERO_RAZAH_TEMPLATE = 'OQJUAWxOQ8M0gcw0z0NCxpZgrDA'
-Global Const $VOLTAIC_HERO_MOW_TEMPLATE = 'OANDYazPSxVNgeETffEaRVV1NA' ; Healer's Boon
+;~ Global Const $VOLTAIC_HERO_GWEN_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdjQcaG4iB' ; ESurge
+Global Const $VOLTAIC_HERO_GWEN_TEMPLATE = 'OQhjAwBc4QkA5ZIg3ATAcQFVXMA' ; Inept + Frag + Epi
+;~ Global Const $VOLTAIC_HERO_NORGU_TEMPLATE = 'OQJUAWBPMsMngcw0z0VEwpZgrDA' ; ESurge + FS
+Global Const $VOLTAIC_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; Psychic Inst
+;~ Global Const $VOLTAIC_HERO_RAZAH_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdjQcaG4iB' ; ESurge
+Global Const $VOLTAIC_HERO_RAZAH_TEMPLATE = 'OQJUAWxOQ8M0gcw0z0NCxpZgrDA' ; Panic + FZ
+Global Const $VOLTAIC_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
 ;~ Global Const $VOLTAIC_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
-Global Const $VOLTAIC_HERO_DUNKORO_TEMPLATE = 'OwQTcUHDxxnV9xrXEqvLxOI0AA'
+Global Const $VOLTAIC_HERO_DUNKORO_TEMPLATE = 'OwAS4YIPGEqvLx6nPwrVfAC'
 Global Const $VOLTAIC_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA'
 Global Const $VOLTAIC_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
-Global Const $VOLTAIC_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDeDLgKNhD1Y7YA'
+Global Const $VOLTAIC_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
 Global Const $VOLTAIC_HERO_XANDRA_TEMPLATE = 'OAOiAyk5gNtePuwJ00ZaNbJA'
-Global Const $VOLTAIC_HERO_VEKK_TEMPLATE = 'OgNDwcPPP1CSSARLWPga31VC'
+Global Const $VOLTAIC_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
+Global Const $VOLTAIC_HERO_SOUSUKE_TEMPLATE = 'OgBVgw0pwFy0Rs+nxqqj1RPMHOWB' ; Master of Magic
+;~ Global Const $VOLTAIC_HERO_SOUSUKE_TEMPLATE = 'OgBTk0FzQaaYd4wBVwRMdgWgdA' ; Overcast Water Supp
+;~ Global Const $VOLTAIC_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
 
-Global Const $VOLTAIC_FLEX3_HERO_ID = $ID_MASTER_OF_WHISPERS
-Global Const $VOLTAIC_FLEX3_HERO_NAME = 'Master of Whispers'
-Global Const $VOLTAIC_FLEX3_HERO_TEMPLATE = $VOLTAIC_HERO_MOW_TEMPLATE
-;~ Global Const $VOLTAIC_FLEX3_HERO_ID = $ID_DUNKORO
-;~ Global Const $VOLTAIC_FLEX3_HERO_NAME = 'Dunkoro'
-;~ Global Const $VOLTAIC_FLEX3_HERO_TEMPLATE = $VOLTAIC_HERO_DUNKORO_TEMPLATE
-Global Const $VOLTAIC_FLEX_HERO_ID = $ID_ZHED_SHADOWHOOF
-Global Const $VOLTAIC_FLEX_HERO_NAME = 'Zhed Shadowhoof'
-Global Const $VOLTAIC_FLEX_HERO_TEMPLATE = $VOLTAIC_HERO_ZHED_TEMPLATE
-;~ Global Const $VOLTAIC_FLEX_HERO_ID = $ID_LIVIA
-;~ Global Const $VOLTAIC_FLEX_HERO_NAME = 'Livia'
-;~ Global Const $VOLTAIC_FLEX_HERO_TEMPLATE = $VOLTAIC_HERO_LIVIA_TEMPLATE
-Global Const $VOLTAIC_FLEX2_HERO_ID = $ID_VEKK
-Global Const $VOLTAIC_FLEX2_HERO_NAME = 'Vekk'
-Global Const $VOLTAIC_FLEX2_HERO_TEMPLATE = $VOLTAIC_HERO_VEKK_TEMPLATE
-;~ Global Const $VOLTAIC_FLEX2_HERO_ID = $ID_XANDRA
-;~ Global Const $VOLTAIC_FLEX2_HERO_NAME = 'Xandra'
-;~ Global Const $VOLTAIC_FLEX2_HERO_TEMPLATE = $VOLTAIC_HERO_XANDRA_TEMPLATE
+Global Const $VOLTAIC_SLOT1_HERO_ID = $ID_GWEN
+Global Const $VOLTAIC_SLOT1_HERO_NAME = 'Gwen'
+Global Const $VOLTAIC_SLOT1_HERO_TEMPLATE = $VOLTAIC_HERO_GWEN_TEMPLATE
+;~ Global Const $VOLTAIC_SLOT1_HERO_ID = $ID_ZHED_SHADOWHOOF
+;~ Global Const $VOLTAIC_SLOT1_HERO_NAME = 'Zhed Shadowhoof'
+;~ Global Const $VOLTAIC_SLOT1_HERO_TEMPLATE = $VOLTAIC_HERO_ZHED_TEMPLATE
+
+Global Const $VOLTAIC_SLOT2_HERO_ID = $ID_NORGU
+Global Const $VOLTAIC_SLOT2_HERO_NAME = 'Norgu'
+Global Const $VOLTAIC_SLOT2_HERO_TEMPLATE = $VOLTAIC_HERO_NORGU_TEMPLATE
+
+Global Const $VOLTAIC_SLOT3_HERO_ID = $ID_RAZAH
+Global Const $VOLTAIC_SLOT3_HERO_NAME = 'Razah'
+Global Const $VOLTAIC_SLOT3_HERO_TEMPLATE = $VOLTAIC_HERO_RAZAH_TEMPLATE
+
+Global Const $VOLTAIC_SLOT4_HERO_ID = $ID_MASTER_OF_WHISPERS
+Global Const $VOLTAIC_SLOT4_HERO_NAME = 'Master of Whispers'
+Global Const $VOLTAIC_SLOT4_HERO_TEMPLATE = $VOLTAIC_HERO_MOW_TEMPLATE
+
+Global Const $VOLTAIC_SLOT5_HERO_ID = $ID_OLIAS
+Global Const $VOLTAIC_SLOT5_HERO_NAME = 'Olias'
+Global Const $VOLTAIC_SLOT5_HERO_TEMPLATE = $VOLTAIC_HERO_OLIAS_TEMPLATE
+
+Global Const $VOLTAIC_SLOT6_HERO_ID = $ID_VEKK
+Global Const $VOLTAIC_SLOT6_HERO_NAME = 'Vekk'
+Global Const $VOLTAIC_SLOT6_HERO_TEMPLATE = $VOLTAIC_HERO_VEKK_TEMPLATE
+;~ Global Const $VOLTAIC_SLOT6_HERO_ID = $ID_DUNKORO
+;~ Global Const $VOLTAIC_SLOT6_HERO_NAME = 'Dunkoro'
+;~ Global Const $VOLTAIC_SLOT6_HERO_TEMPLATE = $VOLTAIC_HERO_DUNKORO_TEMPLATE
+
+;~ Global Const $VOLTAIC_SLOT7_HERO_ID = $ID_VEKK
+;~ Global Const $VOLTAIC_SLOT7_HERO_NAME = 'Vekk'
+;~ Global Const $VOLTAIC_SLOT7_HERO_TEMPLATE = $VOLTAIC_HERO_VEKK_TEMPLATE
+Global Const $VOLTAIC_SLOT7_HERO_ID = $ID_ACOLYTE_SOUSUKE
+Global Const $VOLTAIC_SLOT7_HERO_NAME = 'Alcolyte Sousuke'
+Global Const $VOLTAIC_SLOT7_HERO_TEMPLATE = $VOLTAIC_HERO_SOUSUKE_TEMPLATE
 
 Global $voltaic_farm_setup = False
 
 ;~ Main method to farm Voltaic
 Func VoltaicFarm()
-	If Not $voltaic_farm_setup Then SetupVoltaicFarm()
+	If Not $voltaic_farm_setup And SetupVoltaicFarm() == $FAIL Then Return $FAIL
 
 	GoToVerdantCascades()
 	AdlibRegister('TrackPartyStatus', 10000)
@@ -104,41 +128,41 @@ EndFunc
 
 
 Func SetupVoltaicFlexibleTeam()
-	Info('Voltaic team: Gwen, Norgu, Razah, ' & $VOLTAIC_FLEX3_HERO_NAME & ', Olias, ' & $VOLTAIC_FLEX_HERO_NAME & ', ' & $VOLTAIC_FLEX2_HERO_NAME)
+	Info('Voltaic team: ' & $VOLTAIC_SLOT1_HERO_NAME & ', ' & $VOLTAIC_SLOT2_HERO_NAME & ', ' & $VOLTAIC_SLOT3_HERO_NAME & ', ' & $VOLTAIC_SLOT4_HERO_NAME & ', ' & $VOLTAIC_SLOT5_HERO_NAME & ', ' & $VOLTAIC_SLOT6_HERO_NAME & ', ' & $VOLTAIC_SLOT7_HERO_NAME)
 	Local $heroIDs[7] = [ _
-		$ID_GWEN, _
-		$ID_NORGU, _
-		$ID_RAZAH, _
-		$VOLTAIC_FLEX3_HERO_ID, _
-		$ID_OLIAS, _
-		$VOLTAIC_FLEX_HERO_ID, _
-		$VOLTAIC_FLEX2_HERO_ID _
+		$VOLTAIC_SLOT1_HERO_ID, _
+		$VOLTAIC_SLOT2_HERO_ID, _
+		$VOLTAIC_SLOT3_HERO_ID, _
+		$VOLTAIC_SLOT4_HERO_ID, _
+		$VOLTAIC_SLOT5_HERO_ID, _
+		$VOLTAIC_SLOT6_HERO_ID, _
+		$VOLTAIC_SLOT7_HERO_ID _
 	]
 	Local $heroNames[7] = [ _
-		'Gwen', _
-		'Norgu', _
-		'Razah', _
-		$VOLTAIC_FLEX3_HERO_NAME, _
-		'Olias', _
-		$VOLTAIC_FLEX_HERO_NAME, _
-		$VOLTAIC_FLEX2_HERO_NAME _
+		$VOLTAIC_SLOT1_HERO_NAME, _
+		$VOLTAIC_SLOT2_HERO_NAME, _
+		$VOLTAIC_SLOT3_HERO_NAME, _
+		$VOLTAIC_SLOT4_HERO_NAME, _
+		$VOLTAIC_SLOT5_HERO_NAME, _
+		$VOLTAIC_SLOT6_HERO_NAME, _
+		$VOLTAIC_SLOT7_HERO_NAME _
 	]
 
 	If VoltaicAssembleFixedTeamWithRecovery($heroIDs, $heroNames, 'Voltaic') == $FAIL Then Return $FAIL
 
-	LoadSkillTemplate($VOLTAIC_HERO_GWEN_TEMPLATE, 1)
+	LoadSkillTemplate($VOLTAIC_SLOT1_HERO_TEMPLATE, 1)
 	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_HERO_NORGU_TEMPLATE, 2)
+	LoadSkillTemplate($VOLTAIC_SLOT2_HERO_TEMPLATE, 2)
 	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_HERO_RAZAH_TEMPLATE, 3)
+	LoadSkillTemplate($VOLTAIC_SLOT3_HERO_TEMPLATE, 3)
 	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_FLEX3_HERO_TEMPLATE, 4)
+	LoadSkillTemplate($VOLTAIC_SLOT4_HERO_TEMPLATE, 4)
 	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_HERO_OLIAS_TEMPLATE, 5)
+	LoadSkillTemplate($VOLTAIC_SLOT5_HERO_TEMPLATE, 5)
 	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_FLEX_HERO_TEMPLATE, 6)
+	LoadSkillTemplate($VOLTAIC_SLOT6_HERO_TEMPLATE, 6)
 	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_FLEX2_HERO_TEMPLATE, 7)
+	LoadSkillTemplate($VOLTAIC_SLOT7_HERO_TEMPLATE, 7)
 	RandomSleep(250)
 
 	ClearPartyCommands()
@@ -323,7 +347,19 @@ Func VoltaicFarmLoop()
 	If IsHardmodeEnabled() Then UseConset()
 
 	Sleep(1000)
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -18500, -8000, 1250)
+	While Not IsAgentInRange(GetMyAgent(), -18500, -8000, 1250)
+		If IsPlayerDead() Then
+			RandomSleep(1200)
+			ContinueLoop
+		EndIf
+
+		If IsRunFailed() Then
+			Warn('Voltaic Justicar: wipe detected before shrine, recovering and retrying path')
+			ResetFailuresCounter()
+			RandomSleep(1500)
+			ContinueLoop
+		EndIf
+
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		UseConsumable($ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
@@ -338,7 +374,19 @@ Func VoltaicFarmLoop()
 		MoveAggroAndKillInRange(-16500, -8000, 'Fifth group', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-18800, -7850, 'To the shrine', $VS_AGGRO_RANGE)
 	WEnd
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -17500, -14250, 1250)
+	While Not IsAgentInRange(GetMyAgent(), -17500, -14250, 1250)
+		If IsPlayerDead() Then
+			RandomSleep(1200)
+			ContinueLoop
+		EndIf
+
+		If IsRunFailed() Then
+			Warn('Voltaic Justicar: wipe detected before chest route, recovering and retrying path')
+			ResetFailuresCounter()
+			RandomSleep(1500)
+			ContinueLoop
+		EndIf
+
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		UseConsumable($ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
@@ -346,7 +394,19 @@ Func VoltaicFarmLoop()
 		MoveAggroAndKillInRange(-17700, -12500, 'Boss group', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-17500, -14250, 'Final group', $VS_AGGRO_RANGE)
 	WEnd
-	If IsRunFailed() Then Return $FAIL
+	If IsRunFailed() Then
+		If IsAgentInRange(GetMyAgent(), -17500, -14250, 4500) Then
+			Warn('Voltaic chest phase: run marked failed near chest, continuing chest looting')
+			ResetFailuresCounter()
+		Else
+			Warn('Voltaic chest phase: run marked failed before chest, forcing one recovery approach')
+			ResetFailuresCounter()
+			MoveAggroAndKillInRange(-18500, -11500, 'Pre-Boss group recovery', $VS_AGGRO_RANGE)
+			MoveAggroAndKillInRange(-17700, -12500, 'Boss group recovery', $VS_AGGRO_RANGE)
+			MoveAggroAndKillInRange(-17500, -14250, 'Final group recovery', $VS_AGGRO_RANGE)
+			If IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -17500, -14250, 4500) Then Return $FAIL
+		EndIf
+	EndIf
 	Info('Opening chest')
 	; Tripled to secure looting of chest
 	For $i = 0 To 2

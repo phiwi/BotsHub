@@ -43,6 +43,7 @@ Global Const $FROGGY_HERO_PANELS_TEST_DURATION = 30 * 1000
 Global Const $FROGGY_TEAM_ASSEMBLY_PASSES = 4
 Global Const $FROGGY_TEAM_MISSING_FALLBACK_PASSES = 3
 Global Const $FROGGY_TEAM_OUTPOST_RETRIES = 4
+Global Const $FROGGY_TEMPLATE_LOAD_RETRIES = 5
 Global Const $FROGGY_ASSASSIN_SKILLBAR = 'OwhiAyiMVNNAeNd28N5DWOxMBA'
 Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaXEWYBKmMXEZ4UgpBA'
 ;~ Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaXMXcBKmEZ4UgpZbAA'
@@ -55,44 +56,70 @@ Global Const $FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE = 'OAlkUwG4RZmUMjC4OWNWC4WIegd
 Global Const $FROGGY_ASSASSIN_HERO_DUNKORO_TEMPLATE = 'OwAT02HCXyLaj4upe4ua6DC0oBA'
 Global Const $FROGGY_ASSASSIN_HERO_NORGU_TEMPLATE = 'OQREAsIjU8MV5aI/dwPgnWFQDA'
 Global Const $FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE = 'OQREAsIjU8MV5aI/ewPgnWFQDA' ; ESurge
-Global Const $FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE = 'OAhjQoGYIP3hhWVVaO5EeDzxJA'
-;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQBDArwjNngcw0z0VEwpZAiA' ; ESurge
-;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQhkAsC7AGKDNIHM9MdjQcaGgIA' ; Panic
-Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQN2OGRA' ; Ineptitude
-Global Const $FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKzJY6lDupDBTXG4iB' ; Esurge
-;~ Global Const $FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; PsychInst
-;~ Global Const $FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdDBcaG4iB'
-;~ Global Const $FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB' ; Panic
-Global Const $FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE = 'OQBDArwjNngcw0z0VEwpZAiA' ; ESurge
-Global Const $FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE = 'OANDYazPSxVNgeETffEaRJg1NA' ; Healer's Boon
-Global Const $FROGGY_ELEMENTALIST_HERO_TAHLKORA_TEMPLATE = 'OwUTMu2BPaj4uJC8ioLKDoHghAA'
-Global Const $FROGGY_ELEMENTALIST_HERO_DUNKORO_TEMPLATE = 'OwQTcUHDxxnV9xrXEqvLxOI0AA'
-Global Const $FROGGY_ELEMENTALIST_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDeDLgKNhD1Y7YA'
+Global Const $FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE = 'OAhjQoGYIP3hhWVVaO5EeDzxJA' ; Bone Fiends
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdjQcaG4iB' ; ESurge
+Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQhjAwBc4QkA5ZIg3ATAcQFVXMA' ; Fevered + Clumsi
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIg5ZkATAcQOB9UA' ; Frust/Epi/Frag
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdjQcaG4iB' ; ESurge
+Global Const $FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; Psychic Inst
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdjQcaG4iB' ; ESurge
+Global Const $FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB' ; Panic
+Global Const $FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
+Global Const $FROGGY_ELEMENTALIST_HERO_TAHLKORA_TEMPLATE = 'OwUTMwmCZaj4uJC8ioLKDoHghAA'
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_DUNKORO_TEMPLATE = 'OwAS4YIPGEqvLx6nPwrVfAC'
+Global Const $FROGGY_ELEMENTALIST_HERO_ZHED_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
+Global Const $FROGGY_ELEMENTALIST_HERO_JIN_TEMPLATE = 'OggkYpXYGKq0qEuxvxnBYI0BqBGD' ; Splinter + Throw Dirt
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_JIN_TEMPLATE = 'OggkYpXYGKq0qEuxvxnBYI0hqBGD'
+Global Const $FROGGY_ELEMENTALIST_HERO_SOUSUKE_TEMPLATE = 'OgBVgw0pwFy0Rs+nxqqj1RPMHOWB' ; Master of Magic
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
 Global Const $FROGGY_ELEMENTALIST_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA'
-Global Const $FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
+;~ Global Const $FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA' ; Bone Fiends
+Global Const $FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE = 'OAhjUwGooSyBVBoBKgbheTYM4BA' ; Minion Bomber
 Global Const $FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE = 'OAOiAyk5gNtePuwJ00ZaNbJA'
-Global Const $FROGGY_ELEMENTALIST_HERO_VEKK_TEMPLATE = 'OgNDwcPPP1CSSARLWPga31VC'
-Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_ID = $ID_TAHLKORA
-Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_NAME = 'Tahlkora'
-Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_TAHLKORA_TEMPLATE
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_ID = $ID_MASTER_OF_WHISPERS
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_NAME = 'Master of Whispers'
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_ID = $ID_DUNKORO
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_NAME = 'Dunkoro'
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX3_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_DUNKORO_TEMPLATE
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_ID = $ID_LIVIA
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_NAME = 'Livia'
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE
-Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_ID = $ID_ZHED_SHADOWHOOF
-Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_NAME = 'Zhed Shadowhoof'
-Global Const $FROGGY_ELEMENTALIST_FLEX_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_ZHED_TEMPLATE
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_ID = $ID_XANDRA
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_NAME = 'Xandra'
-;~ Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE
-Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_ID = $ID_VEKK
-Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_NAME = 'Vekk'
-Global Const $FROGGY_ELEMENTALIST_FLEX2_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_VEKK_TEMPLATE
+Global Const $FROGGY_ELEMENTALIST_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT1_HERO_ID = $ID_GWEN
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT1_HERO_NAME = 'Gwen'
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT1_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE
+Global Const $FROGGY_ELEMENTALIST_SLOT1_HERO_ID = $ID_ZHED_SHADOWHOOF
+Global Const $FROGGY_ELEMENTALIST_SLOT1_HERO_NAME = 'Zhed Shadowhoof'
+Global Const $FROGGY_ELEMENTALIST_SLOT1_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_ZHED_TEMPLATE
+
+Global Const $FROGGY_ELEMENTALIST_SLOT2_HERO_ID = $ID_NORGU
+Global Const $FROGGY_ELEMENTALIST_SLOT2_HERO_NAME = 'Norgu'
+Global Const $FROGGY_ELEMENTALIST_SLOT2_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE
+
+Global Const $FROGGY_ELEMENTALIST_SLOT3_HERO_ID = $ID_RAZAH
+Global Const $FROGGY_ELEMENTALIST_SLOT3_HERO_NAME = 'Razah'
+Global Const $FROGGY_ELEMENTALIST_SLOT3_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE
+
+Global Const $FROGGY_ELEMENTALIST_SLOT4_HERO_ID = $ID_MASTER_OF_WHISPERS
+Global Const $FROGGY_ELEMENTALIST_SLOT4_HERO_NAME = 'Master of Whispers'
+Global Const $FROGGY_ELEMENTALIST_SLOT4_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_MOW_TEMPLATE
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT4_HERO_ID = $ID_TAHLKORA
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT4_HERO_NAME = 'Tahlkora'
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT4_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_TAHLKORA_TEMPLATE
+
+Global Const $FROGGY_ELEMENTALIST_SLOT5_HERO_ID = $ID_OLIAS
+Global Const $FROGGY_ELEMENTALIST_SLOT5_HERO_NAME = 'Olias'
+Global Const $FROGGY_ELEMENTALIST_SLOT5_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_OLIAS_TEMPLATE
+
+Global Const $FROGGY_ELEMENTALIST_SLOT6_HERO_ID = $ID_VEKK
+Global Const $FROGGY_ELEMENTALIST_SLOT6_HERO_NAME = 'Vekk'
+Global Const $FROGGY_ELEMENTALIST_SLOT6_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_VEKK_TEMPLATE
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT6_HERO_ID = $ID_DUNKORO
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT6_HERO_NAME = 'Dunkoro'
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT6_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_DUNKORO_TEMPLATE
+
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT7_HERO_ID = $ID_LIVIA
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT7_HERO_NAME = 'Livia'
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT7_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE
+Global Const $FROGGY_ELEMENTALIST_SLOT7_HERO_ID = $ID_ACOLYTE_SOUSUKE
+Global Const $FROGGY_ELEMENTALIST_SLOT7_HERO_NAME = 'Acolyte Sousuke'
+Global Const $FROGGY_ELEMENTALIST_SLOT7_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_SOUSUKE_TEMPLATE
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT7_HERO_ID = $ID_XANDRA
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT7_HERO_NAME = 'Xandra'
+;~ Global Const $FROGGY_ELEMENTALIST_SLOT7_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE
 
 Global $froggy_farm_setup = False
 
@@ -174,42 +201,51 @@ EndFunc
 
 
 Func SetupFroggyElementalistTeam($skipBuildLoad = False)
-	Info('Froggy Elementalist team: Gwen, Norgu, Razah, ' & $FROGGY_ELEMENTALIST_FLEX3_HERO_NAME & ', Olias, ' & $FROGGY_ELEMENTALIST_FLEX_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_FLEX2_HERO_NAME)
+	Info('Froggy Elementalist team: ' & $FROGGY_ELEMENTALIST_SLOT1_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT2_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT3_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT4_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT5_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT6_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT7_HERO_NAME)
 	Local $heroIDs[7] = [ _
-		$ID_GWEN, _
-		$ID_NORGU, _
-		$ID_RAZAH, _
-		$FROGGY_ELEMENTALIST_FLEX3_HERO_ID, _
-		$ID_OLIAS, _
-		$FROGGY_ELEMENTALIST_FLEX_HERO_ID, _
-		$FROGGY_ELEMENTALIST_FLEX2_HERO_ID _
+		$FROGGY_ELEMENTALIST_SLOT1_HERO_ID, _
+		$FROGGY_ELEMENTALIST_SLOT2_HERO_ID, _
+		$FROGGY_ELEMENTALIST_SLOT3_HERO_ID, _
+		$FROGGY_ELEMENTALIST_SLOT4_HERO_ID, _
+		$FROGGY_ELEMENTALIST_SLOT5_HERO_ID, _
+		$FROGGY_ELEMENTALIST_SLOT6_HERO_ID, _
+		$FROGGY_ELEMENTALIST_SLOT7_HERO_ID _
 	]
 	Local $heroNames[7] = [ _
-		'Gwen', _
-		'Norgu', _
-		'Razah', _
-		$FROGGY_ELEMENTALIST_FLEX3_HERO_NAME, _
-		'Olias', _
-		$FROGGY_ELEMENTALIST_FLEX_HERO_NAME, _
-		$FROGGY_ELEMENTALIST_FLEX2_HERO_NAME _
+		$FROGGY_ELEMENTALIST_SLOT1_HERO_NAME, _
+		$FROGGY_ELEMENTALIST_SLOT2_HERO_NAME, _
+		$FROGGY_ELEMENTALIST_SLOT3_HERO_NAME, _
+		$FROGGY_ELEMENTALIST_SLOT4_HERO_NAME, _
+		$FROGGY_ELEMENTALIST_SLOT5_HERO_NAME, _
+		$FROGGY_ELEMENTALIST_SLOT6_HERO_NAME, _
+		$FROGGY_ELEMENTALIST_SLOT7_HERO_NAME _
+	]
+	Local $heroTemplates[7] = [ _
+		$FROGGY_ELEMENTALIST_SLOT1_HERO_TEMPLATE, _
+		$FROGGY_ELEMENTALIST_SLOT2_HERO_TEMPLATE, _
+		$FROGGY_ELEMENTALIST_SLOT3_HERO_TEMPLATE, _
+		$FROGGY_ELEMENTALIST_SLOT4_HERO_TEMPLATE, _
+		$FROGGY_ELEMENTALIST_SLOT5_HERO_TEMPLATE, _
+		$FROGGY_ELEMENTALIST_SLOT6_HERO_TEMPLATE, _
+		$FROGGY_ELEMENTALIST_SLOT7_HERO_TEMPLATE _
 	]
 
 	If FroggyAssembleFixedTeamWithRecovery($heroIDs, $heroNames, 'Froggy Elementalist') == $FAIL Then Return $FAIL
+	If Not SupportTeamHasExactHeroes($heroIDs, 8) Or GetHeroCount() < 7 Then
+		Warn('Froggy Elementalist setup aborted: incomplete hero team before template load (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
+		FroggyWarnMissingHeroes($heroIDs, $heroNames, 'Froggy Elementalist')
+		Return $FAIL
+	EndIf
+	If FroggyVerifyTeamState($heroIDs, $heroNames, $heroTemplates, 'Froggy Elementalist') == $FAIL Then Return $FAIL
 
 	If Not $skipBuildLoad Then
-		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE, 1)
-		RandomSleep(150)
-		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_NORGU_TEMPLATE, 2)
-		RandomSleep(150)
-		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_RAZAH_TEMPLATE, 3)
-		RandomSleep(150)
-		LoadSkillTemplate($FROGGY_ELEMENTALIST_FLEX3_HERO_TEMPLATE, 4)
-		RandomSleep(150)
-		LoadSkillTemplate($FROGGY_ELEMENTALIST_HERO_OLIAS_TEMPLATE, 5)
-		RandomSleep(150)
-		LoadSkillTemplate($FROGGY_ELEMENTALIST_FLEX_HERO_TEMPLATE, 6)
-		RandomSleep(150)
-		LoadSkillTemplate($FROGGY_ELEMENTALIST_FLEX2_HERO_TEMPLATE, 7)
+		If FroggyLoadHeroTemplateByID($FROGGY_ELEMENTALIST_SLOT1_HERO_ID, $FROGGY_ELEMENTALIST_SLOT1_HERO_NAME, $FROGGY_ELEMENTALIST_SLOT1_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+		If FroggyLoadHeroTemplateByID($FROGGY_ELEMENTALIST_SLOT2_HERO_ID, $FROGGY_ELEMENTALIST_SLOT2_HERO_NAME, $FROGGY_ELEMENTALIST_SLOT2_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+		If FroggyLoadHeroTemplateByID($FROGGY_ELEMENTALIST_SLOT3_HERO_ID, $FROGGY_ELEMENTALIST_SLOT3_HERO_NAME, $FROGGY_ELEMENTALIST_SLOT3_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+		If FroggyLoadHeroTemplateByID($FROGGY_ELEMENTALIST_SLOT4_HERO_ID, $FROGGY_ELEMENTALIST_SLOT4_HERO_NAME, $FROGGY_ELEMENTALIST_SLOT4_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+		If FroggyLoadHeroTemplateByID($FROGGY_ELEMENTALIST_SLOT5_HERO_ID, $FROGGY_ELEMENTALIST_SLOT5_HERO_NAME, $FROGGY_ELEMENTALIST_SLOT5_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+		If FroggyLoadHeroTemplateByID($FROGGY_ELEMENTALIST_SLOT6_HERO_ID, $FROGGY_ELEMENTALIST_SLOT6_HERO_NAME, $FROGGY_ELEMENTALIST_SLOT6_HERO_TEMPLATE) == $FAIL Then Return $FAIL
+		If FroggyLoadHeroTemplateByID($FROGGY_ELEMENTALIST_SLOT7_HERO_ID, $FROGGY_ELEMENTALIST_SLOT7_HERO_NAME, $FROGGY_ELEMENTALIST_SLOT7_HERO_TEMPLATE) == $FAIL Then Return $FAIL
 		RandomSleep(250)
 	EndIf
 
@@ -239,22 +275,31 @@ Func SetupFroggySinTeamFromWingstorm()
 		'Livia', _
 		'Dunkoro' _
 	]
+	Local $heroTemplates[7] = [ _
+		$FROGGY_ASSASSIN_HERO_GWEN_TEMPLATE, _
+		$FROGGY_ASSASSIN_HERO_NORGU_TEMPLATE, _
+		$FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE, _
+		$FROGGY_ASSASSIN_HERO_MOW_TEMPLATE, _
+		$FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE, _
+		$FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE, _
+		$FROGGY_ASSASSIN_HERO_DUNKORO_TEMPLATE _
+	]
 
 	If FroggyAssembleFixedTeamWithRecovery($heroIDs, $heroNames, 'Froggy Assassin') == $FAIL Then Return $FAIL
+	If Not SupportTeamHasExactHeroes($heroIDs, 8) Or GetHeroCount() < 7 Then
+		Warn('Froggy Assassin setup aborted: incomplete hero team before template load (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
+		FroggyWarnMissingHeroes($heroIDs, $heroNames, 'Froggy Assassin')
+		Return $FAIL
+	EndIf
+	If FroggyVerifyTeamState($heroIDs, $heroNames, $heroTemplates, 'Froggy Assassin') == $FAIL Then Return $FAIL
 
-	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_GWEN_TEMPLATE, 1)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_NORGU_TEMPLATE, 2)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE, 3)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_MOW_TEMPLATE, 4)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE, 5)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE, 6)
-	RandomSleep(150)
-	LoadSkillTemplate($FROGGY_ASSASSIN_HERO_DUNKORO_TEMPLATE, 7)
+	If FroggyLoadHeroTemplateByID($ID_GWEN, 'Gwen', $FROGGY_ASSASSIN_HERO_GWEN_TEMPLATE) == $FAIL Then Return $FAIL
+	If FroggyLoadHeroTemplateByID($ID_NORGU, 'Norgu', $FROGGY_ASSASSIN_HERO_NORGU_TEMPLATE) == $FAIL Then Return $FAIL
+	If FroggyLoadHeroTemplateByID($ID_RAZAH, 'Razah', $FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE) == $FAIL Then Return $FAIL
+	If FroggyLoadHeroTemplateByID($ID_MASTER_OF_WHISPERS, 'Master of Whispers', $FROGGY_ASSASSIN_HERO_MOW_TEMPLATE) == $FAIL Then Return $FAIL
+	If FroggyLoadHeroTemplateByID($ID_OLIAS, 'Olias', $FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE) == $FAIL Then Return $FAIL
+	If FroggyLoadHeroTemplateByID($ID_LIVIA, 'Livia', $FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE) == $FAIL Then Return $FAIL
+	If FroggyLoadHeroTemplateByID($ID_DUNKORO, 'Dunkoro', $FROGGY_ASSASSIN_HERO_DUNKORO_TEMPLATE) == $FAIL Then Return $FAIL
 	RandomSleep(250)
 
 	ClearPartyCommands()
@@ -277,6 +322,88 @@ Func FroggyEnsureSoloParty($maxWaitMs = 9000)
 	WEnd
 	Warn('Froggy team: party reset timeout. Party=' & GetPartySize() & ', heroes=' & GetHeroCount())
 	Return $FAIL
+EndFunc
+
+
+Func FroggyVerifyTeamState(ByRef $heroIDs, ByRef $heroNames, ByRef $heroTemplates, $teamLabel)
+	Local $issues = 0
+	Info($teamLabel & ' verify: begin (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
+
+	For $i = 0 To UBound($heroIDs) - 1
+		Local $heroID = $heroIDs[$i]
+		Local $heroName = $heroNames[$i]
+		Local $heroIndex = GetHeroNumberByHeroID($heroID)
+		Local $expectedProfession = FroggyGetTemplatePrimaryProfession($heroTemplates[$i])
+		Local $actualProfession = -1
+		If $heroIndex <> Null Then $actualProfession = GetHeroProfession($heroIndex)
+
+		If $heroIndex == Null Then
+			$issues += 1
+			Info($teamLabel & ' verify: ' & $heroName & ' id=' & $heroID & ' slot=missing actualProf=na expectedProf=' & $expectedProfession)
+		Else
+			If $expectedProfession > 0 And $actualProfession <> $expectedProfession Then $issues += 1
+			Info($teamLabel & ' verify: ' & $heroName & ' id=' & $heroID & ' slot=' & $heroIndex & ' actualProf=' & $actualProfession & ' expectedProf=' & $expectedProfession)
+		EndIf
+	Next
+
+	If $issues > 0 Then
+		Warn($teamLabel & ' verify failed: issues=' & $issues & ' (aborting setup)')
+		Return $FAIL
+	EndIf
+
+	Info($teamLabel & ' verify: ok')
+	Return $SUCCESS
+EndFunc
+
+
+Func FroggyLoadHeroTemplateByID($heroID, $heroName, $templateCode)
+	Local $templatePrimaryProfession = FroggyGetTemplatePrimaryProfession($templateCode)
+
+	For $attempt = 1 To $FROGGY_TEMPLATE_LOAD_RETRIES
+		Local $heroIndex = GetHeroNumberByHeroID($heroID)
+		If $heroIndex == Null Then
+			Warn('Froggy team setup: hero index not found for ' & $heroName & ' on template attempt ' & $attempt & '/' & $FROGGY_TEMPLATE_LOAD_RETRIES)
+			SupportTeamStabilizeAfterTravel($ID_GADDS_ENCAMPMENT, 1200, 120)
+			ContinueLoop
+		EndIf
+
+		Local $heroPrimaryProfession = GetHeroProfession($heroIndex)
+		If $templatePrimaryProfession > 0 And $templatePrimaryProfession <> $heroPrimaryProfession Then
+			Warn('Froggy template mismatch before load: hero=' & $heroName & ' (heroID=' & $heroID & ', heroIndex=' & $heroIndex & ', heroProf=' & $heroPrimaryProfession & ', templateProf=' & $templatePrimaryProfession & ')')
+			SupportTeamStabilizeAfterTravel($ID_GADDS_ENCAMPMENT, 1200, 120)
+			ContinueLoop
+		EndIf
+
+		LoadSkillTemplate($templateCode, $heroIndex)
+		RandomSleep(220)
+		Return $SUCCESS
+	Next
+
+	Warn('Froggy team setup aborted: could not apply template for ' & $heroName & ' after retries')
+	Return $FAIL
+EndFunc
+
+
+Func FroggyGetTemplatePrimaryProfession($templateCode)
+	If $templateCode == '' Then Return -1
+
+	Local $bin64 = ''
+	Local $i
+	For $i = 1 To StringLen($templateCode)
+		$bin64 &= Base64ToBin64(StringMid($templateCode, $i, 1))
+	Next
+
+	If StringLen($bin64) < 10 Then Return -1
+
+	Local $templateType = Bin64ToDec(StringLeft($bin64, 4))
+	If $templateType <> 14 Then Return -1
+
+	$bin64 = StringTrimLeft($bin64, 8)
+	Local $professionBits = Bin64ToDec(StringLeft($bin64, 2)) * 2 + 4
+	$bin64 = StringTrimLeft($bin64, 2)
+	If StringLen($bin64) < $professionBits Then Return -1
+
+	Return Bin64ToDec(StringLeft($bin64, $professionBits))
 EndFunc
 
 
