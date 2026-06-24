@@ -51,24 +51,27 @@ Global Const $SOO_EXPLORE_ESCAPE_ATTEMPTS = 2
 Global Const $SOO_EXPLORE_ESCAPE_WAIT_MS = 3500
 Global Const $SOO_TEMPLATE_LOAD_RETRIES = 3
 
-;~ Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQN2OGRA'
-;~ Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArAZAEBA' Ineptitude
-;~ Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQP1KARA' ; Frust + Clums
-Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJgTQGARA'
-Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; PsychicInst
-;~ Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKzJY6lDupDBTXG4iB' ; Esurge
-Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB'
-Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
+Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJgTQPFRA' ; Inep + Epi + Frust
+;~ Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; PsychicInst
+Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB' ; Esurge
+;~ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB' ; Panic
+Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB'
+Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeEfEaRJgVV1DA' ; Healer's Boon (+FF -CH)
+;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
-Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwQTcUHDxxnV9xrXEqvLxOI0AA'
-Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA'
+;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAS4YIPGEqvLx6nPwrVfAC' ; SoJ
+Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcT4Wo+Vynp6Dv6ig6zlALUgBA' ; RoJ + Unseen + Smoke
+Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
+;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
 Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
 ;~ Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljkwMpZOpidI0npdK6z74aMA' ; EarthMagic
 Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
-Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OAOiAyk5gNtePuwJ00ZaNbJA'
+Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
+Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jXydNgA' ; Ether Renewal Prot (+Convert H. -Draw)
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1Do2dNgA' ; Ether Renewal Prot
-Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
+;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Burning Variant
+Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcT4Wo+Vynp6Dv6ig6zlALUgBA' ; RoJ + Unseen + Smoke
 
 Global Const $SOO_SLOT1_HERO_ID = $ID_GWEN
 Global Const $SOO_SLOT1_HERO_NAME = 'Gwen'
@@ -82,39 +85,45 @@ Global Const $SOO_SLOT3_HERO_ID = $ID_RAZAH
 Global Const $SOO_SLOT3_HERO_NAME = 'Razah'
 Global Const $SOO_SLOT3_HERO_TEMPLATE = $SOO_HERO_RAZAH_TEMPLATE
 
-Global Const $SOO_SLOT4_HERO_ID = $ID_MASTER_OF_WHISPERS
-Global Const $SOO_SLOT4_HERO_NAME = 'Master of Whispers'
-Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
-;~ Global Const $SOO_SLOT4_HERO_ID = $ID_DUNKORO
-;~ Global Const $SOO_SLOT4_HERO_NAME = 'Dunkoro'
-;~ Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
+Global Const $SOO_SLOT4_HERO_ID = $ID_XANDRA
+Global Const $SOO_SLOT4_HERO_NAME = 'Xandra'
+Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
+;~ Global Const $SOO_SLOT4_HERO_ID = $ID_MASTER_OF_WHISPERS
+;~ Global Const $SOO_SLOT4_HERO_NAME = 'Master of Whispers'
+;~ Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
 
 Global Const $SOO_SLOT5_HERO_ID = $ID_OLIAS
 Global Const $SOO_SLOT5_HERO_NAME = 'Olias'
 Global Const $SOO_SLOT5_HERO_TEMPLATE = $SOO_HERO_OLIAS_TEMPLATE
 
-Global Const $SOO_SLOT6_HERO_ID = $ID_ACOLYTE_SOUSUKE
-Global Const $SOO_SLOT6_HERO_NAME = 'Acolyte Sousuke'
-Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_SOUSUKE_TEMPLATE
+Global Const $SOO_SLOT6_HERO_ID = $ID_DUNKORO
+Global Const $SOO_SLOT6_HERO_NAME = 'Dunkoro'
+Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
+;~ Global Const $SOO_SLOT6_HERO_ID = $ID_ACOLYTE_SOUSUKE
+;~ Global Const $SOO_SLOT6_HERO_NAME = 'Acolyte Sousuke'
+;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_SOUSUKE_TEMPLATE
 ;~ Global Const $SOO_SLOT6_HERO_ID = $ID_ZHED_SHADOWHOOF
 ;~ Global Const $SOO_SLOT6_HERO_NAME = 'Zhed Shadowhoof'
 ;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
 
-Global Const $SOO_SLOT7_HERO_ID = $ID_VEKK
-Global Const $SOO_SLOT7_HERO_NAME = 'Vekk'
-Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
-;~ Global Const $SOO_SLOT7_HERO_ID = $ID_XANDRA
-;~ Global Const $SOO_SLOT7_HERO_NAME = 'Xandra'
-;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
+Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
+Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
+Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
+;~ Global Const $SOO_SLOT7_HERO_ID = $ID_VEKK
+;~ Global Const $SOO_SLOT7_HERO_NAME = 'Vekk'
+;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
 
 Global $soo_farm_setup = False
 Global $soo_consecutive_run_failures = 0
 Global $soo_skip_next_inventory_management = False
+Global $soo_floor3_final_fight_conset_uptime = False
+Global $soo_setup_outpost_recovery_attempted = False
 
 
 ;~ Main method to farm SoO
 Func SoOFarm()
 	Local $result = $FAIL
+	SoOForceOutpostRecoveryIfNeeded()
 	If Not $soo_farm_setup Then
 		Local $setupResult = SetupSoOFarm()
 		If $setupResult <> $SUCCESS Then
@@ -146,43 +155,53 @@ EndFunc
 Func SoOHandleRunFailure($reason)
 	$soo_consecutive_run_failures += 1
 	Warn('SoO crash guard: consecutive failure ' & $soo_consecutive_run_failures & '/' & $SOO_CONSECUTIVE_FAIL_GUARD_THRESHOLD & ' (' & $reason & ')')
-	If $soo_consecutive_run_failures < $SOO_CONSECUTIVE_FAIL_GUARD_THRESHOLD Then Return
-
-	Warn('SoO crash guard: threshold reached, starting cooldown and forced outpost refresh')
-	Sleep($SOO_CONSECUTIVE_FAIL_GUARD_COOLDOWN_MS)
-
 	$soo_farm_setup = False
 	$soo_skip_next_inventory_management = True
+	SoOForceOutpostRecovery()
+EndFunc
+
+
+Func SoOForceOutpostRecovery()
+	$soo_setup_outpost_recovery_attempted = True
+	$soo_farm_setup = False
+	Info('SoO: forcing outpost recovery')
 	ResetFailuresCounter()
 
-	Local $escapeResult = SoOEnsureOutpostContext($ID_VLOXS_FALLS, 'SoO crash guard')
+	Local $escapeResult = SoOEnsureOutpostContext($ID_VLOXS_FALLS, 'SoO force recovery')
 	If $escapeResult <> $SUCCESS Then
-		$soo_consecutive_run_failures = 0
-		Warn('SoO crash guard: recovery aborted due to explorable-map lock')
+		Warn('SoO force recovery: escape failed (result=' & $escapeResult & ')')
 		Return
 	EndIf
 
-	If TravelToOutpost($ID_EYE_OF_THE_NORTH, $district_name) == $FAIL Then
-		Warn('SoO crash guard: failed to travel to Eye of The North during recovery')
-	Else
-		SupportTeamStabilizeAfterTravel($ID_EYE_OF_THE_NORTH, 10000, 250)
+	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then
+		Warn('SoO force recovery: travel to Vloxs Falls failed')
+		Return
 	EndIf
 
-	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then
-		Warn('SoO crash guard: failed to travel back to Vloxs Falls during recovery')
-	Else
-		SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250)
+	SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250)
+
+	If GetPartySize() > 1 Then
 		SoOEnsureSoloParty(12000)
 	EndIf
 
+	Info('SoO force recovery: complete')
 	$soo_consecutive_run_failures = 0
-	Warn('SoO crash guard: recovery completed, counter reset')
+EndFunc
+
+
+Func SoOForceOutpostRecoveryIfNeeded()
+	If $soo_setup_outpost_recovery_attempted Then Return
+	If GetMapType() == $ID_OUTPOST Then Return
+
+	Info('SoO: detected non-outpost context before setup, forcing recovery')
+	SoOForceOutpostRecovery()
 EndFunc
 
 
 ;~ SoO farm setup
 Func SetupSoOFarm()
 	Info('Setting up farm')
+	$soo_setup_outpost_recovery_attempted = False
 	Local $escapeResult = SoOEnsureOutpostContext($ID_VLOXS_FALLS, 'SoO setup')
 	If $escapeResult <> $SUCCESS Then Return $escapeResult
 	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
@@ -221,14 +240,22 @@ EndFunc
 Func SoOEnsureOutpostContext($preferredOutpostID, $contextLabel = 'SoO')
 	If GetMapType() == $ID_OUTPOST Then Return $SUCCESS
 
+	Info($contextLabel & ': attempting ResignAndReturnToOutpost from map=' & GetMapID())
+	ResignAndReturnToOutpost($preferredOutpostID)
+	Sleep(1500)
+	If GetMapType() == $ID_OUTPOST Then
+		Info($contextLabel & ': ResignAndReturnToOutpost succeeded')
+		Return $SUCCESS
+	EndIf
+
 	Local $currentMapID = GetMapID()
 	Warn($contextLabel & ': player not in outpost (map=' & $currentMapID & '), trying resign/return escape')
 
 	For $attempt = 1 To $SOO_EXPLORE_ESCAPE_ATTEMPTS
 		Resign()
-		Sleep($SOO_EXPLORE_ESCAPE_WAIT_MS)
+		Sleep($SOO_EXPLORE_ESCAPE_WAIT_MS + 2000)
 		ReturnToOutpost()
-		Sleep(1000)
+		Sleep(2000)
 
 		If WaitMapLoading($preferredOutpostID, 10000, 1000) Then Return $SUCCESS
 		If GetMapType() == $ID_OUTPOST Then Return $SUCCESS
@@ -1046,8 +1073,14 @@ Func ClearSoOFloor3()
 	WEnd
 
 	Local $largerSoOAggroRange = $RANGE_SPELLCAST + 300
+	$soo_floor3_final_fight_conset_uptime = True
+	AdlibRegister('SoOFinalFightConsetUptimeTick', 1000)
 	While Not IsRunFailed() And Not IsQuestReward($ID_QUEST_LOST_SOULS)
-		If CheckStuck('SoO Floor 3 - Third loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
+		If CheckStuck('SoO Floor 3 - Third loop', $MAX_SOO_FARM_DURATION) == $FAIL Then
+			AdlibUnRegister('SoOFinalFightConsetUptimeTick')
+			$soo_floor3_final_fight_conset_uptime = False
+			Return $FAIL
+		EndIf
 		WaitUntilPartyAlive()
 		If IsHardmodeEnabled() Then UseConset()
 		MoveAggroAndKillInRange(-9850, 7600, 'Going back to secure door opening in case run failed 1', $largerSoOAggroRange)
@@ -1070,6 +1103,8 @@ Func ClearSoOFloor3()
 		FlagMoveAggroAndKillInRange(-15850, 17500, '8', $largerSoOAggroRange)
 		Sleep(1000)
 	WEnd
+	AdlibUnRegister('SoOFinalFightConsetUptimeTick')
+	$soo_floor3_final_fight_conset_uptime = False
 	Local $hasQuestReward = IsQuestReward($ID_QUEST_LOST_SOULS)
 	If IsRunFailed() And Not $hasQuestReward Then Return $FAIL
 	If $hasQuestReward Then
@@ -1088,6 +1123,14 @@ Func ClearSoOFloor3()
 	Next
 	MoveTo(-15700, 17150)
 	Return $SUCCESS
+EndFunc
+
+
+Func SoOFinalFightConsetUptimeTick()
+	If Not $soo_floor3_final_fight_conset_uptime Then Return
+	If Not IsHardmodeEnabled() Then Return
+	If IsQuestReward($ID_QUEST_LOST_SOULS) Then Return
+	UseConset()
 EndFunc
 
 
