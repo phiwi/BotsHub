@@ -149,6 +149,7 @@ Func SoOHandleRunSuccess()
 	EndIf
 	$soo_consecutive_run_failures = 0
 	$soo_skip_next_inventory_management = False
+	$soo_setup_outpost_recovery_attempted = True
 EndFunc
 
 
