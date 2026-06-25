@@ -51,7 +51,7 @@ Global Const $SOO_EXPLORE_ESCAPE_ATTEMPTS = 2
 Global Const $SOO_EXPLORE_ESCAPE_WAIT_MS = 3500
 Global Const $SOO_TEMPLATE_LOAD_RETRIES = 3
 
-Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJgTQPFRA' ; Inep + Epi + Frust
+Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAoB8wYa0LACIHUeGJgTQP1EA' ; Inep + Epi + Frust
 ;~ Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; PsychicInst
 Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB' ; Esurge
 ;~ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB' ; Panic
@@ -986,6 +986,7 @@ Func ClearSoOFloor3()
 	WEnd
 
 	Local $floor3SecondLoopTimer = TimerInit()
+	Local $soo_floor3_torch_sequence_done = False
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -8650, 9200, 1250)
 		If CheckStuck('SoO Floor 3 - Second loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		If TimerDiff($floor3SecondLoopTimer) > $SOO_FLOOR3_SECOND_LOOP_TIMEOUT_MS Then
@@ -1008,6 +1009,13 @@ Func ClearSoOFloor3()
 		MoveAggroAndKillInRange(5846, 11037, '8', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(9796, 18960, '9', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(14068, 19549, '10', $SOO_AGGRO_RANGE)
+
+		If $soo_floor3_torch_sequence_done Then
+			Info('Torch sequence already done, skipping to exit moves')
+			MoveAggroAndKillInRange(-9850, 7600, 'Added extra move to force going past door before endloop 1', $SOO_AGGRO_RANGE)
+			MoveAggroAndKillInRange(-8650, 9200, 'Added extra move to force going past door before endloop 2', $SOO_AGGRO_RANGE)
+			ContinueLoop
+		EndIf
 
 		Info('Open torch chest')
 		ClearTarget()
@@ -1067,6 +1075,8 @@ Func ClearSoOFloor3()
 			RandomSleep(500)
 			ActionInteract()
 		Next
+
+		$soo_floor3_torch_sequence_done = True
 
 		MoveAggroAndKillInRange(-9850, 7600, 'Added extra move to force going past door before endloop 1', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-8650, 9200, 'Added extra move to force going past door before endloop 2', $SOO_AGGRO_RANGE)
