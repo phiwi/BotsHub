@@ -60,7 +60,7 @@ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeEfEaRJgVV1DA' ; Healer's Bo
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAS4YIPGEqvLx6nPwrVfAC' ; SoJ
-Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcT4Wo+Vynp6Dv6ig6zlALUgBA' ; RoJ + Unseen + Smoke
+Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcT4Wo+1xnV9xrXEqvLpLKwA' ; RoJ + Return
 Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
 Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
@@ -71,7 +71,7 @@ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jXydNgA' ; Ether Renewal
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1Do2dNgA' ; Ether Renewal Prot
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Burning Variant
-Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcT4Wo+Vynp6Dv6ig6zlALUgBA' ; RoJ + Unseen + Smoke
+Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcT4Wo+1xnV9xrXEqvLpLKwAA' ; RoJ + Return
 
 Global Const $SOO_SLOT1_HERO_ID = $ID_GWEN
 Global Const $SOO_SLOT1_HERO_NAME = 'Gwen'
@@ -118,6 +118,9 @@ Global $soo_consecutive_run_failures = 0
 Global $soo_skip_next_inventory_management = False
 Global $soo_floor3_final_fight_conset_uptime = False
 Global $soo_setup_outpost_recovery_attempted = False
+Global $soo_grails_used = 0
+Global $soo_armors_used = 0
+Global $soo_essences_used = 0
 
 
 ;~ Main method to farm SoO
@@ -150,12 +153,45 @@ Func SoOHandleRunSuccess()
 	$soo_consecutive_run_failures = 0
 	$soo_skip_next_inventory_management = False
 	$soo_setup_outpost_recovery_attempted = True
+	SoOLogConsetSummary()
+EndFunc
+
+
+Func SoOResetConsetCounters()
+	$soo_grails_used = 0
+	$soo_armors_used = 0
+	$soo_essences_used = 0
+EndFunc
+
+
+Func SoOUseConset()
+	If GetEffectTimeRemaining(GetEffect($ID_GRAIL_OF_MIGHT_EFFECT)) <= 0 Then
+		$soo_grails_used += 1
+		Info('SoO con: using Grail of Might  (#' & $soo_grails_used & ' this run)')
+		UseConsumable($ID_GRAIL_OF_MIGHT, True)
+	EndIf
+	If GetEffectTimeRemaining(GetEffect($ID_ARMOR_OF_SALVATION_EFFECT)) <= 0 Then
+		$soo_armors_used += 1
+		Info('SoO con: using Armor of Salvation  (#' & $soo_armors_used & ' this run)')
+		UseConsumable($ID_ARMOR_OF_SALVATION, True)
+	EndIf
+	If GetEffectTimeRemaining(GetEffect($ID_ESSENCE_OF_CELERITY_EFFECT)) <= 0 Then
+		$soo_essences_used += 1
+		Info('SoO con: using Essence of Celerity  (#' & $soo_essences_used & ' this run)')
+		UseConsumable($ID_ESSENCE_OF_CELERITY, True)
+	EndIf
+EndFunc
+
+
+Func SoOLogConsetSummary()
+	Info('SoO con summary: Grails=' & $soo_grails_used & '  Armors=' & $soo_armors_used & '  Essences=' & $soo_essences_used)
 EndFunc
 
 
 Func SoOHandleRunFailure($reason)
 	$soo_consecutive_run_failures += 1
 	Warn('SoO crash guard: consecutive failure ' & $soo_consecutive_run_failures & '/' & $SOO_CONSECUTIVE_FAIL_GUARD_THRESHOLD & ' (' & $reason & ')')
+	SoOLogConsetSummary()
 	$soo_farm_setup = False
 	$soo_skip_next_inventory_management = True
 	SoOForceOutpostRecovery()
@@ -604,6 +640,7 @@ EndFunc
 
 ;~ Farm loop
 Func SoOFarmLoop()
+	SoOResetConsetCounters()
 	GetRewardRefreshAndTakeSoOQuest()
 	ResetFailuresCounter()
 	AdlibRegister('TrackPartyStatus', 10000)
@@ -677,7 +714,7 @@ Func ClearSoOFloor1()
 	Info('------------------------------------')
 	Info('First floor')
 
-	If IsHardmodeEnabled() Then UseConset()
+	If IsHardmodeEnabled() Then SoOUseConset()
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 9232, 11483, 1250)
 		If CheckStuck('SoO Floor 1 - First loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
@@ -772,7 +809,7 @@ EndFunc
 Func ClearSoOFloor2()
 	Info('------------------------------------')
 	Info('Second floor')
-	If IsHardmodeEnabled() Then UseConset()
+	If IsHardmodeEnabled() Then SoOUseConset()
 
 	Local $firstRoomfirstTime = True
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -11000, -6000, 1250)
@@ -958,12 +995,12 @@ EndFunc
 Func ClearSoOFloor3()
 	Info('------------------------------------')
 	Info('Third floor')
-	If IsHardmodeEnabled() Then UseConset()
+	If IsHardmodeEnabled() Then SoOUseConset()
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 1100, 7100, 1250)
 		If CheckStuck('SoO Floor 3 - First loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
-		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then UseConset()
+		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
 		UseMoraleConsumableIfNeeded()
 		Info('Getting blessing')
 		GoToNPC(GetNearestNPCToCoords(17544, 18810))
@@ -995,7 +1032,7 @@ Func ClearSoOFloor3()
 			Return $FAIL
 		EndIf
 		WaitUntilPartyAlive()
-		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then UseConset()
+		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
 		UseMoraleConsumableIfNeeded()
 		MoveAggroAndKillInRange(-2300, 8000, 'Triggering beacon 2', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-4500, 6500, '1', $SOO_AGGRO_RANGE)
@@ -1093,7 +1130,7 @@ Func ClearSoOFloor3()
 			Return $FAIL
 		EndIf
 		WaitUntilPartyAlive()
-		If IsHardmodeEnabled() Then UseConset()
+		If IsHardmodeEnabled() Then SoOUseConset()
 		MoveAggroAndKillInRange(-9850, 7600, 'Going back to secure door opening in case run failed 1', $largerSoOAggroRange)
 		MoveAggroAndKillInRange(-9200, 6000, 'Going back to secure door opening in case run failed 2', $largerSoOAggroRange)
 
@@ -1141,7 +1178,7 @@ Func SoOFinalFightConsetUptimeTick()
 	If Not $soo_floor3_final_fight_conset_uptime Then Return
 	If Not IsHardmodeEnabled() Then Return
 	If IsQuestReward($ID_QUEST_LOST_SOULS) Then Return
-	UseConset()
+	SoOUseConset()
 EndFunc
 
 
