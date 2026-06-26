@@ -71,6 +71,12 @@ Func RunTests()
 EndFunc
 
 
+;~ Method to make manual operations (open Xunlai, send instructions in the GUI input)
+Func ManualMode()
+	Return $PAUSE
+EndFunc
+
+
 ;~ Main method to run the test suite
 Func RunTestSuite()
 	If TestMovement() == $FAIL Then Error('Movement test failed')

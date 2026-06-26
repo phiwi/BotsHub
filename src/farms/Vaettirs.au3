@@ -5,7 +5,7 @@
 #								#
 #################################
 Author: gigi
-Modified by: Pink Musen (v.01), Deroni93 (v.02-3), Dragonel (with help from moneyvsmoney), Night, Gahais
+Modified by: Pink Musen (v.01), Deroni93 (v.02-3), Dragonel (with help from moneyvsmoney), Night, Gahais, BuddyLeeX
 ;
 ; Run this farm bot as Assassin or Mesmer or Monk or Elementalist
 ;
@@ -22,16 +22,17 @@ https://gwpvx.fandom.com/wiki/Build:E/Me_Obsidian_Flesh_Vaettir_Farmer
 #include '../../lib/GWA2.au3'
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
-#include '../utilities/SupportTeam.au3'
 
 Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
-Global Const $AME_VAETTIRS_FARMER_SKILLBAR = 'OwVU4lPL2hN8Id2BEBSANBLhbK'
-Global Const $MEA_VAETTIRS_FARMER_SKILLBAR = 'OQdUAMhOsPP8Id2BEBSANBLhbK'
-Global Const $MOA_VAETTIRS_FARMER_SKILLBAR = 'OwcU8UH6lPP8IdW9ABCRyi3D5B'
-;Global Const $MOA_VAETTIRS_FARMER_SKILLBAR = 'OwcT44P7nhHpzOgIQISW8eIPA'
-Global Const $EME_VAETTIRS_FARMER_SKILLBAR = 'OgVFwDKJL7Uk0n2wXlLoBgJwSwNF'
+Global Const $AME_VAETTIRS_FARMER_SKILLBAR			= 'OwVU4lPL2hN8Id2BEBSANBLhbK'
+Global Const $MEA_VAETTIRS_FARMER_SKILLBAR_FC0		= 'OQdVASBOKv85hHpzOgIQCoJYJcTB'
+Global Const $MEA_VAETTIRS_FARMER_SKILLBAR_FC1		= 'OQdVAQROKv85hHpzOgIQCoJYJcTB'
+Global Const $MEA_VAETTIRS_FARMER_SKILLBAR_FC2_3	= 'OQdVAOhOIf85hHpzOgIQCoJYJcTB'
+Global Const $MEA_VAETTIRS_FARMER_SKILLBAR_FC4		= 'OQdVAMhOK/85hHpzOgIQCoJYJcTB'
+Global Const $MOA_VAETTIRS_FARMER_SKILLBAR			= 'OwcU8UH6lPP8IdW9ABCRyi3D5B'
+Global Const $EME_VAETTIRS_FARMER_SKILLBAR			= 'OgVFwDKJL7Uk0n2wXlLoBgJwSwNF'
 
 Global Const $VAETTIRS_FARM_INFORMATIONS = 'For best results, have :' & @CRLF _
 	& '- +4 Shadow Arts (+3 +1 headgear)' & @CRLF _
@@ -75,16 +76,14 @@ Global Const $VAETTIR_ELEMENTALIST_ELEMENTAL_LORD		= 4
 Global Const $VAETTIR_ELEMENTALIST_MANTRA_OF_EARTH		= 5
 
 ; ==== Global variables ====
-Global $vaettirs_move_options = CloneDictMap($default_move_defend_options)
-$vaettirs_move_options.Item('defendFunction')				= VaettirsStayAlive
-$vaettirs_move_options.Item('moveTimeOut')					= 100 * 1000
-$vaettirs_move_options.Item('randomFactor')					= 50
-$vaettirs_move_options.Item('hosSkillSlot')					= $VAETTIR_HEART_OF_SHADOW
-$vaettirs_move_options.Item('deathChargeSkillSlot')			= 0
-$vaettirs_move_options.Item('openChests')					= False
+Global $vaettirs_move_options						= CloneMap($default_move_defend_options)
+$vaettirs_move_options['defendFunction']			= VaettirsStayAlive
+$vaettirs_move_options['moveTimeOut']				= 100 * 1000
+$vaettirs_move_options['randomFactor']				= 50
+$vaettirs_move_options['hosSkillSlot']				= $VAETTIR_HEART_OF_SHADOW
 
-Global $vaettirs_move_options_elementalist = CloneDictMap($vaettirs_move_options)
-$vaettirs_move_options_elementalist.Item('hosSkillSlot')	= 0
+Global $vaettirs_move_options_elementalist			= CloneMap($vaettirs_move_options)
+$vaettirs_move_options_elementalist['hosSkillSlot']	= 0
 
 Global $vaettirs_farm_setup = False
 Global $vaettirs_player_profession = $ID_ASSASSIN
@@ -100,6 +99,7 @@ Global $vaettir_protective_spirit_timer = TimerInit()
 
 ;~ Main method to farm Vaettirs
 Func VaettirsFarm()
+	If $vaettirs_farm_setup And GetMapID() <> $ID_JAGA_MORAINE Then $vaettirs_farm_setup = False
 	If Not $vaettirs_farm_setup And SetupVaettirsFarm() == $FAIL Then Return $PAUSE
 	Return VaettirsFarmLoop()
 EndFunc
@@ -109,7 +109,7 @@ Func SetupVaettirsFarm()
 	Info('Setting up farm')
 	If TravelToOutpost($ID_LONGEYES_LEDGE, $district_name) == $FAIL Then Return $FAIL
 	If SetupPlayerVaettirsFarm() == $FAIL Then Return $FAIL
-	If VaettirsDropAllHeroesBeforeRun() == $FAIL Then Return $FAIL
+	LeaveParty()
 	SwitchMode($ID_HARD_MODE)
 	While $vaettirs_deadlocked Or GetMapID() <> $ID_JAGA_MORAINE
 		$vaettirs_deadlocked = False
@@ -122,24 +122,7 @@ Func SetupVaettirsFarm()
 EndFunc
 
 
-Func VaettirsDropAllHeroesBeforeRun($maxWaitMs = 9000)
-	Local $timer = TimerInit()
-	SupportTeamKickAllHeroesByIDSweep()
-	KickAllHeroes()
-	LeaveParty(False)
-	While TimerDiff($timer) < $maxWaitMs
-		SupportTeamKickAllHeroesByIDSweep()
-		KickAllHeroes()
-		LeaveParty(False)
-		If GetHeroCount() <= 0 And GetPartySize() <= 1 Then Return $SUCCESS
-		RandomSleep(320)
-	WEnd
-
-	Warn('Could not reset Vaettirs party to solo. Party=' & GetPartySize() & ', heroes=' & GetHeroCount())
-	Return $FAIL
-EndFunc
-
-
+;~ Setup player skills and title depending on his profession
 Func SetupPlayerVaettirsFarm()
 	Info('Setting up player build skill bar')
 	Switch DllStructGetData(GetMyAgent(), 'Primary')
@@ -148,7 +131,7 @@ Func SetupPlayerVaettirsFarm()
 			LoadSkillTemplate($AME_VAETTIRS_FARMER_SKILLBAR)
 		Case $ID_MESMER
 			$vaettirs_player_profession = $ID_MESMER
-			LoadSkillTemplate($MEA_VAETTIRS_FARMER_SKILLBAR)
+			SelectMeASkillbar()
 		Case $ID_MONK
 			$vaettirs_player_profession = $ID_MONK
 			LoadSkillTemplate($MOA_VAETTIRS_FARMER_SKILLBAR)
@@ -166,15 +149,29 @@ Func SetupPlayerVaettirsFarm()
 	Else
 		SetDisplayedTitle($ID_NORN_TITLE)
 	EndIf
-	VaettirsEnsureWeaponSet3()
 	RandomSleep(500)
 	Return $SUCCESS
 EndFunc
 
 
-Func VaettirsEnsureWeaponSet3()
-	ChangeWeaponSet(3)
-	RandomSleep(100)
+;~ Select mesmer attributes depending on whether it has the anniversary shield and proper runes
+Func SelectMeASkillbar()
+	If IsItemEquipped($ID_ANNIVERSARY_SHIELD_CURTAIN) Then
+		Local $fast_casting_rune_bonus = GetAttributeByID($ID_FAST_CASTING, True, 0) - GetAttributeByID($ID_FAST_CASTING, False, 0)
+		Switch $fast_casting_rune_bonus
+			Case 0
+				LoadSkillTemplate($MEA_VAETTIRS_FARMER_SKILLBAR_FC0)
+			Case 1
+				LoadSkillTemplate($MEA_VAETTIRS_FARMER_SKILLBAR_FC1)
+			Case 2 to 3
+				LoadSkillTemplate($MEA_VAETTIRS_FARMER_SKILLBAR_FC2_3)
+			Case Else
+				LoadSkillTemplate($MEA_VAETTIRS_FARMER_SKILLBAR_FC4)
+		EndSwitch
+	Else
+		; No anniversary shield, so it doesn't matter what value of Fast Casting we actually have
+		LoadSkillTemplate($MEA_VAETTIRS_FARMER_SKILLBAR_FC4)
+	EndIf
 EndFunc
 
 
@@ -236,7 +233,6 @@ EndFunc
 
 ;~ Move to X, Y. This is to be used in the run from across Bjora Marches
 Func RunAcrossBjoraMarches($X, $Y)
-	VaettirsEnsureWeaponSet3()
 	Move($X, $Y)
 
 	Local $target
@@ -264,7 +260,6 @@ EndFunc
 
 ;~ Farm loop
 Func VaettirsFarmLoop()
-	VaettirsEnsureWeaponSet3()
 	; In case character died at previous loop
 	If IsPlayerDead() Then
 		If IsPlayerAtMaxMalus() Then
@@ -287,7 +282,7 @@ Func VaettirsFarmLoop()
 	Sleep(1000)
 
 	Info('Picking up loot')
-	PickUpItems(VaettirsStayAlive, VaettirsShouldPickItem)
+	PickUpItems(VaettirsStayAlive)
 	Return RezoneToJagaMoraine()
 EndFunc
 
@@ -407,16 +402,8 @@ Func VaettirsMoveDefending($destinationX, $destinationY)
 	VaettirsKillSequence()
 	If IsPlayerDead() Then Return $FAIL
 	Info('Picking up loot')
-	PickUpItems(VaettirsStayAlive, VaettirsShouldPickItem)
+	PickUpItems(VaettirsStayAlive)
 	Return $SUCCESS
-EndFunc
-
-
-Func VaettirsShouldPickItem($item)
-	Local $itemID = DllStructGetData($item, 'ModelID')
-	; Force-pick all four Sorrow's Furnace map pieces.
-	If IsMapPiece($itemID) Then Return True
-	Return DefaultShouldPickItem($item)
 EndFunc
 
 
@@ -432,7 +419,6 @@ EndFunc
 
 ;~ Use whatever skills you need to keep yourself alive.
 Func VaettirsStayAlive()
-	VaettirsEnsureWeaponSet3()
 	Local $adjacentCount, $areaCount, $foesSpellRange = False, $foesNear = False
 	Local $distance
 	Local $me = GetMyAgent()
@@ -478,8 +464,17 @@ EndFunc
 Func VaettirsCheckShadowForm()
 	; Caution, monk 55hp needs protective spirit before casting shadow form, otherwise damage reduction will not be applied
 	; Casting protective spirit multiple times may remove damage reduction so protective spirit has to casted only once just before Shadow Form
-	If ($vaettirs_player_profession <> $ID_MONK And TimerDiff($vaettir_shadowform_timer) > 19000 And GetEnergy() > 20) Or _
-		($vaettirs_player_profession == $ID_MONK And TimerDiff($vaettir_shadowform_timer) > 19500 And GetEnergy() > 30) Then
+	; Mesmers now have tightened timers to improve success rates
+	Local $shouldRecast = False
+	Switch $vaettirs_player_profession
+		Case $ID_MONK
+			$shouldRecast = TimerDiff($vaettir_shadowform_timer) > 19500 And GetEnergy() > 30
+		Case $ID_MESMER
+			$shouldRecast = TimerDiff($vaettir_shadowform_timer) > 18000 And GetEnergy() > 20
+		Case Else
+			$shouldRecast = TimerDiff($vaettir_shadowform_timer) > 19000 And GetEnergy() > 20
+	EndSwitch
+	If $shouldRecast Then
 		If $vaettirs_player_profession == $ID_MONK Then UseSkillEx($VAETTIR_MONK_PROTECTIVE_SPIRIT)
 		UseSkillEx($VAETTIR_DEADLY_PARADOX)
 		While IsPlayerAlive() And Not IsRecharged($VAETTIR_SHADOWFORM)
@@ -557,7 +552,6 @@ EndFunc
 
 ;~ Kill a mob group
 Func VaettirsKillSequence()
-	VaettirsEnsureWeaponSet3()
 	; Wait for shadow form or other buffs to have been casted very recently
 	While (($vaettirs_player_profession <> $ID_ELEMENTALIST And TimerDiff($vaettir_shadowform_timer) > 5000) Or _
 			($vaettirs_player_profession == $ID_ELEMENTALIST And TimerDiff($vaettir_obsidian_flesh_timer) > 5000)) And _
@@ -617,7 +611,7 @@ Func KillVaettirsUsingSmitingSkills()
 	While $foesCount > 0 And TimerDiff($deadlock) < $maxKillTime And IsPlayerAlive()
 		VaettirsStayAlive()
 
-		If TimerDiff($vaettir_shadowform_timer) < 16000 And IsRecharged($VAETTIR_MONK_BALTHAZARS_AURA) And GetEnergy() > 25 Then
+		If TimerDiff($vaettir_shadowform_timer) < 16000 And IsRecharged($VAETTIR_MONK_BALTHAZARS_AURA) And GetEnergy() > 15 Then
 			UseSkillEx($VAETTIR_MONK_BALTHAZARS_AURA)
 		EndIf
 
@@ -626,7 +620,8 @@ Func KillVaettirsUsingSmitingSkills()
 		EndIf
 
 		If TimerDiff($vaettir_shadowform_timer) < 16000 And IsRecharged($VAETTIR_MONK_SYMBOL_OF_WRATH) And GetEnergy() > 5 Then
-			UseSkillEx($VAETTIR_MONK_SYMBOL_OF_WRATH)
+			Local $target = GetNearestEnemyToAgent(GetMyAgent(), $RANGE_AREA)
+			UseSkillEx($VAETTIR_MONK_SYMBOL_OF_WRATH, $target)
 		EndIf
 
 		RandomSleep(100)

@@ -57,7 +57,7 @@ Global Const $DM_RANGER_HERO_CANT_TOUCH_THIS	= 3
 Global Const $DM_RANGER_HERO_MAKE_HASTE			= 4
 Global Const $DM_RANGER_HERO_STAND_YOUR_GROUND	= 5
 Global Const $DM_RANGER_HERO_EDGE_OF_EXTINCTION = 7
-Global Const $DM_RANGER_HERO_WINNOWING 			= 8
+Global Const $DM_RANGER_HERO_WINNOWING			= 8
 
 ; Order heros are added to the team
 Global $DM_RANGER_HERO	= 1
@@ -160,7 +160,7 @@ Func DragonMossFarmLoop()
 	RandomSleep(50)
 	CommandHero($DM_RANGER_HERO, -8350, 18400)
 	MoveTo(-8400, 18450)
-	
+
 	; Move to spot before aggro and cast defensive spells
 	If $DM_RANGER_HERO > 0 Then
 		UseHeroSkill($DM_RANGER_HERO, $DM_RANGER_HERO_MAKE_HASTE, GetMyAgent())
@@ -183,7 +183,7 @@ Func DragonMossFarmLoop()
 	If $DM_RANGER_HERO > 0 Then
 		CommandHero($DM_RANGER_HERO, -8700, 18300)
 	EndIf
-	RandomSleep(50) 
+	RandomSleep(50)
 
 	; Aggro and cast hero spirits
 	MoveTo(-5300, 15600, 0, 0, UseIMSWhenAvailable)
@@ -215,7 +215,7 @@ Func DragonMossFarmLoop()
 
 	; Killing
 	Local $target = GetNearestEnemyToAgent(GetMyAgent())
-	Local $center = FindMiddleOfFoes(DllStructGetData($target, 'X'), DllStructGetData($target, 'Y'), 2 * $RANGE_ADJACENT)
+	Local $center = FindMiddleOfFoes(DllStructGetData($target, 'X'), DllStructGetData($target, 'Y'), $RANGE_AREA)
 	$target = GetNearestEnemyToCoords($center[0], $center[1])
 	While IsRecharged($DM_DEATHS_CHARGE) And IsPlayerAlive()
 		UseSkillEx($DM_DEATHS_CHARGE, $target)

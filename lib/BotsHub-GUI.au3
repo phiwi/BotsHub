@@ -59,12 +59,9 @@ Opt('GUIOnEventMode', True)
 Opt('GUICloseOnESC', False)
 Opt('MustDeclareVars', True)
 
-Global $GUI_ENABLED = True
-
-; TODO: rename GUI to lowercase snake_case - do it once we move GUI to a separate file
 Global $gui_botshub, $gui_tabs_parent, $gui_tab_main, $gui_tab_runoptions, $gui_tab_lootoptions, $gui_tab_farminfos, $gui_tab_lootoptions, $gui_tab_teamoptions
 Global $gui_console, $gui_combo_characterchoice, $gui_combo_farmchoice, $gui_startbutton, $gui_farmprogress
-Global $gui_label_dynamicexecution, $gui_input_dynamicexecution, $gui_button_dynamicexecution, $gui_renderbutton, $gui_renderlabel, _
+Global $gui_label_manualmode, $gui_input_manualmode, $gui_button_manualmode, $gui_renderbutton, $gui_renderlabel, _
 		$gui_label_bagscount, $gui_combo_bagscount, $gui_label_traveldistrict, $gui_combo_districtchoice, _
 		$gui_label_weaponslot, $gui_combo_weaponslot, $gui_icon_saveconfig, $gui_combo_configchoice
 
@@ -343,16 +340,16 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($gui_renderbutton, 'GuiOptionsHandler')
 	GUICtrlSetOnEvent($gui_button_openstorage, 'GuiOptionsHandler')
 
-	Local $dynamicExecutionTooltip = 'Dynamic execution. It allows to run a command with' & @CRLF _
+	Local $manualModeTooltip = 'Manual Mode. Allows running a command with' & @CRLF _
 							& 'any arguments on the fly by writing it in below field.' & @CRLF _
 							& 'Syntax: fun(arg1, arg2, arg3, [...])'
-	$gui_input_dynamicexecution = GUICtrlCreateInput('', 355, 425, 156, 20)
-	$gui_button_dynamicexecution = GUICtrlCreateButton('Run', 530, 425, 75, 20)
-	GUICtrlSetTip($gui_label_dynamicexecution, $dynamicExecutionTooltip)
-	GUICtrlSetTip($gui_input_dynamicexecution, $dynamicExecutionTooltip)
-	GUICtrlSetTip($gui_button_dynamicexecution, $dynamicExecutionTooltip)
-	GUICtrlSetBkColor($gui_button_dynamicexecution, $COLOR_LIGHTBLUE)
-	GUICtrlSetOnEvent($gui_button_dynamicexecution, 'GuiOptionsHandler')
+	$gui_input_manualmode = GUICtrlCreateInput('', 355, 425, 156, 20)
+	$gui_button_manualmode = GUICtrlCreateButton('Run', 530, 425, 75, 20)
+	GUICtrlSetTip($gui_label_manualmode, $manualModeTooltip)
+	GUICtrlSetTip($gui_input_manualmode, $manualModeTooltip)
+	GUICtrlSetTip($gui_button_manualmode, $manualModeTooltip)
+	GUICtrlSetBkColor($gui_button_manualmode, $COLOR_LIGHTBLUE)
+	GUICtrlSetOnEvent($gui_button_manualmode, 'GuiOptionsHandler')
 	GUICtrlCreateGroup('', -99, -99, 1, 1)
 	GUICtrlCreateTabItem('')
 
@@ -719,8 +716,8 @@ Func GuiOptionsHandler()
 			ToggleRendering()
 		Case $gui_button_openstorage
 			OpenXunlaiWindow()
-		Case $gui_button_dynamicexecution
-			DynamicExecution(GUICtrlRead($gui_input_dynamicexecution))
+		Case $gui_button_manualmode
+			DynamicExecution(GUICtrlRead($gui_input_manualmode))
 		Case Else
 			MsgBox(0, 'Error', 'This button is not coded yet.')
 	EndSwitch
@@ -965,23 +962,21 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $JB_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $JB_HERO_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $JB_FARM_INFORMATIONS)
-		Case 'Missing Daughter'
-			GUICtrlSetData($gui_edit_characterbuilds, $MD_PLAYER_SKILLBAR)
-			GUICtrlSetData($gui_edit_heroesbuilds, $MD_PYRE_SKILLBAR & @CRLF & $MD_XANDRA_SKILLBAR & @CRLF & $MD_MORGAHN_SKILLBAR)
-			GUICtrlSetData($gui_label_farminformations, $MISSING_DAUGHTER_FARM_INFORMATIONS)
+		Case 'Kilroy'
+			GUICtrlSetData($gui_label_farminformations, $KILROY_FARM_INFORMATIONS)
 		Case 'Kournans'
 			GUICtrlSetData($gui_edit_characterbuilds, $ELA_KOURNANS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $R_KOURNANS_HERO_SKILLBAR & @CRLF & _
 				$RT_KOURNANS_HERO_SKILLBAR & @CRLF & $P_KOURNANS_HERO_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $KOURNANS_FARM_INFORMATIONS)
-		Case 'Kurzick'
+		Case 'Kurzick Ferndale'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
-			GUICtrlSetData($gui_label_farminformations, $KURZICK_FACTION_INFORMATIONS)
+			GUICtrlSetData($gui_label_farminformations, $KURZICK_FERNDALE_INFORMATIONS)
 		Case 'Kurzick Drazach'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
-			GUICtrlSetData($gui_label_farminformations, $KURZICK_FACTION_DRAZACH_INFORMATIONS)
+			GUICtrlSetData($gui_label_farminformations, $KURZICK_DRAZACH_INFORMATIONS)
 		Case 'LDOA'
 			GUICtrlSetData($gui_label_farminformations, $LDOA_INFORMATIONS)
 		Case 'Lightbringer & Sunspear'
@@ -992,10 +987,14 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $LIGHTBRINGER_FARM_INFORMATIONS)
-		Case 'Luxon'
+		Case 'LuxonMQ'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
-			GUICtrlSetData($gui_label_farminformations, $LUXON_FACTION_INFORMATIONS)
+			GUICtrlSetData($gui_label_farminformations, $LUXON_MOUNT_QINKAI_INFORMATIONS)
+		Case 'LuxonSS'
+			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
+			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
+			GUICtrlSetData($gui_label_farminformations, $LUXON_SILENT_SURF_INFORMATIONS)
 		Case 'Mantids'
 			GUICtrlSetData($gui_edit_characterbuilds, $RA_MANTIDS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $MANTIDS_HERO_SKILLBAR)
@@ -1003,9 +1002,6 @@ Func UpdateFarmDescription($farm)
 		Case 'Ministerial Commendations'
 			GUICtrlSetData($gui_edit_characterbuilds, $DW_COMMENDATIONS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $COMMENDATIONS_FARM_INFORMATIONS)
-		Case 'Ministerial Com. Custom'
-			GUICtrlSetData($gui_edit_characterbuilds, $A_COMMENDATIONS_CUSTOM_FARMER_SKILLBAR)
-			GUICtrlSetData($gui_label_farminformations, $COMMENDATIONS_CUSTOM_FARM_INFORMATIONS)
 		Case 'Minotaurs'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
@@ -1021,12 +1017,6 @@ Func UpdateFarmDescription($farm)
 		Case 'Pongmei'
 			GUICtrlSetData($gui_edit_characterbuilds, $PONGMEI_CHESTRUNNER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $PONGMEI_CHESTRUN_INFORMATIONS)
-		Case 'Pongmei Sin'
-			GUICtrlSetData($gui_edit_characterbuilds, $PONGMEI_SIN_CHESTRUNNER_SKILLBAR)
-			GUICtrlSetData($gui_label_farminformations, $PONGMEI_SIN_CHESTRUN_INFORMATIONS)
-		Case 'Barbarous Shore Sin'
-			GUICtrlSetData($gui_edit_characterbuilds, $BARBAROUS_SHORE_SIN_CHESTRUNNER_SKILLBAR)
-			GUICtrlSetData($gui_label_farminformations, $BARBAROUS_SHORE_SIN_CHESTRUN_INFORMATIONS)
 		Case 'Raptors'
 			GUICtrlSetData($gui_edit_characterbuilds, $WN_RAPTORS_FARMER_SKILLBAR & @CRLF & $DN_RAPTORS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $P_RUNNER_HERO_SKILLBAR)
@@ -1036,7 +1026,7 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $SOO_FARM_INFORMATIONS)
 		Case 'SpiritSlaves'
-			GUICtrlSetData($gui_edit_characterbuilds, $SPIRIT_SLAVES_SKILLBAR)
+			GUICtrlSetData($gui_edit_characterbuilds, $SPIRIT_SLAVES_RITUALIST_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $SPIRIT_SLAVES_FARM_INFORMATIONS)
 		Case 'Sunspear Armor'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
@@ -1052,12 +1042,9 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $UNDERWORLD_FARM_INFORMATIONS)
-		Case 'UW Chamber Traps'
-			GUICtrlSetData($gui_edit_characterbuilds, $UWCT_SKILLBAR)
-			GUICtrlSetData($gui_label_farminformations, $UWCT_FARM_INFORMATIONS)
 		Case 'Vaettirs'
 			GUICtrlSetData($gui_edit_characterbuilds, $AME_VAETTIRS_FARMER_SKILLBAR & @CRLF & _
-				$MEA_VAETTIRS_FARMER_SKILLBAR & @CRLF & $MOA_VAETTIRS_FARMER_SKILLBAR & @CRLF & $EME_VAETTIRS_FARMER_SKILLBAR)
+				$MEA_VAETTIRS_FARMER_SKILLBAR_FC4 & @CRLF & $MOA_VAETTIRS_FARMER_SKILLBAR & @CRLF & $EME_VAETTIRS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $VAETTIRS_FARM_INFORMATIONS)
 		Case 'Vanguard'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)

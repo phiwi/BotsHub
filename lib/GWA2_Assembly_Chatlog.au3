@@ -59,8 +59,8 @@ Func AssemblerCreateChatLog()
 	_('pushad')
 	; AddToChatLog uses EBP-relative argument access (inherited from caller frame).
 	; Original first instruction: MOV EAX,[EBP+8] confirms EBP is valid at hook point.
-	;   [ebp+8] = message ptr (wchar_t*)
-	;   [ebp+C] = channel (uint32_t)
+	;	[ebp+8] = message ptr (wchar_t*)
+	;	[ebp+C] = channel (uint32_t)
 	_('mov edx,dword[ebp+C]')
 	_('mov dword[ChatMessageChannel],edx')
 	_('mov edx,dword[ebp+8]')
@@ -200,7 +200,7 @@ EndFunc
 ;					is always present in real whisper messages and never in encoded GW strings.
 ;
 ;					LIMITATION: Currently only handles 'Received Whisper'. To add general-channel
-;					alerting (e.g. scan Trade/All for "WTB conset"), register a separate
+;					alerting (e.g. scan Trade/All for 'WTB conset'), register a separate
 ;					AdlibRegister callback that polls GetChatMessageCounter(), reads
 ;					GetChannelName(GetChatMessageChannel()) to filter by channel, and reads
 ;					the message from ChatMessageData via $chat_message_data_address.

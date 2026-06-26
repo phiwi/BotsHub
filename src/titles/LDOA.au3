@@ -52,11 +52,10 @@ Global Const $LOW_HEALTH_CHECK_INTERVAL = 100
 
 Global $ldoa_farm_setup = False
 
-Global $ldoa_fight_options = CloneDictMap($default_move_aggro_kill_options)
-$ldoa_fight_options.Item('openChests')			= False
-$ldoa_fight_options.Item('callTarget')			= False
-$ldoa_fight_options.Item('priorityMobs')		= True
-$ldoa_fight_options.Item('lootInFights')		= False
+Global $ldoa_fight_options = CloneMap($default_move_aggro_kill_options)
+$ldoa_fight_options['openChests']	= False
+$ldoa_fight_options['callTarget']	= False
+$ldoa_fight_options['priorityMobs']	= True
 
 ;~ Main method to get LDOA title
 Func LDOATitleFarm()
@@ -163,7 +162,7 @@ Func InitialSetupLDOA()
 
 	TakeQuest($questNPC, $professionTestQuestID, $professionTestAcceptQuestDialogID)
 	MoveTo(4187, -948)
-	MoveAggroAndKillInRange(4207, -2892, '', 3000)
+	MoveAggroAndKillInRange(4207, -2892, '', $RANGE_SPIRIT + 500)
 	If $primaryProfession == $ID_MONK Then
 		MoveTo(3868, -4330)
 		Local $npcGwen = GetNearestNPCToCoords(3868, -4330)
@@ -336,7 +335,7 @@ Func LDOATitleFarmUnder10()
 	MoveTo(-3640, 10930)
 	Sleep(2000)
 	MoveTo(-3440, 10010)
-	MoveAggroAndKillInRange(-3753, 11131, '', 3000)
+	MoveAggroAndKillInRange(-3753, 11131, '', $RANGE_SPIRIT + 500)
 	If IsPlayerDead() Then Return $FAIL
 	Return $SUCCESS
 EndFunc
@@ -458,7 +457,7 @@ EndFunc
 Func IsLowHealth()
 	Local $me = GetMyAgent()
 	Local $healthRatio = DllStructGetData($me, 'HealthPercent')
-	If $healthRatio > 0 And $healthRatio < $LOW_HEALTH_THRESHOLD Then Return True
+	If Not IsNearlyEqual($healthRatio, 0) And $healthRatio < $LOW_HEALTH_THRESHOLD Then Return True
 	Return False
 EndFunc
 

@@ -85,6 +85,7 @@ Func FarmMinotaurs()
 	If GetMapID() <> $ID_PROPHETS_PATH Then Return $FAIL
 
 	If IsHardmodeEnabled() Then UseConset()
+	UseSummoningStone()
 
 	; 12 groups to vanquish
 	Local Static $minotaurs[][] = [ _
