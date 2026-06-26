@@ -121,6 +121,7 @@ Global $soo_setup_outpost_recovery_attempted = False
 Global $soo_grails_used = 0
 Global $soo_armors_used = 0
 Global $soo_essences_used = 0
+Global $soo_last_conset_timer = TimerInit()
 
 
 ;~ Main method to farm SoO
@@ -165,6 +166,8 @@ EndFunc
 
 
 Func SoOUseConset()
+	If TimerDiff($soo_last_conset_timer) < 3000 Then Return
+	$soo_last_conset_timer = TimerInit()
 	If GetEffectTimeRemaining(GetEffect($ID_GRAIL_OF_MIGHT_EFFECT)) <= 0 Then
 		$soo_grails_used += 1
 		Info('SoO con: using Grail of Might  (#' & $soo_grails_used & ' this run)')
@@ -995,7 +998,6 @@ EndFunc
 Func ClearSoOFloor3()
 	Info('------------------------------------')
 	Info('Third floor')
-	If IsHardmodeEnabled() Then SoOUseConset()
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 1100, 7100, 1250)
 		If CheckStuck('SoO Floor 3 - First loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
