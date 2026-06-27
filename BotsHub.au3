@@ -1,4 +1,4 @@
-#CS ===========================================================================
+﻿#CS ===========================================================================
 ; Author: caustic-kronos (aka Kronos, Night, Svarog)
 ; Contributor: Gahais
 ; Copyright 2025 caustic-kronos
@@ -41,46 +41,68 @@
 #include 'lib/Build_PW_Heroic-Refrain.au3'
 #include 'lib/BotsHub-GUI.au3'
 
+#include 'src/farms/Brightclaw.au3'
 #include 'src/farms/CoF.au3'
 #include 'src/farms/Corsairs.au3'
 #include 'src/farms/DragonMoss.au3'
 #include 'src/farms/EdenIris.au3'
 #include 'src/farms/Feathers.au3'
 #include 'src/farms/FeathersSin.au3'
-#include 'src/farms/FocusHanaku.au3'
 #include 'src/farms/FoWTowerOfCourage.au3'
+#include 'src/farms/UWChamberTraps.au3'
+#include 'src/farms/FocusHanaku.au3'
 #include 'src/farms/Gemstones.au3'
 #include 'src/farms/GemstoneMargonite.au3'
 #include 'src/farms/GemstoneStygian.au3'
 #include 'src/farms/GemstoneTorment.au3'
 #include 'src/farms/JadeBrotherhood.au3'
+#include 'src/farms/MissingDaughter.au3'
 #include 'src/farms/Lightbringer-Sunspear.au3'
 #include 'src/farms/Lightbringer.au3'
 #include 'src/farms/Mantids.au3'
 #include 'src/farms/Kournans.au3'
 #include 'src/farms/Minotaurs.au3'
+#include 'src/farms/OutcastHalcyon.au3'
 #include 'src/farms/Raptors.au3'
 #include 'src/farms/SpiritSlaves.au3'
+#include 'src/farms/SpiritSlavesCustom.au3'
+#include 'src/farms/SpiritSlavesSin.au3'
+#include 'src/farms/SpiritSlavesRangerDerv.au3'
+#include 'src/farms/SpiritSlavesWarrior.au3'
 #include 'src/farms/Vaettirs.au3'
+#include 'src/farms/Vanquish.au3'
+#include 'src/farms/Vanquish Blacktide Lahtenda.au3'
+#include 'src/farms/Warden.au3'
+#include 'src/farms/Wingstorm.au3'
 #include 'src/missions/Deldrimor.au3'
 #include 'src/missions/FoW.au3'
 #include 'src/missions/Froggy.au3'
 #include 'src/missions/GlintChallenge.au3'
 #include 'src/missions/Kilroy.au3'
-#include 'src/missions/MinisterialCommendations.au3'
+#include 'src/missions/MinisterialCommendationsAny.au3'
+#include 'src/missions/MinisterialCommendationsCustom.au3'
 #include 'src/missions/NexusChallenge.au3'
 #include 'src/missions/SoO.au3'
 #include 'src/missions/SunspearArmor.au3'
 #include 'src/missions/TunnelsOfTheForsaken.au3'
 #include 'src/missions/Underworld.au3'
+#include 'src/missions/UnderworldPlainsTrainer.au3'
 #include 'src/missions/Voltaic.au3'
+#include 'src/missions/VSF Perma Tank.au3'
+#include 'src/missions/VSF Perma Tank Thommis.au3'
 #include 'src/missions/WarSupplyKeiran.au3'
 #include 'src/runs/Boreal.au3'
+#include 'src/runs/OutcastRheasCrater.au3'
 #include 'src/runs/Pongmei.au3'
+#include 'src/runs/PongmeiSin.au3'
+#include 'src/runs/BarbarousShoreSin.au3'
 #include 'src/runs/Tasca.au3'
+#include 'src/runs/WajjunBazar.au3'
+#include 'src/runs/AmFah600SpiritBond.au3'
 #include 'src/titles/LDOA.au3'
 #include 'src/utilities/Follower.au3'
 #include 'src/utilities/OmniFarmer.au3'
+#include 'src/utilities/PathActionRecorder.au3'
 #include 'src/utilities/TestSuite.au3'
 #include 'src/vanquishes/Asuran.au3'
 #include 'src/vanquishes/KurzickFerndale.au3'
@@ -100,9 +122,10 @@ Global Const $SUCCESS = 0
 Global Const $FAIL = 1
 Global Const $PAUSE = 2
 
-Global Const $AVAILABLE_FARMS = '|Asuran|Boreal|CoF|Corsairs|Deldrimor|Dragon Moss|Eden Iris|Feathers|Feathers Sin|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Gemstones|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|' & _
-	'Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Ferndale|Kurzick Drazach|Lightbringer & Sunspear|Lightbringer|LDOA|LuxonMQ|LuxonSS|Mantids|Ministerial Commendations|Minotaurs|Nexus Challenge|Norn|OmniFarm|Pongmei|' & _
-	'Raptors|SoO|SpiritSlaves|Sunspear Armor|Tasca|TunnelsOfTheForsaken|Underworld|Vaettirs|Vanguard|Voltaic|War Supply Keiran|Storage|Tests|TestSuite|Manual Mode'
+Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Follower|Focus Hanaku|FoW|FoW Tower of Courage|Froggy|Froggy Hero Panels Test|' & _
+	'Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Ferndale|Kurzick Drazach|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|' & _
+	'Path Recorder|Pongmei|Pongmei Sin|Raptors|SoO|Spirit Slaves Ranger|Spirit Slaves Warrior|Storage|Sunspear Armor|Tasca|TestSuite|Tests|TunnelsOfTheForsaken|Underworld|Underworld Plains Trainer|UW Chamber Traps|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|' & _
+	'Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
 
 Global Const $AVAILABLE_DISTRICTS = '|Random|Random EU|Random US|Random Asia|America|China|English|French|German|International|Italian|Japan|Korea|Polish|Russian|Spanish'
 
@@ -255,25 +278,32 @@ Func RunFarmLoop()
 	; Farm Name;Farm function;Inventory space;Farm duration
 	Local $farm = $farm_map[$farm_name]
 	Local $inventorySpaceNeeded = $farm[2]
+	Local $sooSafetyBypassInventory = ($farm_name == 'SoO' And $soo_skip_next_inventory_management)
+	If $sooSafetyBypassInventory Then
+		Warn('SoO safety mode: skipping this cycle inventory management after critical failure recovery')
+		$soo_skip_next_inventory_management = False
+	EndIf
 
 	; No authentication: skip global farm setup and inventory management
 	If $character_name <> '' Then
 		; Must do mid-run inventory management before normal one else we will go back to town
-		If $inventorySpaceNeeded <> 0 And $run_options_cache['run.farm_materials_mid_run'] Then
+		If Not $sooSafetyBypassInventory And $inventorySpaceNeeded <> 0 And $run_options_cache['run.farm_materials_mid_run'] Then
 			Local $resetRequired = InventoryManagementMidRun()
 			If $resetRequired Then ResetBotsSetups()
 		EndIf
 
 		; During pickup, items will be moved to equipment bag (if used) when first 3 bags are full
 		; So bag 5 will always fill before 4 - hence we can count items up to bag 4
-		If (CountSlots(1, _Min($bags_count, 4)) < $inventorySpaceNeeded) Then
+		If Not $sooSafetyBypassInventory And (CountSlots(1, _Min($bags_count, 4)) < $inventorySpaceNeeded) Then
 			InventoryManagementBeforeRun()
 		EndIf
 		; Inventory management did not clean up inventory - we pause
-		If (CountSlots(1, $bags_count) < $inventorySpaceNeeded) Then
+		If Not $sooSafetyBypassInventory And (CountSlots(1, $bags_count) < $inventorySpaceNeeded) Then
 			Notice('Inventory full, pausing.')
 			ResetBotsSetups()
 			$runtime_status = 'WILL_PAUSE'
+		ElseIf $sooSafetyBypassInventory And (CountSlots(1, $bags_count) < $inventorySpaceNeeded) Then
+			Warn('SoO safety mode: inventory below target but skipping stash/sell once to avoid unstable sequence')
 		EndIf
 
 		; Global farm setup
@@ -520,12 +550,13 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Dragon Moss',					DragonMossFarm,					5,					$DRAGONMOSS_FARM_DURATION)
 	AddFarmToFarmMap(	'Eden Iris',					EdenIrisFarm,					2,					$IRIS_FARM_DURATION)
 	AddFarmToFarmMap(	'Feathers',						FeathersFarm,					10,					$FEATHERS_FARM_DURATION)
-	AddFarmToFarmMap(	'Feathers Sin',					FeathersFarmSinDerv,			10,					$FEATHERS_SIN_DERV_FARM_DURATION)
-	AddFarmToFarmMap(	'Focus Hanaku',					FocusHanakuFarm,				5,					$HANAKU_FARM_DURATION)
+	AddFarmToFarmMap(	'Feathers Sin',						FeathersFarmSinDerv,				10,					$FEATHERS_SIN_DERV_FARM_DURATION)
 	AddFarmToFarmMap(	'Follower',						FollowerFarm,					5,					30 * 60 * 1000)
 	AddFarmToFarmMap(	'FoW',							FoWFarm,						15,					$FOW_FARM_DURATION)
 	AddFarmToFarmMap(	'FoW Tower of Courage',			FoWToCFarm,						10,					$FOW_TOC_FARM_DURATION)
+	AddFarmToFarmMap(	'Focus Hanaku',						FocusHanakuFarm,					5,					$HANAKU_FARM_DURATION)
 	AddFarmToFarmMap(	'Froggy',						FroggyFarm,						10,					$FROGGY_FARM_DURATION)
+	AddFarmToFarmMap(	'Froggy Hero Panels Test',		FroggyHeroPanelsPseudoFarm,		0,					$FROGGY_HERO_PANELS_TEST_DURATION)
 	AddFarmToFarmMap(	'Gemstones',					GemstonesFarm,					10,					$GEMSTONES_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Margonite',			GemstoneMargoniteFarm,			10,					$GEMSTONE_MARGONITE_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Stygian',				GemstoneStygianFarm,			10,					$GEMSTONE_STYGIAN_FARM_DURATION)
@@ -533,6 +564,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Glint Challenge',				GlintChallengeFarm,				5,					$GLINT_CHALLENGE_DURATION)
 	AddFarmToFarmMap(	'Jade Brotherhood',				JadeBrotherhoodFarm,			5,					$JADEBROTHERHOOD_FARM_DURATION)
 	AddFarmToFarmMap(	'Kilroy',						KilroyFarm,						10,					$KILROY_FARM_DURATION)
+	AddFarmToFarmMap(	'Missing Daughter',				MissingDaughterFarm,			5,					$MISSING_DAUGHTER_FARM_DURATION)
 	AddFarmToFarmMap(	'Kournans',						KournansFarm,					5,					$KOURNANS_FARM_DURATION)
 	AddFarmToFarmMap(	'Kurzick Ferndale',				KurzickFerndaleFarm,			15,					$KURZICKS_FERNDALE_DURATION)
 	AddFarmToFarmMap(	'Kurzick Drazach',				KurzickDrazachFarm,				10,					$KURZICKS_DRAZACH_DURATION)
@@ -543,27 +575,47 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'LuxonSS',						LuxonSilentSurfFarm,			10,					$LUXONS_SILENT_SURF_DURATION)
 	AddFarmToFarmMap(	'Mantids',						MantidsFarm,					5,					$MANTIDS_FARM_DURATION)
 	AddFarmToFarmMap(	'Ministerial Commendations',	MinisterialCommendationsFarm,	5,					$COMMENDATIONS_FARM_DURATION)
+	AddFarmToFarmMap(	'Ministerial Com. Custom',	MinisterialCommendationsCustomFarm,	5,					$COMMENDATIONS_CUSTOM_FARM_DURATION)
 	AddFarmToFarmMap(	'Minotaurs',					MinotaursFarm,					5,					$MINOTAURS_FARM_DURATION)
 	AddFarmToFarmMap(	'Nexus Challenge',				NexusChallengeFarm,				5,					$NEXUS_CHALLENGE_FARM_DURATION)
 	AddFarmToFarmMap(	'Norn',							NornTitleFarm,					5,					$NORN_FARM_DURATION)
 	AddFarmToFarmMap(	'OmniFarm',						OmniFarm,						5,					5 * 60 * 1000)
+	AddFarmToFarmMap(	'Outcast Halcyon',					OutcastHalcyonFarm,				5,					$OUTCAST_HALCYON_FARM_DURATION)
+	AddFarmToFarmMap(	'Outcast Rhea''s Crater',			OutcastRheasCraterChestFarm,		5,					$OUTCAST_RHEAS_CRATER_FARM_DURATION)
 	AddFarmToFarmMap(	'Pongmei',						PongmeiChestFarm,				5,					$PONGMEI_FARM_DURATION)
+	AddFarmToFarmMap(	'Pongmei Sin',					PongmeiSinChestFarm,				5,					$PONGMEI_SIN_FARM_DURATION)
+	AddFarmToFarmMap(	'Barbarous Shore Sin',			BarbarousShoreSinChestFarm,		5,					$BARBAROUS_SHORE_SIN_FARM_DURATION)
+	AddFarmToFarmMap(	'Brightclaw',							BrightclawFarm,					5,					5 * 60 * 1000)
+	AddFarmToFarmMap(	'Wingstorm',							WingstormFarm,					5,					$WINGSTORM_RUN_TIMEOUT_MS)
+	AddFarmToFarmMap(	'Path Recorder',					PathActionRecorderFarm,			0,					$PATH_ACTION_RECORDER_DURATION)
 	AddFarmToFarmMap(	'Raptors',						RaptorsFarm,					5,					$RAPTORS_FARM_DURATION)
 	AddFarmToFarmMap(	'SoO',							SoOFarm,						15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SpiritSlaves',					SpiritSlavesFarm,				5,					$SPIRIT_SLAVES_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves Ele',				SpiritSlavesCustomFarm,			5,					$SPIRIT_SLAVES_CUSTOM_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves Ranger',			SpiritSlavesRangerDervFarm,		5,					$SPIRIT_SLAVES_RANGER_DERV_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves Sin',				SpiritSlavesSinFarm,				5,					$SPIRIT_SLAVES_SIN_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves Warrior',		SpiritSlavesWarriorFarm,			5,					$SPIRIT_SLAVES_WARRIOR_FARM_DURATION)
 	AddFarmToFarmMap(	'Sunspear Armor',				SunspearArmorFarm,				5,					$SUNSPEAR_ARMOR_FARM_DURATION)
 	AddFarmToFarmMap(	'Tasca',						TascaChestFarm,					5,					$TASCA_FARM_DURATION)
+	AddFarmToFarmMap(	'Wajjun Bazar',				WajjunBazarRun,					5,					$WAJJUN_BAZAR_FARM_DURATION)
+	AddFarmToFarmMap(	'Am Fah 600 Spirit Bond',	AmFah600SpiritBondRun,			5,					$AMFAH600_SB_FARM_DURATION)
 	AddFarmToFarmMap(	'TunnelsOfTheForsaken',			TunnelsOfTheForsakenFarm,		5,					$TUNNELS_OF_THE_FORSAKEN_FARM_DURATION)
 	AddFarmToFarmMap(	'Underworld',					UnderworldFarm,					5,					$UW_FARM_DURATION)
+	AddFarmToFarmMap(	'Underworld Plains Trainer',	UnderworldPlainsTrainerFarm,	0,					$UWPT_TARGET_LOOP_DURATION_MS)
+	AddFarmToFarmMap(	'UW Chamber Traps',				UWChamberTrapsFarm,				5,					$UWCT_FARM_DURATION)
 	AddFarmToFarmMap(	'Vaettirs',						VaettirsFarm,					5,					$VAETTIRS_FARM_DURATION)
 	AddFarmToFarmMap(	'Vanguard',						VanguardTitleFarm,				5,					$VANGUARD_TITLE_FARM_DURATION)
+	AddFarmToFarmMap(	'Vanquish Blacktide Lahtenda',		VanquishBlackTideLahtendaFarm,	5,					$VANQBT_RUN_TIMEOUT_MS)
+	AddFarmToFarmMap(	'Vanquish Jokanur Zehlon',			VanquishFarm,					5,					$VANQ_RUN_TIMEOUT_MS)
 	AddFarmToFarmMap(	'Voltaic',						VoltaicFarm,					10,					$VOLTAIC_FARM_DURATION)
+	AddFarmToFarmMap(	'VSF Perma Tank',				VSFPermaTankFarm,				5,					$VSF_PERMA_TANK_FARM_DURATION)
+	AddFarmToFarmMap(	'VSF Perma Tank Thommis',		VSFPermaTankThommisFarm,		5,					$VSF_PERMA_TANK_THOMMIS_FARM_DURATION)
+	AddFarmToFarmMap(	'Warden Farm',					WardenFarm,					5,					$WARDEN_FARM_DURATION)
 	AddFarmToFarmMap(	'War Supply Keiran',			WarSupplyKeiranFarm,			10,					$WAR_SUPPLY_FARM_DURATION)
 	AddFarmToFarmMap(	'Manual Mode',					ManualMode,						0,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'Storage',						InventoryManagementBeforeRun,	5,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'Tests',						RunTests,						0,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'TestSuite',					RunTestSuite,					0,					5 * 60 * 1000)
-	AddFarmToFarmMap(	'',								Null,							0,					2 * 60 * 1000)
 EndFunc
 
 
@@ -573,21 +625,41 @@ Func ResetBotsSetups()
 	$boreal_farm_setup						= False
 	$dm_farm_setup							= False
 	$feathers_farm_setup					= False
+	$feathers_sin_derv_farm_setup		= False
 	$froggy_farm_setup						= False
 	$hanaku_farm_setup						= False
 	$iris_farm_setup						= False
 	$jade_brotherhood_farm_setup			= False
+	$missing_daughter_farm_setup			= False
 	$kournans_farm_setup					= False
 	$ldoa_farm_setup						= False
 	$lightbringer_farm_setup				= False
 	$mantids_farm_setup						= False
+	$outcast_rheas_crater_farm_setup		= False
 	$pongmei_farm_setup						= False
+	$pongmei_sin_farm_setup					= False
 	$raptors_farm_setup						= False
 	$soo_farm_setup							= False
 	$spirit_slaves_farm_setup				= False
+	$spirit_slaves_custom_farm_setup		= False
+	$spirit_slaves_ranger_derv_farm_setup	= False
+	$spirit_slaves_ranger_derv_build_setup	= False
+	$spirit_slaves_sin_farm_setup			= False
+	$spirit_slaves_warrior_farm_setup		= False
+	$spirit_slaves_warrior_build_setup		= False
+	$spirit_slaves_warrior_live_vicariously_primed = False
 	$tasca_farm_setup						= False
+	$wajjun_bazar_run_setup				= False
+	$amfah600_sb_setup_done				= False
+	$amfah600_sb_maintained_precast_done	= False
 	$tunnels_of_the_forsaken_farm_setup		= False
 	$vaettirs_farm_setup					= False
+	$vanq_setup_done					= False
+	$vanqbt_setup_done					= False
+	$warden_farm_setup					= False
+	$vsf_setup_done						= False
+	$wingstorm_farm_setup				= False
+	$uwpt_setup_done						= False
 	; Those do not need to be reset - party did not change, build did not change, and there is no need to refresh portal
 	; BUT those bots MUST tp to the correct map on every loop
 	;$cof_farm_setup						= False
@@ -622,7 +694,11 @@ Func GeneralFarmSetup()
 		SetupTeamUsingGlobalSettings()
 	EndIf
 	If $character_name <> '' Then
-		If $run_options_cache['run.go_offline'] Then SetPlayerStatus(0)
+		If $run_options_cache['run.go_offline'] Then
+			SetPlayerStatus(0)
+		Else
+			SetPlayerStatus(3)
+		EndIf
 		If $run_options_cache['run.flash_whisper'] Then EnableWhisperFlash()
 	EndIf
 
@@ -657,18 +733,12 @@ EndFunc
 
 ;~ Auto-detect player build and wire up specialized combat/maintenance routines
 Func SetupPlayerBuildOverrides()
-	; For build detection, we iterate over skills and key skills + profession will give use which build must be used
-	Local $profession = GetHeroProfession(0)
-	Local $skillbar = GetSkillbar(0)
+	If GetHeroProfession(0) <> $ID_PARAGON Then Return
 	For $i = 1 To 8
-		Local $skillID = DllStructGetData($skillbar, 'SkillID' & $i)
-		If $profession == $ID_PARAGON Then
-			If $skillID == $ID_HEROIC_REFRAIN Then Return SetupHRBuild()
-			;If $skillID == ... Then Return ...
+		If GetSkillbarSkillID($i) == $ID_HEROIC_REFRAIN Then
+			SetupHRAdrenalineBuild()
+			Return
 		EndIf
-		;If $profession == $ID_NECROMANCER Then
-			;If $skillID == ... Then Return ...
-		;EndIf
 	Next
 EndFunc
 
