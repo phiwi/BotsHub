@@ -35,6 +35,7 @@ Global Const $SOO_FARM_INFORMATIONS = 'For best results, do not cheap out on her
 
 Global Const $ID_SOO_TORCH = 22342
 Global Const $SOO_AGGRO_RANGE = $RANGE_SPELLCAST + 100
+Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RicYX0m0V8bwNDdYUAA'
 
 Global Const $SOO_FARM_DURATION = 60 * 60 * 1000
 Global Const $MAX_SOO_FARM_DURATION = 80 * 60 * 1000
@@ -255,6 +256,9 @@ Func SetupSoOFarm()
 	EndIf
 	SwitchToHardModeIfEnabled()
 	SetDisplayedTitle($ID_ASURA_TITLE)
+	Info('Loading Ele player build')
+	LoadSkillTemplate($SOO_PLAYER_SKILLBAR)
+	RandomSleep(250)
 	SupportTeamOpenHeroPanels('SoO')
 	For $attempt = 1 To $SOO_SETUP_RUN_TO_DUNGEON_RETRIES
 		If RunToShardsOfOrrDungeon() == $SUCCESS Then

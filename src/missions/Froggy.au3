@@ -82,7 +82,6 @@ Global Const $FROGGY_ELEMENTALIST_HERO_SOUSUKE_TEMPLATE = 'OgBVgw0pwFy0Rs+nxqqj1
 Global Const $FROGGY_ELEMENTALIST_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
 ;~ Global Const $FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA' ; Bone Fiends
 Global Const $FROGGY_ELEMENTALIST_HERO_LIVIA_TEMPLATE = 'OAhjUwGooSyBVBoBKgbheTYM4BA' ; Minion Bomber
-;~ Global Const $FROGGY_ELEMENTALIST_HERO_XANDRA_TEMPLATE = 'OAOiAyk5gNtePuwJ00ZaNbJA'
 Global Const $FROGGY_ELEMENTALIST_HERO_OGDEN_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ7YfMA' ; RoJ + Never Surrender
 Global Const $FROGGY_ELEMENTALIST_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 ;~ SoO-mirrored values assigned to existing template constants below
