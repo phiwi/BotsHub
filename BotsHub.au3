@@ -47,6 +47,7 @@
 #include 'src/farms/EdenIris.au3'
 #include 'src/farms/Feathers.au3'
 #include 'src/farms/FeathersSin.au3'
+#include 'src/farms/FocusHanaku.au3'
 #include 'src/farms/FoWTowerOfCourage.au3'
 #include 'src/farms/Gemstones.au3'
 #include 'src/farms/GemstoneMargonite.au3'
@@ -99,7 +100,7 @@ Global Const $SUCCESS = 0
 Global Const $FAIL = 1
 Global Const $PAUSE = 2
 
-Global Const $AVAILABLE_FARMS = '|Asuran|Boreal|CoF|Corsairs|Deldrimor|Dragon Moss|Eden Iris|Feathers|Feathers Sin|Follower|FoW|FoW Tower of Courage|Froggy|Gemstones|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|' & _
+Global Const $AVAILABLE_FARMS = '|Asuran|Boreal|CoF|Corsairs|Deldrimor|Dragon Moss|Eden Iris|Feathers|Feathers Sin|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Gemstones|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|' & _
 	'Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Ferndale|Kurzick Drazach|Lightbringer & Sunspear|Lightbringer|LDOA|LuxonMQ|LuxonSS|Mantids|Ministerial Commendations|Minotaurs|Nexus Challenge|Norn|OmniFarm|Pongmei|' & _
 	'Raptors|SoO|SpiritSlaves|Sunspear Armor|Tasca|TunnelsOfTheForsaken|Underworld|Vaettirs|Vanguard|Voltaic|War Supply Keiran|Storage|Tests|TestSuite|Manual Mode'
 
@@ -520,6 +521,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Eden Iris',					EdenIrisFarm,					2,					$IRIS_FARM_DURATION)
 	AddFarmToFarmMap(	'Feathers',						FeathersFarm,					10,					$FEATHERS_FARM_DURATION)
 	AddFarmToFarmMap(	'Feathers Sin',					FeathersFarmSinDerv,			10,					$FEATHERS_SIN_DERV_FARM_DURATION)
+	AddFarmToFarmMap(	'Focus Hanaku',					FocusHanakuFarm,				5,					$HANAKU_FARM_DURATION)
 	AddFarmToFarmMap(	'Follower',						FollowerFarm,					5,					30 * 60 * 1000)
 	AddFarmToFarmMap(	'FoW',							FoWFarm,						15,					$FOW_FARM_DURATION)
 	AddFarmToFarmMap(	'FoW Tower of Courage',			FoWToCFarm,						10,					$FOW_TOC_FARM_DURATION)
@@ -572,6 +574,7 @@ Func ResetBotsSetups()
 	$dm_farm_setup							= False
 	$feathers_farm_setup					= False
 	$froggy_farm_setup						= False
+	$hanaku_farm_setup						= False
 	$iris_farm_setup						= False
 	$jade_brotherhood_farm_setup			= False
 	$kournans_farm_setup					= False
