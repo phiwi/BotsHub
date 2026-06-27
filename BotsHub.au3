@@ -68,7 +68,6 @@
 #include 'src/farms/SpiritSlavesCustom.au3'
 #include 'src/farms/SpiritSlavesSin.au3'
 #include 'src/farms/SpiritSlavesRangerDerv.au3'
-#include 'src/farms/SpiritSlavesWarrior.au3'
 #include 'src/farms/Vaettirs.au3'
 #include 'src/farms/Vanquish.au3'
 #include 'src/farms/Vanquish Blacktide Lahtenda.au3'
@@ -85,6 +84,7 @@
 #include 'src/missions/SoO.au3'
 #include 'src/missions/SunspearArmor.au3'
 #include 'src/missions/TunnelsOfTheForsaken.au3'
+#include 'src/missions/TunnelsOfTheForsakenCustom.au3'
 #include 'src/missions/Underworld.au3'
 #include 'src/missions/UnderworldPlainsTrainer.au3'
 #include 'src/missions/Voltaic.au3'
@@ -124,7 +124,7 @@ Global Const $PAUSE = 2
 
 Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Follower|Focus Hanaku|FoW|FoW Tower of Courage|Froggy|Froggy Hero Panels Test|' & _
 	'Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Ferndale|Kurzick Drazach|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|' & _
-	'Path Recorder|Pongmei|Pongmei Sin|Raptors|SoO|Spirit Slaves Ranger|Spirit Slaves Warrior|Storage|Sunspear Armor|Tasca|TestSuite|Tests|TunnelsOfTheForsaken|Underworld|Underworld Plains Trainer|UW Chamber Traps|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|' & _
+	'Path Recorder|Pongmei|Pongmei Sin|Raptors|SoO|Spirit Slaves Ranger|Storage|Sunspear Armor|Tasca|TestSuite|Tests|TunnelsOfTheForsaken|Tunnels Forsaken Custom|Underworld|Underworld Plains Trainer|UW Chamber Traps|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|' & _
 	'Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
 
 Global Const $AVAILABLE_DISTRICTS = '|Random|Random EU|Random US|Random Asia|America|China|English|French|German|International|Italian|Japan|Korea|Polish|Russian|Spanish'
@@ -594,12 +594,12 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Spirit Slaves Ele',				SpiritSlavesCustomFarm,			5,					$SPIRIT_SLAVES_CUSTOM_FARM_DURATION)
 	AddFarmToFarmMap(	'Spirit Slaves Ranger',			SpiritSlavesRangerDervFarm,		5,					$SPIRIT_SLAVES_RANGER_DERV_FARM_DURATION)
 	AddFarmToFarmMap(	'Spirit Slaves Sin',				SpiritSlavesSinFarm,				5,					$SPIRIT_SLAVES_SIN_FARM_DURATION)
-	AddFarmToFarmMap(	'Spirit Slaves Warrior',		SpiritSlavesWarriorFarm,			5,					$SPIRIT_SLAVES_WARRIOR_FARM_DURATION)
 	AddFarmToFarmMap(	'Sunspear Armor',				SunspearArmorFarm,				5,					$SUNSPEAR_ARMOR_FARM_DURATION)
 	AddFarmToFarmMap(	'Tasca',						TascaChestFarm,					5,					$TASCA_FARM_DURATION)
 	AddFarmToFarmMap(	'Wajjun Bazar',				WajjunBazarRun,					5,					$WAJJUN_BAZAR_FARM_DURATION)
 	AddFarmToFarmMap(	'Am Fah 600 Spirit Bond',	AmFah600SpiritBondRun,			5,					$AMFAH600_SB_FARM_DURATION)
 	AddFarmToFarmMap(	'TunnelsOfTheForsaken',			TunnelsOfTheForsakenFarm,		5,					$TUNNELS_OF_THE_FORSAKEN_FARM_DURATION)
+	AddFarmToFarmMap(	'Tunnels Forsaken Custom',		TunnelsOfTheForsakenCustomFarm,	5,					$TUNNELS_FORSAKEN_CUSTOM_DURATION)
 	AddFarmToFarmMap(	'Underworld',					UnderworldFarm,					5,					$UW_FARM_DURATION)
 	AddFarmToFarmMap(	'Underworld Plains Trainer',	UnderworldPlainsTrainerFarm,	0,					$UWPT_TARGET_LOOP_DURATION_MS)
 	AddFarmToFarmMap(	'UW Chamber Traps',				UWChamberTrapsFarm,				5,					$UWCT_FARM_DURATION)
@@ -653,6 +653,7 @@ Func ResetBotsSetups()
 	$amfah600_sb_setup_done				= False
 	$amfah600_sb_maintained_precast_done	= False
 	$tunnels_of_the_forsaken_farm_setup		= False
+	$tunnels_forsaken_custom_setup			= False
 	$vaettirs_farm_setup					= False
 	$vanq_setup_done					= False
 	$vanqbt_setup_done					= False
