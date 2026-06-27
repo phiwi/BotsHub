@@ -65,12 +65,13 @@ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Rest
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
 Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
 ;~ Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljkwMpZOpidI0npdK6z74aMA' ; EarthMagic
-Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
+Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgBVgw0pwFy0Rs+nxqqj1RPMHOWB' ; Master of Magic
+;~ Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
 Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
 Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jXydNgA' ; Ether Renewal Prot (+Convert H. -Draw)
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1Do2dNgA' ; Ether Renewal Prot
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
-Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Burning Variant
+Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
 Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcT4Wo+1xnV9xrXEqvLpLKwAA' ; RoJ + Return
 
 Global Const $SOO_SLOT1_HERO_ID = $ID_GWEN
@@ -102,13 +103,13 @@ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
 ;~ Global Const $SOO_SLOT6_HERO_ID = $ID_ACOLYTE_SOUSUKE
 ;~ Global Const $SOO_SLOT6_HERO_NAME = 'Acolyte Sousuke'
 ;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_SOUSUKE_TEMPLATE
-;~ Global Const $SOO_SLOT6_HERO_ID = $ID_ZHED_SHADOWHOOF
-;~ Global Const $SOO_SLOT6_HERO_NAME = 'Zhed Shadowhoof'
-;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
 
 Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
 Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
 Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
+;~ Global Const $SOO_SLOT7_HERO_ID = $ID_ZHED_SHADOWHOOF
+;~ Global Const $SOO_SLOT7_HERO_NAME = 'Zhed Shadowhoof'
+;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
 ;~ Global Const $SOO_SLOT7_HERO_ID = $ID_VEKK
 ;~ Global Const $SOO_SLOT7_HERO_NAME = 'Vekk'
 ;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
@@ -1049,6 +1050,11 @@ Func ClearSoOFloor3()
 		MoveAggroAndKillInRange(5846, 11037, '8', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(9796, 18960, '9', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(14068, 19549, '10', $SOO_AGGRO_RANGE)
+
+		If IsRunFailed() Then
+			Warn('Party wipe detected before torch sequence, restarting loop to recover')
+			ContinueLoop
+		EndIf
 
 		If $soo_floor3_torch_sequence_done Then
 			Info('Torch sequence already done, skipping to exit moves')
