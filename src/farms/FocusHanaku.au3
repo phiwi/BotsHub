@@ -273,6 +273,11 @@ Func HanakuLoadHeroBuildByID($heroID, $heroName, $template, $fallbackIndex)
 		Return $FAIL
 	EndIf
 
+	If HeroHasTemplate($heroIndex, $template) Then
+		Info('Hanaku ' & $heroName & ': template already loaded, skipping')
+		Return $SUCCESS
+	EndIf
+
 	LoadSkillTemplate($template, $heroIndex)
 	RandomSleep(150)
 	Return $SUCCESS

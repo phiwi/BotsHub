@@ -104,3 +104,52 @@ Func SupportTeamSendPanelKey($key)
 	Sleep(80 + GetPing())
 	ControlSend($hWnd, '', '', $key)
 EndFunc
+
+
+;~ Returns True if the hero already has all 8 skills matching the given template code.
+;~ This avoids redundant LoadSkillTemplate calls and saves significant setup time.
+Func HeroHasTemplate($heroIndex, $templateCode)
+	; Decode the template to extract skill IDs (same logic as LoadSkillTemplate)
+	Local $buildTemplateChars = StringSplit($templateCode, '')
+	_ArrayDelete($buildTemplateChars, 0)
+	Local $buildTemplate = ''
+	For $character In $buildTemplateChars
+		$buildTemplate &= StringRight('000000' & Base64ToBin64($character), 6)
+	Next
+
+	; templateType (4 bits) + version (4 bits)
+	If Bin64ToDec(StringLeft($buildTemplate, 4)) <> 14 Then Return False
+	$buildTemplate = StringTrimLeft($buildTemplate, 8)
+
+	; professionBits (2 bits) => P
+	Local $professionBits = Bin64ToDec(StringLeft($buildTemplate, 2)) * 2 + 4
+	$buildTemplate = StringTrimLeft($buildTemplate, 2)
+
+	; primaryProfession (P bits)
+	Local $primaryProfession = Bin64ToDec(StringLeft($buildTemplate, $professionBits))
+	$buildTemplate = StringTrimLeft($buildTemplate, $professionBits)
+	If $primaryProfession <> GetHeroProfession($heroIndex) Then Return False
+
+	; secondaryProfession (P bits)
+	$buildTemplate = StringTrimLeft($buildTemplate, $professionBits)
+
+	; attributesCount (4 bits) + attributesBits (4 bits) + N attributes
+	Local $attributesCount = Bin64ToDec(StringLeft($buildTemplate, 4))
+	$buildTemplate = StringTrimLeft($buildTemplate, 4)
+	Local $attributesBits = Bin64ToDec(StringLeft($buildTemplate, 4)) + 4
+	$buildTemplate = StringTrimLeft($buildTemplate, 4)
+	$buildTemplate = StringTrimLeft($buildTemplate, ($attributesBits + 4) * $attributesCount)
+
+	; skillsBits (4 bits) => S
+	Local $skillsBits = Bin64ToDec(StringLeft($buildTemplate, 4)) + 8
+	$buildTemplate = StringTrimLeft($buildTemplate, 4)
+
+	; Compare all 8 skills
+	For $i = 0 To 7
+		Local $expectedSkill = Bin64ToDec(StringLeft($buildTemplate, $skillsBits))
+		$buildTemplate = StringTrimLeft($buildTemplate, $skillsBits)
+		If $expectedSkill <> GetSkillbarSkillID($i + 1, $heroIndex) Then Return False
+	Next
+
+	Return True
+EndFunc

@@ -206,7 +206,7 @@ Func SetupFroggyElementalistOverrides()
 	If DllStructGetData(GetMyAgent(), 'Primary') <> $ID_ELEMENTALIST Then Return $SUCCESS
 
 	Info('Froggy Elementalist mode: loading Ele build, weapon set 3 and fixed Elementalist team')
-	;~ LoadSkillTemplate($FROGGY_ELEMENTALIST_SKILLBAR)
+	LoadSkillTemplate($FROGGY_ELEMENTALIST_SKILLBAR)
 	RandomSleep(250)
 	ChangeWeaponSet($FROGGY_ELEMENTALIST_WEAPON_SET)
 	RandomSleep(150)
@@ -387,6 +387,11 @@ Func FroggyLoadHeroTemplateByID($heroID, $heroName, $templateCode)
 			Warn('Froggy team setup: hero index not found for ' & $heroName & ' on template attempt ' & $attempt & '/' & $FROGGY_TEMPLATE_LOAD_RETRIES)
 			SupportTeamStabilizeAfterTravel($ID_GADDS_ENCAMPMENT, 1200, 120)
 			ContinueLoop
+		EndIf
+
+		If HeroHasTemplate($heroIndex, $templateCode) Then
+			Info('Froggy ' & $heroName & ': template already loaded, skipping')
+			Return $SUCCESS
 		EndIf
 
 		Local $heroPrimaryProfession = GetHeroProfession($heroIndex)

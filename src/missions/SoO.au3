@@ -199,6 +199,11 @@ Func SoOHandleRunFailure($reason)
 	SoOLogConsetSummary()
 	$soo_farm_setup = False
 	$soo_skip_next_inventory_management = True
+	If $soo_consecutive_run_failures >= $SOO_CONSECUTIVE_FAIL_GUARD_THRESHOLD Then
+		Warn('SoO crash guard: threshold reached, cooling down for ' & ($SOO_CONSECUTIVE_FAIL_GUARD_COOLDOWN_MS / 1000) & 's')
+		Sleep($SOO_CONSECUTIVE_FAIL_GUARD_COOLDOWN_MS)
+		$soo_consecutive_run_failures = 0
+	EndIf
 	SoOForceOutpostRecovery()
 EndFunc
 
@@ -385,6 +390,11 @@ Func SoOLoadHeroTemplateByID($heroID, $heroName, $templateCode)
 			Warn('SoO team setup: hero index not found for ' & $heroName & ' on template attempt ' & $attempt & '/' & $SOO_TEMPLATE_LOAD_RETRIES)
 			SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 1200, 120)
 			ContinueLoop
+		EndIf
+
+		If HeroHasTemplate($heroIndex, $templateCode) Then
+			Info('SoO ' & $heroName & ': template already loaded, skipping')
+			Return $SUCCESS
 		EndIf
 
 		Local $heroPrimaryProfession = GetHeroProfession($heroIndex)

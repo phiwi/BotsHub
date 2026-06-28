@@ -45,7 +45,7 @@ Global Const $VOLTAIC_TEAM_OUTPOST_RETRIES = 4
 Global Const $VOLTAIC_HERO_GWEN_TEMPLATE = 'OQlkAoB8wYa0LACIHUeGJgTQP1EA' ; Inep + Epi + Frust
 ;~ Global Const $VOLTAIC_HERO_NORGU_TEMPLATE = 'OQJUAWBPMsMngcw0z0VEwpZgrDA' ; ESurge + FS
 ;~ Global Const $VOLTAIC_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; Psychic Inst
-Global Const $VOLTAIC_HERO_NORGU_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB' ; Esurge
+Global Const $VOLTAIC_HERO_NORGU_TEMPLATE = 'OQJUAUBPOMNnAcqpb6lDyAEhrDA' ; Esurge + FS
 ;~ Global Const $VOLTAIC_HERO_RAZAH_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdjQcaG4iB' ; ESurge
 ;~ Global Const $VOLTAIC_HERO_RAZAH_TEMPLATE = 'OQJUAWxOQ8M0gcw0z0NCxpZgrDA' ; Panic + FZ
 Global Const $VOLTAIC_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB' ; Esurge
@@ -58,7 +58,7 @@ Global Const $VOLTAIC_HERO_OGDEN_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ7YfMA' ; RoJ +
 Global Const $VOLTAIC_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
 Global Const $VOLTAIC_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
 Global Const $VOLTAIC_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
-Global Const $VOLTAIC_HERO_XANDRA_TEMPLATE = 'OAOiAyk5gNtePuwJ00ZaNbJA'
+Global Const $VOLTAIC_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
 ;~ Global Const $VOLTAIC_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 ;~ Global Const $VOLTAIC_HERO_SOUSUKE_TEMPLATE = 'OgBVgw0pwFy0Rs+nxqqj1RPMHOWB' ; Master of Magic
 ;~ Global Const $VOLTAIC_HERO_SOUSUKE_TEMPLATE = 'OgBTk0FzQaaYd4wBVwRMdgWgdA' ; Overcast Water Supp
@@ -139,6 +139,16 @@ Func SetupVoltaicFarm()
 EndFunc
 
 
+Func VoltaicLoadTemplateIfNeeded($templateCode, $heroIndex, $heroName = 'Hero')
+	If HeroHasTemplate($heroIndex, $templateCode) Then
+		Info('Voltaic ' & $heroName & ': template already loaded, skipping')
+		Return
+	EndIf
+	LoadSkillTemplate($templateCode, $heroIndex)
+	RandomSleep(150)
+EndFunc
+
+
 Func SetupVoltaicFlexibleTeam()
 	Info('Voltaic team: ' & $VOLTAIC_SLOT1_HERO_NAME & ', ' & $VOLTAIC_SLOT2_HERO_NAME & ', ' & $VOLTAIC_SLOT3_HERO_NAME & ', ' & $VOLTAIC_SLOT4_HERO_NAME & ', ' & $VOLTAIC_SLOT5_HERO_NAME & ', ' & $VOLTAIC_SLOT6_HERO_NAME & ', ' & $VOLTAIC_SLOT7_HERO_NAME)
 	Local $heroIDs[7] = [ _
@@ -162,20 +172,13 @@ Func SetupVoltaicFlexibleTeam()
 
 	If VoltaicAssembleFixedTeamWithRecovery($heroIDs, $heroNames, 'Voltaic') == $FAIL Then Return $FAIL
 
-	LoadSkillTemplate($VOLTAIC_SLOT1_HERO_TEMPLATE, 1)
-	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_SLOT2_HERO_TEMPLATE, 2)
-	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_SLOT3_HERO_TEMPLATE, 3)
-	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_SLOT4_HERO_TEMPLATE, 4)
-	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_SLOT5_HERO_TEMPLATE, 5)
-	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_SLOT6_HERO_TEMPLATE, 6)
-	RandomSleep(150)
-	LoadSkillTemplate($VOLTAIC_SLOT7_HERO_TEMPLATE, 7)
-	RandomSleep(250)
+	VoltaicLoadTemplateIfNeeded($VOLTAIC_SLOT1_HERO_TEMPLATE, 1, $VOLTAIC_SLOT1_HERO_NAME)
+	VoltaicLoadTemplateIfNeeded($VOLTAIC_SLOT2_HERO_TEMPLATE, 2, $VOLTAIC_SLOT2_HERO_NAME)
+	VoltaicLoadTemplateIfNeeded($VOLTAIC_SLOT3_HERO_TEMPLATE, 3, $VOLTAIC_SLOT3_HERO_NAME)
+	VoltaicLoadTemplateIfNeeded($VOLTAIC_SLOT4_HERO_TEMPLATE, 4, $VOLTAIC_SLOT4_HERO_NAME)
+	VoltaicLoadTemplateIfNeeded($VOLTAIC_SLOT5_HERO_TEMPLATE, 5, $VOLTAIC_SLOT5_HERO_NAME)
+	VoltaicLoadTemplateIfNeeded($VOLTAIC_SLOT6_HERO_TEMPLATE, 6, $VOLTAIC_SLOT6_HERO_NAME)
+	VoltaicLoadTemplateIfNeeded($VOLTAIC_SLOT7_HERO_TEMPLATE, 7, $VOLTAIC_SLOT7_HERO_NAME)
 
 	ClearPartyCommands()
 	CancelAllHeroes()
