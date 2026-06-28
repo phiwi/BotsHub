@@ -299,6 +299,11 @@ Func MDLoadHeroTemplateStable($heroID, $heroName, $template, $expectedProfession
 			ContinueLoop
 		EndIf
 
+		If HeroHasTemplate($slot, $template) Then
+			Info('MD ' & $heroName & ': template already loaded, skipping')
+			Return True
+		EndIf
+
 		Local $profession = GetHeroProfession($slot)
 		If $profession <> $expectedProfession Then
 			RandomSleep(180)
