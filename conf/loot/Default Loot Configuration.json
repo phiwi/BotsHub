@@ -1025,6 +1025,7 @@
 		"Keys": true
 	},
 	"Identify items": {
+		"White": false,
 		"Blue": true,
 		"Purple": true,
 		"Gold": false
