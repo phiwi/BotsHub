@@ -155,7 +155,11 @@ EndFunc
 Func SetupPlayerFocusHanakuFarm()
 	Info('Setting up player build and starting weapon set')
 	If DllStructGetData(GetMyAgent(), 'Primary') == $ID_ASSASSIN Then
-		LoadSkillTemplate($HANAKU_PLAYER_SKILLBAR)
+		If HeroHasTemplate(0, $HANAKU_PLAYER_SKILLBAR) Then
+			Info('Hanaku player: template already loaded, skipping')
+		Else
+			LoadSkillTemplate($HANAKU_PLAYER_SKILLBAR)
+		EndIf
 	Else
 		Warn('Should run this farm as assassin')
 		Return $FAIL

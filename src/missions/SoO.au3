@@ -60,8 +60,8 @@ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB'
 Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeEfEaRJgVV1DA' ; Healer's Boon (+FF -CH)
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
-;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAS4YIPGEqvLx6nPwrVfAC' ; SoJ
-Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcT4Wo+1xnV9xrXEqvLpLKwA' ; RoJ + Return
+;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcT4Wo+1xnV9xrXEqvLpLKwA' ; RoJ + Return
+Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74aMA' ; RoJ + Stand your Ground
 Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
 Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
@@ -73,7 +73,8 @@ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jXydNgA' ; Ether Renewal
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1Do2dNgA' ; Ether Renewal Prot
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
-Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcT4Wo+1xnV9xrXEqvLpLKwAA' ; RoJ + Return
+Global Const $SOO_HERO_OGDEN_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ7YfMA' ; RoJ + Never Surrender
+;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcT4Wo+1xnV9xrXEqvLpLKwAA' ; RoJ + Return
 
 Global Const $SOO_SLOT1_HERO_ID = $ID_GWEN
 Global Const $SOO_SLOT1_HERO_NAME = 'Gwen'
@@ -262,8 +263,12 @@ Func SetupSoOFarm()
 	SwitchToHardModeIfEnabled()
 	SetDisplayedTitle($ID_ASURA_TITLE)
 	Info('Loading Ele player build')
-	LoadSkillTemplate($SOO_PLAYER_SKILLBAR)
-	RandomSleep(250)
+	If HeroHasTemplate(0, $SOO_PLAYER_SKILLBAR) Then
+		Info('SoO player: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($SOO_PLAYER_SKILLBAR)
+		RandomSleep(250)
+	EndIf
 	SupportTeamOpenHeroPanels('SoO')
 	For $attempt = 1 To $SOO_SETUP_RUN_TO_DUNGEON_RETRIES
 		If RunToShardsOfOrrDungeon() == $SUCCESS Then
