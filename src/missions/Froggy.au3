@@ -188,8 +188,12 @@ Func SetupFroggyAssassinOverrides()
 	If DllStructGetData(GetMyAgent(), 'Primary') <> $ID_ASSASSIN Then Return $SUCCESS
 
 	Info('Froggy Assassin mode: loading Sin build, weapon set 2, and fixed support team')
-	LoadSkillTemplate($FROGGY_ASSASSIN_SKILLBAR)
-	RandomSleep(250)
+	If HeroHasTemplate(0, $FROGGY_ASSASSIN_SKILLBAR) Then
+		Info('Froggy player: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($FROGGY_ASSASSIN_SKILLBAR)
+		RandomSleep(250)
+	EndIf
 	ChangeWeaponSet($FROGGY_ASSASSIN_WEAPON_SET)
 	RandomSleep(150)
 
@@ -206,8 +210,12 @@ Func SetupFroggyElementalistOverrides()
 	If DllStructGetData(GetMyAgent(), 'Primary') <> $ID_ELEMENTALIST Then Return $SUCCESS
 
 	Info('Froggy Elementalist mode: loading Ele build, weapon set 3 and fixed Elementalist team')
-	LoadSkillTemplate($FROGGY_ELEMENTALIST_SKILLBAR)
-	RandomSleep(250)
+	If HeroHasTemplate(0, $FROGGY_ELEMENTALIST_SKILLBAR) Then
+		Info('Froggy player: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($FROGGY_ELEMENTALIST_SKILLBAR)
+		RandomSleep(250)
+	EndIf
 	ChangeWeaponSet($FROGGY_ELEMENTALIST_WEAPON_SET)
 	RandomSleep(150)
 
