@@ -669,10 +669,6 @@ Func ResetBotsSetups()
 	$warden_farm_setup					= False
 	$vsf_setup_done						= False
 	$wingstorm_farm_setup				= False
-	$bone_buyer_farm_setup				= False
-	$dust_buyer_farm_setup				= False
-	$feather_buyer_farm_setup			= False
-	$iron_buyer_farm_setup				= False
 	$uwpt_setup_done						= False
 	; Those do not need to be reset - party did not change, build did not change, and there is no need to refresh portal
 	; BUT those bots MUST tp to the correct map on every loop
