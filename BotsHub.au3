@@ -657,9 +657,6 @@ Func ResetBotsSetups()
 	$spirit_slaves_ranger_derv_farm_setup	= False
 	$spirit_slaves_ranger_derv_build_setup	= False
 	$spirit_slaves_sin_farm_setup			= False
-	$spirit_slaves_warrior_farm_setup		= False
-	$spirit_slaves_warrior_build_setup		= False
-	$spirit_slaves_warrior_live_vicariously_primed = False
 	$tasca_farm_setup						= False
 	$wajjun_bazar_run_setup				= False
 	$amfah600_sb_setup_done				= False
