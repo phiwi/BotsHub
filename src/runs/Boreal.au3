@@ -163,41 +163,49 @@ EndFunc
 
 Func SetupPlayerBorealChestFarm()
 	Info('Setting up player build skill bar')
+	Local $selectedBuild = ''
 	Switch DllStructGetData(GetMyAgent(), 'Primary')
 		Case $ID_WARRIOR
 			$boreal_player_profession = $ID_WARRIOR
-			LoadSkillTemplate($BOREAL_WARRIOR_CHESTRUNNER_SKILLBAR)
+			$selectedBuild = $BOREAL_WARRIOR_CHESTRUNNER_SKILLBAR
 		Case $ID_RANGER
 			$boreal_player_profession = $ID_RANGER
-			LoadSkillTemplate($BOREAL_RANGER_CHESTRUNNER_SKILLBAR)
+			$selectedBuild = $BOREAL_RANGER_CHESTRUNNER_SKILLBAR
 		Case $ID_MONK
 			$boreal_player_profession = $ID_MONK
-			LoadSkillTemplate($BOREAL_MONK_CHESTRUNNER_SKILLBAR)
+			$selectedBuild = $BOREAL_MONK_CHESTRUNNER_SKILLBAR
 		Case $ID_NECROMANCER
 			$boreal_player_profession = $ID_NECROMANCER
-			LoadSkillTemplate($BOREAL_NECROMANCER_CHESTRUNNER_SKILLBAR)
+			$selectedBuild = $BOREAL_NECROMANCER_CHESTRUNNER_SKILLBAR
 		Case $ID_MESMER
 			$boreal_player_profession = $ID_MESMER
-			LoadSkillTemplate($BOREAL_MESMER_CHESTRUNNER_SKILLBAR)
+			$selectedBuild = $BOREAL_MESMER_CHESTRUNNER_SKILLBAR
 		Case $ID_ELEMENTALIST
 			$boreal_player_profession = $ID_ELEMENTALIST
-			LoadSkillTemplate($BOREAL_ELEMENTALIST_CHESTRUNNER_SKILLBAR)
+			$selectedBuild = $BOREAL_ELEMENTALIST_CHESTRUNNER_SKILLBAR
 		Case $ID_ASSASSIN
 			$boreal_player_profession = $ID_ASSASSIN
-			LoadSkillTemplate($BOREAL_ASSASSIN_CHESTRUNNER_SKILLBAR)
+			$selectedBuild = $BOREAL_ASSASSIN_CHESTRUNNER_SKILLBAR
 		Case $ID_RITUALIST
 			$boreal_player_profession = $ID_RITUALIST
-			LoadSkillTemplate($BOREAL_RITUALIST_CHESTRUNNER_SKILLBAR)
+			$selectedBuild = $BOREAL_RITUALIST_CHESTRUNNER_SKILLBAR
 		Case $ID_PARAGON
 			$boreal_player_profession = $ID_PARAGON
-			LoadSkillTemplate($BOREAL_PARAGON_CHESTRUNNER_SKILLBAR)
+			$selectedBuild = $BOREAL_PARAGON_CHESTRUNNER_SKILLBAR
 		Case $ID_DERVISH
 			$boreal_player_profession = $ID_DERVISH
-			LoadSkillTemplate($BOREAL_DERVISH_CHEST_RUNNER_SKILLBAR)
+			$selectedBuild = $BOREAL_DERVISH_CHEST_RUNNER_SKILLBAR
 		Case Else
 			Warn('Unsupported profession for Boreal run')
 			Return $FAIL
 	EndSwitch
+	If $selectedBuild <> '' Then
+		If HeroHasTemplate(0, $selectedBuild) Then
+			Info('Boreal player: template already loaded, skipping')
+		Else
+			LoadSkillTemplate($selectedBuild)
+		EndIf
+	EndIf
 	RandomSleep(250)
 	$boreal_has_shroud_of_distress = GetSkillbarSkillID($BOREAL_SHROUD_OF_DISTRESS) == $ID_SHROUD_OF_DISTRESS
 	$boreal_has_heart_of_shadow = GetSkillbarSkillID($BOREAL_HEART_OF_SHADOW) == $ID_HEART_OF_SHADOW
@@ -264,11 +272,23 @@ Func SetupTeamBorealChestFarm()
 	$boreal_melonni_index = SupportTeamResolveHeroIndex($ID_MELONNI, $BOREAL_HERO_MELONNI_INDEX)
 	$boreal_morgahn_index = SupportTeamResolveHeroIndex($ID_GENERAL_MORGAHN, $BOREAL_HERO_MORGAHN_INDEX)
 
-	LoadSkillTemplate($BOREAL_HERO_KAHMU_TEMPLATE, $boreal_kahmu_index)
+	If HeroHasTemplate($boreal_kahmu_index, $BOREAL_HERO_KAHMU_TEMPLATE) Then
+		Info('Boreal Kahmu: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($BOREAL_HERO_KAHMU_TEMPLATE, $boreal_kahmu_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($BOREAL_HERO_MELONNI_TEMPLATE, $boreal_melonni_index)
+	If HeroHasTemplate($boreal_melonni_index, $BOREAL_HERO_MELONNI_TEMPLATE) Then
+		Info('Boreal Melonni: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($BOREAL_HERO_MELONNI_TEMPLATE, $boreal_melonni_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($BOREAL_HERO_MORGAHN_TEMPLATE, $boreal_morgahn_index)
+	If HeroHasTemplate($boreal_morgahn_index, $BOREAL_HERO_MORGAHN_TEMPLATE) Then
+		Info('Boreal Morgahn: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($BOREAL_HERO_MORGAHN_TEMPLATE, $boreal_morgahn_index)
+	EndIf
 	RandomSleep(250)
 
 	DisableAllHeroSkills($boreal_kahmu_index)

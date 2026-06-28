@@ -163,13 +163,27 @@ Func SetupPlayerMinisterialCommendationsCustomFarm()
 
     If DllStructGetData(GetMyAgent(), 'Primary') == $ID_ASSASSIN Then
         Info('Custom Ministerial expects assassin. Loading recommended assassin build automatically')
-        LoadSkillTemplate($A_COMMENDATIONS_CUSTOM_FARMER_SKILLBAR)
-        RandomSleep(250)
+        If HeroHasTemplate(0, $A_COMMENDATIONS_CUSTOM_FARMER_SKILLBAR) Then
+            Info('Ministerial Custom player: template already loaded, skipping')
+        Else
+            LoadSkillTemplate($A_COMMENDATIONS_CUSTOM_FARMER_SKILLBAR)
+            RandomSleep(250)
+        EndIf
     Else
         Warn('Custom Ministerial was designed for assassin. Continuing with current player build')
     EndIf
 
     Return $SUCCESS
+EndFunc
+
+
+Func ComCustomLoadIfNeeded($template, $heroIndex, $heroName)
+	If HeroHasTemplate($heroIndex, $template) Then
+		Info('Ministerial Custom ' & $heroName & ': template already loaded, skipping')
+		Return
+	EndIf
+	LoadSkillTemplate($template, $heroIndex)
+	RandomSleep(150)
 EndFunc
 
 
@@ -205,20 +219,14 @@ Func SetupTeamMinisterialCommendationsCustomFarm()
     If GetHeroNumberByHeroID($ID_LIVIA) <> $COMMENDATIONS_CUSTOM_HERO_LIVIA_SLOT Then Return $FAIL
     If GetHeroNumberByHeroID($ID_XANDRA) <> $COMMENDATIONS_CUSTOM_HERO_XANDRA_SLOT Then Return $FAIL
 
-    LoadSkillTemplate($COMMENDATIONS_CUSTOM_HERO_NORGU_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_NORGU_SLOT)
-    RandomSleep(150)
-    LoadSkillTemplate($COMMENDATIONS_CUSTOM_HERO_RAZAH_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_RAZAH_SLOT)
-    RandomSleep(150)
-    LoadSkillTemplate($COMMENDATIONS_CUSTOM_HERO_GWEN_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_GWEN_SLOT)
-    RandomSleep(150)
-    LoadSkillTemplate($COMMENDATIONS_CUSTOM_HERO_ZHED_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_ZHED_SLOT)
-    RandomSleep(150)
-    ; LoadSkillTemplate($COMMENDATIONS_CUSTOM_HERO_VEKK_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_VEKK_SLOT)
-    LoadSkillTemplate($COMMENDATIONS_CUSTOM_HERO_OGDEN_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_OGDEN_SLOT)
-    RandomSleep(150)
-    LoadSkillTemplate($COMMENDATIONS_CUSTOM_HERO_LIVIA_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_LIVIA_SLOT)
-    RandomSleep(150)
-    LoadSkillTemplate($COMMENDATIONS_CUSTOM_HERO_XANDRA_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_XANDRA_SLOT)
+    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_NORGU_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_NORGU_SLOT, 'Norgu')
+    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_RAZAH_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_RAZAH_SLOT, 'Razah')
+    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_GWEN_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_GWEN_SLOT, 'Gwen')
+    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_ZHED_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_ZHED_SLOT, 'Zhed')
+    ; ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_VEKK_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_VEKK_SLOT, 'Vekk')
+    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_OGDEN_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_OGDEN_SLOT, 'Ogden')
+    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_LIVIA_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_LIVIA_SLOT, 'Livia')
+    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_XANDRA_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_XANDRA_SLOT, 'Xandra')
     RandomSleep(250)
 
     CancelAllHeroes()
