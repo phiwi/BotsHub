@@ -101,6 +101,10 @@
 #include 'src/runs/AmFah600SpiritBond.au3'
 #include 'src/titles/LDOA.au3'
 #include 'src/utilities/Follower.au3'
+#include 'src/utilities/BoneBuyer.au3'
+#include 'src/utilities/DustBuyer.au3'
+#include 'src/utilities/FeatherBuyer.au3'
+#include 'src/utilities/IronBuyer.au3'
 #include 'src/utilities/OmniFarmer.au3'
 #include 'src/utilities/PathActionRecorder.au3'
 #include 'src/utilities/TestSuite.au3'
@@ -122,10 +126,10 @@ Global Const $SUCCESS = 0
 Global Const $FAIL = 1
 Global Const $PAUSE = 2
 
-Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Follower|Focus Hanaku|FoW|FoW Tower of Courage|Froggy|Froggy Hero Panels Test|' & _
-	'Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Ferndale|Kurzick Drazach|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|' & _
-	'Path Recorder|Pongmei|Pongmei Sin|Raptors|SoO|Spirit Slaves Ranger|Storage|Sunspear Armor|Tasca|TestSuite|Tests|TunnelsOfTheForsaken|Tunnels Forsaken Custom|Underworld|Underworld Plains Trainer|UW Chamber Traps|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|' & _
-	'Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
+Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Focus Hanaku|FoW|FoW Tower of Courage|Follower|Froggy|' & _
+	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|' & _
+	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|SoO|Spirit Slaves Ranger|Storage|Sunspear Armor|Tasca|' & _
+	'TestSuite|Tests|Tunnels Forsaken Custom|TunnelsOfTheForsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
 
 Global Const $AVAILABLE_DISTRICTS = '|Random|Random EU|Random US|Random Asia|America|China|English|French|German|International|Italian|Japan|Korea|Polish|Russian|Spanish'
 
@@ -587,8 +591,13 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Barbarous Shore Sin',			BarbarousShoreSinChestFarm,		5,					$BARBAROUS_SHORE_SIN_FARM_DURATION)
 	AddFarmToFarmMap(	'Brightclaw',							BrightclawFarm,					5,					5 * 60 * 1000)
 	AddFarmToFarmMap(	'Wingstorm',							WingstormFarm,					5,					$WINGSTORM_RUN_TIMEOUT_MS)
+	AddFarmToFarmMap(	'Buying Bones',					BoneBuyerFarm,					5,					$BONE_BUYER_DURATION)
+	AddFarmToFarmMap(	'Buying Dust',					DustBuyerFarm,					5,					$DUST_BUYER_DURATION)
+	AddFarmToFarmMap(	'Buying Feathers',				FeatherBuyerFarm,				5,					$FEATHER_BUYER_DURATION)
+	AddFarmToFarmMap(	'Buying Iron',					IronBuyerFarm,					5,					$IRON_BUYER_DURATION)
 	AddFarmToFarmMap(	'Path Recorder',					PathActionRecorderFarm,			0,					$PATH_ACTION_RECORDER_DURATION)
 	AddFarmToFarmMap(	'Raptors',						RaptorsFarm,					5,					$RAPTORS_FARM_DURATION)
+	AddFarmToFarmMap(	'Sell, Salvage, Stash',		InventoryManagementBeforeRun,	5,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'SoO',							SoOFarm,						15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SpiritSlaves',					SpiritSlavesFarm,				5,					$SPIRIT_SLAVES_FARM_DURATION)
 	AddFarmToFarmMap(	'Spirit Slaves Ele',				SpiritSlavesCustomFarm,			5,					$SPIRIT_SLAVES_CUSTOM_FARM_DURATION)
@@ -660,6 +669,10 @@ Func ResetBotsSetups()
 	$warden_farm_setup					= False
 	$vsf_setup_done						= False
 	$wingstorm_farm_setup				= False
+	$bone_buyer_farm_setup				= False
+	$dust_buyer_farm_setup				= False
+	$feather_buyer_farm_setup			= False
+	$iron_buyer_farm_setup				= False
 	$uwpt_setup_done						= False
 	; Those do not need to be reset - party did not change, build did not change, and there is no need to refresh portal
 	; BUT those bots MUST tp to the correct map on every loop
@@ -725,9 +738,13 @@ EndFunc
 ;~ Setup player build from global settings (from GUI or JSON)
 Func SetupPlayerUsingGlobalSettings()
 	If $run_options_cache['team.load_player_build'] Then
-		Info('Loading player build from GUI')
-		LoadSkillTemplate($run_options_cache['team.player_build'])
-		RandomSleep(500)
+		If HeroHasTemplate(0, $run_options_cache['team.player_build']) Then
+			Info('Player: template already loaded, skipping')
+		Else
+			Info('Loading player build from GUI')
+			LoadSkillTemplate($run_options_cache['team.player_build'])
+			RandomSleep(500)
+		EndIf
 	EndIf
 EndFunc
 
@@ -755,8 +772,12 @@ Func SetupTeamUsingGlobalSettings($teamSize = $ID_TEAM_SIZE_LARGE)
 			AddHero($HERO_IDS_FROM_NAMES[$hero])
 			If $run_options_cache['team.load_hero_' & $i & '_build'] Then
 				RandomSleep(500)
-				Info('Loading hero ' & $i & ' build from GUI')
-				LoadSkillTemplate($run_options_cache['team.hero_' & $i & '_build'], $i)
+				If HeroHasTemplate($i, $run_options_cache['team.hero_' & $i & '_build']) Then
+					Info('Hero ' & $i & ' (' & $hero & '): template already loaded, skipping')
+				Else
+					Info('Loading hero ' & $i & ' build from GUI')
+					LoadSkillTemplate($run_options_cache['team.hero_' & $i & '_build'], $i)
+				EndIf
 			EndIf
 		EndIf
 	Next
