@@ -145,13 +145,10 @@ Func FeathersSinDervFarmLoop()
 	Info('Running to Sensali.')
 	UseConsumable($ID_BIRTHDAY_CUPCAKE)
 	FeathersSinDervMaintainFirstSpotSprint('route_1')
-	MoveTo(9000, -12680)
-	FeathersSinDervMaintainFirstSpotSprint('route_2')
-	MoveTo(7588, -10609)
-	FeathersSinDervMaintainFirstSpotSprint('route_3')
-	MoveTo(2900, -9700)
-	FeathersSinDervMaintainFirstSpotSprint('route_4')
-	MoveTo(1540, -6995)
+	FeathersSinDervSprintMoveTo(9000, -12680)
+	FeathersSinDervSprintMoveTo(7588, -10609)
+	FeathersSinDervSprintMoveTo(2900, -9700)
+	FeathersSinDervSprintMoveTo(1540, -6995)
 	Info('Farming Sensali (Sin/Derv).')
 	If FeathersSinDervRunSpot(-472, -4342, False, 5 * 60 * 1000, False) == $FAIL Then Return $FAIL
 	If FeathersSinDervRunSpot(-1536, -1686) == $FAIL Then Return $FAIL
@@ -172,6 +169,19 @@ Func FeathersSinDervFarmLoop()
 	If FeathersSinDervRunSpot(-9700, 2400) == $FAIL Then Return $FAIL
 
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
+EndFunc
+
+
+; Move to target while continuously maintaining Onslaught sprint (first-spot only).
+Func FeathersSinDervSprintMoveTo($x, $y)
+	Move($x, $y)
+	Local $me = GetMyAgent()
+	While GetDistanceToPoint($me, $x, $y) > 250
+		If IsPlayerDead() Then Return
+		FeathersSinDervMaintainFirstSpotSprint('sprint_move')
+		Sleep(250)
+		$me = GetMyAgent()
+	WEnd
 EndFunc
 
 
@@ -290,8 +300,7 @@ Func FeathersSinDervKill($waitForSettle = True)
 	If IsRecharged($FEATHERS_SIN_DERV_ONSLAUGHT) Then UseSkillEx($FEATHERS_SIN_DERV_ONSLAUGHT)
 	FeathersSinDervMaintainDefense()
 
-	If GetEnergy() >= 10 Then
-		UseSkillEx($FEATHERS_SIN_DERV_CHILLING_VICTORY, $target)
+	If GetEnergy() >= 5 Then
 		UseSkillEx($FEATHERS_SIN_DERV_EREMITES_ATTACK, $target)
 	EndIf
 
@@ -309,6 +318,7 @@ Func FeathersSinDervKill($waitForSettle = True)
 		If IsPlayerDead() Then Return $FAIL
 
 		$target = GetNearestEnemyToAgent(GetMyAgent())
+		Attack($target)
 		FeathersSinDervMaintainDefense()
 		If IsRecharged($FEATHERS_SIN_DERV_GRENTHS_AURA) Then UseSkillEx($FEATHERS_SIN_DERV_GRENTHS_AURA)
 		If IsRecharged($FEATHERS_SIN_DERV_GRENTHS_FINGERS) And CountFoesInRangeOfAgent(GetMyAgent(), 300, FeathersSinDervIsSensali) > 1 Then UseSkillEx($FEATHERS_SIN_DERV_GRENTHS_FINGERS)
@@ -326,7 +336,6 @@ Func FeathersSinDervKill($waitForSettle = True)
 		EndIf
 
 		Sleep(250)
-		Attack($target)
 	WEnd
 
 	RandomSleep(500)
