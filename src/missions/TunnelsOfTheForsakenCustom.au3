@@ -32,7 +32,7 @@ Global Const $TUNNELS_FORSAKEN_CUSTOM_INFORMATIONS = 'Custom Tunnels Forsaken fa
 Global Const $TUNNELS_FORSAKEN_CUSTOM_DURATION = 40 * 60 * 1000
 Global Const $MAX_TUNNELS_FORSAKEN_CUSTOM_DURATION = 60 * 60 * 1000
 
-Global Const $TFC_PLAYER_SKILLBAR = 'OwcT4Y44ZaX0m0n5eAlw6zNbNCA'
+Global Const $TFC_PLAYER_SKILLBAR = 'OwcT4Y44ZaX0m0n5ewV0NLLSiBA'
 ;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwcT8Wo6VaXcBKmMgAkRR8N7iAA'
 ;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwgiAyiMVNNAeNd24DWOBNxMBA'
 Global Const $TFC_HERO_MOW_TEMPLATE = 'OAhjQoGYIP3hq61TaO5EeDzxJA'
@@ -45,6 +45,9 @@ Global Const $TFC_HERO_XANDRA_TEMPLATE = 'OAOjAyhDJPYTnp17xFOhmtkLGA'
 
 Global $tunnels_forsaken_custom_setup = False
 
+Global Const $TFC_HERO2_KEY = "9"
+Global Const $TFC_HERO_PANEL_KEYS = "5|6|7|8"
+
 ;~ Main method to farm TunnelsOfTheForsaken Custom
 Func TunnelsOfTheForsakenCustomFarm()
 	If Not $tunnels_forsaken_custom_setup And SetupTunnelsForsakenCustom() == $FAIL Then Return $FAIL
@@ -55,6 +58,11 @@ Func TunnelsOfTheForsakenCustomFarm()
 	AdlibUnregister('TrackPartyStatus')
 	TravelToOutpost($ID_PIKEN_SQUARE, $district_name)
 	Return $result
+EndFunc
+
+
+Func TunnelsForsakenCustomOpenHeroPanels()
+	SupportTeamOpenHeroPanels('Tunnels Custom', $TFC_HERO2_KEY, $TFC_HERO_PANEL_KEYS)
 EndFunc
 
 
@@ -70,10 +78,13 @@ Func SetupTunnelsForsakenCustom()
 		Warn('Should run this farm as monk')
 		Return $FAIL
 	EndIf
-	LoadSkillTemplate($TFC_PLAYER_SKILLBAR)
-	RandomSleep(250)
+	If Not HeroHasTemplate(0, $TFC_PLAYER_SKILLBAR) Then
+		LoadSkillTemplate($TFC_PLAYER_SKILLBAR)
+		RandomSleep(250)
+	EndIf
 
 	If SetupTunnelsForsakenCustomTeam() == $FAIL Then Return $FAIL
+	TunnelsForsakenCustomOpenHeroPanels()
 
 	Info('Preparations complete')
 	$tunnels_forsaken_custom_setup = True
@@ -183,7 +194,6 @@ EndFunc
 Func ClearTunnelsForsakenCustomFloor1()
 	Info('------------------------------------')
 	Info('First floor')
-	If IsHardmodeEnabled() Then UseConset()
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -8684, 4580, $RANGE_AREA)
 		WaitUntilPartyAlive()
@@ -227,7 +237,6 @@ EndFunc
 Func ClearTunnelsForsakenCustomFloor2()
 	Info('------------------------------------')
 	Info('Second floor')
-	If IsHardmodeEnabled() Then UseConset()
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -16748, 5350, $RANGE_LONGBOW)
 		If CheckStuck('TunnelsForsakenCustom Floor 2', $MAX_TUNNELS_FORSAKEN_CUSTOM_DURATION) == $FAIL Then Return $FAIL
@@ -289,6 +298,7 @@ Func ClearTunnelsForsakenCustomFloor3()
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		UseSummoningStone()
+		If IsHardmodeEnabled() Then UseConset()
 		MoveAggroAndKillInRange(-11162, 3309, '1', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-10127, 2505, '2', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-17353, -952, '3', $PLAYER_AGGRO_RANGE)
@@ -309,6 +319,7 @@ Func ClearTunnelsForsakenCustomFloor3()
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		UseSummoningStone()
+		If IsHardmodeEnabled() Then UseConset()
 		MoveAggroAndKillInRange(-9820, -2108, '11', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-8166, 1081, '12', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-5090, -78, '13', $PLAYER_AGGRO_RANGE)
