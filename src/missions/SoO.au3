@@ -1156,7 +1156,13 @@ Func ClearSoOFloor3()
 			$soo_floor3_final_fight_conset_uptime = False
 			Return $FAIL
 		EndIf
+		Local $wasWiped = IsPlayerAndPartyWiped()
 		WaitUntilPartyAlive()
+		If $wasWiped Then
+			Info('Party wipe detected during boss fight — clearing hero flags so they follow from shrine')
+			CancelAllHeroes()
+			RandomSleep(300)
+		EndIf
 		If IsHardmodeEnabled() Then SoOUseConset()
 		MoveAggroAndKillInRange(-9850, 7600, 'Going back to secure door opening in case run failed 1', $largerSoOAggroRange)
 		MoveAggroAndKillInRange(-9200, 6000, 'Going back to secure door opening in case run failed 2', $largerSoOAggroRange)
