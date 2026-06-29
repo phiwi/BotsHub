@@ -52,7 +52,7 @@ Global Const $SOO_EXPLORE_ESCAPE_ATTEMPTS = 2
 Global Const $SOO_EXPLORE_ESCAPE_WAIT_MS = 3500
 Global Const $SOO_TEMPLATE_LOAD_RETRIES = 3
 
-Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQlkAoB8wYa0LACIHUeGJgTQP1EA' ; Inep + Epi + Frust
+Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQljAsBspRvAIgcQ5ZkAOB9UTAA' ; Inep + Epi + Frust
 ;~ Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; PsychicInst
 Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB' ; Esurge
 ;~ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB' ; Panic
@@ -60,7 +60,7 @@ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB'
 Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeEfEaRJgVV1DA' ; Healer's Boon (+FF -CH)
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
-Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcT4Wo+1xnV9xrXEqvLpLKwA' ; RoJ + Return
+Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+sqPe9iQ9dJdRBGA' ; RoJ + Return
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
 Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
@@ -74,7 +74,7 @@ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jXydNgA' ; Ether Renewal
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
 ;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
-Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcT4Wo+1xnV9xrXEqvLpLKwAA' ; RoJ + Return
+Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcU44XA1PO+sqPe9iQ9dJdRBGA' ; RoJ + Return
 
 Global Const $SOO_SLOT1_HERO_ID = $ID_GWEN
 Global Const $SOO_SLOT1_HERO_NAME = 'Gwen'
@@ -1095,8 +1095,16 @@ Func ClearSoOFloor3()
 			ActionInteract()
 			RandomSleep(1000)
 		Next
+		If IsRunFailed() Then
+			Warn('Party wipe detected after torch chest — restarting loop to recover')
+			ContinueLoop
+		EndIf
 		Info('Pick up torch')
 		PickUpTorch()
+		If IsRunFailed() Then
+			Warn('Party wipe detected after picking up torch — restarting loop to recover')
+			ContinueLoop
+		EndIf
 
 		InteractWithTorchOrBrazierAt(15692, 17111, 'Light up torch')
 		InteractWithTorchOrBrazierAt(12969, 19842, 'Light up brazier 1')
@@ -1119,6 +1127,10 @@ Func ClearSoOFloor3()
 		DropBundle()
 		RandomSleep(500)
 
+		If IsRunFailed() Then
+			Warn('Party wipe detected before keyboss — restarting loop to recover')
+			ContinueLoop
+		EndIf
 		Info('Keyboss')
 		MoveAggroAndKillInRange(-11600, 2400, '14', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-10000, 3000, '15', $SOO_AGGRO_RANGE)
