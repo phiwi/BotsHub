@@ -127,7 +127,7 @@ Global Const $SUCCESS = 0
 Global Const $FAIL = 1
 Global Const $PAUSE = 2
 
-Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|FoW|FoW Tower of Courage|Follower|Froggy|' & _
+Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Iron|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|FoW|FoW Tower of Courage|Follower|Froggy|' & _
 	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|' & _
 	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|SoO|Spirit Slaves Ranger|Storage|Sunspear Armor|Tasca|' & _
 	'TestSuite|Tests|Tunnels Forsaken Custom|TunnelsOfTheForsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
