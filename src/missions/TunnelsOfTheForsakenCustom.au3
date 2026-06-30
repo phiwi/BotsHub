@@ -32,12 +32,19 @@ Global Const $TUNNELS_FORSAKEN_CUSTOM_INFORMATIONS = 'Custom Tunnels Forsaken fa
 Global Const $TUNNELS_FORSAKEN_CUSTOM_DURATION = 40 * 60 * 1000
 Global Const $MAX_TUNNELS_FORSAKEN_CUSTOM_DURATION = 60 * 60 * 1000
 
-Global Const $TFC_PLAYER_SKILLBAR = 'OwcT4Y44ZaX0m0n5ewV0NLLSiBA'
+;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwcT4Y44ZaX0mcB6ewV0NTiBnAA'
 ;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwcT8Wo6VaXcBKmMgAkRR8N7iAA'
-;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwgiAyiMVNNAeNd24DWOBNxMBA'
+Global Const $TFC_PLAYER_SKILLBAR = 'OwgiAyiMVNNAeNd24DWOBNxMBA'
 Global Const $TFC_HERO_MOW_TEMPLATE = 'OAhjQoGYIP3hq61TaO5EeDzxJA'
-Global Const $TFC_HERO_GWEN_TEMPLATE = 'OQhkAoC8AGKjbTDwBMd40MAR4iB'
+Global Const $TFC_HERO_ZHED_TEMPLATE = 'OgljgwMpZS0ChDXVfDeD6QLgIDA' ; BSurge
+;~ Global Const $TFC_HERO_ZHED_TEMPLATE = 'OgBFgYeKuIrjY9PjVVHrjeYOcsC' ; Master of Magic
+
+Global Const $TFC_HERO_OGDEN_TEMPLATE = 'OwUUMw2+S4NexNydrecX1iT/MAA' ; Healnig Burst Hybrid
+Global Const $TFC_HERO_GWEN_TEMPLATE = 'OQhkAoC8AGKyJMEm+0nDZARcxA' ; Esurge
+;~ Global Const $TFC_HERO_GWEN_TEMPLATE = 'OQhkAoC8AGKjbTDwBMd40MAR4iB'
 Global Const $TFC_HERO_XANDRA_TEMPLATE = 'OAOjAyhDJPYTnp17xFOhmtkLGA'
+Global Const $TFC_HERO_ALTHEA_TEMPLATE = 'OQhkAoB8AGK0LACYeGJAHUGARwFD'
+Global Const $TFC_HERO_VEKK_TEMPLATE = 'OgNDwbrvO0iaBJRLWPWJQNPC'
 ;~ Old team (Olias/Livia/MoW) — kept for reference
 ;~ Global Const $TFC_HERO_OLIAS_TEMPLATE = 'OANDUshvSxMVBoBbhKg3V1DBEA'
 ;~ Global Const $TFC_HERO_LIVIA_TEMPLATE = 'OAhkUsG3RFuTMzOgIkmTuhJ1+iB'
@@ -97,9 +104,14 @@ Func SetupTunnelsForsakenCustomTeam()
 	LeaveParty()
 	RandomSleep(200)
 
-	Local $heroIDs[3] = [$ID_MASTER_OF_WHISPERS, $ID_GWEN, $ID_XANDRA]
-	Local $heroNames[3] = ['Master of Whispers', 'Gwen', 'Xandra']
-	Local $heroTemplates[3] = [$TFC_HERO_MOW_TEMPLATE, $TFC_HERO_GWEN_TEMPLATE, $TFC_HERO_XANDRA_TEMPLATE]
+	;~ Local $heroIDs[3] = [$ID_MASTER_OF_WHISPERS, $ID_GWEN, $ID_XANDRA]
+	;~ Local $heroNames[3] = ['Master of Whispers', 'Gwen', 'Xandra']
+	;~ Local $heroTemplates[3] = [$TFC_HERO_MOW_TEMPLATE, $TFC_HERO_GWEN_TEMPLATE, $TFC_HERO_XANDRA_TEMPLATE]
+	;~ Local $heroIDs[3] = [$ID_GWEN, $ID_MASTER_OF_WHISPERS, $ID_XANDRA]
+	Local $heroIDs[3] = [$ID_GWEN, $ID_GHOST_OF_ALTHEA, $ID_VEKK]
+	Local $heroNames[3] = ['Gwen', 'Althea', 'Vekk']
+	;~ Local $heroNames[3] = ['Gwen', 'Althea', 'Ogden']
+	Local $heroTemplates[3] = [$TFC_HERO_GWEN_TEMPLATE, $TFC_HERO_MOW_TEMPLATE, $TFC_HERO_XANDRA_TEMPLATE]
 
 	For $i = 0 To 2
 		For $attempt = 1 To 5
@@ -194,12 +206,14 @@ EndFunc
 Func ClearTunnelsForsakenCustomFloor1()
 	Info('------------------------------------')
 	Info('First floor')
+	If IsHardmodeEnabled() Then UseConset()
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -8684, 4580, $RANGE_AREA)
 		WaitUntilPartyAlive()
 		If CheckStuck('TunnelsForsakenCustom Floor 1', $MAX_TUNNELS_FORSAKEN_CUSTOM_DURATION) == $FAIL Then Return $FAIL
 		UseMoraleConsumableIfNeeded()
 		UseSummoningStone()
+		If IsHardmodeEnabled() Then UseConset()
 		MoveTo(-15247, -5785)
 		MoveAggroAndKillInRange(-13102, -6841, '2', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-11660, -7585, '3', $PLAYER_AGGRO_RANGE)
@@ -237,12 +251,14 @@ EndFunc
 Func ClearTunnelsForsakenCustomFloor2()
 	Info('------------------------------------')
 	Info('Second floor')
+	If IsHardmodeEnabled() Then UseConset()
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -16748, 5350, $RANGE_LONGBOW)
 		If CheckStuck('TunnelsForsakenCustom Floor 2', $MAX_TUNNELS_FORSAKEN_CUSTOM_DURATION) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		UseSummoningStone()
+		If IsHardmodeEnabled() Then UseConset()
 		MoveAggroAndKillInRange(-2196, 12191, '1', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(1228, 16292, '2', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-764, 17454, '3', $PLAYER_AGGRO_RANGE)
