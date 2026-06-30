@@ -163,6 +163,14 @@ Func FroggyHeroPanelsPseudoFarm()
 EndFunc
 
 
+;~ Wait for party to be alive, and if a wipe happened, clear all hero flags so they follow from shrine.
+Func FroggyWaitUntilPartyAlive()
+	Local $wasWiped = IsPlayerAndPartyWiped()
+	WaitUntilPartyAlive()
+	If $wasWiped Then CancelAllHeroes()
+EndFunc
+
+
 ;~ Froggy farm setup
 Func SetupFroggyFarm()
 	Info('Setting up farm')
@@ -717,7 +725,7 @@ Func ClearFroggyFloor1()
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 6078, 4483, 1250)
 		If CheckStuck('Froggy Floor 1 - First loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
-		WaitUntilPartyAlive()
+		FroggyWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		MoveAggroAndKillInRange(17619, 2687, 'Moving near duo', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(18168, 4788, 'Killing one from duo', $FROGGY_AGGRO_RANGE)
@@ -737,7 +745,7 @@ Func ClearFroggyFloor1()
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -1501, -8590, 1250)
 		If CheckStuck('Froggy Floor 1 - Second loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
-		WaitUntilPartyAlive()
+		FroggyWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		MoveAggroAndKillInRange(4960, 1984, 'Triggering beacon 2', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(3567, -278, 'Massive frog cave', $FROGGY_AGGRO_RANGE)
@@ -750,7 +758,7 @@ Func ClearFroggyFloor1()
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 7171, -17934, 1250)
 		If CheckStuck('Froggy Floor 1 - Third loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
-		WaitUntilPartyAlive()
+		FroggyWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		MoveAggroAndKillInRange(-115, -8569, 'You played two hours and died like this?!', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(1966, -11018, 'Last cave entrance', $FROGGY_AGGRO_RANGE)
@@ -794,7 +802,7 @@ Func ClearFroggyFloor2()
 		EndIf
 
 		If CheckStuck('Froggy Floor 2 - First loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
-		WaitUntilPartyAlive()
+		FroggyWaitUntilPartyAlive()
 		Info('Getting blessing')
 		MoveTo(-11072, -5522)
 		GoToNPC(GetNearestNPCToCoords(-11055, -5533))
@@ -831,7 +839,7 @@ Func ClearFroggyFloor2()
 		EndIf
 
 		If CheckStuck('Froggy Floor 2 - Second loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
-		WaitUntilPartyAlive()
+		FroggyWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		MoveAggroAndKillInRange(3130, 12731, 'Beetle zone', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(3535, 13860, 'Aiur will be restored', $FROGGY_AGGRO_RANGE)
@@ -855,7 +863,7 @@ Func ClearFroggyFloor2()
 		EndIf
 
 		If CheckStuck('Froggy Floor 2 - Third loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
-		WaitUntilPartyAlive()
+		FroggyWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		MoveAggroAndKillInRange(9829, -1175, 'The Death Fleet descends', $FROGGY_AGGRO_RANGE)
 		MoveAggroAndKillInRange(10932, -5203, 'I hear and obey', $FROGGY_AGGRO_RANGE)
@@ -892,6 +900,7 @@ Func ClearFroggyFloor2()
 	Local $lastBossAreaWipeCount = $party_failures_count
 	While Not IsRunFailed() And Not IsQuestReward($ID_FROGGY_QUEST)
 		If IsPlayerDead() Then
+			CancelAllHeroes()
 			RandomSleep(1200)
 			ContinueLoop
 		EndIf
@@ -900,6 +909,7 @@ Func ClearFroggyFloor2()
 			$lastBossAreaWipeCount = $party_failures_count
 			$bossAreaPasses = 0
 			Warn('Froggy Floor 2: wipe detected in boss area, extending retry window')
+			CancelAllHeroes()
 			RandomSleep(1800)
 			ContinueLoop
 		EndIf
@@ -908,7 +918,7 @@ Func ClearFroggyFloor2()
 		If CheckStuck('Froggy Floor 2 - Fourth loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
 		Info('------------------------------------')
 		Info('Boss area')
-		WaitUntilPartyAlive()
+		FroggyWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		MoveAggroAndKillInRange(17494, -14149, 'Our enemies will be undone', $largeFroggyAggroRange)
 		MoveAggroAndKillInRange(14641, -15081, 'I live to serve.', $largeFroggyAggroRange)
