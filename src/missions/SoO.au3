@@ -194,6 +194,28 @@ Func SoOLogConsetSummary()
 EndFunc
 
 
+Func SoOHasEnoughConsets()
+	If Not $run_options_cache['run.use_consets'] Then Return True
+
+	Local $grailFound = FindInInventoryOrXunlaiStorage($ID_GRAIL_OF_MIGHT)
+	Local $armorFound = FindInInventoryOrXunlaiStorage($ID_ARMOR_OF_SALVATION)
+	Local $essenceFound = FindInInventoryOrXunlaiStorage($ID_ESSENCE_OF_CELERITY)
+
+	Local $grailQty = 0, $armorQty = 0, $essenceQty = 0
+	If $grailFound[0] <> 0 Then $grailQty = DllStructGetData(GetItemBySlot($grailFound[0], $grailFound[1]), 'Quantity')
+	If $armorFound[0] <> 0 Then $armorQty = DllStructGetData(GetItemBySlot($armorFound[0], $armorFound[1]), 'Quantity')
+	If $essenceFound[0] <> 0 Then $essenceQty = DllStructGetData(GetItemBySlot($essenceFound[0], $essenceFound[1]), 'Quantity')
+
+	If $grailQty < 3 Or $armorQty < 3 Or $essenceQty < 3 Then
+		Warn('SoO conset check: Grails=' & $grailQty & '  Armors=' & $armorQty & '  Essences=' & $essenceQty & ' (need >=3 each)')
+		Return False
+	EndIf
+
+	Info('SoO conset check: Grails=' & $grailQty & '  Armors=' & $armorQty & '  Essences=' & $essenceQty)
+	Return True
+EndFunc
+
+
 Func SoOHandleRunFailure($reason)
 	$soo_consecutive_run_failures += 1
 	Warn('SoO crash guard: consecutive failure ' & $soo_consecutive_run_failures & '/' & $SOO_CONSECUTIVE_FAIL_GUARD_THRESHOLD & ' (' & $reason & ')')
@@ -255,6 +277,10 @@ Func SetupSoOFarm()
 	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
 	If Not SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250) Then
 		Warn('SoO setup: outpost stabilization timed out before team setup')
+	EndIf
+	If Not SoOHasEnoughConsets() Then
+		Warn('SoO setup aborted: not enough consets available (need >=3 of each)')
+		Return $PAUSE
 	EndIf
 	If SetupSoOFlexibleTeam() == $FAIL Then
 		SoORecoverAfterTeamSetupFailure()
