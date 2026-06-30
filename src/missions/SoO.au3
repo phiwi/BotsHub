@@ -197,9 +197,9 @@ EndFunc
 Func SoOHasEnoughConsets()
 	If Not $run_options_cache['run.use_consets'] Then Return True
 
-	Local $grailFound = FindInInventoryOrXunlaiStorage($ID_GRAIL_OF_MIGHT)
-	Local $armorFound = FindInInventoryOrXunlaiStorage($ID_ARMOR_OF_SALVATION)
-	Local $essenceFound = FindInInventoryOrXunlaiStorage($ID_ESSENCE_OF_CELERITY)
+	Local $grailFound = FindInInventory($ID_GRAIL_OF_MIGHT)
+	Local $armorFound = FindInInventory($ID_ARMOR_OF_SALVATION)
+	Local $essenceFound = FindInInventory($ID_ESSENCE_OF_CELERITY)
 
 	Local $grailQty = 0, $armorQty = 0, $essenceQty = 0
 	If $grailFound[0] <> 0 Then $grailQty = DllStructGetData(GetItemBySlot($grailFound[0], $grailFound[1]), 'Quantity')
@@ -207,7 +207,7 @@ Func SoOHasEnoughConsets()
 	If $essenceFound[0] <> 0 Then $essenceQty = DllStructGetData(GetItemBySlot($essenceFound[0], $essenceFound[1]), 'Quantity')
 
 	If $grailQty < 3 Or $armorQty < 3 Or $essenceQty < 3 Then
-		Warn('SoO conset check: Grails=' & $grailQty & '  Armors=' & $armorQty & '  Essences=' & $essenceQty & ' (need >=3 each)')
+		Warn('SoO conset check: Grails=' & $grailQty & '  Armors=' & $armorQty & '  Essences=' & $essenceQty & ' (need >=3 each in inventory)')
 		Return False
 	EndIf
 
