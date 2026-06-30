@@ -105,6 +105,7 @@
 #include 'src/utilities/BoneBuyer.au3'
 #include 'src/utilities/BuyAll.au3'
 #include 'src/utilities/DustBuyer.au3'
+#include 'src/utilities/FeatherBuyer.au3'
 #include 'src/utilities/IronBuyer.au3'
 #include 'src/utilities/OmniFarmer.au3'
 #include 'src/utilities/PathActionRecorder.au3'
@@ -127,7 +128,7 @@ Global Const $SUCCESS = 0
 Global Const $FAIL = 1
 Global Const $PAUSE = 2
 
-Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Iron|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|FoW|FoW Tower of Courage|Follower|Froggy|' & _
+Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|FoW|FoW Tower of Courage|Follower|Froggy|' & _
 	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|' & _
 	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|SoO|Spirit Slaves Ranger|Storage|Sunspear Armor|Tasca|' & _
 	'TestSuite|Tests|Tunnels Forsaken Custom|TunnelsOfTheForsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
@@ -596,6 +597,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Buying Bones',					BoneBuyerFarm,					5,					$BONE_BUYER_DURATION)
 	AddFarmToFarmMap(	'Buying Dust',					DustBuyerFarm,					5,					$DUST_BUYER_DURATION)
 	AddFarmToFarmMap(	'Buying All',					BuyAllFarm,					5,					$BUY_ALL_DURATION)
+	AddFarmToFarmMap(	'Buying Feathers',				FeatherBuyerFarm,				5,					$FEATHER_BUYER_DURATION)
 	AddFarmToFarmMap(	'Buying Iron',					IronBuyerFarm,					5,					$IRON_BUYER_DURATION)
 	AddFarmToFarmMap(	'Path Recorder',					PathActionRecorderFarm,			0,					$PATH_ACTION_RECORDER_DURATION)
 	AddFarmToFarmMap(	'Raptors',						RaptorsFarm,					5,					$RAPTORS_FARM_DURATION)
