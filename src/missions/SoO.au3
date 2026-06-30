@@ -138,6 +138,11 @@ Func SoOFarm()
 			If $setupResult == $PAUSE Then Return $PAUSE
 			Return $FAIL
 		EndIf
+	ElseIf Not SoOHasEnoughConsets() Then
+		Warn('SoO: not enough consets for another run, returning to outpost')
+		$soo_farm_setup = False
+		TravelToOutpost($ID_VLOXS_FALLS, $district_name)
+		Return $PAUSE
 	EndIf
 
 	$result = SoOFarmLoop()
