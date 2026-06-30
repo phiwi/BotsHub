@@ -144,7 +144,6 @@ Func SoOFarm()
 	Else
 		SoOHasEnoughConsets()
 	EndIf
-	EndIf
 
 	$result = SoOFarmLoop()
 	If $result == $SUCCESS Then
