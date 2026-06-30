@@ -141,11 +141,9 @@ Func SoOFarm()
 			If $setupResult == $PAUSE Then Return $PAUSE
 			Return $FAIL
 		EndIf
-	ElseIf Not SoOHasEnoughConsets() Then
-		Warn('SoO: not enough consets for another run, returning to outpost')
-		$soo_farm_setup = False
-		TravelToOutpost($ID_VLOXS_FALLS, $district_name)
-		Return $PAUSE
+	Else
+		SoOHasEnoughConsets()
+	EndIf
 	EndIf
 
 	$result = SoOFarmLoop()
@@ -215,8 +213,9 @@ Func SoOHasEnoughConsets()
 	If $essenceFound[0] <> 0 Then $essenceQty = DllStructGetData(GetItemBySlot($essenceFound[0], $essenceFound[1]), 'Quantity')
 
 	If $grailQty < 3 Or $armorQty < 3 Or $essenceQty < 3 Then
-		Warn('SoO conset check: Grails=' & $grailQty & '  Armors=' & $armorQty & '  Essences=' & $essenceQty & ' (need >=3 each in inventory)')
-		Return False
+		Warn('SoO conset check: Grails=' & $grailQty & '  Armors=' & $armorQty & '  Essences=' & $essenceQty & ' — falling back to Normal Mode')
+		$run_options_cache['run.hard_mode'] = False
+		Return True
 	EndIf
 
 	Info('SoO conset check: Grails=' & $grailQty & '  Armors=' & $armorQty & '  Essences=' & $essenceQty)
@@ -294,10 +293,7 @@ Func SetupSoOFarm()
 	If Not SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250) Then
 		Warn('SoO setup: outpost stabilization timed out before team setup')
 	EndIf
-	If Not SoOHasEnoughConsets() Then
-		Warn('SoO setup aborted: not enough consets available (need >=3 of each)')
-		Return $PAUSE
-	EndIf
+	SoOHasEnoughConsets()
 	If SetupSoOFlexibleTeam() == $FAIL Then
 		SoORecoverAfterTeamSetupFailure()
 		Return $FAIL
