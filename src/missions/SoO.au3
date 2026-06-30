@@ -60,7 +60,7 @@ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB'
 Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeEfEaRJgVV1DA' ; Healer's Boon (+FF -CH)
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
-Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+sqPe9iQ9dJdRBG ; RoJ + Return
+Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+sqPe9iQ9dJdRBG' ; RoJ + Return
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
 Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
@@ -1212,6 +1212,10 @@ Func ClearSoOFloor3()
 		SoOWaitUntilPartyAlive()
 		If $wasWiped Then
 			Info('Party wipe detected during boss fight — clearing hero flags so they follow from shrine')
+		ElseIf IsPlayerDead() Then
+			CancelAllHeroes()
+			RandomSleep(200)
+			ContinueLoop
 		EndIf
 		If IsHardmodeEnabled() Then SoOUseConset()
 		MoveAggroAndKillInRange(-9850, 7600, 'Going back to secure door opening in case run failed 1', $largerSoOAggroRange)
