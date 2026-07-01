@@ -345,29 +345,35 @@ Func VoltaicFarmLoop()
 	MoveAggroAndKillInRange(25298, -9456, '10', $VS_AGGRO_RANGE)
 	If IsRunFailed() Then Return $FAIL
 
-	Move(25729, -9360)
 	Info('Entering Slavers')
 	Local $portalTimer = TimerInit()
 	While Not WaitMapLoading($ID_SLAVERS_EXILE)
-		If IsRunFailed() Then Return $FAIL
-		If TimerDiff($portalTimer) > 30000 Then
+		If IsRunFailed() Then
+			WaitUntilPartyAlive()
+			ResetFailuresCounter()
+		EndIf
+		If TimerDiff($portalTimer) > 60000 Then
 			Warn('Voltaic: timed out waiting for Slavers Exile portal')
 			Return $FAIL
 		EndIf
-		Sleep(50)
+		Move(25729, -9360)
+		Sleep(250)
 	WEnd
 	MoveTo(-16797, 9251)
 	MoveTo(-17835, 12524)
-	Move(-18300, 12527)
 	; The map has the same ID as slavers
 	$portalTimer = TimerInit()
 	While Not WaitMapLoading()
-		If IsRunFailed() Then Return $FAIL
-		If TimerDiff($portalTimer) > 30000 Then
+		If IsRunFailed() Then
+			WaitUntilPartyAlive()
+			ResetFailuresCounter()
+		EndIf
+		If TimerDiff($portalTimer) > 60000 Then
 			Warn('Voltaic: timed out waiting for Justicar portal')
 			Return $FAIL
 		EndIf
-		Sleep(50)
+		Move(-18300, 12527)
+		Sleep(250)
 	WEnd
 	Info('Now in Justicar')
 	Sleep(500)
