@@ -53,10 +53,12 @@ Global Const $VOLTAIC_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB' ; Esur
 ;~ Global Const $VOLTAIC_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
 ;~ Global Const $VOLTAIC_HERO_DUNKORO_TEMPLATE = 'OwAS4YIPGEqvLx6nPwrVfAC' ; SoJ
 Global Const $VOLTAIC_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74aMA' ; RoJ + Stand your Ground
-Global Const $VOLTAIC_HERO_OGDEN_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ7YfMA' ; RoJ + Never Surrender
+;~ Global Const $VOLTAIC_HERO_OGDEN_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ7YfMA' ; RoJ + Never Surrender
+Global Const $VOLTAIC_HERO_OGDEN_TEMPLATE = 'OwcT4Wo+Vynp6Dv6ig6zloLCLEA' ; RoJ + Smoke
+
 ;~ Global Const $VOLTAIC_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA'
 Global Const $VOLTAIC_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
-Global Const $VOLTAIC_HERO_LIVIA_TEMPLATE = 'OAljUwGpZSUBKgfBVVbh8Y7Y1YA'
+Global Const $VOLTAIC_HERO_LIVIA_TEMPLATE = 'OABDUshnS1MUBKgfBWClBVVbhA'
 Global Const $VOLTAIC_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
 Global Const $VOLTAIC_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
 ;~ Global Const $VOLTAIC_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
@@ -93,9 +95,12 @@ Global Const $VOLTAIC_SLOT5_HERO_TEMPLATE = $VOLTAIC_HERO_OLIAS_TEMPLATE
 ;~ Global Const $VOLTAIC_SLOT6_HERO_ID = $ID_VEKK
 ;~ Global Const $VOLTAIC_SLOT6_HERO_NAME = 'Vekk'
 ;~ Global Const $VOLTAIC_SLOT6_HERO_TEMPLATE = $VOLTAIC_HERO_VEKK_TEMPLATE
-Global Const $VOLTAIC_SLOT6_HERO_ID = $ID_DUNKORO
-Global Const $VOLTAIC_SLOT6_HERO_NAME = 'Dunkoro'
-Global Const $VOLTAIC_SLOT6_HERO_TEMPLATE = $VOLTAIC_HERO_DUNKORO_TEMPLATE
+Global Const $VOLTAIC_SLOT6_HERO_ID = $ID_LIVIA
+Global Const $VOLTAIC_SLOT6_HERO_NAME = 'Livia'
+Global Const $VOLTAIC_SLOT6_HERO_TEMPLATE = $VOLTAIC_HERO_LIVIA_TEMPLATE
+;~ Global Const $VOLTAIC_SLOT6_HERO_ID = $ID_DUNKORO
+;~ Global Const $VOLTAIC_SLOT6_HERO_NAME = 'Dunkoro'
+;~ Global Const $VOLTAIC_SLOT6_HERO_TEMPLATE = $VOLTAIC_HERO_DUNKORO_TEMPLATE
 
 ;~ Global Const $VOLTAIC_SLOT7_HERO_ID = $ID_VEKK
 ;~ Global Const $VOLTAIC_SLOT7_HERO_NAME = 'Vekk'
@@ -342,14 +347,26 @@ Func VoltaicFarmLoop()
 
 	Move(25729, -9360)
 	Info('Entering Slavers')
+	Local $portalTimer = TimerInit()
 	While Not WaitMapLoading($ID_SLAVERS_EXILE)
+		If IsRunFailed() Then Return $FAIL
+		If TimerDiff($portalTimer) > 30000 Then
+			Warn('Voltaic: timed out waiting for Slavers Exile portal')
+			Return $FAIL
+		EndIf
 		Sleep(50)
 	WEnd
 	MoveTo(-16797, 9251)
 	MoveTo(-17835, 12524)
 	Move(-18300, 12527)
 	; The map has the same ID as slavers
+	$portalTimer = TimerInit()
 	While Not WaitMapLoading()
+		If IsRunFailed() Then Return $FAIL
+		If TimerDiff($portalTimer) > 30000 Then
+			Warn('Voltaic: timed out waiting for Justicar portal')
+			Return $FAIL
+		EndIf
 		Sleep(50)
 	WEnd
 	Info('Now in Justicar')
