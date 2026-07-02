@@ -372,7 +372,11 @@ Func VoltaicFarmLoop()
 			Move(25729, -9360)
 			Sleep(250)
 		WEnd
-	Until Not IsAgentInRange(GetMyAgent(), 25729, -9360, 5000)
+	Until GetMapID() == $ID_SLAVERS_EXILE And Not IsAgentInRange(GetMyAgent(), 25729, -9360, 5000)
+	If GetMapID() <> $ID_SLAVERS_EXILE Then
+		Warn('Voltaic: portal entry loop exited but map is ' & GetMapID() & ', expected ' & $ID_SLAVERS_EXILE)
+		Return $FAIL
+	EndIf
 	MoveTo(-16797, 9251)
 	MoveTo(-17835, 12524)
 	; The map has the same ID as slavers
@@ -399,6 +403,10 @@ Func VoltaicFarmLoop()
 		Move(-18300, 12527)
 		Sleep(250)
 	WEnd
+	If IsAgentInRange(GetMyAgent(), -16797, 9251, $RANGE_SPIRIT) Then
+		Warn('Voltaic: second WaitMapLoading triggered but still near Slavers spawn — not in Justicar')
+		Return $FAIL
+	EndIf
 	Info('Now in Justicar')
 	Sleep(500)
 	GoToNPC(GetNearestNPCToCoords(-12135, -18210))
