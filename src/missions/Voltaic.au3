@@ -359,6 +359,10 @@ Func VoltaicFarmLoop()
 		Move(25729, -9360)
 		Sleep(250)
 	WEnd
+	If IsAgentInRange(GetMyAgent(), 25729, -9360, 5000) Then
+		Warn('Voltaic: did not enter Slavers Exile — still near portal in Verdant Cascades')
+		Return $FAIL
+	EndIf
 	MoveTo(-16797, 9251)
 	MoveTo(-17835, 12524)
 	; The map has the same ID as slavers
