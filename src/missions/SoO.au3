@@ -99,12 +99,12 @@ Global Const $SOO_SLOT5_HERO_ID = $ID_OLIAS
 Global Const $SOO_SLOT5_HERO_NAME = 'Olias'
 Global Const $SOO_SLOT5_HERO_TEMPLATE = $SOO_HERO_OLIAS_TEMPLATE
 
-;~ Global Const $SOO_SLOT6_HERO_ID = $ID_DUNKORO
-;~ Global Const $SOO_SLOT6_HERO_NAME = 'Dunkoro'
-;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
-Global Const $SOO_SLOT6_HERO_ID = $ID_LIVIA
-Global Const $SOO_SLOT6_HERO_NAME = 'Livia'
-Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_LIVIA_TEMPLATE
+Global Const $SOO_SLOT6_HERO_ID = $ID_DUNKORO
+Global Const $SOO_SLOT6_HERO_NAME = 'Dunkoro'
+Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
+;~ Global Const $SOO_SLOT6_HERO_ID = $ID_LIVIA
+;~ Global Const $SOO_SLOT6_HERO_NAME = 'Livia'
+;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_LIVIA_TEMPLATE
 ;~ Global Const $SOO_SLOT6_HERO_ID = $ID_ACOLYTE_SOUSUKE
 ;~ Global Const $SOO_SLOT6_HERO_NAME = 'Acolyte Sousuke'
 ;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_SOUSUKE_TEMPLATE
@@ -174,6 +174,7 @@ EndFunc
 
 
 Func SoOUseConset()
+	If Not $run_options_cache['run.use_consets'] Then Return
 	If TimerDiff($soo_last_conset_timer) < 3000 Then Return
 	$soo_last_conset_timer = TimerInit()
 	If GetEffectTimeRemaining(GetEffect($ID_GRAIL_OF_MIGHT_EFFECT)) <= 0 Then
