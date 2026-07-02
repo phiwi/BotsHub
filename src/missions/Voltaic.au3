@@ -388,22 +388,15 @@ Func VoltaicFarmLoop()
 	If IsHardmodeEnabled() Then UseConset()
 
 	Sleep(1000)
-	While Not IsAgentInRange(GetMyAgent(), -18500, -8000, 1250)
+	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -18500, -8000, $RANGE_LONGBOW)
 		If IsPlayerDead() Then
 			RandomSleep(1200)
 			ContinueLoop
 		EndIf
 
-		If IsRunFailed() Then
-			Warn('Voltaic Justicar: wipe detected before shrine, recovering and retrying path')
-			ResetFailuresCounter()
-			RandomSleep(1500)
-			ContinueLoop
-		EndIf
-
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
-		UseConsumable($ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
+		UseSummoningStone()
 		MoveAggroAndKillInRange(-13500, -15750, 'In front of the door', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-12500, -15000, 'Before the bridge', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-10400, -14800, 'After the bridge', $VS_AGGRO_RANGE)
@@ -415,22 +408,15 @@ Func VoltaicFarmLoop()
 		MoveAggroAndKillInRange(-16500, -8000, 'Fifth group', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-18800, -7850, 'To the shrine', $VS_AGGRO_RANGE)
 	WEnd
-	While Not IsAgentInRange(GetMyAgent(), -17500, -14250, 1250)
+	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -17500, -14250, $RANGE_LONGBOW)
 		If IsPlayerDead() Then
 			RandomSleep(1200)
 			ContinueLoop
 		EndIf
 
-		If IsRunFailed() Then
-			Warn('Voltaic Justicar: wipe detected before chest route, recovering and retrying path')
-			ResetFailuresCounter()
-			RandomSleep(1500)
-			ContinueLoop
-		EndIf
-
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
-		UseConsumable($ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
+		UseSummoningStone()
 		MoveAggroAndKillInRange(-18500, -11500, 'Pre-Boss group', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-17700, -12500, 'Boss group', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-17500, -14250, 'Final group', $VS_AGGRO_RANGE)
