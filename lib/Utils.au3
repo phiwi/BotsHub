@@ -178,6 +178,8 @@ Func TravelToOutpost($outpostID, $district = 'Random')
 	If GetMapID() == $outpostID Then Return $SUCCESS
 	Info('Travelling to ' & $outpostName & ' (Outpost)')
 
+	CancelAction()
+	RandomSleep(150)
 	DistrictTravel($outpostID, $district)
 	Local $arrivalWindow = TimerInit()
 	While TimerDiff($arrivalWindow) < 5000
@@ -189,6 +191,8 @@ Func TravelToOutpost($outpostID, $district = 'Random')
 
 	If $district <> 'Random' Then
 		Warn('Retrying travel to ' & $outpostName & ' in Random district')
+		CancelAction()
+		RandomSleep(150)
 		DistrictTravel($outpostID, 'Random')
 		$arrivalWindow = TimerInit()
 		While TimerDiff($arrivalWindow) < 5000
@@ -196,6 +200,17 @@ Func TravelToOutpost($outpostID, $district = 'Random')
 			Sleep(200)
 		WEnd
 	EndIf
+
+	; Final attempt: close any remaining dialogs and retry with Random district
+	Warn('Final retry travel to ' & $outpostName & ' after UI cleanup')
+	CancelAction()
+	RandomSleep(300)
+	DistrictTravel($outpostID, 'Random')
+	$arrivalWindow = TimerInit()
+	While TimerDiff($arrivalWindow) < 5000
+		If GetMapID() == $outpostID Then Return $SUCCESS
+		Sleep(200)
+	WEnd
 
 	Local $currentMapID = GetMapID()
 	Local $currentMapName = 'unknown'

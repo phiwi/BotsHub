@@ -108,6 +108,8 @@ Func InventoryManagementBeforeRun($tradeTown = $ID_EYE_OF_THE_NORTH)
 		If GetMapType() <> $ID_OUTPOST Then TravelToOutpost($tradeTown, $district_name)
 		StoreItemsInXunlaiStorage()
 	EndIf
+	CancelAction()
+	RandomSleep(250)
 	ResetBotsSetups()
 	Return $PAUSE
 EndFunc
