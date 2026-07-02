@@ -365,6 +365,11 @@ Func VoltaicFarmLoop()
 				EndIf
 				$portalTimer = TimerInit()
 			EndIf
+			If IsPlayerDead() Then
+				WaitUntilPartyAlive()
+				ResetFailuresCounter()
+				$portalTimer = TimerInit()
+			EndIf
 			If TimerDiff($portalTimer) > 60000 Then
 				Warn('Voltaic: timed out waiting for Slavers Exile portal')
 				Return $FAIL
