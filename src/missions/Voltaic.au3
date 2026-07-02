@@ -346,23 +346,22 @@ Func VoltaicFarmLoop()
 	If IsRunFailed() Then Return $FAIL
 
 	Info('Entering Slavers')
-	Local $portalTimer = TimerInit()
-	While Not WaitMapLoading($ID_SLAVERS_EXILE)
-		If IsRunFailed() Then
-			WaitUntilPartyAlive()
-			ResetFailuresCounter()
-		EndIf
-		If TimerDiff($portalTimer) > 60000 Then
-			Warn('Voltaic: timed out waiting for Slavers Exile portal')
-			Return $FAIL
-		EndIf
-		Move(25729, -9360)
-		Sleep(250)
-	WEnd
-	If IsAgentInRange(GetMyAgent(), 25729, -9360, 5000) Then
-		Warn('Voltaic: did not enter Slavers Exile — still near portal in Verdant Cascades')
-		Return $FAIL
-	EndIf
+	Local $portalTimer
+	Do
+		$portalTimer = TimerInit()
+		While Not WaitMapLoading($ID_SLAVERS_EXILE)
+			If IsRunFailed() Then
+				WaitUntilPartyAlive()
+				ResetFailuresCounter()
+			EndIf
+			If TimerDiff($portalTimer) > 60000 Then
+				Warn('Voltaic: timed out waiting for Slavers Exile portal')
+				Return $FAIL
+			EndIf
+			Move(25729, -9360)
+			Sleep(250)
+		WEnd
+	Until Not IsAgentInRange(GetMyAgent(), 25729, -9360, 5000)
 	MoveTo(-16797, 9251)
 	MoveTo(-17835, 12524)
 	; The map has the same ID as slavers
