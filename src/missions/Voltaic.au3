@@ -42,7 +42,7 @@ Global Const $VOLTAIC_TEAM_OUTPOST_RETRIES = 4
 
 ;~ Global Const $VOLTAIC_HERO_GWEN_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdjQcaG4iB' ; ESurge
 ;~ Global Const $VOLTAIC_HERO_GWEN_TEMPLATE = 'OQhkAsC8gFKzJIHM9MdjQcaG4iB' ; ESurge
-Global Const $VOLTAIC_HERO_GWEN_TEMPLATE = 'OQlkAoB8wYa0LACIHUeGJgTQP1EA' ; Inep + Epi + Frust
+Global Const $VOLTAIC_HERO_GWEN_TEMPLATE = 'OQBDAZwTSvAIgcQ5ZkA9UZAEBA' ; Inep
 ;~ Global Const $VOLTAIC_HERO_NORGU_TEMPLATE = 'OQJUAWBPMsMngcw0z0VEwpZgrDA' ; ESurge + FS
 ;~ Global Const $VOLTAIC_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; Psychic Inst
 Global Const $VOLTAIC_HERO_NORGU_TEMPLATE = 'OQJUAUBPOMNnAcqpb6lDyAEhrDA' ; Esurge + FS
@@ -59,7 +59,7 @@ Global Const $VOLTAIC_HERO_OGDEN_TEMPLATE = 'OwcT4Wo+Vynp6Dv6ig6zloLCLEA' ; RoJ 
 ;~ Global Const $VOLTAIC_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA'
 Global Const $VOLTAIC_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
 Global Const $VOLTAIC_HERO_LIVIA_TEMPLATE = 'OABDUshnS1MUB4BfBWClBVVbhA' ; Bone Fiends
-Global Const $VOLTAIC_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
+Global Const $VOLTAIC_HERO_ZHED_TEMPLATE = 'OgNDgMjvOhjr63wboDDI3VtI' ; BSurge + Prots
 Global Const $VOLTAIC_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
 ;~ Global Const $VOLTAIC_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 ;~ Global Const $VOLTAIC_HERO_SOUSUKE_TEMPLATE = 'OgBVgw0pwFy0Rs+nxqqj1RPMHOWB' ; Master of Magic
@@ -69,9 +69,6 @@ Global Const $VOLTAIC_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
 Global Const $VOLTAIC_SLOT1_HERO_ID = $ID_GWEN
 Global Const $VOLTAIC_SLOT1_HERO_NAME = 'Gwen'
 Global Const $VOLTAIC_SLOT1_HERO_TEMPLATE = $VOLTAIC_HERO_GWEN_TEMPLATE
-;~ Global Const $VOLTAIC_SLOT1_HERO_ID = $ID_ZHED_SHADOWHOOF
-;~ Global Const $VOLTAIC_SLOT1_HERO_NAME = 'Zhed Shadowhoof'
-;~ Global Const $VOLTAIC_SLOT1_HERO_TEMPLATE = $VOLTAIC_HERO_ZHED_TEMPLATE
 
 Global Const $VOLTAIC_SLOT2_HERO_ID = $ID_NORGU
 Global Const $VOLTAIC_SLOT2_HERO_NAME = 'Norgu'
@@ -102,15 +99,12 @@ Global Const $VOLTAIC_SLOT6_HERO_TEMPLATE = $VOLTAIC_HERO_LIVIA_TEMPLATE
 ;~ Global Const $VOLTAIC_SLOT6_HERO_NAME = 'Dunkoro'
 ;~ Global Const $VOLTAIC_SLOT6_HERO_TEMPLATE = $VOLTAIC_HERO_DUNKORO_TEMPLATE
 
-;~ Global Const $VOLTAIC_SLOT7_HERO_ID = $ID_VEKK
-;~ Global Const $VOLTAIC_SLOT7_HERO_NAME = 'Vekk'
-;~ Global Const $VOLTAIC_SLOT7_HERO_TEMPLATE = $VOLTAIC_HERO_VEKK_TEMPLATE
-;~ Global Const $VOLTAIC_SLOT7_HERO_ID = $ID_ACOLYTE_SOUSUKE
-;~ Global Const $VOLTAIC_SLOT7_HERO_NAME = 'Acolyte Sousuke'
-;~ Global Const $VOLTAIC_SLOT7_HERO_TEMPLATE = $VOLTAIC_HERO_SOUSUKE_TEMPLATE
-Global Const $VOLTAIC_SLOT7_HERO_ID = $ID_OGDEN
-Global Const $VOLTAIC_SLOT7_HERO_NAME = 'Ogden Stonehealer'
-Global Const $VOLTAIC_SLOT7_HERO_TEMPLATE = $VOLTAIC_HERO_OGDEN_TEMPLATE
+;~ Global Const $VOLTAIC_SLOT7_HERO_ID = $ID_OGDEN
+;~ Global Const $VOLTAIC_SLOT7_HERO_NAME = 'Ogden Stonehealer'
+;~ Global Const $VOLTAIC_SLOT7_HERO_TEMPLATE = $VOLTAIC_HERO_OGDEN_TEMPLATE
+Global Const $VOLTAIC_SLOT7_HERO_ID = $ID_ZHED_SHADOWHOOF
+Global Const $VOLTAIC_SLOT7_HERO_NAME = 'Zhed Shadowhoof'
+Global Const $VOLTAIC_SLOT7_HERO_TEMPLATE = $VOLTAIC_HERO_ZHED_TEMPLATE
 
 Global $voltaic_farm_setup = False
 
@@ -329,6 +323,9 @@ Func VoltaicFarmLoop()
 	If GetMapID() <> $ID_VERDANT_CASCADES Then Return $FAIL
 	ResetFailuresCounter()
 
+	; Disable Norgu's skill 8 until we reach the dungeon
+	If Not GetIsHeroSkillSlotDisabled(2, 8) Then ToggleHeroSkillSlot(2, 8)
+
 	MoveAggroAndKillInRange(-19887, 6074, '1', $VS_AGGRO_RANGE)
 	Info('Making way to Slavers')
 	MoveAggroAndKillInRange(-10273, 3251, '2', $VS_AGGRO_RANGE)
@@ -414,6 +411,8 @@ Func VoltaicFarmLoop()
 		Return $FAIL
 	EndIf
 	Info('Now in Justicar')
+	; Re-enable Norgu's skill 8 now that we're inside the dungeon
+	If GetIsHeroSkillSlotDisabled(2, 8) Then ToggleHeroSkillSlot(2, 8)
 	Sleep(500)
 	GoToNPC(GetNearestNPCToCoords(-12135, -18210))
 	RandomSleep(250)
