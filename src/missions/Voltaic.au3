@@ -58,7 +58,7 @@ Global Const $VOLTAIC_HERO_OGDEN_TEMPLATE = 'OwcT4Wo+Vynp6Dv6ig6zloLCLEA' ; RoJ 
 
 ;~ Global Const $VOLTAIC_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA'
 Global Const $VOLTAIC_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
-Global Const $VOLTAIC_HERO_LIVIA_TEMPLATE = 'OABDUshnS1MUBKgfBWClBVVbhA'
+Global Const $VOLTAIC_HERO_LIVIA_TEMPLATE = 'OABDUshnS1MUB4BfBWClBVVbhA' ; Bone Fiends
 Global Const $VOLTAIC_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
 Global Const $VOLTAIC_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
 ;~ Global Const $VOLTAIC_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
@@ -379,9 +379,9 @@ Func VoltaicFarmLoop()
 	EndIf
 	MoveTo(-16797, 9251)
 	MoveTo(-17835, 12524)
-	; The map has the same ID as slavers
+	; Slavers and Justicar share the same map ID — use position to detect portal entry
 	$portalTimer = TimerInit()
-	While Not WaitMapLoading()
+	While IsAgentInRange(GetMyAgent(), -18300, 12527, $RANGE_NEARBY)
 		If IsRunFailed() Then
 			WaitUntilPartyAlive()
 			CancelAllHeroes()
@@ -403,8 +403,9 @@ Func VoltaicFarmLoop()
 		Move(-18300, 12527)
 		Sleep(250)
 	WEnd
-	If IsAgentInRange(GetMyAgent(), -16797, 9251, $RANGE_SPIRIT) Then
-		Warn('Voltaic: second WaitMapLoading triggered but still near Slavers spawn — not in Justicar')
+	Sleep(1500)
+	If IsAgentInRange(GetMyAgent(), -18300, 12527, $RANGE_SPIRIT) Then
+		Warn('Voltaic: left portal radius but still near Slavers portal — not in Justicar')
 		Return $FAIL
 	EndIf
 	Info('Now in Justicar')
