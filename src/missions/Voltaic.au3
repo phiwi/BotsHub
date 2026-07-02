@@ -352,7 +352,18 @@ Func VoltaicFarmLoop()
 		While Not WaitMapLoading($ID_SLAVERS_EXILE)
 			If IsRunFailed() Then
 				WaitUntilPartyAlive()
+				CancelAllHeroes()
 				ResetFailuresCounter()
+				Info('Voltaic: recovering from wipe, walking back to portal')
+				MoveAggroAndKillInRange(18054, -3275, '8', $VS_AGGRO_RANGE)
+				MoveAggroAndKillInRange(20966, -6476, '9', $VS_AGGRO_RANGE)
+				MoveAggroAndKillInRange(25298, -9456, '10', $VS_AGGRO_RANGE)
+				If IsRunFailed() Then
+					WaitUntilPartyAlive()
+					CancelAllHeroes()
+					ResetFailuresCounter()
+				EndIf
+				$portalTimer = TimerInit()
 			EndIf
 			If TimerDiff($portalTimer) > 60000 Then
 				Warn('Voltaic: timed out waiting for Slavers Exile portal')
@@ -369,7 +380,17 @@ Func VoltaicFarmLoop()
 	While Not WaitMapLoading()
 		If IsRunFailed() Then
 			WaitUntilPartyAlive()
+			CancelAllHeroes()
 			ResetFailuresCounter()
+			Info('Voltaic: recovering from wipe, walking back to Justicar portal')
+			MoveTo(-16797, 9251)
+			MoveTo(-17835, 12524)
+			If IsRunFailed() Then
+				WaitUntilPartyAlive()
+				CancelAllHeroes()
+				ResetFailuresCounter()
+			EndIf
+			$portalTimer = TimerInit()
 		EndIf
 		If TimerDiff($portalTimer) > 60000 Then
 			Warn('Voltaic: timed out waiting for Justicar portal')
