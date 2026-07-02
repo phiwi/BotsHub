@@ -381,7 +381,7 @@ Func VoltaicFarmLoop()
 	MoveTo(-17835, 12524)
 	; Slavers and Justicar share the same map ID — use position to detect portal entry
 	$portalTimer = TimerInit()
-	While IsAgentInRange(GetMyAgent(), -18300, 12527, $RANGE_NEARBY)
+	While IsAgentInRange(GetMyAgent(), -17835, 12524, $RANGE_SPIRIT)
 		If IsRunFailed() Then
 			WaitUntilPartyAlive()
 			CancelAllHeroes()
@@ -400,12 +400,12 @@ Func VoltaicFarmLoop()
 			Warn('Voltaic: timed out waiting for Justicar portal')
 			Return $FAIL
 		EndIf
-		Move(-18300, 12527)
+		Move(-18600, 12600)
 		Sleep(250)
 	WEnd
 	Sleep(1500)
-	If IsAgentInRange(GetMyAgent(), -18300, 12527, $RANGE_SPIRIT) Then
-		Warn('Voltaic: left portal radius but still near Slavers portal — not in Justicar')
+	If IsAgentInRange(GetMyAgent(), -17835, 12524, $RANGE_SPIRIT) Then
+		Warn('Voltaic: left portal radius but still near approach point — not in Justicar')
 		Return $FAIL
 	EndIf
 	Info('Now in Justicar')
