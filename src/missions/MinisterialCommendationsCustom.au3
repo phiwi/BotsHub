@@ -502,7 +502,12 @@ Func InitialFightCustom()
         AttackOrUseSkill(1300, $COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE, $COMMENDATIONS_CUSTOM_SKILL_HUNDRED_BLADES)
 
         ; Allow player deaths here so heroes can resurrect.
-        If IsPlayerDead() Then ExitLoop
+        ; Bail immediately only on full party wipe — no one left to rez.
+        If IsPlayerDead() Then
+            If IsPlayerAndPartyWiped() Then ExitLoop
+            RandomSleep(500)
+            ContinueLoop
+        EndIf
 
         $foesInRange = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_COMPASS)
     WEnd
