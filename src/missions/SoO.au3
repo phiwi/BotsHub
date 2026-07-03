@@ -60,7 +60,8 @@ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB'
 Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeEfEaRJgVV1DA' ; Healer's Boon (+FF -CH)
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
-Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+sqPe9iQ9dJdRBG' ; RoJ + Return
+;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+sqPe9iQ9dJdRBG' ; RoJ + Return
+Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+s7Be9iQ9dJdRBGA' ; RoJ + SoW
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
 Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
@@ -72,9 +73,11 @@ Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
 Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jXydNgA' ; Ether Renewal Prot (+Convert H. -Draw)
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1Do2dNgA' ; Ether Renewal Prot
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
-Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
+;~ Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
 ;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
 Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcU44XA1PO+sqPe9iQ9dJdRBGA' ; RoJ + Return
+Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBFgYeKuIrjY9PjVVHrjeYOcsC' ; MoM
+
 
 Global Const $SOO_SLOT1_HERO_ID = $ID_GWEN
 Global Const $SOO_SLOT1_HERO_NAME = 'Gwen'
@@ -105,19 +108,13 @@ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
 ;~ Global Const $SOO_SLOT6_HERO_ID = $ID_LIVIA
 ;~ Global Const $SOO_SLOT6_HERO_NAME = 'Livia'
 ;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_LIVIA_TEMPLATE
-;~ Global Const $SOO_SLOT6_HERO_ID = $ID_ACOLYTE_SOUSUKE
-;~ Global Const $SOO_SLOT6_HERO_NAME = 'Acolyte Sousuke'
-;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_SOUSUKE_TEMPLATE
 
-Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
-Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
-Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
-;~ Global Const $SOO_SLOT7_HERO_ID = $ID_ZHED_SHADOWHOOF
-;~ Global Const $SOO_SLOT7_HERO_NAME = 'Zhed Shadowhoof'
-;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
-;~ Global Const $SOO_SLOT7_HERO_ID = $ID_VEKK
-;~ Global Const $SOO_SLOT7_HERO_NAME = 'Vekk'
-;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
+;~ Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
+;~ Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
+;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
+Global Const $SOO_SLOT7_HERO_ID = $ID_ACOLYTE_SOUSUKE
+Global Const $SOO_SLOT7_HERO_NAME = 'Alcolyte Sousuke'
+Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_SOUSUKE_TEMPLATE
 
 Global $soo_farm_setup = False
 Global $soo_consecutive_run_failures = 0
@@ -174,7 +171,6 @@ EndFunc
 
 
 Func SoOUseConset()
-	If Not $run_options_cache['run.use_consets'] Then Return
 	If TimerDiff($soo_last_conset_timer) < 3000 Then Return
 	$soo_last_conset_timer = TimerInit()
 	If GetEffectTimeRemaining(GetEffect($ID_GRAIL_OF_MIGHT_EFFECT)) <= 0 Then
@@ -1109,7 +1105,8 @@ Func ClearSoOFloor3()
 		MoveAggroAndKillInRange(9796, 18960, '9', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(14068, 19549, '10', $SOO_AGGRO_RANGE)
 
-		If IsRunFailed() Then
+		If IsPlayerDead() Or IsRunFailed() Then
+			SoOWaitUntilPartyAlive()
 			Warn('Party wipe detected before torch sequence, restarting loop to recover')
 			ContinueLoop
 		EndIf
@@ -1134,13 +1131,15 @@ Func ClearSoOFloor3()
 			ActionInteract()
 			RandomSleep(1000)
 		Next
-		If IsRunFailed() Then
+		If IsPlayerDead() Or IsRunFailed() Then
+			SoOWaitUntilPartyAlive()
 			Warn('Party wipe detected after torch chest — restarting loop to recover')
 			ContinueLoop
 		EndIf
 		Info('Pick up torch')
 		PickUpTorch()
-		If IsRunFailed() Then
+		If IsPlayerDead() Or IsRunFailed() Then
+			SoOWaitUntilPartyAlive()
 			Warn('Party wipe detected after picking up torch — restarting loop to recover')
 			ContinueLoop
 		EndIf
@@ -1166,7 +1165,8 @@ Func ClearSoOFloor3()
 		DropBundle()
 		RandomSleep(500)
 
-		If IsRunFailed() Then
+		If IsPlayerDead() Or IsRunFailed() Then
+			SoOWaitUntilPartyAlive()
 			Warn('Party wipe detected before keyboss — restarting loop to recover')
 			ContinueLoop
 		EndIf
