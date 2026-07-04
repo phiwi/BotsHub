@@ -1685,6 +1685,19 @@ Func BuyItem($itemPosition, $amount, $value)
 EndFunc
 
 
+;~ Crafts an item at a consumable crafter NPC (e.g. Eyja, Kwat, Alcus in Embark Beach).
+;~ Materials are consumed automatically from inventory by the game.
+Func CraftItem($modelID, $quantity, $npcAgentID)
+	DllStructSetData($CRAFT_ITEM_STRUCT, 1, $craft_item_ptr)
+	DllStructSetData($CRAFT_ITEM_STRUCT, 2, $modelID)
+	DllStructSetData($CRAFT_ITEM_STRUCT, 3, $quantity)
+	DllStructSetData($CRAFT_ITEM_STRUCT, 4, $npcAgentID)
+	DllStructSetData($CRAFT_ITEM_STRUCT, 5, 0)
+	DllStructSetData($CRAFT_ITEM_STRUCT, 6, 0)
+	Enqueue($CRAFT_ITEM_STRUCT_PTR, 24)
+EndFunc
+
+
 ;~ Returns the item ID of the quoted item.
 Func GetTraderCostID()
 	Return MemoryRead(GetProcessHandle(), $trader_cost_ID)

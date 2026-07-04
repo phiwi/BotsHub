@@ -157,20 +157,20 @@ Func ConsetBuyerFarm()
 		If $stillNeedBone    > 0 Then BuyMaterialBatch($ID_BONE,                    $stillNeedBone,    'Bones')
 	EndIf
 
-	; ── Schritt 6: 10x Grail of Might bei Eyja ──
-	Info('Buying ' & $CONSET_BUY_COUNT & 'x Grail of Might from Eyja')
-	GoToNPCByCoords($EYJA_X, $EYJA_Y)
-	BuyConsetItem($ID_GRAIL_OF_MIGHT, $CONSET_BUY_COUNT)
+	; ── Schritt 6: 10 pieces Grail of Might bei Eyja ──
+	Info('Buying ' & $CONSET_BUY_COUNT & ' pieces of Grail of Might from Eyja')
+	Local $eyja = GoToNPCByCoords($EYJA_X, $EYJA_Y)
+	CraftConsetItem($ID_GRAIL_OF_MIGHT, $CONSET_BUY_COUNT, $eyja)
 
-	; ── Schritt 7: 10x Essence of Celerity bei Kwat ──
-	Info('Buying ' & $CONSET_BUY_COUNT & 'x Essence of Celerity from Kwat')
-	GoToNPCByCoords($KWAT_X, $KWAT_Y)
-	BuyConsetItem($ID_ESSENCE_OF_CELERITY, $CONSET_BUY_COUNT)
+	; ── Schritt 7: 10 pieces Essence of Celerity bei Kwat ──
+	Info('Buying ' & $CONSET_BUY_COUNT & ' pieces of Essence of Celerity from Kwat')
+	Local $kwat = GoToNPCByCoords($KWAT_X, $KWAT_Y)
+	CraftConsetItem($ID_ESSENCE_OF_CELERITY, $CONSET_BUY_COUNT, $kwat)
 
-	; ── Schritt 8: 10x Armor of Salvation bei Alcus Nailbiter ──
-	Info('Buying ' & $CONSET_BUY_COUNT & 'x Armor of Salvation from Alcus Nailbiter')
-	GoToNPCByCoords($ALCUS_X, $ALCUS_Y)
-	BuyConsetItem($ID_ARMOR_OF_SALVATION, $CONSET_BUY_COUNT)
+	; ── Schritt 8: 10 pieces Armor of Salvation bei Alcus Nailbiter ──
+	Info('Buying ' & $CONSET_BUY_COUNT & ' pieces of Armor of Salvation from Alcus Nailbiter')
+	Local $alcus = GoToNPCByCoords($ALCUS_X, $ALCUS_Y)
+	CraftConsetItem($ID_ARMOR_OF_SALVATION, $CONSET_BUY_COUNT, $alcus)
 
 	Info('Conset Buyer: done. Bought ' & $CONSET_BUY_COUNT & ' consets.')
 	Return $PAUSE
@@ -320,7 +320,7 @@ Func ConsetBuyerShouldStoreMat($item)
 EndFunc
 
 
-;~ Zum nächsten NPC bei den angegebenen Koordinaten laufen
+;~ Zum nächsten NPC bei den angegebenen Koordinaten laufen und Agent-ID zurückgeben
 Func GoToNPCByCoords($x, $y)
 	MoveTo($x, $y)
 	Local $npc = GetNearestNPCToCoords($x, $y)
@@ -332,45 +332,19 @@ Func GoToNPCByCoords($x, $y)
 		GoNPC($npc)
 		RandomSleep(750)
 	EndIf
+	Return $npc
 EndFunc
 
 
-;~ Ein Conset-Item (Grail/Essence/Armor) in angegebener Menge beim aktuellen NPC kaufen
-;~ Verwendet BuyItem (Merchant) statt TraderRequest/TraderBuy, weil die Conset-NPCs
-;~ reguläre Merchants sind und nicht das Trader-Interface nutzen.
-Func BuyConsetItem($modelID, $amount)
-	Local $processHandle = GetProcessHandle()
+;~ Ein Conset-Item (Grail/Essence/Armor) in angegebener Menge beim aktuellen NPC craften.
+;~ Conset-NPCs (Eyja, Kwat, Alcus) sind "Consumable Crafter" – sie tauschen Materialien
+;~ gegen den Gegenstand. Das CraftItem-Kommando löst den Tausch aus, das Spiel
+;~ entnimmt die Materialien automatisch aus dem Inventar.
+Func CraftConsetItem($modelID, $amount, $npc)
+	Local $npcAgentID = DllStructGetData($npc, 'ID')
 	For $i = 1 To $amount
-		; Item in der Merchant-Liste suchen (reguläre Händler wie Eyja/Kwat/Alcus)
-		Local $merchantBase = GetMerchantItemsBase()
-		Local $merchantSize = GetMerchantItemsSize()
-		Local $itemPos = 0, $itemValue = 0
-		For $p = 0 To $merchantSize - 1
-			Local $itemID = MemoryRead($processHandle, $merchantBase + 4 * $p)
-			If $itemID Then
-				Local $offsets[] = [0, 0x18, 0x40, 0xB8, 4 * $itemID]
-				Local $itemPtr = MemoryReadPtr($processHandle, $base_address_ptr, $offsets)
-				If $itemPtr[1] And MemoryRead($processHandle, $itemPtr[1] + 0x2C) == $modelID Then
-					$itemPos = $p + 1
-					$itemValue = MemoryRead($processHandle, $itemPtr[1] + 0x24, 'short')
-					ExitLoop
-				EndIf
-			EndIf
-		Next
-
-		If $itemPos > 0 Then
-			; Merchant-Gegenstand direkt kaufen
-			BuyItem($itemPos, 1, $itemValue)
-		Else
-			; Fallback: Trader (Material-Händler)
-			If Not TraderRequest($modelID) Then
-				Warn('Could not find ' & $modelID & ' in merchant list (item ' & $i & ')')
-				Return $FAIL
-			EndIf
-			RandomSleep(250)
-			TraderBuy()
-		EndIf
-		RandomSleep(250)
+		CraftItem($modelID, 1, $npcAgentID)
+		RandomSleep(350)
 	Next
 	Return $SUCCESS
 EndFunc
