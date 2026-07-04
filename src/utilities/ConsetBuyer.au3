@@ -56,14 +56,14 @@ Global Const $CONSET_BUY_DURATION = 10 * 60 * 1000
 
 ; ==== Embark Beach NPC-Koordinaten ====
 ; Eyja — verkauft Grail of Might
-Global Const $EYJA_X = 1200
-Global Const $EYJA_Y = -2050
+Global Const $EYJA_X = 3339
+Global Const $EYJA_Y = 616
 ; Kwat — verkauft Essence of Celerity
-Global Const $KWAT_X = 1350
-Global Const $KWAT_Y = -2150
+Global Const $KWAT_X = 3625
+Global Const $KWAT_Y = 155
 ; Alcus Nailbiter — verkauft Armor of Salvation
-Global Const $ALCUS_X = 1500
-Global Const $ALCUS_Y = -2250
+Global Const $ALCUS_X = 3693
+Global Const $ALCUS_Y = -57
 
 
 ;~ Hauptfunktion
