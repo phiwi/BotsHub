@@ -141,6 +141,28 @@ Func ConsetBuyerFarm()
 	RandomSleep(500)
 	UseCitySpeedBoost()
 
+	; Fehlende Mats (falls EotN-Trader fehlschlug) in Embark Beach nachkaufen
+	Local $currIron    = CountMaterialInInventory($ID_IRON_INGOT)
+	Local $currDust    = CountMaterialInInventory($ID_PILE_OF_GLITTERING_DUST)
+	Local $currFeather = CountMaterialInInventory($ID_FEATHER)
+	Local $currBone    = CountMaterialInInventory($ID_BONE)
+	Local $stillNeedIron    = _Max(0, $CONSET_IRON_TOTAL    - $currIron)
+	Local $stillNeedDust    = _Max(0, $CONSET_DUST_TOTAL    - $currDust)
+	Local $stillNeedFeather = _Max(0, $CONSET_FEATHER_TOTAL - $currFeather)
+	Local $stillNeedBone    = _Max(0, $CONSET_BONE_TOTAL    - $currBone)
+	If $stillNeedIron > 0 Or $stillNeedDust > 0 Or $stillNeedFeather > 0 Or $stillNeedBone > 0 Then
+		Info('Buying remaining materials in Embark Beach: Iron=' & $stillNeedIron & ' Dust=' & $stillNeedDust & ' Feathers=' & $stillNeedFeather & ' Bones=' & $stillNeedBone)
+		Local $ebNpcCoords = NPCCoordinatesInTown($ID_EMBARK_BEACH, 'Basic material trader')
+		MoveTo($ebNpcCoords[0], $ebNpcCoords[1])
+		Local $ebTrader = GetNearestNPCToCoords($ebNpcCoords[0], $ebNpcCoords[1])
+		GoToNPC($ebTrader)
+		RandomSleep(1000)
+		If $stillNeedIron    > 0 Then BuyMaterialBatch($ID_IRON_INGOT,             $stillNeedIron)
+		If $stillNeedDust    > 0 Then BuyMaterialBatch($ID_PILE_OF_GLITTERING_DUST, $stillNeedDust)
+		If $stillNeedFeather > 0 Then BuyMaterialBatch($ID_FEATHER,                 $stillNeedFeather)
+		If $stillNeedBone    > 0 Then BuyMaterialBatch($ID_BONE,                    $stillNeedBone)
+	EndIf
+
 	; ── Schritt 6: 10x Grail of Might bei Eyja ──
 	Info('Buying ' & $CONSET_BUY_COUNT & 'x Grail of Might from Eyja')
 	GoToNPCByCoords($EYJA_X, $EYJA_Y)
