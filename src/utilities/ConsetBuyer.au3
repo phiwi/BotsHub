@@ -347,7 +347,10 @@ Func CraftConsetItem($modelID, $amount, $npc)
 			Return $FAIL
 		EndIf
 		RandomSleep(250)
-		TraderBuy()
+		If Not TraderBuy() Then
+			Warn('TraderBuy failed for modelID ' & $modelID & ' (item ' & $i & ')')
+			Return $FAIL
+		EndIf
 		RandomSleep(250)
 	Next
 	Return $SUCCESS
