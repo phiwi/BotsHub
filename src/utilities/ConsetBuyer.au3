@@ -202,13 +202,10 @@ Func BuyMaterialBatch($modelID, $amount, $name = '')
 	Info('Buying ' & $amount & ' ' & $name & ' (' & $batches & ' batches of 10)')
 	For $i = 1 To $batches
 		Local $requestOK = TraderRequest($modelID)
-		; Falls TraderRequest fehlschlägt, nochmal zum NPC laufen und retry
+		; Falls TraderRequest fehlschlägt, kurz warten und retry
 		If Not $requestOK Then
 			Warn('Retrying trader request for ' & $name & ' on batch ' & $i)
-			Local $npcCoords = NPCCoordinatesInTown($ID_EYE_OF_THE_NORTH, 'Basic material trader')
-			Local $trader = GetNearestNPCToCoords($npcCoords[0], $npcCoords[1])
-			GoToNPC($trader)
-			RandomSleep(1000)
+			RandomSleep(1500)
 			$requestOK = TraderRequest($modelID)
 		EndIf
 		If Not $requestOK Then
@@ -328,14 +325,26 @@ Func GoToNPCByCoords($x, $y)
 	MoveTo($x, $y)
 	Local $npc = GetNearestNPCToCoords($x, $y)
 	GoToNPC($npc)
-	RandomSleep(500)
+	RandomSleep(750)
+	; Sicherstellen dass der Dialog wirklich offen ist: nochmal interact
+	Local $me = GetMyAgent()
+	If GetDistance($me, $npc) <= 250 Then
+		GoNPC($npc)
+		RandomSleep(750)
+	EndIf
 EndFunc
 
 
 ;~ Ein Conset-Item (Grail/Essence/Armor) in angegebener Menge beim aktuellen NPC kaufen
 Func BuyConsetItem($modelID, $amount)
 	For $i = 1 To $amount
-		If Not TraderRequest($modelID) Then
+		Local $requestOK = TraderRequest($modelID)
+		If Not $requestOK Then
+			Warn('Retrying conset request for ' & $modelID & ' (item ' & $i & ')')
+			RandomSleep(1500)
+			$requestOK = TraderRequest($modelID)
+		EndIf
+		If Not $requestOK Then
 			Warn('Could not request ' & $modelID & ' from trader (item ' & $i & ')')
 			Return $FAIL
 		EndIf
