@@ -24,13 +24,14 @@
 ;
 ; Ablauf:
 ;   1. Nach Eye of the North reisen
-;   2. Vorhandene Mats aus dem Stash holen
-;   3. Fehlende Mats beim Material-Händler kaufen
-;   4. Gold prüfen (7.500 für 10 Consets), ggf. aus Stash holen
-;   5. Nach Embark Beach reisen
-;   6. 10x Grail of Might        bei Eyja kaufen
-;   7. 10x Essence of Celerity   bei Kwat kaufen
-;   8. 10x Armor of Salvation    bei Alcus Nailbiter kaufen
+;   2. Vorhandene Mats aus Inventar + Stash zählen/holen
+;   3. Fehlende Mats berechnen
+;   4. Gold prüfen und ggf. aus Stash holen
+;   5. Fehlende Mats beim Händler kaufen
+;   6. Nach Embark Beach reisen
+;   7. 10x Grail of Might        bei Eyja kaufen
+;   8. 10x Essence of Celerity   bei Kwat kaufen
+;   9. 10x Armor of Salvation    bei Alcus Nailbiter kaufen
 ; ===========================================================================
 #CE ===========================================================================
 
@@ -92,7 +93,7 @@ Func ConsetBuyerFarm()
 
 	Info('Materials from stash: Iron=' & $stashIron & ' Dust=' & $stashDust & ' Feathers=' & $stashFeather & ' Bones=' & $stashBone)
 
-	; ── Schritt 3: Fehlende Mats beim Händler kaufen ──
+	; ── Schritt 3: Fehlende Mats berechnen ──
 	Local $totalIron    = $invIron    + $stashIron
 	Local $totalDust    = $invDust    + $stashDust
 	Local $totalFeather = $invFeather + $stashFeather
@@ -102,6 +103,22 @@ Func ConsetBuyerFarm()
 	Local $needFeather = _Max(0, $CONSET_FEATHER_TOTAL - $totalFeather)
 	Local $needBone    = _Max(0, $CONSET_BONE_TOTAL    - $totalBone)
 
+	; ── Schritt 4: Gold sicherstellen (für Mats + Consets) ──
+	; Materialkosten: ~10g pro Stück bei 10er-Batch
+	Local $matGoldNeeded = ($needIron + $needDust + $needFeather + $needBone) * 10
+	Local $totalGoldNeeded = $CONSET_TOTAL_GOLD + $matGoldNeeded
+	If GetGoldCharacter() < $totalGoldNeeded Then
+		Info('Need ' & $totalGoldNeeded & ' gold (' & $CONSET_TOTAL_GOLD & ' for consets + ~' & $matGoldNeeded & ' for materials), only have ' & GetGoldCharacter() & '. Withdrawing from stash.')
+		WithdrawGold($totalGoldNeeded)
+		RandomSleep(300)
+		If GetGoldCharacter() < $totalGoldNeeded Then
+			Warn('Not enough gold (' & GetGoldCharacter() & ') for ' & $CONSET_BUY_COUNT & ' consets')
+			Return $FAIL
+		EndIf
+	EndIf
+	Info('Gold OK: ' & GetGoldCharacter())
+
+	; ── Schritt 5: Fehlende Mats beim Händler kaufen ──
 	If $needIron > 0 Or $needDust > 0 Or $needFeather > 0 Or $needBone > 0 Then
 		Info('Buying missing materials from trader: Iron=' & $needIron & ' Dust=' & $needDust & ' Feathers=' & $needFeather & ' Bones=' & $needBone)
 		GoToMaterialTraderEotN()
@@ -113,39 +130,26 @@ Func ConsetBuyerFarm()
 		Info('All materials already in inventory — skipping trader')
 	EndIf
 
-	; ── Schritt 4: Gold sicherstellen ──
-	Local $goldNeeded = $CONSET_TOTAL_GOLD
-	If GetGoldCharacter() < $goldNeeded Then
-		Info('Need ' & $goldNeeded & ' gold, only have ' & GetGoldCharacter() & '. Withdrawing from stash.')
-		WithdrawGold($goldNeeded)
-		RandomSleep(300)
-		If GetGoldCharacter() < $goldNeeded Then
-			Warn('Not enough gold (' & GetGoldCharacter() & ') to buy ' & $CONSET_BUY_COUNT & ' consets')
-			Return $FAIL
-		EndIf
-	EndIf
-	Info('Gold OK: ' & GetGoldCharacter())
-
 	; Material-Reste zurück in den Stash legen (damit Inventar nicht überläuft)
 	StoreItemsInXunlaiStorage(ConsetBuyerShouldStoreMat)
 
-	; ── Schritt 5: Nach Embark Beach ──
+	; ── Schritt 6: Nach Embark Beach ──
 	Info('Travelling to Embark Beach')
 	TravelToOutpost($ID_EMBARK_BEACH, $district_name)
 	RandomSleep(500)
 	UseCitySpeedBoost()
 
-	; ── Schritt 6: 10x Grail of Might bei Eyja ──
+	; ── Schritt 7: 10x Grail of Might bei Eyja ──
 	Info('Buying ' & $CONSET_BUY_COUNT & 'x Grail of Might from Eyja')
 	GoToNPCByCoords($EYJA_X, $EYJA_Y)
 	BuyConsetItem($ID_GRAIL_OF_MIGHT, $CONSET_BUY_COUNT)
 
-	; ── Schritt 7: 10x Essence of Celerity bei Kwat ──
+	; ── Schritt 8: 10x Essence of Celerity bei Kwat ──
 	Info('Buying ' & $CONSET_BUY_COUNT & 'x Essence of Celerity from Kwat')
 	GoToNPCByCoords($KWAT_X, $KWAT_Y)
 	BuyConsetItem($ID_ESSENCE_OF_CELERITY, $CONSET_BUY_COUNT)
 
-	; ── Schritt 8: 10x Armor of Salvation bei Alcus Nailbiter ──
+	; ── Schritt 9: 10x Armor of Salvation bei Alcus Nailbiter ──
 	Info('Buying ' & $CONSET_BUY_COUNT & 'x Armor of Salvation from Alcus Nailbiter')
 	GoToNPCByCoords($ALCUS_X, $ALCUS_Y)
 	BuyConsetItem($ID_ARMOR_OF_SALVATION, $CONSET_BUY_COUNT)
