@@ -336,20 +336,48 @@ EndFunc
 
 
 ;~ Ein Conset-Item (Grail/Essence/Armor) in angegebener Menge beim aktuellen NPC kaufen
+;~ Verwendet BuyItem (Merchant) statt TraderRequest/TraderBuy, weil die Conset-NPCs
+;~ reguläre Merchants sind und nicht das Trader-Interface nutzen.
 Func BuyConsetItem($modelID, $amount)
 	For $i = 1 To $amount
-		Local $requestOK = TraderRequest($modelID)
-		If Not $requestOK Then
-			Warn('Retrying conset request for ' & $modelID & ' (item ' & $i & ')')
-			RandomSleep(1500)
-			$requestOK = TraderRequest($modelID)
+		; Position des Items in der Merchant-Liste finden
+		Local $merchantBase = GetMerchantItemsBase()
+		Local $merchantSize = GetMerchantItemsSize()
+		Local $itemPos = 0
+		Local $processHandle = GetProcessHandle()
+		For $p = 0 To $merchantSize - 1
+			Local $itemID = MemoryRead($processHandle, $merchantBase + 4 * $p)
+			If $itemID Then
+				Local $offsets[] = [0, 0x18, 0x40, 0xB8, 4 * $itemID]
+				Local $itemPtr = MemoryReadPtr($processHandle, $base_address_ptr, $offsets)
+				If $itemPtr[1] And MemoryRead($processHandle, $itemPtr[1] + 0x2C) == $modelID Then
+					$itemPos = $p + 1
+					ExitLoop
+				EndIf
+			EndIf
+		Next
+		If $itemPos == 0 Then
+			; Fallback: TraderRequest versuchen (für Material-Händler)
+			If Not TraderRequest($modelID) Then
+				Warn('Could not find ' & $modelID & ' in merchant list (item ' & $i & ')')
+				Return $FAIL
+			EndIf
+			RandomSleep(250)
+			TraderBuy()
+		Else
+			; Preis ermitteln: erst Quote anfordern
+			If Not TraderRequest($modelID) Then
+				Warn('Could not request quote for ' & $modelID & ' (item ' & $i & ')')
+				Return $FAIL
+			EndIf
+			RandomSleep(250)
+			Local $price = GetTraderCostValue()
+			If $price <= 0 Then
+				Warn('Could not get price for ' & $modelID & ' (item ' & $i & ')')
+				Return $FAIL
+			EndIf
+			BuyItem($itemPos, 1, $price)
 		EndIf
-		If Not $requestOK Then
-			Warn('Could not request ' & $modelID & ' from trader (item ' & $i & ')')
-			Return $FAIL
-		EndIf
-		RandomSleep(250)
-		TraderBuy()
 		RandomSleep(250)
 	Next
 	Return $SUCCESS
