@@ -129,10 +129,7 @@ Func ConsetBuyerFarm()
 		Info('All materials already in inventory — skipping trader')
 	EndIf
 
-	; Material-Reste zurück in den Stash legen (damit Inventar nicht überläuft)
-	StoreItemsInXunlaiStorage(ConsetBuyerShouldStoreMat)
-
-	; ── Schritt 5: Nach Embark Beach ──
+	; ── Schritt 5: Nach Embark Beach (Mats bleiben im Inventar für Conset-Kauf!) ──
 	Info('Travelling to Embark Beach')
 	TravelToOutpost($ID_EMBARK_BEACH, $district_name)
 	RandomSleep(500)
