@@ -104,6 +104,7 @@
 #include 'src/utilities/Follower.au3'
 #include 'src/utilities/BoneBuyer.au3'
 #include 'src/utilities/BuyAll.au3'
+#include 'src/utilities/ConsetBuyer.au3'
 #include 'src/utilities/DustBuyer.au3'
 #include 'src/utilities/FeatherBuyer.au3'
 #include 'src/utilities/IronBuyer.au3'
@@ -599,6 +600,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Buying All',					BuyAllFarm,					5,					$BUY_ALL_DURATION)
 	AddFarmToFarmMap(	'Buying Feathers',				FeatherBuyerFarm,				5,					$FEATHER_BUYER_DURATION)
 	AddFarmToFarmMap(	'Buying Iron',					IronBuyerFarm,					5,					$IRON_BUYER_DURATION)
+	AddFarmToFarmMap(	'Buying Consets',				ConsetBuyerFarm,				5,					$CONSET_BUY_DURATION)
 	AddFarmToFarmMap(	'Path Recorder',					PathActionRecorderFarm,			0,					$PATH_ACTION_RECORDER_DURATION)
 	AddFarmToFarmMap(	'Raptors',						RaptorsFarm,					5,					$RAPTORS_FARM_DURATION)
 	AddFarmToFarmMap(	'Sell, Salvage, Stash',		InventoryManagementBeforeRun,	5,					2 * 60 * 1000)
