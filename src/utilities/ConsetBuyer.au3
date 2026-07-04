@@ -172,39 +172,46 @@ Func BuyMaterialBatch($modelID, $amount)
 EndFunc
 
 
-;~ Materialien aus dem Stash holen, bis zu $maxAmount
+;~ Materialien aus dem Stash holen (Material-Storage + regulärer Stash), bis zu $maxAmount
 Func WithdrawMaterialFromStorage($modelID, $maxAmount)
-	Local $found = FindInXunlaiStorage($modelID)
-	If $found[0] == 0 Then Return 0
+	Local $foundBag = 0, $foundSlot = 0, $qty = 0
 
-	Local $item = GetItemBySlot($found[0], $found[1])
-	Local $qty = DllStructGetData($item, 'Quantity')
-	Local $take = _Min($maxAmount, $qty)
-
-	; Wenn der Stack grösser als benötigt, nur Teilmenge via Split nehmen
-	; Wenn der ganze Stack passt, einfach moven
-	If $take >= $qty Then
-		; Ganzen Stack in Inventar verschieben
-		Local $emptySlot = FindInventoryEmptySlot()
-		If $emptySlot[0] == 0 Then
-			Warn('No inventory space to withdraw ' & $modelID)
-			Return 0
+	; 1) Material-Storage (Bag 6) prüfen
+	Local $materialSlot = $MAP_MATERIAL_LOCATION[$modelID]
+	If $materialSlot <> Null Then
+		Local $matItem = GetItemBySlot(6, $materialSlot)
+		If DllStructGetData($matItem, 'ModelID') == $modelID Then
+			; Quantity = Equipped * 256 + Quantity (Material-Storage encoding)
+			$qty = DllStructGetData($matItem, 'Equipped') * 256 + DllStructGetData($matItem, 'Quantity')
+			If $qty > 0 Then
+				$foundBag = 6
+				$foundSlot = $materialSlot
+			EndIf
 		EndIf
-		MoveItem($item, $emptySlot[0], $emptySlot[1])
-		RandomSleep(300)
-		Return $qty
-	Else
-		; Stack splitten ist komplex — fürs Erste: ganzen Stack nehmen
-		; und Rest später zurücklegen (wird in StoreItemsInXunlaiStorage erledigt)
-		Local $emptySlot = FindInventoryEmptySlot()
-		If $emptySlot[0] == 0 Then
-			Warn('No inventory space to withdraw ' & $modelID)
-			Return 0
-		EndIf
-		MoveItem($item, $emptySlot[0], $emptySlot[1])
-		RandomSleep(300)
-		Return $qty
 	EndIf
+
+	; 2) Regulärer Stash (Bags 8-21) als Fallback
+	If $foundBag == 0 Then
+		Local $found = FindInXunlaiStorage($modelID)
+		If $found[0] == 0 Then Return 0
+		$foundBag = $found[0]
+		$foundSlot = $found[1]
+		Local $item = GetItemBySlot($foundBag, $foundSlot)
+		$qty = DllStructGetData($item, 'Quantity')
+	EndIf
+
+	Local $take = _Min($maxAmount, $qty)
+	Local $item = GetItemBySlot($foundBag, $foundSlot)
+
+	; Ganzen Stack in Inventar verschieben (Material-Storage-Stacks können >250 sein)
+	Local $emptySlot = FindInventoryEmptySlot()
+	If $emptySlot[0] == 0 Then
+		Warn('No inventory space to withdraw ' & $modelID)
+		Return 0
+	EndIf
+	MoveItem($item, $emptySlot[0], $emptySlot[1])
+	RandomSleep(300)
+	Return $qty
 EndFunc
 
 
