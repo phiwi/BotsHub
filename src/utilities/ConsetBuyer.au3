@@ -173,45 +173,54 @@ EndFunc
 
 
 ;~ Materialien aus dem Stash holen (Material-Storage + regulärer Stash), bis zu $maxAmount
+;~ Movet mehrfach, da pro Move nur 250 Einheiten (1 Stack) ins Inventar passen.
 Func WithdrawMaterialFromStorage($modelID, $maxAmount)
-	Local $foundBag = 0, $foundSlot = 0, $qty = 0
+	Local $totalWithdrawn = 0
 
-	; 1) Material-Storage (Bag 6) prüfen
-	Local $materialSlot = $MAP_MATERIAL_LOCATION[$modelID]
-	If $materialSlot <> Null Then
-		Local $matItem = GetItemBySlot(6, $materialSlot)
-		If DllStructGetData($matItem, 'ModelID') == $modelID Then
-			; Quantity = Equipped * 256 + Quantity (Material-Storage encoding)
-			$qty = DllStructGetData($matItem, 'Equipped') * 256 + DllStructGetData($matItem, 'Quantity')
-			If $qty > 0 Then
-				$foundBag = 6
-				$foundSlot = $materialSlot
+	While $totalWithdrawn < $maxAmount
+		Local $foundBag = 0, $foundSlot = 0, $available = 0
+
+		; 1) Material-Storage (Bag 6) prüfen
+		Local $materialSlot = $MAP_MATERIAL_LOCATION[$modelID]
+		If $materialSlot <> Null Then
+			Local $matItem = GetItemBySlot(6, $materialSlot)
+			If DllStructGetData($matItem, 'ModelID') == $modelID Then
+				$available = DllStructGetData($matItem, 'Equipped') * 256 + DllStructGetData($matItem, 'Quantity')
+				If $available > 0 Then
+					$foundBag = 6
+					$foundSlot = $materialSlot
+				EndIf
 			EndIf
 		EndIf
-	EndIf
 
-	; 2) Regulärer Stash (Bags 8-21) als Fallback
-	If $foundBag == 0 Then
-		Local $found = FindInXunlaiStorage($modelID)
-		If $found[0] == 0 Then Return 0
-		$foundBag = $found[0]
-		$foundSlot = $found[1]
+		; 2) Regulärer Stash (Bags 8-21) als Fallback
+		If $foundBag == 0 Then
+			Local $found = FindInXunlaiStorage($modelID)
+			If $found[0] == 0 Then ExitLoop
+			$foundBag = $found[0]
+			$foundSlot = $found[1]
+			$available = DllStructGetData(GetItemBySlot($foundBag, $foundSlot), 'Quantity')
+		EndIf
+
+		If $available <= 0 Then ExitLoop
+
+		Local $emptySlot = FindInventoryEmptySlot()
+		If $emptySlot[0] == 0 Then
+			Warn('No inventory space to withdraw more ' & $modelID)
+			ExitLoop
+		EndIf
+
 		Local $item = GetItemBySlot($foundBag, $foundSlot)
-		$qty = DllStructGetData($item, 'Quantity')
-	EndIf
+		MoveItem($item, $emptySlot[0], $emptySlot[1])
+		RandomSleep(300)
 
-	Local $take = _Min($maxAmount, $qty)
-	Local $item = GetItemBySlot($foundBag, $foundSlot)
+		; Eine Bewegung holt max. 250 (1 Stack). Prüfen, was tatsächlich angekommen ist.
+		Local $movedItem = GetItemBySlot($emptySlot[0], $emptySlot[1])
+		Local $movedQty = DllStructGetData($movedItem, 'Quantity')
+		$totalWithdrawn += $movedQty
+	WEnd
 
-	; Ganzen Stack in Inventar verschieben (Material-Storage-Stacks können >250 sein)
-	Local $emptySlot = FindInventoryEmptySlot()
-	If $emptySlot[0] == 0 Then
-		Warn('No inventory space to withdraw ' & $modelID)
-		Return 0
-	EndIf
-	MoveItem($item, $emptySlot[0], $emptySlot[1])
-	RandomSleep(300)
-	Return $qty
+	Return $totalWithdrawn
 EndFunc
 
 
