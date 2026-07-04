@@ -104,6 +104,7 @@ Func ConsetBuyerFarm()
 
 	If $needIron > 0 Or $needDust > 0 Or $needFeather > 0 Or $needBone > 0 Then
 		Info('Buying missing materials from trader: Iron=' & $needIron & ' Dust=' & $needDust & ' Feathers=' & $needFeather & ' Bones=' & $needBone)
+		CloseAllPanels()
 		GoToMaterialTraderEotN()
 		If $needIron    > 0 Then BuyMaterialBatch($ID_IRON_INGOT,             $needIron)
 		If $needDust    > 0 Then BuyMaterialBatch($ID_PILE_OF_GLITTERING_DUST, $needDust)
@@ -171,8 +172,11 @@ Func BuyMaterialBatch($modelID, $amount)
 	Local $batches = Ceiling($amount / 10)
 	Info('Buying ' & $amount & 'x ' & $modelID & ' (' & $batches & ' batches of 10)')
 	For $i = 1 To $batches
-		TraderRequest($modelID)
-		RandomSleep(200)
+		If Not TraderRequest($modelID) Then
+			Warn('Could not request modelID ' & $modelID & ' from trader on batch ' & $i)
+			Return $FAIL
+		EndIf
+		RandomSleep(250)
 		Local $price = GetTraderCostValue()
 		If $price <= 0 Then
 			Warn('Could not get trader price for modelID ' & $modelID & ' on batch ' & $i)
