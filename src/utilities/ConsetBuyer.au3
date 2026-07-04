@@ -92,7 +92,17 @@ Func ConsetBuyerFarm()
 
 	Info('Materials from stash: Iron=' & $stashIron & ' Dust=' & $stashDust & ' Feathers=' & $stashFeather & ' Bones=' & $stashBone)
 
-	; ── Schritt 3: Fehlende Mats beim Händler kaufen ──
+	; ── Schritt 3: Gold für Mats + Consets sicherstellen (VOR dem Händler!) ──
+	; Pro 10er-Batch: Iron~180g, Dust~170g, Feathers~350g, Bones~150g → großzügig 100k deckt alles
+	Local $goldNeeded = 100000
+	If GetGoldCharacter() < 20000 Then
+		Info('Need gold for materials and consets. Withdrawing up to ' & $goldNeeded & ' from stash.')
+		WithdrawGold($goldNeeded)
+		RandomSleep(300)
+	EndIf
+	Info('Gold: ' & GetGoldCharacter())
+
+	; ── Schritt 4: Fehlende Mats beim Händler kaufen ──
 	Local $totalIron    = $invIron    + $stashIron
 	Local $totalDust    = $invDust    + $stashDust
 	Local $totalFeather = $invFeather + $stashFeather
@@ -111,26 +121,13 @@ Func ConsetBuyerFarm()
 		EndIf
 		GoToMaterialTraderEotN()
 		RandomSleep(1000)
-		If $needIron    > 0 Then BuyMaterialBatch($ID_IRON_INGOT,             $needIron)
-		If $needDust    > 0 Then BuyMaterialBatch($ID_PILE_OF_GLITTERING_DUST, $needDust)
-		If $needFeather > 0 Then BuyMaterialBatch($ID_FEATHER,                 $needFeather)
-		If $needBone    > 0 Then BuyMaterialBatch($ID_BONE,                    $needBone)
+		If $needIron    > 0 Then BuyMaterialBatch($ID_IRON_INGOT,             $needIron,    'Iron')
+		If $needDust    > 0 Then BuyMaterialBatch($ID_PILE_OF_GLITTERING_DUST, $needDust,    'Dust')
+		If $needFeather > 0 Then BuyMaterialBatch($ID_FEATHER,                 $needFeather, 'Feathers')
+		If $needBone    > 0 Then BuyMaterialBatch($ID_BONE,                    $needBone,    'Bones')
 	Else
 		Info('All materials already in inventory — skipping trader')
 	EndIf
-
-	; ── Schritt 4: Gold sicherstellen ──
-	Local $goldNeeded = $CONSET_TOTAL_GOLD
-	If GetGoldCharacter() < $goldNeeded Then
-		Info('Need ' & $goldNeeded & ' gold, only have ' & GetGoldCharacter() & '. Withdrawing from stash.')
-		WithdrawGold($goldNeeded)
-		RandomSleep(300)
-		If GetGoldCharacter() < $goldNeeded Then
-			Warn('Not enough gold (' & GetGoldCharacter() & ') to buy ' & $CONSET_BUY_COUNT & ' consets')
-			Return $FAIL
-		EndIf
-	EndIf
-	Info('Gold OK: ' & GetGoldCharacter())
 
 	; Material-Reste zurück in den Stash legen (damit Inventar nicht überläuft)
 	StoreItemsInXunlaiStorage(ConsetBuyerShouldStoreMat)
@@ -157,10 +154,10 @@ Func ConsetBuyerFarm()
 		Local $ebTrader = GetNearestNPCToCoords($ebNpcCoords[0], $ebNpcCoords[1])
 		GoToNPC($ebTrader)
 		RandomSleep(1000)
-		If $stillNeedIron    > 0 Then BuyMaterialBatch($ID_IRON_INGOT,             $stillNeedIron)
-		If $stillNeedDust    > 0 Then BuyMaterialBatch($ID_PILE_OF_GLITTERING_DUST, $stillNeedDust)
-		If $stillNeedFeather > 0 Then BuyMaterialBatch($ID_FEATHER,                 $stillNeedFeather)
-		If $stillNeedBone    > 0 Then BuyMaterialBatch($ID_BONE,                    $stillNeedBone)
+		If $stillNeedIron    > 0 Then BuyMaterialBatch($ID_IRON_INGOT,             $stillNeedIron,    'Iron')
+		If $stillNeedDust    > 0 Then BuyMaterialBatch($ID_PILE_OF_GLITTERING_DUST, $stillNeedDust,    'Dust')
+		If $stillNeedFeather > 0 Then BuyMaterialBatch($ID_FEATHER,                 $stillNeedFeather, 'Feathers')
+		If $stillNeedBone    > 0 Then BuyMaterialBatch($ID_BONE,                    $stillNeedBone,    'Bones')
 	EndIf
 
 	; ── Schritt 6: 10x Grail of Might bei Eyja ──
@@ -202,14 +199,15 @@ EndFunc
 
 
 ;~ Eine bestimmte Menge eines Materials in 10er-Batches kaufen
-Func BuyMaterialBatch($modelID, $amount)
+Func BuyMaterialBatch($modelID, $amount, $name = '')
+	If $name == '' Then $name = $modelID
 	Local $batches = Ceiling($amount / 10)
-	Info('Buying ' & $amount & 'x ' & $modelID & ' (' & $batches & ' batches of 10)')
+	Info('Buying ' & $amount & ' ' & $name & ' (' & $batches & ' batches of 10)')
 	For $i = 1 To $batches
 		Local $requestOK = TraderRequest($modelID)
 		; Falls TraderRequest fehlschlägt, nochmal zum NPC laufen und retry
 		If Not $requestOK Then
-			Warn('Retrying trader request for modelID ' & $modelID & ' on batch ' & $i)
+			Warn('Retrying trader request for ' & $name & ' on batch ' & $i)
 			Local $npcCoords = NPCCoordinatesInTown($ID_EYE_OF_THE_NORTH, 'Basic material trader')
 			Local $trader = GetNearestNPCToCoords($npcCoords[0], $npcCoords[1])
 			GoToNPC($trader)
@@ -217,13 +215,13 @@ Func BuyMaterialBatch($modelID, $amount)
 			$requestOK = TraderRequest($modelID)
 		EndIf
 		If Not $requestOK Then
-			Warn('Could not request modelID ' & $modelID & ' from trader on batch ' & $i)
+			Warn('Could not request ' & $name & ' from trader on batch ' & $i)
 			Return $FAIL
 		EndIf
 		RandomSleep(250)
 		Local $price = GetTraderCostValue()
 		If $price <= 0 Then
-			Warn('Could not get trader price for modelID ' & $modelID & ' on batch ' & $i)
+			Warn('Could not get trader price for ' & $name & ' on batch ' & $i)
 			Return $FAIL
 		EndIf
 		TraderBuy()
