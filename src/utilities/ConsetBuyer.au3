@@ -104,7 +104,6 @@ Func ConsetBuyerFarm()
 
 	If $needIron > 0 Or $needDust > 0 Or $needFeather > 0 Or $needBone > 0 Then
 		Info('Buying missing materials from trader: Iron=' & $needIron & ' Dust=' & $needDust & ' Feathers=' & $needFeather & ' Bones=' & $needBone)
-		CloseAllPanels()
 		GoToMaterialTraderEotN()
 		If $needIron    > 0 Then BuyMaterialBatch($ID_IRON_INGOT,             $needIron)
 		If $needDust    > 0 Then BuyMaterialBatch($ID_PILE_OF_GLITTERING_DUST, $needDust)
