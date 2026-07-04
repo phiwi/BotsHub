@@ -167,8 +167,15 @@ Func GoToMaterialTraderEotN()
 	Local $npcCoords = NPCCoordinatesInTown($ID_EYE_OF_THE_NORTH, 'Basic material trader')
 	MoveTo($npcCoords[0], $npcCoords[1])
 	Local $trader = GetNearestNPCToCoords($npcCoords[0], $npcCoords[1])
+	; Erstmal zum NPC laufen und Interact senden
 	GoToNPC($trader)
-	RandomSleep(500)
+	RandomSleep(750)
+	; Sicherstellen dass der Dialog wirklich offen ist: nochmal interact
+	Local $me = GetMyAgent()
+	If GetDistance($me, $trader) <= 250 Then
+		GoNPC($trader)
+		RandomSleep(750)
+	EndIf
 EndFunc
 
 
@@ -177,7 +184,17 @@ Func BuyMaterialBatch($modelID, $amount)
 	Local $batches = Ceiling($amount / 10)
 	Info('Buying ' & $amount & 'x ' & $modelID & ' (' & $batches & ' batches of 10)')
 	For $i = 1 To $batches
-		If Not TraderRequest($modelID) Then
+		Local $requestOK = TraderRequest($modelID)
+		; Falls TraderRequest fehlschlägt, nochmal zum NPC laufen und retry
+		If Not $requestOK Then
+			Warn('Retrying trader request for modelID ' & $modelID & ' on batch ' & $i)
+			Local $npcCoords = NPCCoordinatesInTown($ID_EYE_OF_THE_NORTH, 'Basic material trader')
+			Local $trader = GetNearestNPCToCoords($npcCoords[0], $npcCoords[1])
+			GoToNPC($trader)
+			RandomSleep(1000)
+			$requestOK = TraderRequest($modelID)
+		EndIf
+		If Not $requestOK Then
 			Warn('Could not request modelID ' & $modelID & ' from trader on batch ' & $i)
 			Return $FAIL
 		EndIf
