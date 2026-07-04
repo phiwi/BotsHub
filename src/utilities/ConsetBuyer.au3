@@ -75,19 +75,32 @@ Func ConsetBuyerFarm()
 	RandomSleep(500)
 
 	; ── Schritt 2: Mats aus dem Stash holen ──
-	Info('Checking stash for materials')
-	Local $stashIron    = WithdrawMaterialFromStorage($ID_IRON_INGOT,             $CONSET_IRON_TOTAL)
-	Local $stashDust    = WithdrawMaterialFromStorage($ID_PILE_OF_GLITTERING_DUST, $CONSET_DUST_TOTAL)
-	Local $stashFeather = WithdrawMaterialFromStorage($ID_FEATHER,                 $CONSET_FEATHER_TOTAL)
-	Local $stashBone    = WithdrawMaterialFromStorage($ID_BONE,                    $CONSET_BONE_TOTAL)
+	Info('Checking inventory and stash for materials')
+
+	; ── Bereits im Inventar vorhandene Mats zählen ──
+	Local $invIron    = CountMaterialInInventory($ID_IRON_INGOT)
+	Local $invDust    = CountMaterialInInventory($ID_PILE_OF_GLITTERING_DUST)
+	Local $invFeather = CountMaterialInInventory($ID_FEATHER)
+	Local $invBone    = CountMaterialInInventory($ID_BONE)
+	Info('Materials in inventory: Iron=' & $invIron & ' Dust=' & $invDust & ' Feathers=' & $invFeather & ' Bones=' & $invBone)
+
+	; ── Rest aus dem Stash holen ──
+	Local $stashIron    = WithdrawMaterialFromStorage($ID_IRON_INGOT,             $CONSET_IRON_TOTAL    - $invIron)
+	Local $stashDust    = WithdrawMaterialFromStorage($ID_PILE_OF_GLITTERING_DUST, $CONSET_DUST_TOTAL    - $invDust)
+	Local $stashFeather = WithdrawMaterialFromStorage($ID_FEATHER,                 $CONSET_FEATHER_TOTAL - $invFeather)
+	Local $stashBone    = WithdrawMaterialFromStorage($ID_BONE,                    $CONSET_BONE_TOTAL    - $invBone)
 
 	Info('Materials from stash: Iron=' & $stashIron & ' Dust=' & $stashDust & ' Feathers=' & $stashFeather & ' Bones=' & $stashBone)
 
 	; ── Schritt 3: Fehlende Mats beim Händler kaufen ──
-	Local $needIron    = _Max(0, $CONSET_IRON_TOTAL    - $stashIron)
-	Local $needDust    = _Max(0, $CONSET_DUST_TOTAL    - $stashDust)
-	Local $needFeather = _Max(0, $CONSET_FEATHER_TOTAL - $stashFeather)
-	Local $needBone    = _Max(0, $CONSET_BONE_TOTAL    - $stashBone)
+	Local $totalIron    = $invIron    + $stashIron
+	Local $totalDust    = $invDust    + $stashDust
+	Local $totalFeather = $invFeather + $stashFeather
+	Local $totalBone    = $invBone    + $stashBone
+	Local $needIron    = _Max(0, $CONSET_IRON_TOTAL    - $totalIron)
+	Local $needDust    = _Max(0, $CONSET_DUST_TOTAL    - $totalDust)
+	Local $needFeather = _Max(0, $CONSET_FEATHER_TOTAL - $totalFeather)
+	Local $needBone    = _Max(0, $CONSET_BONE_TOTAL    - $totalBone)
 
 	If $needIron > 0 Or $needDust > 0 Or $needFeather > 0 Or $needBone > 0 Then
 		Info('Buying missing materials from trader: Iron=' & $needIron & ' Dust=' & $needDust & ' Feathers=' & $needFeather & ' Bones=' & $needBone)
@@ -221,6 +234,22 @@ Func WithdrawMaterialFromStorage($modelID, $maxAmount)
 	WEnd
 
 	Return $totalWithdrawn
+EndFunc
+
+
+;~ Zählt, wie viele Einheiten eines Materials bereits im Inventar (Bags 1-5) liegen
+Func CountMaterialInInventory($modelID)
+	Local $total = 0
+	For $bagIndex = 1 To $bags_count
+		Local $bag = GetBag($bagIndex)
+		For $slot = 1 To DllStructGetData($bag, 'Slots')
+			Local $item = GetItemBySlot($bagIndex, $slot)
+			If DllStructGetData($item, 'ModelID') == $modelID Then
+				$total += DllStructGetData($item, 'Quantity')
+			EndIf
+		Next
+	Next
+	Return $total
 EndFunc
 
 
