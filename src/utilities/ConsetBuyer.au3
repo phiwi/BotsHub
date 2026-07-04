@@ -336,15 +336,19 @@ Func GoToNPCByCoords($x, $y)
 EndFunc
 
 
-;~ Ein Conset-Item (Grail/Essence/Armor) in angegebener Menge beim aktuellen NPC craften.
-;~ Conset-NPCs (Eyja, Kwat, Alcus) sind "Consumable Crafter" – sie tauschen Materialien
-;~ gegen den Gegenstand. Das CraftItem-Kommando löst den Tausch aus, das Spiel
-;~ entnimmt die Materialien automatisch aus dem Inventar.
+;~ Ein Conset-Item (Grail/Essence/Armor) in angegebener Menge beim aktuellen NPC kaufen.
+;~ Conset-NPCs (Eyja, Kwat, Alcus) sind "Consumable Crafter". CraftRequest sucht
+;~ das Item ohne bag==0/AgentID==0 Filter, dann wird mit TraderBuy gekauft.
 Func CraftConsetItem($modelID, $amount, $npc)
-	Local $npcAgentID = DllStructGetData($npc, 'ID')
 	For $i = 1 To $amount
-		CraftItem($modelID, 1, $npcAgentID)
-		RandomSleep(350)
+		Local $requestOK = CraftRequest($modelID)
+		If Not $requestOK Then
+			Warn('CraftRequest failed for modelID ' & $modelID & ' (item ' & $i & ')')
+			Return $FAIL
+		EndIf
+		RandomSleep(250)
+		TraderBuy()
+		RandomSleep(250)
 	Next
 	Return $SUCCESS
 EndFunc

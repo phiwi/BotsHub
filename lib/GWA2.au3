@@ -1784,6 +1784,42 @@ Func TraderRequest($modelID, $dyeColor = -1)
 EndFunc
 
 
+;~ Request a quote from a crafter NPC (like Eyja/Kwat/Alcus). Like TraderRequest but skips the bag==0/AgentID==0 filter.
+Func CraftRequest($modelID)
+	Local $processHandle = GetProcessHandle()
+	Local $offset[] = [0, 0x18, 0x40, 0xC0]
+	Local $itemArraySize = MemoryReadPtr($processHandle, $base_address_ptr, $offset)
+	Local $offset[] = [0, 0x18, 0x40, 0xB8, 0]
+	Local $itemPtr, $itemID
+	Local $found = False
+	Local $quoteID = MemoryRead($processHandle, $trader_quote_ID)
+	Local $itemStruct = SafeDllStructCreate($ITEM_STRUCT_TEMPLATE)
+	For $itemID = 1 To $itemArraySize[1]
+		$offset[4] = 0x4 * $itemID
+		$itemPtr = MemoryReadPtr($processHandle, $base_address_ptr, $offset)
+		If $itemPtr[1] = 0 Then ContinueLoop
+
+		SafeDllCall13($kernel_handle, 'int', 'ReadProcessMemory', 'int', $processHandle, 'int', $itemPtr[1], 'ptr', DllStructGetPtr($itemStruct), 'int', DllStructGetSize($itemStruct), 'int', 0)
+		If DllStructGetData($itemStruct, 'ModelID') = $modelID Then
+			$found = True
+			ExitLoop
+		EndIf
+	Next
+	If Not $found Then Return False
+
+	DllStructSetData($REQUEST_QUOTE_STRUCT, 2, DllStructGetData($itemStruct, 'ID'))
+	Enqueue($REQUEST_QUOTE_STRUCT_PTR, 8)
+
+	Local $deadlock = TimerInit()
+	$found = False
+	While Not $found And TimerDiff($deadlock) < 5000
+		Sleep(50)
+		$found = MemoryRead($processHandle, $trader_quote_ID) <> $quoteID
+	WEnd
+	Return $found
+EndFunc
+
+
 ;~ Buy the requested item.
 Func TraderBuy()
 	If Not GetTraderCostID() Or Not GetTraderCostValue() Then Return False
