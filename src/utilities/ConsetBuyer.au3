@@ -339,12 +339,12 @@ EndFunc
 ;~ Verwendet BuyItem (Merchant) statt TraderRequest/TraderBuy, weil die Conset-NPCs
 ;~ reguläre Merchants sind und nicht das Trader-Interface nutzen.
 Func BuyConsetItem($modelID, $amount)
+	Local $processHandle = GetProcessHandle()
 	For $i = 1 To $amount
-		; Position des Items in der Merchant-Liste finden
+		; Item in der Merchant-Liste suchen (reguläre Händler wie Eyja/Kwat/Alcus)
 		Local $merchantBase = GetMerchantItemsBase()
 		Local $merchantSize = GetMerchantItemsSize()
-		Local $itemPos = 0
-		Local $processHandle = GetProcessHandle()
+		Local $itemPos = 0, $itemValue = 0
 		For $p = 0 To $merchantSize - 1
 			Local $itemID = MemoryRead($processHandle, $merchantBase + 4 * $p)
 			If $itemID Then
@@ -352,31 +352,23 @@ Func BuyConsetItem($modelID, $amount)
 				Local $itemPtr = MemoryReadPtr($processHandle, $base_address_ptr, $offsets)
 				If $itemPtr[1] And MemoryRead($processHandle, $itemPtr[1] + 0x2C) == $modelID Then
 					$itemPos = $p + 1
+					$itemValue = MemoryRead($processHandle, $itemPtr[1] + 0x24, 'short')
 					ExitLoop
 				EndIf
 			EndIf
 		Next
-		If $itemPos == 0 Then
-			; Fallback: TraderRequest versuchen (für Material-Händler)
+
+		If $itemPos > 0 Then
+			; Merchant-Gegenstand direkt kaufen
+			BuyItem($itemPos, 1, $itemValue)
+		Else
+			; Fallback: Trader (Material-Händler)
 			If Not TraderRequest($modelID) Then
 				Warn('Could not find ' & $modelID & ' in merchant list (item ' & $i & ')')
 				Return $FAIL
 			EndIf
 			RandomSleep(250)
 			TraderBuy()
-		Else
-			; Preis ermitteln: erst Quote anfordern
-			If Not TraderRequest($modelID) Then
-				Warn('Could not request quote for ' & $modelID & ' (item ' & $i & ')')
-				Return $FAIL
-			EndIf
-			RandomSleep(250)
-			Local $price = GetTraderCostValue()
-			If $price <= 0 Then
-				Warn('Could not get price for ' & $modelID & ' (item ' & $i & ')')
-				Return $FAIL
-			EndIf
-			BuyItem($itemPos, 1, $price)
 		EndIf
 		RandomSleep(250)
 	Next
