@@ -342,17 +342,41 @@ EndFunc
 
 ;~ Ein Conset-Item (Grail/Essence/Armor) in angegebener Menge beim aktuellen NPC kaufen.
 ;~ Der NPC muss bereits anvisiert und der Dialog geöffnet sein (via GoToNPCByCoords).
-;~ Verwendet CraftItem (Transaction Type 3) — NICHT BuyItem (Type 1),
-;~ da Conset-NPCs keine normalen Händler sind, sondern Crafter.
-;~ Materialien werden vom Spiel automatisch aus dem Inventar entnommen, Gold wird abgezogen.
+;~ Verwendet SendPacket mit HEADER_TRANSACT_ITEMS (0x4D) — der bislang ungenutzte
+;~ Netzwerk-Packet-Typ "Confirms a transaction involving items".
+;~ Conset-NPCs sind Crafter, keine Händler; sie nutzen diesen Packet-Typ statt
+;~ des Transaction-Ringbuffers (Type 1/3).
 Func CraftConsetItem($modelID, $amount, $npc)
+	Local $processHandle = GetProcessHandle()
+	Local $merchantBase = GetMerchantItemsBase()
+	Local $merchantSize = GetMerchantItemsSize()
 	Local $npcAgentID = DllStructGetData($npc, 'ID')
-	Info('Crafting ' & $amount & 'x modelID ' & $modelID & ' at NPC AgentID ' & $npcAgentID)
 
-	; Conset-NPCs verwenden CraftItem (Assembly CommandCraftItem → Transaction Type 3).
-	; Parameter: modelID, quantity, npcAgentID.
+	; ItemID des zu craftenden Items im Merchant-Fenster finden
+	Local $merchItemID = 0
+	For $p = 0 To $merchantSize - 1
+		Local $id = MemoryRead($processHandle, $merchantBase + 4 * $p)
+		If $id Then
+			Local $offsets[] = [0, 0x18, 0x40, 0xB8, 4 * $id]
+			Local $itemPtr = MemoryReadPtr($processHandle, $base_address_ptr, $offsets)
+			If $itemPtr[1] And MemoryRead($processHandle, $itemPtr[1] + 0x2C) == $modelID Then
+				$merchItemID = $id
+				ExitLoop
+			EndIf
+		EndIf
+	Next
+
+	If $merchItemID == 0 Then
+		Warn('Could not find modelID ' & $modelID & ' in merchant window')
+		Return $FAIL
+	EndIf
+
+	Info('Crafting ' & $amount & 'x modelID ' & $modelID & ' (merchItemID=' & $merchItemID & ') at NPC AgentID ' & $npcAgentID)
+
+	; HEADER_TRANSACT_ITEMS (0x4D): bestätigt eine Item-Transaktion beim Crafter-NPC.
+	; Packet: 4 bytes header + 4 bytes itemID + 4 bytes quantity = 12 bytes total.
 	For $i = 1 To $amount
-		CraftItem($modelID, 1, $npcAgentID)
+		SendPacket(0xC, $HEADER_TRANSACT_ITEMS, $merchItemID, 1)
 		RandomSleep(350)
 	Next
 	Return $SUCCESS
