@@ -1728,7 +1728,7 @@ EndFunc
 
 ;~ Get item from merchant corresponding to given modelID
 Func GetMerchantItemPtrByModelID($modelID)
-	Local $offsets[] = [0, 0x18, 0x40, 0xB8]
+	Local $offsets[] = [0, 0x18, 0x40, 0xB8, 0]
 	Local $merchantBaseAddress = GetMerchantItemsBase()
 	Local $itemID = 0
 	Local $itemPtr = 0
