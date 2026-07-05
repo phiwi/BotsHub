@@ -36,7 +36,10 @@ Global Const $PATH_ACTION_RECORDER_INFORMATIONS = 'Utility recorder for farm rou
 	& '- Ctrl+Alt+4: mark KILL start' & @CRLF _
 	& '- Ctrl+Alt+5: mark LOOT start' & @CRLF _
 	& '- Ctrl+Alt+6: mark HALCYON button click (adds 0-5s quest/Rion snapshots)' & @CRLF _
-	& '- Ctrl+Alt+7: capture current mouse position for HALCYON dialog calibration'
+	& '- Ctrl+Alt+7: capture current mouse position for HALCYON dialog calibration' & @CRLF _
+	& '- Ctrl+Alt+8: NPC snap — logs all NPCs, target, merchant items, trader state' & @CRLF _
+	& '- Ctrl+Alt+9: Dialog snap — logs trader quote state, gold, inventory' & @CRLF _
+	& '- Ctrl+Alt+0: FULL memory dump — all state for conset reverse-engineering'
 Global Const $PATH_ACTION_RECORDER_DURATION = 30 * 60 * 1000
 Global Const $PATH_ACTION_RECORDER_INTERVAL_MS = 200
 Global Const $PATH_ACTION_RECORDER_STATUS_INTERVAL_MS = 1500
@@ -104,6 +107,7 @@ Func RegisterPathActionRecorderHotkeys()
 	HotKeySet('^!7', 'MarkHalcyonDialogCalibrationHotkey')
 	HotKeySet('^!8', 'MarkNPCSnapHotkey')
 	HotKeySet('^!9', 'MarkDialogSnapHotkey')
+	HotKeySet('^!0', 'MarkMemoryDumpHotkey')
 EndFunc
 
 
@@ -118,6 +122,7 @@ Func TeardownPathActionRecorderHotkeys()
 	HotKeySet('^!7')
 	HotKeySet('^!8')
 	HotKeySet('^!9')
+	HotKeySet('^!0')
 EndFunc
 
 
@@ -652,4 +657,103 @@ Func _PathRecorderCountMaterial($modelID)
 		Next
 	Next
 	Return $total
+EndFunc
+
+
+;~ Ctrl+Alt+0: Kompletter Memory-Dump für Conset-Reverse-Engineering.
+;~ Drücke VOR der NPC-Interaktion, NACH Dialog-Öffnen, und NACH dem Kauf.
+Func MarkMemoryDumpHotkey()
+	Local $processHandle = GetProcessHandle()
+	Local $me = GetMyAgent()
+	Local $myX = 0, $myY = 0
+	If $me <> Null Then
+		$myX = Int(DllStructGetData($me, 'X'))
+		$myY = Int(DllStructGetData($me, 'Y'))
+	EndIf
+
+	Info('')
+	Info('╔══════════════════════════════════════════════════════════╗')
+	Info('║         FULL MEMORY DUMP — Conset Reverse-Engineering     ║')
+	Info('╠══════════════════════════════════════════════════════════╣')
+	Info('║ Map=' & GetMapID() & ' Type=' & GetMapType() & ' Pos=(' & $myX & ',' & $myY & ')')
+	Info('║ Gold: Char=' & GetGoldCharacter() & ' Storage=' & GetGoldStorage())
+	Info('╠══════════════════════════════════════════════════════════╣')
+
+	; ── Target ──
+	Local $target = GetCurrentTarget()
+	If $target <> Null Then
+		Info('║ TARGET: AgentID=' & DllStructGetData($target, 'ID') & ' ModelID=' & DllStructGetData($target, 'ModelID') & ' Type=' & DllStructGetData($target, 'Type'))
+	Else
+		Info('║ TARGET: none')
+	EndIf
+
+	; ── Nearest NPC ──
+	If $me <> Null Then
+		Local $nearestNpc = GetNearestNPCToCoords($myX, $myY)
+		If $nearestNpc <> Null Then
+			Info('║ NEAREST NPC: AgentID=' & DllStructGetData($nearestNpc, 'ID') & ' ModelID=' & DllStructGetData($nearestNpc, 'ModelID') & ' Dist=' & Int(GetDistance($me, $nearestNpc)))
+		EndIf
+	EndIf
+
+	; ── Trader State ──
+	Local $quoteID = MemoryRead($processHandle, $trader_quote_ID)
+	Local $costID  = MemoryRead($processHandle, $trader_cost_ID)
+	Local $costVal = MemoryRead($processHandle, $trader_cost_value)
+	Info('╠══════════════════════════════════════════════════════════╣')
+	Info('║ TRADER STATE:')
+	Info('║   TraderQuoteID  = ' & $quoteID)
+	Info('║   TraderCostID   = ' & $costID)
+	Info('║   TraderCostValue= ' & $costVal)
+
+	; ── Raw bytes um Trader-Quote-Speicher ──
+	Local $rawQuote = MemoryRead($processHandle, $trader_quote_ID, 'byte[16]')
+	Local $rawCost  = MemoryRead($processHandle, $trader_cost_ID, 'byte[16]')
+	Info('║   Raw QuoteID[0..15] = ' & $rawQuote)
+	Info('║   Raw CostID[0..15]  = ' & $rawCost)
+
+	; ── Merchant Items ──
+	Local $merchBase = GetMerchantItemsBase()
+	Local $merchSize = GetMerchantItemsSize()
+	Info('╠══════════════════════════════════════════════════════════╣')
+	Info('║ MERCHANT: Base=0x' & Hex($merchBase) & ' Size=' & $merchSize)
+	Local $foundCount = 0
+	For $i = 0 To $merchSize - 1
+		Local $merchItemID = MemoryRead($processHandle, $merchBase + 4 * $i)
+		If $merchItemID Then
+			Local $offsets[] = [0, 0x18, 0x40, 0xB8, 4 * $merchItemID]
+			Local $itemPtr = MemoryReadPtr($processHandle, $base_address_ptr, $offsets)
+			If $itemPtr[1] Then
+				Local $mID = MemoryRead($processHandle, $itemPtr[1] + 0x2C)
+				Local $val = MemoryRead($processHandle, $itemPtr[1] + 0x24, 'short')
+				Local $rawBytes = MemoryRead($processHandle, $itemPtr[1], 'byte[64]')
+				Info('║   [' & $i & '] ItemID=' & $merchItemID & ' ModelID=' & $mID & ' Value=' & $val)
+				Info('║       Raw[0..63]=' & $rawBytes)
+				$foundCount += 1
+			Else
+				Info('║   [' & $i & '] ItemID=' & $merchItemID & ' Ptr=NULL')
+			EndIf
+		EndIf
+	Next
+	Info('║   Valid items: ' & $foundCount)
+
+	; ── Inventory: 4 Mats + 3 Consets ──
+	Info('╠══════════════════════════════════════════════════════════╣')
+	Info('║ INVENTORY:')
+	Info('║   Iron=' & _PathRecorderCountMaterial($ID_IRON_INGOT) & ' Dust=' & _PathRecorderCountMaterial($ID_PILE_OF_GLITTERING_DUST))
+	Info('║   Feathers=' & _PathRecorderCountMaterial($ID_FEATHER) & ' Bones=' & _PathRecorderCountMaterial($ID_BONE))
+	Info('║   Grail=' & _PathRecorderCountMaterial($ID_GRAIL_OF_MIGHT) & ' Essence=' & _PathRecorderCountMaterial($ID_ESSENCE_OF_CELERITY) & ' Armor=' & _PathRecorderCountMaterial($ID_ARMOR_OF_SALVATION))
+
+	; ── Craft Item Struct State ──
+	Info('╠══════════════════════════════════════════════════════════╣')
+	Info('║ CRAFT_ITEM_STRUCT (vor Enqueue):')
+	Local $craftRaw = MemoryRead($processHandle, DllStructGetPtr($CRAFT_ITEM_STRUCT), 'byte[' & DllStructGetSize($CRAFT_ITEM_STRUCT) & ']')
+	Info('║   Ptr=' & DllStructGetPtr($CRAFT_ITEM_STRUCT) & ' Size=' & DllStructGetSize($CRAFT_ITEM_STRUCT) & ' Data=' & $craftRaw)
+
+	; ── BUY_ITEM_STRUCT State ──
+	Info('║ BUY_ITEM_STRUCT (vor Enqueue):')
+	Local $buyRaw = MemoryRead($processHandle, DllStructGetPtr($BUY_ITEM_STRUCT), 'byte[' & DllStructGetSize($BUY_ITEM_STRUCT) & ']')
+	Info('║   Ptr=' & DllStructGetPtr($BUY_ITEM_STRUCT) & ' Size=' & DllStructGetSize($BUY_ITEM_STRUCT) & ' Data=' & $buyRaw)
+
+	Info('╚══════════════════════════════════════════════════════════╝')
+	Info('')
 EndFunc
