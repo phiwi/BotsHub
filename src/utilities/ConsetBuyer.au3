@@ -342,27 +342,39 @@ EndFunc
 
 ;~ Ein Conset-Item (Grail/Essence/Armor) in angegebener Menge beim aktuellen NPC kaufen.
 ;~ Der NPC muss bereits anvisiert und der Dialog geöffnet sein (via GoToNPCByCoords).
-;~ Nutzt GetMerchantItemPtrByModelID um das Item im Merchant-Fenster zu finden,
-;~ dann CraftItem (Transaction Type 3) zum Craften.
-;~ Die Materialien werden vom Spiel automatisch aus dem Inventar entnommen.
+;~ Sucht das Item im Merchant-Fenster und kauft es via BuyItem mit dem korrekten Gold-Preis
+;~ (250g pro Stück). Die Materialien werden vom Spiel automatisch aus dem Inventar entnommen.
 Func CraftConsetItem($modelID, $amount, $npc)
-	Local $npcAgentID = DllStructGetData($npc, 'ID')
 	Local $processHandle = GetProcessHandle()
+	Local $merchantBase = GetMerchantItemsBase()
+	Local $merchantSize = GetMerchantItemsSize()
 
-	; Item im Merchant-Fenster des NPCs suchen
-	Local $itemPtr = GetMerchantItemPtrByModelID($modelID)
-	If $itemPtr == Null Then
+	; Item-Position im Merchant-Fenster finden
+	Local $itemPos = 0
+	For $p = 0 To $merchantSize - 1
+		Local $merchItemID = MemoryRead($processHandle, $merchantBase + 4 * $p)
+		If $merchItemID Then
+			Local $offsets[] = [0, 0x18, 0x40, 0xB8, 4 * $merchItemID]
+			Local $itemPtr = MemoryReadPtr($processHandle, $base_address_ptr, $offsets)
+			If $itemPtr[1] And MemoryRead($processHandle, $itemPtr[1] + 0x2C) == $modelID Then
+				$itemPos = $p + 1
+				ExitLoop
+			EndIf
+		EndIf
+	Next
+
+	If $itemPos == 0 Then
 		Warn('Could not find modelID ' & $modelID & ' in merchant window')
 		Return $FAIL
 	EndIf
 
-	; Item-ID aus dem Struct lesen (das ist der dynamische Key, nicht die ModelID)
-	Local $itemID = MemoryRead($processHandle, $itemPtr + 0) ; offset 0 = ID
+	Info('Buying ' & $amount & 'x modelID ' & $modelID & ' at merchant pos ' & $itemPos)
 
-	Info('Crafting ' & $amount & 'x modelID ' & $modelID & ' (itemID=' & $itemID & ', npcAgentID=' & $npcAgentID & ')')
-
+	; Conset-Items kosten je 250g. Die Materialien werden vom Spiel
+	; automatisch aus dem Inventar genommen.
+	Local $consPrice = 250
 	For $i = 1 To $amount
-		CraftItem($modelID, 1, $npcAgentID)
+		BuyItem($itemPos, 1, $consPrice)
 		RandomSleep(350)
 	Next
 	Return $SUCCESS
