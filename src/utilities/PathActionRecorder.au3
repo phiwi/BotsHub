@@ -39,7 +39,7 @@ Global Const $PATH_ACTION_RECORDER_INFORMATIONS = 'Utility recorder for farm rou
 	& '- Ctrl+Alt+7: capture current mouse position for HALCYON dialog calibration' & @CRLF _
 	& '- Ctrl+Alt+8: NPC snap — logs all NPCs, target, merchant items, trader state' & @CRLF _
 	& '- Ctrl+Alt+9: Dialog snap — logs trader quote state, gold, inventory' & @CRLF _
-	& '- Ctrl+Alt+0: FULL memory dump — all state for conset reverse-engineering' & @CRLF _\
+	& '- Ctrl+Alt+0: FULL memory dump — all state for conset reverse-engineering' & @CRLF _
 	& '- Ctrl+Alt+P: toggle PacketSend logging ON/OFF (captures outgoing network packets)'
 Global Const $PATH_ACTION_RECORDER_DURATION = 30 * 60 * 1000
 Global Const $PATH_ACTION_RECORDER_INTERVAL_MS = 200
