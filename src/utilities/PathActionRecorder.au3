@@ -102,6 +102,8 @@ Func RegisterPathActionRecorderHotkeys()
 	HotKeySet('^!5', 'MarkLootHotkey')
 	HotKeySet('^!6', 'MarkHalcyonClickHotkey')
 	HotKeySet('^!7', 'MarkHalcyonDialogCalibrationHotkey')
+	HotKeySet('^!8', 'MarkNPCSnapHotkey')
+	HotKeySet('^!9', 'MarkDialogSnapHotkey')
 EndFunc
 
 
@@ -114,6 +116,8 @@ Func TeardownPathActionRecorderHotkeys()
 	HotKeySet('^!5')
 	HotKeySet('^!6')
 	HotKeySet('^!7')
+	HotKeySet('^!8')
+	HotKeySet('^!9')
 EndFunc
 
 
@@ -541,4 +545,111 @@ EndFunc
 
 Func MarkLootHotkey()
 	PathActionRecorderMark('LOOT_START')
+EndFunc
+
+
+;~ Ctrl+Alt+8: Snapshot aller NPCs in Range + Trader-Quote-State
+Func MarkNPCSnapHotkey()
+	Local $me = GetMyAgent()
+	If $me == Null Then Return
+
+	Local $myX = Int(DllStructGetData($me, 'X'))
+	Local $myY = Int(DllStructGetData($me, 'Y'))
+	Local $mapID = GetMapID()
+
+	Info('=== NPC SNAP === map=' & $mapID & ' pos=(' & $myX & ',' & $myY & ')')
+
+	; Aktuelles Target
+	Local $target = GetCurrentTarget()
+	If $target <> Null Then
+		Local $tID = DllStructGetData($target, 'ID')
+		Local $tModel = DllStructGetData($target, 'ModelID')
+		Local $tType = DllStructGetData($target, 'Type')
+		Info('  TARGET: AgentID=' & $tID & ' ModelID=' & $tModel & ' Type=' & $tType)
+	Else
+		Info('  TARGET: none')
+	EndIf
+
+	; Alle NPCs in Compass-Range
+	Local $npcs = GetAgentArray($ID_AGENT_TYPE_NPC)
+	Local $count = 0
+	For $npc In $npcs
+		Local $dist = Int(GetDistance($me, $npc))
+		If $dist > $RANGE_COMPASS Then ContinueLoop
+		Local $nID = DllStructGetData($npc, 'ID')
+		Local $nModel = DllStructGetData($npc, 'ModelID')
+		Local $nAlleg = DllStructGetData($npc, 'Allegiance')
+		Info('  NPC[' & $count & ']: AgentID=' & $nID & ' ModelID=' & $nModel & ' Dist=' & $dist & ' Alleg=' & $nAlleg)
+		$count += 1
+	Next
+	Info('  Total NPCs in compass: ' & $count)
+
+	; Trader/Merchant state
+	Local $processHandle = GetProcessHandle()
+	Local $quoteID = MemoryRead($processHandle, $trader_quote_ID)
+	Local $costID = MemoryRead($processHandle, $trader_cost_ID)
+	Local $costVal = MemoryRead($processHandle, $trader_cost_value)
+	Info('  TRADER: QuoteID=' & $quoteID & ' CostID=' & $costID & ' CostValue=' & $costVal)
+
+	; Merchant items
+	Local $merchBase = GetMerchantItemsBase()
+	Local $merchSize = GetMerchantItemsSize()
+	Info('  MERCHANT: Base=' & $merchBase & ' Size=' & $merchSize)
+	For $i = 0 To _Min(19, $merchSize - 1)
+		Local $itemID = MemoryRead($processHandle, $merchBase + 4 * $i)
+		If $itemID Then
+			Local $offsets[] = [0, 0x18, 0x40, 0xB8, 4 * $itemID]
+			Local $itemPtr = MemoryReadPtr($processHandle, $base_address_ptr, $offsets)
+			If $itemPtr[1] Then
+				Local $itemModel = MemoryRead($processHandle, $itemPtr[1] + 0x2C)
+				Local $itemVal = MemoryRead($processHandle, $itemPtr[1] + 0x24, 'short')
+				Info('  MERCH[' & $i & ']: ItemID=' & $itemID & ' ModelID=' & $itemModel & ' Value=' & $itemVal)
+			Else
+				Info('  MERCH[' & $i & ']: ItemID=' & $itemID & ' Ptr=NULL')
+			EndIf
+		EndIf
+	Next
+	Info('=== NPC SNAP END ===')
+EndFunc
+
+
+;~ Ctrl+Alt+9: Trader-Quote-State Snapshot (nach Dialog-Klick drücken)
+Func MarkDialogSnapHotkey()
+	Local $processHandle = GetProcessHandle()
+	Local $quoteID = MemoryRead($processHandle, $trader_quote_ID)
+	Local $costID = MemoryRead($processHandle, $trader_cost_ID)
+	Local $costVal = MemoryRead($processHandle, $trader_cost_value)
+
+	Info('=== DIALOG SNAP ===')
+	Info('  TraderQuoteID=' & $quoteID)
+	Info('  TraderCostID=' & $costID)
+	Info('  TraderCostValue=' & $costVal)
+	Info('  MapID=' & GetMapID() & ' MapType=' & GetMapType())
+
+	; Auch Gold checken
+	Info('  GoldCharacter=' & GetGoldCharacter() & ' GoldStorage=' & GetGoldStorage())
+
+	; Inventar-Count der 4 Materialien
+	Info('  Inv Iron=' & _PathRecorderCountMaterial($ID_IRON_INGOT) & ' Dust=' & _PathRecorderCountMaterial($ID_PILE_OF_GLITTERING_DUST) & ' Feathers=' & _PathRecorderCountMaterial($ID_FEATHER) & ' Bones=' & _PathRecorderCountMaterial($ID_BONE))
+
+	; Conset-Items im Inventar
+	Info('  Inv Grail=' & _PathRecorderCountMaterial($ID_GRAIL_OF_MIGHT) & ' Essence=' & _PathRecorderCountMaterial($ID_ESSENCE_OF_CELERITY) & ' Armor=' & _PathRecorderCountMaterial($ID_ARMOR_OF_SALVATION))
+	Info('=== DIALOG SNAP END ===')
+EndFunc
+
+
+;~ Hilfsfunktion: Material im Inventar zählen
+Func _PathRecorderCountMaterial($modelID)
+	Local $total = 0
+	For $bagIndex = 1 To 5
+		Local $bag = GetBag($bagIndex)
+		If $bag == Null Then ContinueLoop
+		For $slot = 1 To DllStructGetData($bag, 'Slots')
+			Local $item = GetItemBySlot($bagIndex, $slot)
+			If DllStructGetData($item, 'ModelID') == $modelID Then
+				$total += DllStructGetData($item, 'Quantity')
+			EndIf
+		Next
+	Next
+	Return $total
 EndFunc
