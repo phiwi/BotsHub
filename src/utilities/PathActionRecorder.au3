@@ -39,7 +39,8 @@ Global Const $PATH_ACTION_RECORDER_INFORMATIONS = 'Utility recorder for farm rou
 	& '- Ctrl+Alt+7: capture current mouse position for HALCYON dialog calibration' & @CRLF _
 	& '- Ctrl+Alt+8: NPC snap — logs all NPCs, target, merchant items, trader state' & @CRLF _
 	& '- Ctrl+Alt+9: Dialog snap — logs trader quote state, gold, inventory' & @CRLF _
-	& '- Ctrl+Alt+0: FULL memory dump — all state for conset reverse-engineering'
+	& '- Ctrl+Alt+0: FULL memory dump — all state for conset reverse-engineering' & @CRLF _\
+	& '- Ctrl+Alt+P: toggle PacketSend logging ON/OFF (captures outgoing network packets)'
 Global Const $PATH_ACTION_RECORDER_DURATION = 30 * 60 * 1000
 Global Const $PATH_ACTION_RECORDER_INTERVAL_MS = 200
 Global Const $PATH_ACTION_RECORDER_STATUS_INTERVAL_MS = 1500
@@ -108,6 +109,7 @@ Func RegisterPathActionRecorderHotkeys()
 	HotKeySet('^!8', 'MarkNPCSnapHotkey')
 	HotKeySet('^!9', 'MarkDialogSnapHotkey')
 	HotKeySet('^!0', 'MarkMemoryDumpHotkey')
+	HotKeySet('^!p', 'TogglePacketLogHotkey')
 EndFunc
 
 
@@ -123,6 +125,8 @@ Func TeardownPathActionRecorderHotkeys()
 	HotKeySet('^!8')
 	HotKeySet('^!9')
 	HotKeySet('^!0')
+	HotKeySet('^!p')
+	PacketLogTeardown()
 EndFunc
 
 
@@ -784,3 +788,180 @@ Func MarkMemoryDumpHotkey()
 	Info('╚══════════════════════════════════════════════════════════╝')
 	Info('')
 EndFunc
+
+
+#Region PacketSend Hook — Reverse-Engineering für Conset-Crafting
+; ═══════════════════════════════════════════════════════════
+; Ctrl+Alt+P toggelt einen Detour auf GWs PacketSend-Funktion.
+; Jedes ausgehende Netzwerk-Paket wird geloggt (Header + Payload).
+; Damit lässt sich das Crafting-Paket beim manuellen Kauf bei
+; Eyja/Kwat/Alcus identifizieren und später via SendPacket replizieren.
+;
+; Nutzung:
+;   1. PathActionRecorder starten
+;   2. Ctrl+Alt+P drücken → "Packet log ON"
+;   3. Zu Eyja laufen, Dialog öffnen, EIN Stück craften
+;   4. Ctrl+Alt+P drücken → "Packet log OFF"
+;   5. Im Log das Craft-Paket identifizieren (erkennbar am Header)
+; ═══════════════════════════════════════════════════════════
+
+Global $packet_log_active = False
+Global $packet_log_code_addr = 0
+Global $packet_log_data_addr = 0
+Global $packet_log_last_counter = 0
+Global $packet_log_trampoline_bytes = ''
+
+; Offsets in der Data-Region (64 bytes total):
+;   +0:  counter (4 bytes)
+;   +4:  size    (4 bytes)
+;   +8:  data    (56 bytes — header + payload)
+
+
+;~ Ctrl+Alt+P: Packet-Logging ein-/ausschalten
+Func TogglePacketLogHotkey()
+	If $packet_log_active Then
+		PacketLogTeardown()
+		Info('Packet log OFF')
+	Else
+		If PacketLogSetup() Then
+			Info('Packet log ON — capturing outgoing packets. Press Ctrl+Alt+P to stop.')
+		Else
+			Warn('Packet log setup failed')
+		EndIf
+	EndIf
+EndFunc
+
+
+;~ Installiert den PacketSend-Detour in GW
+Func PacketLogSetup()
+	Local $processHandle = GetProcessHandle()
+	Local $packetSendAddr = GetLabel('PacketSend')
+	If $packetSendAddr = 0 Then
+		Warn('PacketSend label not found — is GWA2 initialized?')
+		Return False
+	EndIf
+
+	; ── 1. Original-Bytes sichern (für Trampoline) ──
+	$packet_log_trampoline_bytes = MemoryRead($processHandle, $packetSendAddr, 'byte[5]')
+
+	; ── 2. Data-Region allokieren (64 bytes) ──
+	Local $allocData = SafeDllCall13($kernel_handle, 'ptr', 'VirtualAllocEx', _
+		'handle', $processHandle, 'ptr', 0, 'ulong_ptr', 64, 'dword', 0x1000, 'dword', 0x40)
+	$packet_log_data_addr = $allocData[0]
+	If $packet_log_data_addr = 0 Then
+		Warn('Failed to allocate data region for packet logger')
+		Return False
+	EndIf
+
+	; ── 3. Code-Region allokieren ──
+	Local $codeSize = 128
+	Local $allocCode = SafeDllCall13($kernel_handle, 'ptr', 'VirtualAllocEx', _
+		'handle', $processHandle, 'ptr', 0, 'ulong_ptr', $codeSize, 'dword', 0x1000, 'dword', 0x40)
+	$packet_log_code_addr = $allocCode[0]
+	If $packet_log_code_addr = 0 Then
+		Warn('Failed to allocate code region for packet logger')
+		SafeDllCall9($kernel_handle, 'int', 'VirtualFreeEx', 'int', $processHandle, 'ptr', $packet_log_data_addr, 'int', 0, 'int', 0x8000)
+		$packet_log_data_addr = 0
+		Return False
+	EndIf
+
+	; ── 4. Hook-Code schreiben ──
+	; Assembly (x86, NASM-ish):
+	;   PacketLogProc:
+	;     pushfd                     ; 9C
+	;     pushad                     ; 60
+	;     mov esi,[esp+0x2C]         ; 8B 74 24 2C  — dataPtr (arg3, nach pushad: +0x24+8)
+	;     mov edx,[esp+0x28]         ; 8B 54 24 28  — size    (arg2)
+	;     mov dword[dataAddr+4],edx  ; 89 15 <dataAddr+4>  — store size
+	;     mov ecx,edx                ; 8B CA
+	;     cmp ecx,56                 ; 83 F9 38
+	;     jle +2                     ; 7E 02
+	;     mov ecx,56                 ; B9 38 00 00 00
+	;     mov edi,dataAddr+8         ; BF <dataAddr+8>
+	;     rep movsb                  ; F3 A4
+	;     mov edx,dword[dataAddr]    ; 8B 15 <dataAddr>
+	;     inc edx                    ; 42
+	;     mov dword[dataAddr],edx    ; 89 15 <dataAddr>
+	;     popad                      ; 61
+	;     popfd                      ; 9D
+	;     ; trampoline: 5 original bytes + JMP back
+	;     ; Dieser Teil wird separat geschrieben
+	Local $hookCode = '0x9C60'                           ; pushfd; pushad
+	$hookCode &= '8B74242C'                              ; mov esi,[esp+2C]
+	$hookCode &= '8B542428'                              ; mov edx,[esp+28]
+	$hookCode &= '8915' & SwapEndian(Hex($packet_log_data_addr + 4, 8))  ; mov [dataAddr+4],edx
+	$hookCode &= '8BCA'                                  ; mov ecx,edx
+	$hookCode &= '83F938'                                ; cmp ecx,56
+	$hookCode &= '7E02'                                  ; jle +2
+	$hookCode &= 'B938000000'                            ; mov ecx,56
+	$hookCode &= 'BF' & SwapEndian(Hex($packet_log_data_addr + 8, 8))  ; mov edi,dataAddr+8
+	$hookCode &= 'F3A4'                                  ; rep movsb
+	$hookCode &= '8B15' & SwapEndian(Hex($packet_log_data_addr, 8))  ; mov edx,[dataAddr]
+	$hookCode &= '42'                                    ; inc edx
+	$hookCode &= '8915' & SwapEndian(Hex($packet_log_data_addr, 8))  ; mov [dataAddr],edx
+	$hookCode &= '619D'                                  ; popad; popfd
+	; Trampoline: 5 original bytes + JMP back to PacketSend+5
+	$hookCode &= $packet_log_trampoline_bytes            ; original instruction bytes
+	Local $jmpBackOffset = ($packetSendAddr + 5) - ($packet_log_code_addr + StringLen($hookCode)/2 + 5)
+	$hookCode &= 'E9' & SwapEndian(Hex($jmpBackOffset, 8))  ; JMP PacketSend+5
+
+	WriteBinary($processHandle, $hookCode, $packet_log_code_addr)
+
+	; ── 5. Detour installieren: JMP von PacketSend → PacketLogProc ──
+	Local $jmpOffset = $packet_log_code_addr - $packetSendAddr - 5
+	WriteBinary($processHandle, 'E9' & SwapEndian(Hex($jmpOffset, 8)), $packetSendAddr)
+
+	; ── 6. Polling starten ──
+	$packet_log_last_counter = MemoryRead($processHandle, $packet_log_data_addr)
+	$packet_log_active = True
+	AdlibRegister('PacketLogPollCallback', 250)
+
+	Return True
+EndFunc
+
+
+;~ Entfernt den Detour und gibt die allokierten Regionen frei
+Func PacketLogTeardown()
+	If Not $packet_log_active Then Return
+	AdlibUnRegister('PacketLogPollCallback')
+	$packet_log_active = False
+
+	Local $processHandle = GetProcessHandle()
+	Local $packetSendAddr = GetLabel('PacketSend')
+
+	; Original-Bytes wiederherstellen
+	If $packetSendAddr <> 0 And $packet_log_trampoline_bytes <> '' Then
+		WriteBinary($processHandle, $packet_log_trampoline_bytes, $packetSendAddr)
+	EndIf
+
+	; Allokierten Speicher freigeben
+	If $packet_log_code_addr <> 0 Then
+		SafeDllCall9($kernel_handle, 'int', 'VirtualFreeEx', 'int', $processHandle, 'ptr', $packet_log_code_addr, 'int', 0, 'int', 0x8000)
+		$packet_log_code_addr = 0
+	EndIf
+	If $packet_log_data_addr <> 0 Then
+		SafeDllCall9($kernel_handle, 'int', 'VirtualFreeEx', 'int', $processHandle, 'ptr', $packet_log_data_addr, 'int', 0, 'int', 0x8000)
+		$packet_log_data_addr = 0
+	EndIf
+	$packet_log_trampoline_bytes = ''
+EndFunc
+
+
+;~ AdlibRegister-Callback: prüft auf neue Pakete und loggt sie
+Func PacketLogPollCallback()
+	If Not $packet_log_active Then Return
+	Local $processHandle = GetProcessHandle()
+	If $packet_log_data_addr == 0 Then Return
+
+	Local $counter = MemoryRead($processHandle, $packet_log_data_addr)
+	If $counter == $packet_log_last_counter Then Return
+	$packet_log_last_counter = $counter
+
+	Local $size = MemoryRead($processHandle, $packet_log_data_addr + 4)
+	Local $rawData = MemoryRead($processHandle, $packet_log_data_addr + 8, 'byte[' & _Min($size, 56) & ']')
+
+	; Header (erste 4 Bytes) extrahieren und in lesbarer Form loggen
+	Local $headerHex = StringMid($rawData, 3, 8) ; 0xHHHHHHHH → HHHHHHHH
+	Info('[PACKET] size=' & $size & ' header=0x' & $headerHex & ' raw=' & $rawData)
+EndFunc
+#EndRegion PacketSend Hook
