@@ -342,39 +342,17 @@ EndFunc
 
 ;~ Ein Conset-Item (Grail/Essence/Armor) in angegebener Menge beim aktuellen NPC kaufen.
 ;~ Der NPC muss bereits anvisiert und der Dialog geöffnet sein (via GoToNPCByCoords).
-;~ Sucht das Item im Merchant-Fenster und kauft es via BuyItem mit dem korrekten Gold-Preis
-;~ (250g pro Stück). Die Materialien werden vom Spiel automatisch aus dem Inventar entnommen.
+;~ Verwendet CraftItem (Transaction Type 3) — NICHT BuyItem (Type 1),
+;~ da Conset-NPCs keine normalen Händler sind, sondern Crafter.
+;~ Materialien werden vom Spiel automatisch aus dem Inventar entnommen, Gold wird abgezogen.
 Func CraftConsetItem($modelID, $amount, $npc)
-	Local $processHandle = GetProcessHandle()
-	Local $merchantBase = GetMerchantItemsBase()
-	Local $merchantSize = GetMerchantItemsSize()
+	Local $npcAgentID = DllStructGetData($npc, 'ID')
+	Info('Crafting ' & $amount & 'x modelID ' & $modelID & ' at NPC AgentID ' & $npcAgentID)
 
-	; Item-Position im Merchant-Fenster finden
-	Local $itemPos = 0
-	For $p = 0 To $merchantSize - 1
-		Local $merchItemID = MemoryRead($processHandle, $merchantBase + 4 * $p)
-		If $merchItemID Then
-			Local $offsets[] = [0, 0x18, 0x40, 0xB8, 4 * $merchItemID]
-			Local $itemPtr = MemoryReadPtr($processHandle, $base_address_ptr, $offsets)
-			If $itemPtr[1] And MemoryRead($processHandle, $itemPtr[1] + 0x2C) == $modelID Then
-				$itemPos = $p + 1
-				ExitLoop
-			EndIf
-		EndIf
-	Next
-
-	If $itemPos == 0 Then
-		Warn('Could not find modelID ' & $modelID & ' in merchant window')
-		Return $FAIL
-	EndIf
-
-	Info('Buying ' & $amount & 'x modelID ' & $modelID & ' at merchant pos ' & $itemPos)
-
-	; Conset-Items kosten je 250g. Die Materialien werden vom Spiel
-	; automatisch aus dem Inventar genommen.
-	Local $consPrice = 250
+	; Conset-NPCs verwenden CraftItem (Assembly CommandCraftItem → Transaction Type 3).
+	; Parameter: modelID, quantity, npcAgentID.
 	For $i = 1 To $amount
-		BuyItem($itemPos, 1, $consPrice)
+		CraftItem($modelID, 1, $npcAgentID)
 		RandomSleep(350)
 	Next
 	Return $SUCCESS

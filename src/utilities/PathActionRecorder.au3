@@ -754,6 +754,33 @@ Func MarkMemoryDumpHotkey()
 	Local $buyRaw = MemoryRead($processHandle, DllStructGetPtr($BUY_ITEM_STRUCT), 'byte[' & DllStructGetSize($BUY_ITEM_STRUCT) & ']')
 	Info('║   Ptr=' & DllStructGetPtr($BUY_ITEM_STRUCT) & ' Size=' & DllStructGetSize($BUY_ITEM_STRUCT) & ' Data=' & $buyRaw)
 
+	; ── Ring-Buffer State (Enqueue-System) ──
+	Local $qc = MemoryRead($processHandle, GetLabel('QueueCounter'))
+	Local $qs = GetLabel('QueueSize')
+	Local $qb = GetLabel('QueueBase')
+	Info('╠══════════════════════════════════════════════════════════╣')
+	Info('║ RING BUFFER:')
+	Info('║   QueueCounter=' & $qc & ' QueueSize=' & $qs & ' QueueBase=0x' & Hex($qb))
+	; Nächsten 3 Slots dumpen (aktueller + 2 folgende)
+	For $slotOffset = 0 To 2
+		Local $slotIdx = Mod($qc + $slotOffset, $qs)
+		Local $slotAddr = $qb + 256 * $slotIdx
+		Local $slotData = MemoryRead($processHandle, $slotAddr, 'byte[24]')
+		Local $cmdPtr = MemoryRead($processHandle, $slotAddr, 'ptr')
+		Local $cmdName = '(empty)'
+		If $cmdPtr <> 0 Then
+			If $cmdPtr = GetLabel('CommandBuyItem') Then $cmdName = 'BuyItem'
+			If $cmdPtr = GetLabel('CommandSellItem') Then $cmdName = 'SellItem'
+			If $cmdPtr = GetLabel('CommandCraftItem') Then $cmdName = 'CraftItem'
+			If $cmdPtr = GetLabel('CommandCollectorExchange') Then $cmdName = 'CollectorExchange'
+			If $cmdPtr = GetLabel('CommandTraderBuy') Then $cmdName = 'TraderBuy'
+			If $cmdPtr = GetLabel('CommandTraderSell') Then $cmdName = 'TraderSell'
+			If $cmdPtr = GetLabel('CommandRequestQuote') Then $cmdName = 'RequestQuote'
+			If $cmdPtr = GetLabel('CommandRequestQuoteSell') Then $cmdName = 'RequestQuoteSell'
+		EndIf
+		Info('║   Slot[' & $slotIdx & '] @ 0x' & Hex($slotAddr) & ' Cmd=' & $cmdName & ' Raw[0..23]=' & $slotData)
+	Next
+
 	Info('╚══════════════════════════════════════════════════════════╝')
 	Info('')
 EndFunc
