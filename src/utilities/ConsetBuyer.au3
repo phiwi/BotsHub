@@ -70,66 +70,70 @@ Global Const $ALCUS_Y = -57
 Func ConsetBuyerFarm()
 	Info('Conset Buyer: buying ' & $CONSET_BUY_COUNT & ' consets')
 
-	; ── Schritt 1: Nach Eye of the North ──
-	TravelToOutpost($ID_EYE_OF_THE_NORTH, $district_name)
-	RandomSleep(500)
-
-	; ── Schritt 2: Mats aus dem Stash holen ──
-	Info('Checking inventory and stash for materials')
-
-	; ── Bereits im Inventar vorhandene Mats zählen ──
+	; ── Schritt 1: Inventar prüfen (ohne Travel) ──
 	Local $invIron    = CountMaterialInInventory($ID_IRON_INGOT)
 	Local $invDust    = CountMaterialInInventory($ID_PILE_OF_GLITTERING_DUST)
 	Local $invFeather = CountMaterialInInventory($ID_FEATHER)
 	Local $invBone    = CountMaterialInInventory($ID_BONE)
-	Info('Materials in inventory: Iron=' & $invIron & ' Dust=' & $invDust & ' Feathers=' & $invFeather & ' Bones=' & $invBone)
+	Local $currGold   = GetGoldCharacter()
+	Info('Materials in inventory: Iron=' & $invIron & ' Dust=' & $invDust & ' Feathers=' & $invFeather & ' Bones=' & $invBone & ' Gold=' & $currGold)
 
-	; ── Rest aus dem Stash holen ──
-	Local $stashIron    = WithdrawMaterialFromStorage($ID_IRON_INGOT,             $CONSET_IRON_TOTAL    - $invIron)
-	Local $stashDust    = WithdrawMaterialFromStorage($ID_PILE_OF_GLITTERING_DUST, $CONSET_DUST_TOTAL    - $invDust)
-	Local $stashFeather = WithdrawMaterialFromStorage($ID_FEATHER,                 $CONSET_FEATHER_TOTAL - $invFeather)
-	Local $stashBone    = WithdrawMaterialFromStorage($ID_BONE,                    $CONSET_BONE_TOTAL    - $invBone)
+	; Prüfen ob alle Mats + Gold bereits im Inventar sind → dann direkt nach Embark
+	Local $allMatsReady = ($invIron >= $CONSET_IRON_TOTAL) And ($invDust >= $CONSET_DUST_TOTAL) And ($invFeather >= $CONSET_FEATHER_TOTAL) And ($invBone >= $CONSET_BONE_TOTAL)
+	Local $goldReady = ($currGold >= 20000)
 
-	Info('Materials from stash: Iron=' & $stashIron & ' Dust=' & $stashDust & ' Feathers=' & $stashFeather & ' Bones=' & $stashBone)
-
-	; ── Schritt 3: Gold für Mats + Consets sicherstellen (VOR dem Händler!) ──
-	; Pro 10er-Batch: Iron~180g, Dust~170g, Feathers~350g, Bones~150g → großzügig 100k deckt alles
-	Local $goldNeeded = 100000
-	If GetGoldCharacter() < 20000 Then
-		Info('Need gold for materials and consets. Withdrawing up to ' & $goldNeeded & ' from stash.')
-		WithdrawGold($goldNeeded)
-		RandomSleep(300)
-	EndIf
-	Info('Gold: ' & GetGoldCharacter())
-
-	; ── Schritt 4: Fehlende Mats beim Händler kaufen ──
-	Local $totalIron    = $invIron    + $stashIron
-	Local $totalDust    = $invDust    + $stashDust
-	Local $totalFeather = $invFeather + $stashFeather
-	Local $totalBone    = $invBone    + $stashBone
-	Local $needIron    = _Max(0, $CONSET_IRON_TOTAL    - $totalIron)
-	Local $needDust    = _Max(0, $CONSET_DUST_TOTAL    - $totalDust)
-	Local $needFeather = _Max(0, $CONSET_FEATHER_TOTAL - $totalFeather)
-	Local $needBone    = _Max(0, $CONSET_BONE_TOTAL    - $totalBone)
-
-	If $needIron > 0 Or $needDust > 0 Or $needFeather > 0 Or $needBone > 0 Then
-		Info('Buying missing materials from trader: Iron=' & $needIron & ' Dust=' & $needDust & ' Feathers=' & $needFeather & ' Bones=' & $needBone)
-		; Nur wenn wir auch wirklich aus dem Stash gezogen haben, könnte der Xunlai-Tresor noch offen sein
-		If $stashIron > 0 Or $stashDust > 0 Or $stashFeather > 0 Or $stashBone > 0 Then
-			CloseAllPanels()
-			RandomSleep(500)
-		EndIf
-		GoToMaterialTraderEotN()
-		RandomSleep(1000)
-		If $needIron    > 0 Then BuyMaterialBatch($ID_IRON_INGOT,             $needIron,    'Iron')
-		If $needDust    > 0 Then BuyMaterialBatch($ID_PILE_OF_GLITTERING_DUST, $needDust,    'Dust')
-		If $needFeather > 0 Then BuyMaterialBatch($ID_FEATHER,                 $needFeather, 'Feathers')
-		If $needBone    > 0 Then BuyMaterialBatch($ID_BONE,                    $needBone,    'Bones')
+	If $allMatsReady And $goldReady Then
+		Info('All materials and gold already ready — skipping Eye of the North')
 	Else
-		Info('All materials already in inventory — skipping trader')
+		; ── Benötigt Stash/Trader: nach Eye of the North ──
+		TravelToOutpost($ID_EYE_OF_THE_NORTH, $district_name)
+		RandomSleep(500)
+
+		; ── Rest aus dem Stash holen ──
+		Local $stashIron    = WithdrawMaterialFromStorage($ID_IRON_INGOT,             $CONSET_IRON_TOTAL    - $invIron)
+		Local $stashDust    = WithdrawMaterialFromStorage($ID_PILE_OF_GLITTERING_DUST, $CONSET_DUST_TOTAL    - $invDust)
+		Local $stashFeather = WithdrawMaterialFromStorage($ID_FEATHER,                 $CONSET_FEATHER_TOTAL - $invFeather)
+		Local $stashBone    = WithdrawMaterialFromStorage($ID_BONE,                    $CONSET_BONE_TOTAL    - $invBone)
+
+		Info('Materials from stash: Iron=' & $stashIron & ' Dust=' & $stashDust & ' Feathers=' & $stashFeather & ' Bones=' & $stashBone)
+
+		; ── Gold sicherstellen ──
+		$currGold = GetGoldCharacter()
+		If $currGold < 20000 Then
+			Info('Need gold for materials and consets. Withdrawing up to 100000 from stash.')
+			WithdrawGold(100000)
+			RandomSleep(300)
+		EndIf
+		Info('Gold: ' & GetGoldCharacter())
+
+		; ── Fehlende Mats beim Händler kaufen ──
+		Local $totalIron    = $invIron    + $stashIron
+		Local $totalDust    = $invDust    + $stashDust
+		Local $totalFeather = $invFeather + $stashFeather
+		Local $totalBone    = $invBone    + $stashBone
+		Local $needIron    = _Max(0, $CONSET_IRON_TOTAL    - $totalIron)
+		Local $needDust    = _Max(0, $CONSET_DUST_TOTAL    - $totalDust)
+		Local $needFeather = _Max(0, $CONSET_FEATHER_TOTAL - $totalFeather)
+		Local $needBone    = _Max(0, $CONSET_BONE_TOTAL    - $totalBone)
+
+		If $needIron > 0 Or $needDust > 0 Or $needFeather > 0 Or $needBone > 0 Then
+			Info('Buying missing materials from trader: Iron=' & $needIron & ' Dust=' & $needDust & ' Feathers=' & $needFeather & ' Bones=' & $needBone)
+			If $stashIron > 0 Or $stashDust > 0 Or $stashFeather > 0 Or $stashBone > 0 Then
+				CloseAllPanels()
+				RandomSleep(500)
+			EndIf
+			GoToMaterialTraderEotN()
+			RandomSleep(1000)
+			If $needIron    > 0 Then BuyMaterialBatch($ID_IRON_INGOT,             $needIron,    'Iron')
+			If $needDust    > 0 Then BuyMaterialBatch($ID_PILE_OF_GLITTERING_DUST, $needDust,    'Dust')
+			If $needFeather > 0 Then BuyMaterialBatch($ID_FEATHER,                 $needFeather, 'Feathers')
+			If $needBone    > 0 Then BuyMaterialBatch($ID_BONE,                    $needBone,    'Bones')
+		Else
+			Info('All materials collected from stash — skipping trader')
+		EndIf
 	EndIf
 
-	; ── Schritt 5: Nach Embark Beach (Mats bleiben im Inventar für Conset-Kauf!) ──
+	; ── Nach Embark Beach ──
 	Info('Travelling to Embark Beach')
 	TravelToOutpost($ID_EMBARK_BEACH, $district_name)
 	RandomSleep(500)
