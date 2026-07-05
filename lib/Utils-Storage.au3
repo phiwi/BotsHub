@@ -840,6 +840,7 @@ Func SellBasicMaterialsToMerchant($shouldSellMaterial = DefaultShouldSellBasicMa
 			$item = GetItemBySlot($bagIndex, $i)
 			If $shouldSellMaterial($item) Then
 				SellItemToTrader($item)
+				RandomSleep(250)
 			EndIf
 		Next
 	Next
@@ -867,6 +868,7 @@ Func SellRareMaterialsToMerchant($shouldSellMaterial = DefaultShouldSellRareMate
 			$item = GetItemBySlot($bagIndex, $i)
 			If $shouldSellMaterial($item) Then
 				SellItemToTrader($item)
+				RandomSleep(250)
 			EndIf
 		Next
 	Next
