@@ -161,22 +161,22 @@ Func ConsetBuyerFarm()
 		If $stillNeedBone    > 0 Then BuyMaterialBatch($ID_BONE,                    $stillNeedBone,    'Bones')
 	EndIf
 
-	; ── Schritt 6: 10 pieces Grail of Might bei Eyja ──
-	Info('Buying ' & $CONSET_BUY_COUNT & ' pieces of Grail of Might from Eyja')
-	Local $eyja = GoToNPCByCoords($EYJA_X, $EYJA_Y)
-	CraftConsetItem($ID_GRAIL_OF_MIGHT, $CONSET_BUY_COUNT, $eyja)
+	; ═══ Schritt 6: Bei Eyja anhalten — Crafting muss manuell erfolgen ═══
+	; Automatisiertes Crafting ist mit GWA2 aktuell nicht möglich.
+	; Der Bot navigiert zu Eyja, öffnet den Dialog und pausiert.
+	; Danach manuell craften, dann Bot per GUI wieder starten.
+	Info('')
+	Info('═══════════════════════════════════════════════════════════')
+	Info('  MANUAL STEP: Craft ' & $CONSET_BUY_COUNT & 'x Grail of Might at Eyja')
+	Info('  Walk to Eyja (' & $EYJA_X & ',' & $EYJA_Y & '), open dialog, craft each piece.')
+	Info('  Then do the same at Kwat for Essence, Alcus for Armor.')
+	Info('  When done, press Start to continue or Stop to finish.')
+	Info('═══════════════════════════════════════════════════════════')
+	Info('')
+	GoToNPCByCoords($EYJA_X, $EYJA_Y)
 
-	; ── Schritt 7: 10 pieces Essence of Celerity bei Kwat ──
-	Info('Buying ' & $CONSET_BUY_COUNT & ' pieces of Essence of Celerity from Kwat')
-	Local $kwat = GoToNPCByCoords($KWAT_X, $KWAT_Y)
-	CraftConsetItem($ID_ESSENCE_OF_CELERITY, $CONSET_BUY_COUNT, $kwat)
-
-	; ── Schritt 8: 10 pieces Armor of Salvation bei Alcus Nailbiter ──
-	Info('Buying ' & $CONSET_BUY_COUNT & ' pieces of Armor of Salvation from Alcus Nailbiter')
-	Local $alcus = GoToNPCByCoords($ALCUS_X, $ALCUS_Y)
-	CraftConsetItem($ID_ARMOR_OF_SALVATION, $CONSET_BUY_COUNT, $alcus)
-
-	Info('Conset Buyer: done. Bought ' & $CONSET_BUY_COUNT & ' consets.')
+	; ── Schritt 7-8 übersprungen (manuell) ──
+	Info('Conset Buyer: materials ready, crafting left to user.')
 	Return $PAUSE
 EndFunc
 
