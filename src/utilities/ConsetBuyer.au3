@@ -341,21 +341,29 @@ EndFunc
 
 
 ;~ Ein Conset-Item (Grail/Essence/Armor) in angegebener Menge beim aktuellen NPC kaufen.
-;~ Conset-NPCs (Eyja, Kwat, Alcus) sind "Consumable Crafter". CraftRequest sucht
-;~ das Item ohne bag==0/AgentID==0 Filter, dann wird mit TraderBuy gekauft.
+;~ Der NPC muss bereits anvisiert und der Dialog geöffnet sein (via GoToNPCByCoords).
+;~ Nutzt GetMerchantItemPtrByModelID um das Item im Merchant-Fenster zu finden,
+;~ dann CraftItem (Transaction Type 3) zum Craften.
+;~ Die Materialien werden vom Spiel automatisch aus dem Inventar entnommen.
 Func CraftConsetItem($modelID, $amount, $npc)
+	Local $npcAgentID = DllStructGetData($npc, 'ID')
+	Local $processHandle = GetProcessHandle()
+
+	; Item im Merchant-Fenster des NPCs suchen
+	Local $itemPtr = GetMerchantItemPtrByModelID($modelID)
+	If $itemPtr == Null Then
+		Warn('Could not find modelID ' & $modelID & ' in merchant window')
+		Return $FAIL
+	EndIf
+
+	; Item-ID aus dem Struct lesen (das ist der dynamische Key, nicht die ModelID)
+	Local $itemID = MemoryRead($processHandle, $itemPtr + 0) ; offset 0 = ID
+
+	Info('Crafting ' & $amount & 'x modelID ' & $modelID & ' (itemID=' & $itemID & ', npcAgentID=' & $npcAgentID & ')')
+
 	For $i = 1 To $amount
-		Local $requestOK = CraftRequest($modelID)
-		If Not $requestOK Then
-			Warn('CraftRequest failed for modelID ' & $modelID & ' (item ' & $i & ')')
-			Return $FAIL
-		EndIf
-		RandomSleep(250)
-		If Not TraderBuy() Then
-			Warn('TraderBuy failed for modelID ' & $modelID & ' (item ' & $i & ')')
-			Return $FAIL
-		EndIf
-		RandomSleep(250)
+		CraftItem($modelID, 1, $npcAgentID)
+		RandomSleep(350)
 	Next
 	Return $SUCCESS
 EndFunc
