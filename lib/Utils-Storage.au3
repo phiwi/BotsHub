@@ -33,6 +33,26 @@
 
 
 #Region Inventory Management
+;~ Reset GWA2 internal state after intensive NPC interactions (stash/sell/salvage).
+;~ Re-syncs the ring buffer queue counter with GW, re-initializes command structs,
+;~ and waits for the game to stabilize — equivalent to a "soft restart" of the bot state.
+Func ResetGWA2State()
+	Info('Resetting GWA2 state after inventory operations')
+	; 1. Close any lingering dialogs (storage, merchant, trader)
+	CancelAction()
+	RandomSleep(500)
+	; 2. Give GW time to drain the ring buffer and process pending actions
+	RandomSleep(2000)
+	; 3. Re-sync queue counter from GW memory and re-initialize all command structures
+	;    This reads $queue_counter directly from GW's memory, ensuring we don't
+	;    overwrite unconsumed ring buffer slots.
+	InitializeCommandStructures()
+	; 4. Final stabilization — ensure any side effects are cleaned up
+	CancelAction()
+	RandomSleep(500)
+EndFunc
+
+
 ;~ Function to deal with inventory before farm run
 Func InventoryManagementBeforeRun($tradeTown = $ID_EYE_OF_THE_NORTH)
 	; Clarity rename
@@ -108,8 +128,7 @@ Func InventoryManagementBeforeRun($tradeTown = $ID_EYE_OF_THE_NORTH)
 		If GetMapType() <> $ID_OUTPOST Then TravelToOutpost($tradeTown, $district_name)
 		StoreItemsInXunlaiStorage()
 	EndIf
-	CancelAction()
-	RandomSleep(250)
+	ResetGWA2State()
 	ResetBotsSetups()
 	Return $PAUSE
 EndFunc
