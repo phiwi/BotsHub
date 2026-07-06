@@ -131,7 +131,7 @@ Global Const $PAUSE = 2
 
 Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|FoW|FoW Tower of Courage|Follower|Froggy|' & _
 	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|' & _
-	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|SoO|Spirit Slaves Ranger|Storage|Sunspear Armor|Tasca|' & _
+	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|SoO|SoO Celerity|Spirit Slaves Ranger|Storage|Sunspear Armor|Tasca|' & _
 	'TestSuite|Tests|Tunnels Forsaken Custom|TunnelsOfTheForsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
 
 Global Const $AVAILABLE_DISTRICTS = '|Random|Random EU|Random US|Random Asia|America|China|English|French|German|International|Italian|Japan|Korea|Polish|Russian|Spanish'
@@ -285,7 +285,7 @@ Func RunFarmLoop()
 	; Farm Name;Farm function;Inventory space;Farm duration
 	Local $farm = $farm_map[$farm_name]
 	Local $inventorySpaceNeeded = $farm[2]
-	Local $sooSafetyBypassInventory = ($farm_name == 'SoO' And $soo_skip_next_inventory_management)
+	Local $sooSafetyBypassInventory = (StringLeft($farm_name, 3) == 'SoO' And $soo_skip_next_inventory_management)
 	If $sooSafetyBypassInventory Then
 		Warn('SoO safety mode: skipping this cycle inventory management after critical failure recovery')
 		$soo_skip_next_inventory_management = False
@@ -605,6 +605,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Raptors',						RaptorsFarm,					5,					$RAPTORS_FARM_DURATION)
 	AddFarmToFarmMap(	'Sell, Salvage, Stash',		InventoryManagementBeforeRun,	5,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'SoO',							SoOFarm,						15,					$SOO_FARM_DURATION)
+	AddFarmToFarmMap(	'SoO Celerity',					SoOCelerityFarm,				15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SpiritSlaves',					SpiritSlavesFarm,				5,					$SPIRIT_SLAVES_FARM_DURATION)
 	AddFarmToFarmMap(	'Spirit Slaves Ele',				SpiritSlavesCustomFarm,			5,					$SPIRIT_SLAVES_CUSTOM_FARM_DURATION)
 	AddFarmToFarmMap(	'Spirit Slaves Ranger',			SpiritSlavesRangerDervFarm,		5,					$SPIRIT_SLAVES_RANGER_DERV_FARM_DURATION)

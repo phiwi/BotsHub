@@ -127,6 +127,16 @@ Global $soo_grails_used = 0
 Global $soo_armors_used = 0
 Global $soo_essences_used = 0
 Global $soo_last_conset_timer = TimerInit()
+Global $soo_celerity_only = False
+
+
+;~ Main method to farm SoO (Celerity-only variant — only uses Essence of Celerity)
+Func SoOCelerityFarm()
+	$soo_celerity_only = True
+	Local $result = SoOFarm()
+	$soo_celerity_only = False
+	Return $result
+EndFunc
 
 
 ;~ Main method to farm SoO
@@ -175,15 +185,17 @@ EndFunc
 Func SoOUseConset()
 	If TimerDiff($soo_last_conset_timer) < 3000 Then Return
 	$soo_last_conset_timer = TimerInit()
-	If GetEffectTimeRemaining(GetEffect($ID_GRAIL_OF_MIGHT_EFFECT)) <= 0 Then
-		$soo_grails_used += 1
-		Info('SoO con: using Grail of Might  (#' & $soo_grails_used & ' this run)')
-		UseConsumable($ID_GRAIL_OF_MIGHT, True)
-	EndIf
-	If GetEffectTimeRemaining(GetEffect($ID_ARMOR_OF_SALVATION_EFFECT)) <= 0 Then
-		$soo_armors_used += 1
-		Info('SoO con: using Armor of Salvation  (#' & $soo_armors_used & ' this run)')
-		UseConsumable($ID_ARMOR_OF_SALVATION, True)
+	If Not $soo_celerity_only Then
+		If GetEffectTimeRemaining(GetEffect($ID_GRAIL_OF_MIGHT_EFFECT)) <= 0 Then
+			$soo_grails_used += 1
+			Info('SoO con: using Grail of Might  (#' & $soo_grails_used & ' this run)')
+			UseConsumable($ID_GRAIL_OF_MIGHT, True)
+		EndIf
+		If GetEffectTimeRemaining(GetEffect($ID_ARMOR_OF_SALVATION_EFFECT)) <= 0 Then
+			$soo_armors_used += 1
+			Info('SoO con: using Armor of Salvation  (#' & $soo_armors_used & ' this run)')
+			UseConsumable($ID_ARMOR_OF_SALVATION, True)
+		EndIf
 	EndIf
 	If GetEffectTimeRemaining(GetEffect($ID_ESSENCE_OF_CELERITY_EFFECT)) <= 0 Then
 		$soo_essences_used += 1
@@ -200,6 +212,19 @@ EndFunc
 
 Func SoOHasEnoughConsets()
 	If Not $run_options_cache['run.use_consets'] Then Return True
+
+	If $soo_celerity_only Then
+		Local $essenceFound = FindInInventory($ID_ESSENCE_OF_CELERITY)
+		Local $essenceQty = 0
+		If $essenceFound[0] <> 0 Then $essenceQty = DllStructGetData(GetItemBySlot($essenceFound[0], $essenceFound[1]), 'Quantity')
+		If $essenceQty < 3 Then
+			Warn('SoO celerity: Essences=' & $essenceQty & ' — falling back to Normal Mode')
+			$run_options_cache['run.hard_mode'] = False
+			Return True
+		EndIf
+		Info('SoO celerity: Essences=' & $essenceQty)
+		Return True
+	EndIf
 
 	Local $grailFound = FindInInventory($ID_GRAIL_OF_MIGHT)
 	Local $armorFound = FindInInventory($ID_ARMOR_OF_SALVATION)
