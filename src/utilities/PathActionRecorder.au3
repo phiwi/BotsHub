@@ -842,7 +842,11 @@ Func PacketLogSetup()
 	EndIf
 
 	; ── 1. Original-Bytes sichern (für Trampoline) ──
-	$packet_log_trampoline_bytes = MemoryRead($processHandle, $packetSendAddr, 'byte[5]')
+	Local $trampHex = ''
+	For $i = 0 To 4
+		$trampHex &= Hex(MemoryRead($processHandle, $packetSendAddr + $i, 'byte'), 2)
+	Next
+	$packet_log_trampoline_bytes = $trampHex
 
 	; ── 2. Data-Region allokieren (64 bytes) ──
 	Local $allocData = SafeDllCall13($kernel_handle, 'ptr', 'VirtualAllocEx', _
@@ -870,12 +874,15 @@ Func PacketLogSetup()
 	;   PacketLogProc:
 	;     pushfd                     ; 9C
 	;     pushad                     ; 60
-	;     mov esi,[esp+0x2C]         ; 8B 74 24 2C  — dataPtr (arg3, nach pushad: +0x24+8)
-	;     mov edx,[esp+0x28]         ; 8B 54 24 28  — size    (arg2)
+	;     ; Stack nach pushfd+pushad (8reg*4 + 4 = 36 bytes):
+	;     ;   [esp+00..1F]=pushad regs, [esp+20]=eflags, [esp+24]=retaddr,
+	;     ;   [esp+28]=arg1(PacketLoc), [esp+2C]=arg2(size), [esp+30]=arg3(dataPtr)
+	;     mov esi,[esp+0x30]         ; 8B 74 24 30  — dataPtr
+	;     mov edx,[esp+0x2C]         ; 8B 54 24 2C  — size
 	;     mov dword[dataAddr+4],edx  ; 89 15 <dataAddr+4>  — store size
 	;     mov ecx,edx                ; 8B CA
 	;     cmp ecx,56                 ; 83 F9 38
-	;     jle +2                     ; 7E 02
+	;     jle +5                     ; 7E 05  — skip mov ecx,56 (5 bytes)
 	;     mov ecx,56                 ; B9 38 00 00 00
 	;     mov edi,dataAddr+8         ; BF <dataAddr+8>
 	;     rep movsb                  ; F3 A4
@@ -886,13 +893,13 @@ Func PacketLogSetup()
 	;     popfd                      ; 9D
 	;     ; trampoline: 5 original bytes + JMP back
 	;     ; Dieser Teil wird separat geschrieben
-	Local $hookCode = '0x9C60'                           ; pushfd; pushad
-	$hookCode &= '8B74242C'                              ; mov esi,[esp+2C]
-	$hookCode &= '8B542428'                              ; mov edx,[esp+28]
+	Local $hookCode = '9C60'                             ; pushfd; pushad
+	$hookCode &= '8B742430'                              ; mov esi,[esp+30]  — dataPtr
+	$hookCode &= '8B54242C'                              ; mov edx,[esp+2C]  — size
 	$hookCode &= '8915' & SwapEndian(Hex($packet_log_data_addr + 4, 8))  ; mov [dataAddr+4],edx
 	$hookCode &= '8BCA'                                  ; mov ecx,edx
 	$hookCode &= '83F938'                                ; cmp ecx,56
-	$hookCode &= '7E02'                                  ; jle +2
+	$hookCode &= '7E05'                                  ; jle +5 (skip 5-byte mov ecx,56)
 	$hookCode &= 'B938000000'                            ; mov ecx,56
 	$hookCode &= 'BF' & SwapEndian(Hex($packet_log_data_addr + 8, 8))  ; mov edi,dataAddr+8
 	$hookCode &= 'F3A4'                                  ; rep movsb
