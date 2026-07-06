@@ -1845,11 +1845,13 @@ Func SellItemToTrader($item, $quantity = 0)
 				Return False
 			EndIf
 		WEnd
+		; Brief pause to let GW consume the quote Enqueue before sending the sell
+		RandomSleep(200)
 		; Execute trader sell
 		Local $costValue = MemoryRead($processHandle, $trader_cost_value)
 		Enqueue($TRADER_SELL_STRUCT_PTR, 4)
-		; Wait a bit for transaction to complete
-		PingSleep(50)
+		; Wait for transaction to complete and ring buffer to drain
+		RandomSleep(200)
 	Next
 	Return True
 EndFunc
