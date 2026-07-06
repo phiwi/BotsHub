@@ -31,20 +31,22 @@ Opt('MustDeclareVars', True)
 
 #Region Inventory Management
 ;~ Reset GWA2 internal state after intensive NPC interactions (stash/sell/salvage).
-;~ Re-syncs the ring buffer queue counter with GW, re-initializes command structs,
-;~ and waits for the game to stabilize — equivalent to a "soft restart" of the bot state.
+;~ Closes lingering dialogs and waits for the ring buffer to drain naturally.
+;~ NOTE: We intentionally do NOT call InitializeCommandStructures() here because
+;~ re-reading $queue_counter from GW memory creates a race condition — between
+;~ reading the counter and the next Enqueue, GW may advance its read position,
+;~ causing the Enqueue to write to a slot GW already passed. This makes all
+;~ subsequent Enqueue operations (map travel, etc.) fail silently.
 Func ResetGWA2State()
 	Info('Resetting GWA2 state after inventory operations')
 	; 1. Close any lingering dialogs (storage, merchant, trader)
 	CancelAction()
 	RandomSleep(500)
-	; 2. Give GW time to drain the ring buffer and process pending actions
-	RandomSleep(2000)
-	; 3. Re-sync queue counter from GW memory and re-initialize all command structures
-	;    This reads $queue_counter directly from GW's memory, ensuring we don't
-	;    overwrite unconsumed ring buffer slots.
-	InitializeCommandStructures()
-	; 4. Final stabilization — ensure any side effects are cleaned up
+	; 2. Give GW ample time to drain the ring buffer and process pending actions.
+	;    At ~30 slots/sec and a 64-slot buffer, 3 seconds is more than enough
+	;    for GW to consume all pending Enqueue operations.
+	RandomSleep(3000)
+	; 3. Final stabilization — ensure any side effects are cleaned up
 	CancelAction()
 	RandomSleep(500)
 EndFunc
