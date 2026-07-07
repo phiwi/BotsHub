@@ -35,7 +35,8 @@ Global Const $SOO_FARM_INFORMATIONS = 'For best results, do not cheap out on her
 
 Global Const $ID_SOO_TORCH = 22342
 Global Const $SOO_AGGRO_RANGE = $RANGE_SPELLCAST + 100
-Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RicYX0m0V8bwNDdYUAA'
+Global Const $SOO_PLAYER_SKILLBAR = 'OgBCgMzE5wuoNpr43g3wCoSD'
+;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RicYX0m0V8bwNDdYUAA'
 
 Global Const $SOO_FARM_DURATION = 60 * 60 * 1000
 Global Const $MAX_SOO_FARM_DURATION = 80 * 60 * 1000
@@ -52,15 +53,17 @@ Global Const $SOO_EXPLORE_ESCAPE_ATTEMPTS = 2
 Global Const $SOO_EXPLORE_ESCAPE_WAIT_MS = 3500
 Global Const $SOO_TEMPLATE_LOAD_RETRIES = 3
 
-Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQljAsBspRvAIgcQ5ZkAOB9UTAA' ; Inep + Epi + Frust
+Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkA9UTAEBA' ; Inep + Frust
 ;~ Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; PsychicInst
-Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB' ; Esurge
+Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB' ; Esurge
 ;~ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB' ; Panic
-Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMAR4iB'
+Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB'
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeEfEaRJgVV1DA' ; Healer's Boon (+FF -CH)
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
-Global Const $SOO_HERO_MOW_TEMPLATE = 'OABDQqhHPPVLxQrM4CFaV13A' ; Curses
+;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OABDQqhHPPVLxQrM4CFaV13A' ; Curses
+Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDY7ZPPXat4K5uWGsEVV7A' ; Prot
+
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+
 Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+s7Be9iQ9dJdxqPA' ; RoJ + SoW
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
@@ -70,8 +73,10 @@ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Rest
 Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OABDUshnSANUBfBbhlBWCVCJgA' ; Bone Fiends + Golem
 Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgBVgw0pwFy0Rs+nxqqj1RPMHOWB' ; Master of Magic
 ;~ Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
-Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
-Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jXydNgA' ; Ether Renewal Prot (+Convert H. -Draw)
+Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmUTkLA' ; Spirit's Gift + Chains
+;~ Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
+
+Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1j62dNgA' ; Ether Renewal Prot
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1Do2dNgA' ; Ether Renewal Prot
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
@@ -93,9 +98,12 @@ Global Const $SOO_SLOT3_HERO_ID = $ID_RAZAH
 Global Const $SOO_SLOT3_HERO_NAME = 'Razah'
 Global Const $SOO_SLOT3_HERO_TEMPLATE = $SOO_HERO_RAZAH_TEMPLATE
 
-Global Const $SOO_SLOT4_HERO_ID = $ID_XANDRA
-Global Const $SOO_SLOT4_HERO_NAME = 'Xandra'
-Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
+;~ Global Const $SOO_SLOT4_HERO_ID = $ID_XANDRA
+;~ Global Const $SOO_SLOT4_HERO_NAME = 'Xandra'
+;~ Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
+Global Const $SOO_SLOT4_HERO_ID = $ID_VEKK
+Global Const $SOO_SLOT4_HERO_NAME = 'Vekk'
+Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
 
 Global Const $SOO_SLOT5_HERO_ID = $ID_OLIAS
 Global Const $SOO_SLOT5_HERO_NAME = 'Olias'
@@ -108,12 +116,12 @@ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
 ;~ Global Const $SOO_SLOT6_HERO_NAME = 'Livia'
 ;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_LIVIA_TEMPLATE
 
-Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
-Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
-Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
-;~ Global Const $SOO_SLOT7_HERO_ID = $ID_MASTER_OF_WHISPERS
-;~ Global Const $SOO_SLOT7_HERO_NAME = 'Master of Whispers'
-;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
+;~ Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
+;~ Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
+;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
+Global Const $SOO_SLOT7_HERO_ID = $ID_MASTER_OF_WHISPERS
+Global Const $SOO_SLOT7_HERO_NAME = 'Master of Whispers'
+Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
 ;~ Global Const $SOO_SLOT7_HERO_ID = $ID_ACOLYTE_SOUSUKE
 ;~ Global Const $SOO_SLOT7_HERO_NAME = 'Alcolyte Sousuke'
 ;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_SOUSUKE_TEMPLATE
@@ -977,11 +985,15 @@ Func ClearSoOFloor2()
 		PickUpTorch()
 	WEnd
 
+	Local $soo_floor2_torch_done = False
+	Local $wasWiped = False
 	Local $secondRoomfirstTime = True
 	Local $mapLoaded = False
 	While Not IsRunFailed() And Not $mapLoaded
 		If CheckStuck('SoO Floor 2 - Second Room', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
+		$wasWiped = IsPlayerAndPartyWiped()
 		SoOWaitUntilPartyAlive()
+		If $wasWiped Then CancelAllHeroes()
 		UseMoraleConsumableIfNeeded()
 
 		If IsAgentInRange(GetMyAgent(), -14076, -19457, 1250) Then
@@ -1000,7 +1012,11 @@ Func ClearSoOFloor2()
 			PickUpTorch()
 		EndIf
 
-		If Not $secondRoomfirstTime Then
+		; Only run the "end-of-floor → torch room 1" return path when the portal
+		; didn't open and we need to retry the entire room. Skip it after a wipe —
+		; after a wipe we respawn at the shrine and the block above already moves
+		; us back to the torch room 1 exit.
+		If Not $secondRoomfirstTime And Not $wasWiped Then
 			MoveAggroAndKillInRange(-17500, -9500, 'If not first loop, run back from end of floor to torch room 1', $SOO_AGGRO_RANGE)
 			PickUpTorch()
 			MoveTo(-16000, -8700)
@@ -1034,9 +1050,14 @@ Func ClearSoOFloor2()
 		MoveAggroAndKillInRange(-3900, -4163, '15', $SOO_AGGRO_RANGE)
 		PickUpTorch()
 
-		InteractWithTorchOrBrazierAt(-3717, -4254, 'Light up torch')
-		InteractWithTorchOrBrazierAt(-8251, -3240, 'Light up brazier 1')
-		InteractWithTorchOrBrazierAt(-8278, -1670, 'Light up brazier 2')
+		If $soo_floor2_torch_done Then
+			Info('Torch sequence already done, skipping to group clearing')
+		Else
+			InteractWithTorchOrBrazierAt(-3717, -4254, 'Light up torch')
+			InteractWithTorchOrBrazierAt(-8251, -3240, 'Light up brazier 1')
+			InteractWithTorchOrBrazierAt(-8278, -1670, 'Light up brazier 2')
+			$soo_floor2_torch_done = True
+		EndIf
 
 		Info('Drop torch')
 		DropBundle()
