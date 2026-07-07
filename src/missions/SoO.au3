@@ -62,18 +62,18 @@ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB'
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OABDQqhHPPVLxQrM4CFaV13A' ; Curses
-Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDY7ZPPXat4K5uWGsEVV7A' ; Prot
+Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDY7ZPPjRt4K5uaHKDWiqK' ; Prot + Enfeeble
 
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+
 Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + SoW
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
-Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
+Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhmwrqKNncDzxJA' ; BiP Resto + Blood Bond
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
 ;~ Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljkwMpZOpidI0npdK6z74aMA' ; EarthMagic
 Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OABDUshnSANUBfBbhlBWCVCJgA' ; Bone Fiends + Golem
 Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgBVgw0pwFy0Rs+nxqqj1RPMHOWB' ; Master of Magic
 ;~ Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
-Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmUTkLA' ; Spirit's Gift + Chains
+Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWTkLA' ; Spirit's Gift
 ;~ Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
 
 Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1j62dNgA' ; Ether Renewal Prot
@@ -84,6 +84,8 @@ Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water 
 ;~ Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBFgYeKuIrjY9PjVVHrjeYOcsC' ; MoM
 Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + So
 ;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcU44XA1PO+sqPe9iQ9dJdRBGA' ; RoJ + Return
+Global Const $SOO_HERO_TAHLKORA_TEMPLATE = 'OwAS8YIPPt6xM5uGQEIaROC' ; Healer's Boon Prot
+
 
 
 Global Const $SOO_SLOT1_HERO_ID = $ID_GWEN
@@ -98,12 +100,12 @@ Global Const $SOO_SLOT3_HERO_ID = $ID_RAZAH
 Global Const $SOO_SLOT3_HERO_NAME = 'Razah'
 Global Const $SOO_SLOT3_HERO_TEMPLATE = $SOO_HERO_RAZAH_TEMPLATE
 
-;~ Global Const $SOO_SLOT4_HERO_ID = $ID_XANDRA
-;~ Global Const $SOO_SLOT4_HERO_NAME = 'Xandra'
-;~ Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
-Global Const $SOO_SLOT4_HERO_ID = $ID_VEKK
-Global Const $SOO_SLOT4_HERO_NAME = 'Vekk'
-Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
+Global Const $SOO_SLOT4_HERO_ID = $ID_XANDRA
+Global Const $SOO_SLOT4_HERO_NAME = 'Xandra'
+Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
+;~ Global Const $SOO_SLOT4_HERO_ID = $ID_VEKK
+;~ Global Const $SOO_SLOT4_HERO_NAME = 'Vekk'
+;~ Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
 
 Global Const $SOO_SLOT5_HERO_ID = $ID_OLIAS
 Global Const $SOO_SLOT5_HERO_NAME = 'Olias'
@@ -119,12 +121,12 @@ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
 ;~ Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
 ;~ Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
 ;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
-Global Const $SOO_SLOT7_HERO_ID = $ID_MASTER_OF_WHISPERS
-Global Const $SOO_SLOT7_HERO_NAME = 'Master of Whispers'
-Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
-;~ Global Const $SOO_SLOT7_HERO_ID = $ID_ACOLYTE_SOUSUKE
-;~ Global Const $SOO_SLOT7_HERO_NAME = 'Alcolyte Sousuke'
-;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_SOUSUKE_TEMPLATE
+Global Const $SOO_SLOT7_HERO_ID = $ID_TAHLKORA
+Global Const $SOO_SLOT7_HERO_NAME = 'Tahlkora'
+Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_TAHLKORA_TEMPLATE
+;~ Global Const $SOO_SLOT7_HERO_ID = $ID_MASTER_OF_WHISPERS
+;~ Global Const $SOO_SLOT7_HERO_NAME = 'Master of Whispers'
+;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
 
 Global $soo_farm_setup = False
 Global $soo_consecutive_run_failures = 0
@@ -136,6 +138,7 @@ Global $soo_armors_used = 0
 Global $soo_essences_used = 0
 Global $soo_last_conset_timer = TimerInit()
 Global $soo_celerity_only = False
+Global $soo_current_floor = 0
 
 
 ;~ Main method to farm SoO (Celerity-only variant — only uses Essence of Celerity)
@@ -204,6 +207,13 @@ Func SoOUseConset()
 			Info('SoO con: using Armor of Salvation  (#' & $soo_armors_used & ' this run)')
 			UseConsumable($ID_ARMOR_OF_SALVATION, True)
 		EndIf
+	Else
+		; Celerity-only mode: Armor is added on floor 3 for extra survivability during the boss fight
+		If $soo_current_floor >= 3 And GetEffectTimeRemaining(GetEffect($ID_ARMOR_OF_SALVATION_EFFECT)) <= 0 Then
+			$soo_armors_used += 1
+			Info('SoO con: using Armor of Salvation  (#' & $soo_armors_used & ' this run)')
+			UseConsumable($ID_ARMOR_OF_SALVATION, True)
+		EndIf
 	EndIf
 	If GetEffectTimeRemaining(GetEffect($ID_ESSENCE_OF_CELERITY_EFFECT)) <= 0 Then
 		$soo_essences_used += 1
@@ -223,14 +233,19 @@ Func SoOHasEnoughConsets()
 
 	If $soo_celerity_only Then
 		Local $essenceFound = FindInInventory($ID_ESSENCE_OF_CELERITY)
-		Local $essenceQty = 0
+		Local $armorFound = FindInInventory($ID_ARMOR_OF_SALVATION)
+		Local $essenceQty = 0, $armorQty = 0
 		If $essenceFound[0] <> 0 Then $essenceQty = DllStructGetData(GetItemBySlot($essenceFound[0], $essenceFound[1]), 'Quantity')
+		If $armorFound[0] <> 0 Then $armorQty = DllStructGetData(GetItemBySlot($armorFound[0], $armorFound[1]), 'Quantity')
 		If $essenceQty < 3 Then
 			Warn('SoO celerity: Essences=' & $essenceQty & ' — falling back to Normal Mode')
 			$run_options_cache['run.hard_mode'] = False
 			Return True
 		EndIf
-		Info('SoO celerity: Essences=' & $essenceQty)
+		If $armorQty < 1 Then
+			Warn('SoO celerity: Armors=' & $armorQty & ' (need 1 for floor 3) — continuing without')
+		EndIf
+		Info('SoO celerity: Essences=' & $essenceQty & '  Armors=' & $armorQty)
 		Return True
 	EndIf
 
@@ -805,6 +820,7 @@ EndFunc
 Func ClearSoOFloor1()
 	Info('------------------------------------')
 	Info('First floor')
+	$soo_current_floor = 1
 
 	If IsHardmodeEnabled() Then SoOUseConset()
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 9232, 11483, 1250)
@@ -902,6 +918,7 @@ EndFunc
 Func ClearSoOFloor2()
 	Info('------------------------------------')
 	Info('Second floor')
+	$soo_current_floor = 2
 	If IsHardmodeEnabled() Then SoOUseConset()
 
 	Local $firstRoomfirstTime = True
@@ -1109,6 +1126,7 @@ EndFunc
 Func ClearSoOFloor3()
 	Info('------------------------------------')
 	Info('Third floor')
+	$soo_current_floor = 3
 
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 1100, 7100, 1250)
 		If CheckStuck('SoO Floor 3 - First loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
