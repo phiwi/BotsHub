@@ -65,7 +65,7 @@ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB'
 Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDY7ZPPXat4K5uWGsEVV7A' ; Prot
 
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+
-Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+s7Be9iQ9dJdxqPA' ; RoJ + SoW
+Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + SoW
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
 Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQkG4RFyzdwOI8qqSzJ3wccC' ; BiP Resto + Enfeebling Blood
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
@@ -82,7 +82,7 @@ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1j62dNgA' ; Ether Renewal
 Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
 ;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
 ;~ Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBFgYeKuIrjY9PjVVHrjeYOcsC' ; MoM
-Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcU44XA1PO+s7Be9iQ9dJdxqPA' ; RoJ + So
+Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + So
 ;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcU44XA1PO+sqPe9iQ9dJdRBGA' ; RoJ + Return
 
 
@@ -905,6 +905,7 @@ Func ClearSoOFloor2()
 	If IsHardmodeEnabled() Then SoOUseConset()
 
 	Local $firstRoomfirstTime = True
+	Local $soo_floor1_torch_done = False
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -11000, -6000, 1250)
 		If CheckStuck('SoO Floor 2 - First Room', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		SoOWaitUntilPartyAlive()
@@ -929,42 +930,48 @@ Func ClearSoOFloor2()
 		MoveAggroAndKillInRange(-14600, -16650, '1', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-16600, -16500, '2', $SOO_AGGRO_RANGE)
 
-		Info('Open torch chest')
-		ClearTarget()
-		Sleep(500)
+		If Not $soo_floor1_torch_done Then
+			Info('Open torch chest')
+			ClearTarget()
+			Sleep(500)
 
-		; Doubled to secure bot
-		For $i = 1 To 2
-			MoveTo(-14709, -16548)
-			TargetNearestItem()
-			RandomSleep(1500)
-			ActionInteract()
+			; Doubled to secure bot
+			For $i = 1 To 2
+				MoveTo(-14709, -16548)
+				TargetNearestItem()
+				RandomSleep(1500)
+				ActionInteract()
+				RandomSleep(500)
+				ActionInteract()
+				RandomSleep(500)
+			Next
+
+			Info('Pick up torch')
+			PickUpTorch()
+
+			MoveAggroAndKillInRange(-9300, -17300, '3', $SOO_AGGRO_RANGE)
+			; Pick up again in case of death
+			PickUpTorch()
+			MoveAggroAndKillInRange(-9600, -16600, '4', $SOO_AGGRO_RANGE)
+			; Pick up again in case of death
+			PickUpTorch()
+			InteractWithTorchOrBrazierAt(-11242, -14612, 'Light up torch')
+
+			Info('Get in torch room')
+			MoveTo(-10033, -12701)
+			InteractWithTorchOrBrazierAt(-11019, -11550, 'Lighting brazier 1')
+			InteractWithTorchOrBrazierAt(-9028, -9021, 'Lighting brazier 2')
+			InteractWithTorchOrBrazierAt(-6805, -11511, 'Lighting brazier 3')
+			InteractWithTorchOrBrazierAt(-8984, -13842, 'Lighting brazier 4')
+
+			Info('Drop torch')
+			DropBundle()
 			RandomSleep(500)
-			ActionInteract()
-			RandomSleep(500)
-		Next
+			$soo_floor1_torch_done = True
+		Else
+			Info('Torch/brazier sequence already done, skipping to group clearing')
+		EndIf
 
-		Info('Pick up torch')
-		PickUpTorch()
-
-		MoveAggroAndKillInRange(-9300, -17300, '3', $SOO_AGGRO_RANGE)
-		; Pick up again in case of death
-		PickUpTorch()
-		MoveAggroAndKillInRange(-9600, -16600, '4', $SOO_AGGRO_RANGE)
-		; Pick up again in case of death
-		PickUpTorch()
-		InteractWithTorchOrBrazierAt(-11242, -14612, 'Light up torch')
-
-		Info('Get in torch room')
-		MoveTo(-10033, -12701)
-		InteractWithTorchOrBrazierAt(-11019, -11550, 'Lighting brazier 1')
-		InteractWithTorchOrBrazierAt(-9028, -9021, 'Lighting brazier 2')
-		InteractWithTorchOrBrazierAt(-6805, -11511, 'Lighting brazier 3')
-		InteractWithTorchOrBrazierAt(-8984, -13842, 'Lighting brazier 4')
-
-		Info('Drop torch')
-		DropBundle()
-		RandomSleep(500)
 		Info('Kill group')
 		FlagMoveAggroAndKillInRange(-9358, -12411, '5', $SOO_AGGRO_RANGE)
 		FlagMoveAggroAndKillInRange(-10143, -11136, '6', $SOO_AGGRO_RANGE)
@@ -983,6 +990,7 @@ Func ClearSoOFloor2()
 		MoveAggroAndKillInRange(-11000, -6000, '11', $SOO_AGGRO_RANGE)
 		; Pick up again in case of death
 		PickUpTorch()
+		$firstRoomfirstTime = False
 	WEnd
 
 	Local $soo_floor2_torch_done = False
