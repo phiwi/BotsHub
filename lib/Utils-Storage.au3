@@ -32,23 +32,26 @@ Opt('MustDeclareVars', True)
 #Region Inventory Management
 ;~ Reset GWA2 internal state after intensive NPC interactions (stash/sell/salvage).
 ;~ Closes lingering dialogs and waits for the ring buffer to drain naturally.
-;~ NOTE: We intentionally do NOT call InitializeCommandStructures() here because
-;~ re-reading $queue_counter from GW memory creates a race condition — between
-;~ reading the counter and the next Enqueue, GW may advance its read position,
-;~ causing the Enqueue to write to a slot GW already passed. This makes all
-;~ subsequent Enqueue operations (map travel, etc.) fail silently.
+;~ Also verifies the party state — if heroes were lost during inventory management,
+;~ we're still in the trade town and the farm setup will re-assemble them.
 Func ResetGWA2State()
 	Info('Resetting GWA2 state after inventory operations')
 	; 1. Close any lingering dialogs (storage, merchant, trader)
 	CancelAction()
 	RandomSleep(500)
 	; 2. Give GW ample time to drain the ring buffer and process pending actions.
-	;    At ~30 slots/sec and a 64-slot buffer, 3 seconds is more than enough
-	;    for GW to consume all pending Enqueue operations.
-	RandomSleep(3000)
-	; 3. Final stabilization — ensure any side effects are cleaned up
+	;    At ~30 slots/sec, a 64-slot buffer drains in ~2 seconds. We wait 5 seconds
+	;    to also cover any delayed GW processing after intensive NPC interactions.
+	RandomSleep(5000)
+	; 3. Final stabilization — close anything that might have popped up
 	CancelAction()
 	RandomSleep(500)
+	; 4. Log party state for diagnostics
+	Local $partySize = GetPartySize()
+	Local $heroCount = GetHeroCount()
+	If $partySize <= 1 Or $heroCount == 0 Then
+		Warn('ResetGWA2State: party appears empty or incomplete (party=' & $partySize & ', heroes=' & $heroCount & '). Farm setup will re-assemble.')
+	EndIf
 EndFunc
 
 
