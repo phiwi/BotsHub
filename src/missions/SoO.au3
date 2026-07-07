@@ -70,7 +70,7 @@ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + S
 Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhmwrqKNncDzxJA' ; BiP Resto + Blood Bond
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
 Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OABDUshnSANUBfBbhlBWCVCJgA' ; Bone Fiends + Golem
-Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgljgwMpZSXVfDLg6QKNhD1Y7YA' ; BlindingS
+Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgVDIJycO5gwxV9bo0GCXgiA' ; BlindingS + Dom
 Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWTkLA' ; Spirit's Gift
 ;~ Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWzLG'
 
@@ -109,12 +109,12 @@ Global Const $SOO_SLOT5_HERO_ID = $ID_OLIAS
 Global Const $SOO_SLOT5_HERO_NAME = 'Olias'
 Global Const $SOO_SLOT5_HERO_TEMPLATE = $SOO_HERO_OLIAS_TEMPLATE
 
-Global Const $SOO_SLOT6_HERO_ID = $ID_DUNKORO
-Global Const $SOO_SLOT6_HERO_NAME = 'Dunkoro'
-Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
-;~ Global Const $SOO_SLOT6_HERO_ID = $ID_LIVIA
-;~ Global Const $SOO_SLOT6_HERO_NAME = 'Livia'
-;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_LIVIA_TEMPLATE
+;~ Global Const $SOO_SLOT6_HERO_ID = $ID_DUNKORO
+;~ Global Const $SOO_SLOT6_HERO_NAME = 'Dunkoro'
+;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
+Global Const $SOO_SLOT6_HERO_ID = $ID_ZHED_SHADOWHOOF
+Global Const $SOO_SLOT6_HERO_NAME = 'Zhed'
+Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
 
 ;~ Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
 ;~ Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
@@ -207,11 +207,11 @@ Func SoOUseConset()
 		EndIf
 	Else
 		; Celerity-only mode: Armor is added on floor 3 for extra survivability during the boss fight
-		If $soo_current_floor >= 3 And GetEffectTimeRemaining(GetEffect($ID_ARMOR_OF_SALVATION_EFFECT)) <= 0 Then
-			$soo_armors_used += 1
-			Info('SoO con: using Armor of Salvation  (#' & $soo_armors_used & ' this run)')
-			UseConsumable($ID_ARMOR_OF_SALVATION, True)
-		EndIf
+		;~ If $soo_current_floor >= 3 And GetEffectTimeRemaining(GetEffect($ID_ARMOR_OF_SALVATION_EFFECT)) <= 0 Then
+		;~ 	$soo_armors_used += 1
+		;~ 	Info('SoO con: using Armor of Salvation  (#' & $soo_armors_used & ' this run)')
+		;~ 	UseConsumable($ID_ARMOR_OF_SALVATION, True)
+		;~ EndIf
 	EndIf
 	If GetEffectTimeRemaining(GetEffect($ID_ESSENCE_OF_CELERITY_EFFECT)) <= 0 Then
 		$soo_essences_used += 1
@@ -231,19 +231,14 @@ Func SoOHasEnoughConsets()
 
 	If $soo_celerity_only Then
 		Local $essenceFound = FindInInventory($ID_ESSENCE_OF_CELERITY)
-		Local $armorFound = FindInInventory($ID_ARMOR_OF_SALVATION)
-		Local $essenceQty = 0, $armorQty = 0
+		Local $essenceQty = 0
 		If $essenceFound[0] <> 0 Then $essenceQty = DllStructGetData(GetItemBySlot($essenceFound[0], $essenceFound[1]), 'Quantity')
-		If $armorFound[0] <> 0 Then $armorQty = DllStructGetData(GetItemBySlot($armorFound[0], $armorFound[1]), 'Quantity')
 		If $essenceQty < 3 Then
 			Warn('SoO celerity: Essences=' & $essenceQty & ' — falling back to Normal Mode')
 			$run_options_cache['run.hard_mode'] = False
 			Return True
 		EndIf
-		If $armorQty < 1 Then
-			Warn('SoO celerity: Armors=' & $armorQty & ' (need 1 for floor 3) — continuing without')
-		EndIf
-		Info('SoO celerity: Essences=' & $essenceQty & '  Armors=' & $armorQty)
+		Info('SoO celerity: Essences=' & $essenceQty)
 		Return True
 	EndIf
 
