@@ -58,11 +58,9 @@ Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkA9UTAEBA' ; Inep + Fru
 Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB' ; Esurge
 ;~ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB' ; Panic
 Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB'
-;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeEfEaRJgVV1DA' ; Healer's Boon (+FF -CH)
-;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDYbzfRxVNgeETffEaRVV1DA' ; Healer's Boon
-;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OAhjYoHYIPWb7wnoqKNncDzqHA' ; Xinrae
 ;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OABDQqhHPPVLxQrM4CFaV13A' ; Curses
-Global Const $SOO_HERO_MOW_TEMPLATE = 'OANDY7ZPPjRt4K5uaHKDWiqK' ; Prot + Enfeeble
+Global Const $SOO_HERO_MOW_TEMPLATE = 'OANTY0G/QKuqB0jY67jQLqqqeA' ; Healer's Boon Hybrid
+
 
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+
 Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + SoW
@@ -109,22 +107,22 @@ Global Const $SOO_SLOT5_HERO_ID = $ID_OLIAS
 Global Const $SOO_SLOT5_HERO_NAME = 'Olias'
 Global Const $SOO_SLOT5_HERO_TEMPLATE = $SOO_HERO_OLIAS_TEMPLATE
 
-;~ Global Const $SOO_SLOT6_HERO_ID = $ID_DUNKORO
-;~ Global Const $SOO_SLOT6_HERO_NAME = 'Dunkoro'
-;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
-Global Const $SOO_SLOT6_HERO_ID = $ID_ZHED_SHADOWHOOF
-Global Const $SOO_SLOT6_HERO_NAME = 'Zhed'
-Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
+Global Const $SOO_SLOT6_HERO_ID = $ID_DUNKORO
+Global Const $SOO_SLOT6_HERO_NAME = 'Dunkoro'
+Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
+;~ Global Const $SOO_SLOT6_HERO_ID = $ID_ZHED_SHADOWHOOF
+;~ Global Const $SOO_SLOT6_HERO_NAME = 'Zhed'
+;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
 
 ;~ Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
 ;~ Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
 ;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
-Global Const $SOO_SLOT7_HERO_ID = $ID_TAHLKORA
-Global Const $SOO_SLOT7_HERO_NAME = 'Tahlkora'
-Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_TAHLKORA_TEMPLATE
-;~ Global Const $SOO_SLOT7_HERO_ID = $ID_MASTER_OF_WHISPERS
-;~ Global Const $SOO_SLOT7_HERO_NAME = 'Master of Whispers'
-;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
+;~ Global Const $SOO_SLOT7_HERO_ID = $ID_TAHLKORA
+;~ Global Const $SOO_SLOT7_HERO_NAME = 'Tahlkora'
+;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_TAHLKORA_TEMPLATE
+Global Const $SOO_SLOT7_HERO_ID = $ID_MASTER_OF_WHISPERS
+Global Const $SOO_SLOT7_HERO_NAME = 'Master of Whispers'
+Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
 
 Global $soo_farm_setup = False
 Global $soo_consecutive_run_failures = 0
