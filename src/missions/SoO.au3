@@ -35,7 +35,7 @@ Global Const $SOO_FARM_INFORMATIONS = 'For best results, do not cheap out on her
 
 Global Const $ID_SOO_TORCH = 22342
 Global Const $SOO_AGGRO_RANGE = $RANGE_SPELLCAST + 100
-Global Const $SOO_PLAYER_SKILLBAR = 'OgBDgcmcSfVkD7i2kuifDeDKNA'
+Global Const $SOO_PLAYER_SKILLBAR = 'OgdDgcmcSrgkD7iuifDLgeDKNA'
 ;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgBCgMzE5wuoNpr43g3wCoSD'
 
 ;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RicYX0m0V8bwNDdYUAA'
@@ -232,7 +232,7 @@ Func SoOHasEnoughConsets()
 
 	Local $forcedByHM = IsHardmodeEnabled() And Not $run_options_cache['run.use_consets']
 	If $forcedByHM Then
-		Info('SoO con: Hard Mode detected — forcing conset usage regardless of GUI checkbox')
+		Warn('SoO con: Hard Mode detected — forcing conset usage regardless of GUI checkbox')
 	EndIf
 
 	If $soo_celerity_only Then
