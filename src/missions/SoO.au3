@@ -35,7 +35,9 @@ Global Const $SOO_FARM_INFORMATIONS = 'For best results, do not cheap out on her
 
 Global Const $ID_SOO_TORCH = 22342
 Global Const $SOO_AGGRO_RANGE = $RANGE_SPELLCAST + 100
-Global Const $SOO_PLAYER_SKILLBAR = 'OgBCgMzE5wuoNpr43g3wCoSD'
+Global Const $SOO_PLAYER_SKILLBAR = 'OgBDgcmcSmCkD7i2kuifDeDKNA'
+;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgBCgMzE5wuoNpr43g3wCoSD'
+
 ;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RicYX0m0V8bwNDdYUAA'
 
 Global Const $SOO_FARM_DURATION = 60 * 60 * 1000
@@ -76,10 +78,10 @@ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1j62dNgA' ; Ether Renewal
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1Do2dNgA' ; Ether Renewal Prot
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
-;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
 ;~ Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBFgYeKuIrjY9PjVVHrjeYOcsC' ; MoM
-Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + So
-;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwcU44XA1PO+sqPe9iQ9dJdRBGA' ; RoJ + Return
+Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT44HC1xnhXvIUfXS9QLeXBA' ; RoJ + Prot
+;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + SoW
+
 Global Const $SOO_HERO_TAHLKORA_TEMPLATE = 'OwAS8YIPPt6xM5uGQEIaROC' ; Healer's Boon Prot
 
 
@@ -114,15 +116,12 @@ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
 ;~ Global Const $SOO_SLOT6_HERO_NAME = 'Zhed'
 ;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
 
-;~ Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
-;~ Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
-;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
-;~ Global Const $SOO_SLOT7_HERO_ID = $ID_TAHLKORA
-;~ Global Const $SOO_SLOT7_HERO_NAME = 'Tahlkora'
-;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_TAHLKORA_TEMPLATE
-Global Const $SOO_SLOT7_HERO_ID = $ID_MASTER_OF_WHISPERS
-Global Const $SOO_SLOT7_HERO_NAME = 'Master of Whispers'
-Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
+Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
+Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
+Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
+;~ Global Const $SOO_SLOT7_HERO_ID = $ID_MASTER_OF_WHISPERS
+;~ Global Const $SOO_SLOT7_HERO_NAME = 'Master of Whispers'
+;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
 
 Global $soo_farm_setup = False
 Global $soo_consecutive_run_failures = 0
@@ -225,7 +224,8 @@ EndFunc
 
 
 Func SoOHasEnoughConsets()
-	If Not $run_options_cache['run.use_consets'] Then Return True
+	; SoO always uses consets in Hard Mode, regardless of the GUI checkbox
+	If Not $run_options_cache['run.use_consets'] And Not IsHardmodeEnabled() Then Return True
 
 	If $soo_celerity_only Then
 		Local $essenceFound = FindInInventory($ID_ESSENCE_OF_CELERITY)
