@@ -35,7 +35,7 @@ Global Const $SOO_FARM_INFORMATIONS = 'For best results, do not cheap out on her
 
 Global Const $ID_SOO_TORCH = 22342
 Global Const $SOO_AGGRO_RANGE = $RANGE_SPELLCAST + 100
-Global Const $SOO_PLAYER_SKILLBAR = 'OgdDgcmcSrgkD7iuifDLgeDKNA'
+Global Const $SOO_PLAYER_SKILLBAR = 'OgdDgcisSrgkD7iuifDoDjCuCA'
 ;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgBCgMzE5wuoNpr43g3wCoSD'
 
 ;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RicYX0m0V8bwNDdYUAA'
@@ -67,7 +67,7 @@ Global Const $SOO_HERO_MOW_TEMPLATE = 'OANTY0G/QKuqB0jY67jQLqqqeA' ; Healer's Bo
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+
 Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + SoW
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
-Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhmwrqKNncDzxJA' ; BiP Resto + Blood Bond
+Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhmwrqKNncDzqHA' ; BiP Resto + Blood Bond
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
 Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OABDUshnSANUBfBbhlBWCVCJgA' ; Bone Fiends + Golem
 Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgVDIJycO5gwxV9bo0GCXgiA' ; BlindingS + Dom
@@ -680,6 +680,15 @@ Func RunToShardsOfOrrDungeon()
 	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
 	ResetFailuresCounter()
 	Local $routeTimer = TimerInit()
+
+	; Diagnostic: verify agent and movement system are functional before navigation
+	Local $myID = GetMyID()
+	If Not GetAgentExists($myID) Then
+		Warn('SoO nav diagnostic: GetAgentExists(GetMyID()) returned false before navigation (myID=' & $myID & ')')
+	Else
+		Local $me = GetMyAgent()
+		Info('SoO nav diagnostic: agent OK at (' & Round(DllStructGetData($me, 'X')) & ', ' & Round(DllStructGetData($me, 'Y')) & ') map=' & GetMapID())
+	EndIf
 
 	Info('Making way to portal')
 	MoveTo(16448, 14830)
