@@ -592,6 +592,15 @@ EndFunc
 
 
 Func SoOAssembleFixedTeamWithRecovery(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
+	; Force GW window to foreground before team assembly to ensure UI is responsive,
+	; especially when the screen has been turned off by power management.
+	Local $gwHandle = GetWindowHandle()
+	If $gwHandle Then
+		WinActivate($gwHandle)
+		WinWaitActive($gwHandle, '', 3)
+		RandomSleep(400)
+	EndIf
+
 	Local $attempt
 	For $attempt = 1 To $SOO_TEAM_OUTPOST_RETRIES
 		If $attempt > 1 Then
