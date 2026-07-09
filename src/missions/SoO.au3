@@ -53,11 +53,8 @@ Global Const $SOO_EXPLORE_ESCAPE_WAIT_MS = 3500
 Global Const $SOO_TEMPLATE_LOAD_RETRIES = 3
 
 Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkA9UTAEBA' ; Inep + Frust
-;~ Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAsC8gFKTIc6lDupDBTXG4iB' ; PsychicInst
 Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB' ; Esurge
-;~ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAsC7AGODNIHM9MdjQcaG4iB' ; Panic
 Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB'
-;~ Global Const $SOO_HERO_MOW_TEMPLATE = 'OABDQqhHPPVLxQrM4CFaV13A' ; Curses
 Global Const $SOO_HERO_MOW_TEMPLATE = 'OANTY0G/QKuqB0jY67jQLqqqeA' ; Healer's Boon Hybrid
 
 

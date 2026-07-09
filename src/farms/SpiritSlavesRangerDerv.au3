@@ -29,7 +29,8 @@ Global Const $SSRD_CHAIN_MIN_ADREN6 = 5
 Global Const $SSRD_NORTH_CENTER_X = -8598
 Global Const $SSRD_NORTH_CENTER_Y = -5810
 Global Const $SSRD_NORTH_CLEAR_RETRY_MAX = 2
-Global Const $SSRD_SOUTH_WAIT_MAX_MS = 120000
+Global Const $SSRD_SOUTH_WAIT_MAX_MS = 45000
+Global Const $SSRD_SOUTH_HOLD_WAIT_MAX_MS = 15000
 Global Const $SSRD_ENERGY_WAIT_MAX_MS = 25000
 Global Const $SSRD_REENGAGE_MIN_HP = 0.99
 Global Const $SSRD_REENGAGE_MIN_ENERGY = 0.99
@@ -173,9 +174,13 @@ Func SpiritSlavesRangerDervFarmLoop()
 	If SpiritSlavesRangerDervFarmNorthGroup() == $FAIL Then Return SpiritSlavesRangerDervRestartAfterDeath()
 	SpiritSlavesRangerDervEnsureWeaponSet1('between-wave-1-and-2-energy-recovery')
 	SpiritSlavesRangerDervLogInfo('Killing group 2 @ South')
-	If SpiritSlavesRangerDervFarmSouthGroup() == $FAIL Then Return SpiritSlavesRangerDervRestartAfterDeath()
+	If SpiritSlavesRangerDervFarmSouthGroup() == $FAIL Then
+		SpiritSlavesRangerDervLogWarn('South group 2 failed — skipping to next group')
+	EndIf
 	SpiritSlavesRangerDervLogInfo('Killing group 3 @ South')
-	If SpiritSlavesRangerDervFarmSouthGroup() == $FAIL Then Return SpiritSlavesRangerDervRestartAfterDeath()
+	If SpiritSlavesRangerDervFarmSouthGroup() == $FAIL Then
+		SpiritSlavesRangerDervLogWarn('South group 3 failed — skipping to next group')
+	EndIf
 	SpiritSlavesRangerDervLogInfo('Killing group 4 @ North')
 	If SpiritSlavesRangerDervFarmNorthGroup() == $FAIL Then Return SpiritSlavesRangerDervRestartAfterDeath()
 	SpiritSlavesRangerDervLogInfo('Killing group 5 @ North')
@@ -266,7 +271,7 @@ Func SpiritSlavesRangerDervFarmSouthGroup()
 	EndIf
 	Local $foesCount = CountFoesInRangeOfCoords(-7400, -9400, $RANGE_SPELLCAST, SpiritSlavesRangerDervIsPastAggroLine)
 	Local $deadlock = TimerInit()
-	While IsPlayerAlive() And Not $forceImmediateEngage And $foesCount < 8 And TimerDiff($deadlock) < $SSRD_SOUTH_WAIT_MAX_MS
+	While IsPlayerAlive() And Not $forceImmediateEngage And $foesCount < 6 And TimerDiff($deadlock) < $SSRD_SOUTH_WAIT_MAX_MS
 		RandomSleep(100)
 		$foesCount = CountFoesInRangeOfCoords(-7400, -9400, $RANGE_SPELLCAST, SpiritSlavesRangerDervIsPastAggroLine)
 		SpiritSlavesRangerDervCleanseFromCripple()
@@ -276,41 +281,43 @@ Func SpiritSlavesRangerDervFarmSouthGroup()
 			SpiritSlavesRangerDervLogInfo('South staging: aggro arrived during wait (' & $nearbyNow & '), engaging now')
 		EndIf
 	WEnd
-	If Not $forceImmediateEngage And TimerDiff($deadlock) >= $SSRD_SOUTH_WAIT_MAX_MS And $foesCount < 8 Then
-		SpiritSlavesRangerDervLogWarn('South staging timeout: mobs did not pass aggro line in time')
-		Return $FAIL
+	If Not $forceImmediateEngage And TimerDiff($deadlock) >= $SSRD_SOUTH_WAIT_MAX_MS Then
+		SpiritSlavesRangerDervLogWarn('South staging: timeout waiting for mobs — group may already be cleared, skipping')
+		Return $SUCCESS
 	EndIf
 	SpiritSlavesRangerDervCleanseFromCripple()
 	If Not $forceImmediateEngage Then
 		Move(-7735, -8380)
 		$foesCount = CountFoesInRangeOfAgent(GetMyAgent(), 950)
 		$deadlock = TimerInit()
-		While IsPlayerAlive() And $foesCount == 0 And TimerDiff($deadlock) < $SSRD_SOUTH_WAIT_MAX_MS
+		While IsPlayerAlive() And $foesCount == 0 And TimerDiff($deadlock) < $SSRD_SOUTH_HOLD_WAIT_MAX_MS
 			RandomSleep(100)
 			$foesCount = CountFoesInRangeOfAgent(GetMyAgent(), 950)
 		WEnd
-		If TimerDiff($deadlock) >= $SSRD_SOUTH_WAIT_MAX_MS And $foesCount == 0 Then
-			SpiritSlavesRangerDervLogWarn('South staging timeout: no aggro acquired near hold spot')
-			Return $FAIL
+		If $foesCount == 0 Then
+			SpiritSlavesRangerDervLogWarn('South staging: no aggro at hold spot — group may be cleared, skipping')
+			Return $SUCCESS
 		EndIf
-		If $foesCount > 0 Then
-			$forceImmediateEngage = True
-			SpiritSlavesRangerDervLogInfo('South staging: aggro acquired at hold spot (' & $foesCount & '), engaging now')
-		EndIf
+		$forceImmediateEngage = True
+		SpiritSlavesRangerDervLogInfo('South staging: aggro acquired at hold spot (' & $foesCount & '), engaging now')
 	EndIf
 	If IsPlayerDead() Then Return $FAIL
-	If $forceImmediateEngage Then
-		SpiritSlavesRangerDervLogInfo('South staging: engaging immediately under pressure')
-	Else
+
+	; Always wait for energy before engaging — missing energy was causing kill-sequence to start with 0 foes in area
+	If Not $forceImmediateEngage Then
 		If SpiritSlavesRangerDervWaitForEnergy() == $FAIL Then
 			SpiritSlavesRangerDervLogWarn('South staging timeout: energy did not recover to 20 in time')
-			Return $FAIL
+			Return $SUCCESS
 		EndIf
 	EndIf
 
 	SpiritSlavesRangerDervEnsureWeaponSet3('south-group')
 	MoveTo(-7800, -7680)
 	Local $targetFoe = GetNearestEnemyToAgent(GetMyAgent())
+	If $targetFoe == Null Then
+		SpiritSlavesRangerDervLogWarn('South staging: no target foe found — group cleared, skipping')
+		Return $SUCCESS
+	EndIf
 	SpiritSlavesRangerDervStartUpkeepSequence($targetFoe)
 	SpiritSlavesRangerDervMaintainUpkeep($targetFoe)
 	RandomSleep(150)
@@ -321,6 +328,10 @@ Func SpiritSlavesRangerDervFarmSouthGroup()
 	MoveTo($positionToGo[0], $positionToGo[1])
 	RandomSleep(120)
 	$targetFoe = GetNearestEnemyToAgent(GetMyAgent())
+	If $targetFoe == Null Then
+		SpiritSlavesRangerDervLogWarn('South group: no foes at center — skipping')
+		Return $SUCCESS
+	EndIf
 	SpiritSlavesRangerDervMaintainUpkeep($targetFoe)
 
 	If IsPlayerDead() Then Return $FAIL
