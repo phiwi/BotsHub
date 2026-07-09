@@ -35,10 +35,7 @@ Global Const $SOO_FARM_INFORMATIONS = 'For best results, do not cheap out on her
 
 Global Const $ID_SOO_TORCH = 22342
 Global Const $SOO_AGGRO_RANGE = $RANGE_SPELLCAST + 100
-Global Const $SOO_PLAYER_SKILLBAR = 'OgdDgcisSrgkD7iuifDoDjCuCA'
-;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgBCgMzE5wuoNpr43g3wCoSD'
-
-;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RicYX0m0V8bwNDdYUAA'
+Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RaFkcYX0V8bwNDdYUAA'
 
 Global Const $SOO_FARM_DURATION = 60 * 60 * 1000
 Global Const $MAX_SOO_FARM_DURATION = 80 * 60 * 1000
@@ -79,7 +76,7 @@ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1j62dNgA' ; Ether Renewal
 ;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
 Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
 ;~ Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBFgYeKuIrjY9PjVVHrjeYOcsC' ; MoM
-Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT44HC1xnhXvIUfXS9QLeXBA' ; RoJ + Prot
+Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT44HC1xnhXvI3juY9QLeXBA' ; RoJ + Prot
 ;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + SoW
 
 Global Const $SOO_HERO_TAHLKORA_TEMPLATE = 'OwAS8YIPPt6xM5uGQEIaROC' ; Healer's Boon Prot
@@ -134,6 +131,18 @@ Global $soo_essences_used = 0
 Global $soo_last_conset_timer = TimerInit()
 Global $soo_celerity_only = False
 Global $soo_current_floor = 0
+
+
+;~ SoO-specific run failure check: fails when player reaches -60% death penalty,
+;~ not based on a fixed wipe count. This allows the bot to recover from wipes
+;~ as long as morale consumables keep the DP below -60%.
+Func SoOIsRunFailed()
+	If GetMorale() <= -60 Then
+		Notice('Player reached -60% death penalty, run is considered failed.')
+		Return True
+	EndIf
+	Return False
+EndFunc
 
 
 ;~ Main method to farm SoO (Celerity-only variant — only uses Essence of Celerity)
@@ -724,7 +733,7 @@ Func RunToShardsOfOrrDungeon()
 		Return $FAIL
 	EndIf
 
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 11156, -17802, 1250)
+	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), 11156, -17802, 1250)
 		If TimerDiff($routeTimer) > $SOO_RUN_TO_DUNGEON_TIMEOUT_MS Then
 			Warn('SoO setup route timed out while moving through Arbor Bay')
 			AdlibUnRegister('TrackPartyStatus')
@@ -741,7 +750,7 @@ Func RunToShardsOfOrrDungeon()
 		MoveAggroAndKillInRange(8803, -5104, '4', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(8125, -8247, '5', $SOO_AGGRO_RANGE)
 		; Can't return here - we need to deregister adlib first
-		If IsRunFailed() Then ExitLoop
+		If SoOIsRunFailed() Then ExitLoop
 		MoveAggroAndKillInRange(8634, -11529, '6', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(9559, -13494, '7', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(10314, -16111, '8', $SOO_AGGRO_RANGE)
@@ -749,7 +758,7 @@ Func RunToShardsOfOrrDungeon()
 	WEnd
 
 	AdlibUnRegister('TrackPartyStatus')
-	Return IsRunFailed() ? $FAIL : $SUCCESS
+	Return SoOIsRunFailed() ? $FAIL : $SUCCESS
 EndFunc
 
 
@@ -831,7 +840,7 @@ Func ClearSoOFloor1()
 	$soo_current_floor = 1
 
 	If IsHardmodeEnabled() Then SoOUseConset()
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 9232, 11483, 1250)
+	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), 9232, 11483, 1250)
 		If CheckStuck('SoO Floor 1 - First loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		SoOWaitUntilPartyAlive()
 		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
@@ -860,7 +869,7 @@ Func ClearSoOFloor1()
 		MoveAggroAndKillInRange(9200, 12000, 'Triggering beacon 2', $SOO_AGGRO_RANGE)
 	WEnd
 
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 16134, 11781, 1250)
+	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), 16134, 11781, 1250)
 		If CheckStuck('SoO Floor 1 - Second loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		SoOWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
@@ -883,7 +892,7 @@ Func ClearSoOFloor1()
 		MoveAggroAndKillInRange(16000, 12000, 'Triggering beacon 3', $SOO_AGGRO_RANGE)
 	WEnd
 
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 14750, 5250, 1250)
+	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), 14750, 5250, 1250)
 		If CheckStuck('SoO Floor 1 - Third loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		SoOWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
@@ -895,7 +904,7 @@ Func ClearSoOFloor1()
 
 	Info('Going through portal')
 	Local $mapLoaded = False
-	While Not IsRunFailed() And Not $mapLoaded
+	While Not SoOIsRunFailed() And Not $mapLoaded
 		If CheckStuck('SoO Floor 1 - Opening door', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		SoOWaitUntilPartyAlive()
 		Info('Open dungeon door')
@@ -918,7 +927,7 @@ Func ClearSoOFloor1()
 		RandomSleep(2000)
 		$mapLoaded = WaitMapLoading($ID_SHARDS_OF_ORR_LVL_2)
 	WEnd
-	Return IsRunFailed() ? $FAIL : $SUCCESS
+	Return SoOIsRunFailed() ? $FAIL : $SUCCESS
 EndFunc
 
 
@@ -931,7 +940,7 @@ Func ClearSoOFloor2()
 
 	Local $firstRoomfirstTime = True
 	Local $soo_floor1_torch_done = False
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -11000, -6000, 1250)
+	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), -11000, -6000, 1250)
 		If CheckStuck('SoO Floor 2 - First Room', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		SoOWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
@@ -1022,7 +1031,7 @@ Func ClearSoOFloor2()
 	Local $wasWiped = False
 	Local $secondRoomfirstTime = True
 	Local $mapLoaded = False
-	While Not IsRunFailed() And Not $mapLoaded
+	While Not SoOIsRunFailed() And Not $mapLoaded
 		If CheckStuck('SoO Floor 2 - Second Room', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		$wasWiped = IsPlayerAndPartyWiped()
 		SoOWaitUntilPartyAlive()
@@ -1126,7 +1135,7 @@ Func ClearSoOFloor2()
 		RandomSleep(2000)
 		$mapLoaded = WaitMapLoading($ID_SHARDS_OF_ORR_LVL_3)
 	WEnd
-	Return IsRunFailed() ? $FAIL : $SUCCESS
+	Return SoOIsRunFailed() ? $FAIL : $SUCCESS
 EndFunc
 
 
@@ -1136,7 +1145,7 @@ Func ClearSoOFloor3()
 	Info('Third floor')
 	$soo_current_floor = 3
 
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 1100, 7100, 1250)
+	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), 1100, 7100, 1250)
 		If CheckStuck('SoO Floor 3 - First loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		SoOWaitUntilPartyAlive()
 		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
@@ -1164,7 +1173,7 @@ Func ClearSoOFloor3()
 
 	Local $floor3SecondLoopTimer = TimerInit()
 	Local $soo_floor3_torch_sequence_done = False
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -8650, 9200, 1250)
+	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), -8650, 9200, 1250)
 		If CheckStuck('SoO Floor 3 - Second loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		If TimerDiff($floor3SecondLoopTimer) > $SOO_FLOOR3_SECOND_LOOP_TIMEOUT_MS Then
 			Error('Bot appears to be stuck at: SoO Floor 3 - Second loop. Restarting run.')
@@ -1187,7 +1196,7 @@ Func ClearSoOFloor3()
 		MoveAggroAndKillInRange(9796, 18960, '9', $SOO_AGGRO_RANGE)
 		MoveAggroAndKillInRange(14068, 19549, '10', $SOO_AGGRO_RANGE)
 
-		If IsPlayerDead() Or IsRunFailed() Then
+		If IsPlayerDead() Or SoOIsRunFailed() Then
 			SoOWaitUntilPartyAlive()
 			Warn('Party wipe detected before torch sequence, restarting loop to recover')
 			ContinueLoop
@@ -1213,14 +1222,14 @@ Func ClearSoOFloor3()
 			ActionInteract()
 			RandomSleep(1000)
 		Next
-		If IsPlayerDead() Or IsRunFailed() Then
+		If IsPlayerDead() Or SoOIsRunFailed() Then
 			SoOWaitUntilPartyAlive()
 			Warn('Party wipe detected after torch chest — restarting loop to recover')
 			ContinueLoop
 		EndIf
 		Info('Pick up torch')
 		PickUpTorch()
-		If IsPlayerDead() Or IsRunFailed() Then
+		If IsPlayerDead() Or SoOIsRunFailed() Then
 			SoOWaitUntilPartyAlive()
 			Warn('Party wipe detected after picking up torch — restarting loop to recover')
 			ContinueLoop
@@ -1247,7 +1256,7 @@ Func ClearSoOFloor3()
 		DropBundle()
 		RandomSleep(500)
 
-		If IsPlayerDead() Or IsRunFailed() Then
+		If IsPlayerDead() Or SoOIsRunFailed() Then
 			SoOWaitUntilPartyAlive()
 			Warn('Party wipe detected before keyboss — restarting loop to recover')
 			ContinueLoop
@@ -1283,7 +1292,7 @@ Func ClearSoOFloor3()
 	Local $largerSoOAggroRange = $RANGE_SPELLCAST + 300
 	$soo_floor3_final_fight_conset_uptime = True
 	AdlibRegister('SoOFinalFightConsetUptimeTick', 1000)
-	While Not IsRunFailed() And Not IsQuestReward($ID_QUEST_LOST_SOULS)
+	While Not SoOIsRunFailed() And Not IsQuestReward($ID_QUEST_LOST_SOULS)
 		If CheckStuck('SoO Floor 3 - Third loop', $MAX_SOO_FARM_DURATION) == $FAIL Then
 			AdlibUnRegister('SoOFinalFightConsetUptimeTick')
 			$soo_floor3_final_fight_conset_uptime = False
@@ -1322,7 +1331,7 @@ Func ClearSoOFloor3()
 	AdlibUnRegister('SoOFinalFightConsetUptimeTick')
 	$soo_floor3_final_fight_conset_uptime = False
 	Local $hasQuestReward = IsQuestReward($ID_QUEST_LOST_SOULS)
-	If IsRunFailed() And Not $hasQuestReward Then Return $FAIL
+	If SoOIsRunFailed() And Not $hasQuestReward Then Return $FAIL
 	If $hasQuestReward Then
 		; If boss is dead and reward is available, do not let old wipe counter skip chest looting.
 		ResetFailuresCounter()
