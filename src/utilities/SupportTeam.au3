@@ -36,6 +36,10 @@ EndFunc
 Func SupportTeamStabilizeAfterTravel($expectedOutpostID, $maxWaitMs = 10000, $pollMs = 250)
 	If Not WaitMapLoading($expectedOutpostID, $maxWaitMs, $pollMs) Then Return False
 
+	; Force GW window active after map load — ensures party UI is responsive
+	; even when Windows power management turned off the screen.
+	ForceGwWindowActive()
+
 	Local $timer = TimerInit()
 	Local $stableTicks = 0
 	Local $lastPartySize = -1

@@ -49,7 +49,10 @@ Func ResetGWA2State()
 	; 3. Final stabilization — close anything that might have popped up
 	CancelAction()
 	RandomSleep(500)
-	; 4. Log party state for diagnostics
+	; 4. Force GW window active — ensures rendering pipeline is alive even if
+	;    Windows turned off the screen during inventory operations.
+	ForceGwWindowActive()
+	; 5. Log party state for diagnostics
 	Local $partySize = GetPartySize()
 	Local $heroCount = GetHeroCount()
 	If $partySize <= 1 Or $heroCount == 0 Then

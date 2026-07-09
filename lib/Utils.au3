@@ -2218,6 +2218,24 @@ Func GetWindowHandleForProcess($process)
 EndFunc
 
 
+;~ Force the GW window to foreground to ensure its rendering pipeline is active.
+;~ This prevents UI-freeze issues when Windows turns off the screen (power management).
+;~ Returns True if the window was successfully activated.
+Func ForceGwWindowActive()
+	Local $gwHandle = GetWindowHandle()
+	If Not $gwHandle Then Return False
+	Local $gwState = WinGetState($gwHandle)
+	; Already visible and active — nothing to do
+	If BitAND($gwState, 2) And BitAND($gwState, 8) Then Return True
+	; Minimized — restore first
+	If BitAND($gwState, 16) Then WinSetState($gwHandle, '', @SW_RESTORE)
+	WinActivate($gwHandle)
+	Local $activated = WinWaitActive($gwHandle, '', 5)
+	If $activated Then RandomSleep(400)
+	Return $activated <> 0
+EndFunc
+
+
 ;~ Get the address provided to a call (ie: strips the E8 instruction, and sums current call address with the obtained offset)
 Func GetCallTargetAddress($processHandle, $address)
 	Local $offset = MemoryRead($processHandle, $address + 0x01, 'dword')

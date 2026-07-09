@@ -328,6 +328,11 @@ Func RunFarmLoop()
 	; Running chosen farm
 	Local $result = $NOT_STARTED
 	$run_timer = TimerInit()
+
+	; Force GW window active before executing farm — last line of defense
+	; against screen-off rendering pipeline freezes.
+	ForceGwWindowActive()
+
 	Local $farmFunction = $farm[1]
 	If $run_mode == 'HEADLESS' Then
 		$result = $farmFunction()
