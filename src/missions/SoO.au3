@@ -35,7 +35,33 @@ Global Const $SOO_FARM_INFORMATIONS = 'For best results, do not cheap out on her
 
 Global Const $ID_SOO_TORCH = 22342
 Global Const $SOO_AGGRO_RANGE = $RANGE_SPELLCAST + 100
-Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RaFkcYX0V8bwNDdYUAA'
+
+; SoO-specific move+aggro wrappers that approach to aggro edge before engaging.
+; This prevents overstepping into groups and alerting all foes simultaneously —
+; the first skill hits them by surprise (like MissingDaughter does).
+Global $soo_move_aggro_options
+$soo_move_aggro_options = CloneMap($default_move_aggro_kill_options)
+$soo_move_aggro_options['approachBeforeFight'] = True
+
+Global $soo_flag_move_aggro_options
+$soo_flag_move_aggro_options = CloneMap($flag_move_aggro_kill_options)
+$soo_flag_move_aggro_options['approachBeforeFight'] = True
+
+Func SoOMoveAggroAndKill($x, $y, $log = '', $range = $SOO_AGGRO_RANGE)
+	$soo_move_aggro_options['fightRange'] = $range
+	Return MoveAggroAndKill($x, $y, $log, $soo_move_aggro_options)
+EndFunc
+
+Func SoOFlagMoveAggroAndKill($x, $y, $log = '', $range = $SOO_AGGRO_RANGE)
+	$soo_flag_move_aggro_options['fightRange'] = $range
+	Return MoveAggroAndKill($x, $y, $log, $soo_flag_move_aggro_options)
+EndFunc
+
+
+;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgFTsYmWRCv4dwmcdYXEZQdYaAA' ; Water Magic
+;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgdTkYm6RaFcXEWgryVEZgp5UAA' ; Earth Magic
+Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RaFkcYX0V8bwNDdYUAA' ; Air Magic
+
 
 Global Const $SOO_FARM_DURATION = 60 * 60 * 1000
 Global Const $MAX_SOO_FARM_DURATION = 80 * 60 * 1000
@@ -58,8 +84,9 @@ Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB'
 Global Const $SOO_HERO_MOW_TEMPLATE = 'OANTY0G/QKuqB0jY67jQLqqqeA' ; Healer's Boon Hybrid
 
 
-;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwcU44XA1PO+
+;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44HC1xnhXvI3juY9QLeXBA' ; RoJ + Prot
 Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + SoW
+
 ;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
 Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhmwrqKNncDzqHA' ; BiP Resto + Blood Bond
 ;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
@@ -750,17 +777,17 @@ Func RunToShardsOfOrrDungeon()
 			Return $FAIL
 		EndIf
 		SoOWaitUntilPartyAlive()
-		MoveAggroAndKillInRange(13122, 10437, '1', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(10668, 6530, '2', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(11891, -224, '3', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(8803, -5104, '4', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(8125, -8247, '5', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(13122, 10437, '1', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(10668, 6530, '2', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(11891, -224, '3', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(8803, -5104, '4', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(8125, -8247, '5', $SOO_AGGRO_RANGE)
 		; Can't return here - we need to deregister adlib first
 		If SoOIsRunFailed() Then ExitLoop
-		MoveAggroAndKillInRange(8634, -11529, '6', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(9559, -13494, '7', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(10314, -16111, '8', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(11156, -17802, '9', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(8634, -11529, '6', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(9559, -13494, '7', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(10314, -16111, '8', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(11156, -17802, '9', $SOO_AGGRO_RANGE)
 	WEnd
 
 	AdlibUnRegister('TrackPartyStatus')
@@ -858,21 +885,21 @@ Func ClearSoOFloor1()
 		RandomSleep(500)
 
 		MoveTo(-11750, 9925)
-		MoveAggroAndKillInRange(-10486, 9587, '1', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-6196, 10260, '2', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-4000, 12000, '3', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-10486, 9587, '1', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-6196, 10260, '2', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-4000, 12000, '3', $SOO_AGGRO_RANGE)
 		; Poison trap between 3 and 4
-		MoveAggroAndKillInRange(-2200, 13000, '4', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(2650, 16200, '5', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-2200, 13000, '4', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(2650, 16200, '5', $SOO_AGGRO_RANGE)
 		; too close to walls
-		MoveAggroAndKillInRange(3350, 15400, '6', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(3350, 15400, '6', $SOO_AGGRO_RANGE)
 		; Poison trap between 6 and 7
 		; too close to walls
-		MoveAggroAndKillInRange(4200, 14325, '7', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(4200, 14325, '7', $SOO_AGGRO_RANGE)
 		; Poison trap between 7 and 8
 		; too close to walls
-		MoveAggroAndKillInRange(7600, 12500, '8', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(9200, 12000, 'Triggering beacon 2', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(7600, 12500, '8', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(9200, 12000, 'Triggering beacon 2', $SOO_AGGRO_RANGE)
 	WEnd
 
 	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), 16134, 11781, 1250)
@@ -880,10 +907,10 @@ Func ClearSoOFloor1()
 		SoOWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		; too close to walls
-		MoveAggroAndKillInRange(7300, 12200, '', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(6300, 10400, 'Killing boss for key', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(7300, 12200, '', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(6300, 10400, 'Killing boss for key', $SOO_AGGRO_RANGE)
 		PickUpItems()
-		MoveAggroAndKillInRange(11200, 13900, '1', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(11200, 13900, '1', $SOO_AGGRO_RANGE)
 		; Poison trap between 1 and 2
 		FanFlagHeroes()
 		MoveTo(12500, 14250)
@@ -892,10 +919,10 @@ Func ClearSoOFloor1()
 		CancelAllHeroes()
 		RandomSleep(1000)
 		; too close to walls
-		MoveAggroAndKillInRange(12500, 14250, '2', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(13750, 15900, '3', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(16000, 17000, '4', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(16000, 12000, 'Triggering beacon 3', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(12500, 14250, '2', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(13750, 15900, '3', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(16000, 17000, '4', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(16000, 12000, 'Triggering beacon 3', $SOO_AGGRO_RANGE)
 	WEnd
 
 	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), 14750, 5250, 1250)
@@ -903,9 +930,9 @@ Func ClearSoOFloor1()
 		SoOWaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		; Poison trap between 1, 2 and 3
-		MoveAggroAndKillInRange(14000, 7400, '1', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(14400, 6000, '2', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(15000, 5300, '3', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(14000, 7400, '1', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(14400, 6000, '2', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(15000, 5300, '3', $SOO_AGGRO_RANGE)
 	WEnd
 
 	Info('Going through portal')
@@ -925,8 +952,8 @@ Func ClearSoOFloor1()
 			RandomSleep(500)
 		Next
 
-		FlagMoveAggroAndKillInRange(18000, 1900, '1', $SOO_AGGRO_RANGE)
-		FlagMoveAggroAndKillInRange(19700, 700, '2', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(18000, 1900, '1', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(19700, 700, '2', $SOO_AGGRO_RANGE)
 
 		MoveTo(20000, 900)
 		Move(20400, 1300)
@@ -967,8 +994,8 @@ Func ClearSoOFloor2()
 			RandomSleep(500)
 		EndIf
 
-		MoveAggroAndKillInRange(-14600, -16650, '1', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-16600, -16500, '2', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-14600, -16650, '1', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-16600, -16500, '2', $SOO_AGGRO_RANGE)
 
 		If Not $soo_floor1_torch_done Then
 			Info('Open torch chest')
@@ -989,10 +1016,10 @@ Func ClearSoOFloor2()
 			Info('Pick up torch')
 			PickUpTorch()
 
-			MoveAggroAndKillInRange(-9300, -17300, '3', $SOO_AGGRO_RANGE)
+			SoOMoveAggroAndKill(-9300, -17300, '3', $SOO_AGGRO_RANGE)
 			; Pick up again in case of death
 			PickUpTorch()
-			MoveAggroAndKillInRange(-9600, -16600, '4', $SOO_AGGRO_RANGE)
+			SoOMoveAggroAndKill(-9600, -16600, '4', $SOO_AGGRO_RANGE)
 			; Pick up again in case of death
 			PickUpTorch()
 			InteractWithTorchOrBrazierAt(-11242, -14612, 'Light up torch')
@@ -1013,21 +1040,21 @@ Func ClearSoOFloor2()
 		EndIf
 
 		Info('Kill group')
-		FlagMoveAggroAndKillInRange(-9358, -12411, '5', $SOO_AGGRO_RANGE)
-		FlagMoveAggroAndKillInRange(-10143, -11136, '6', $SOO_AGGRO_RANGE)
-		FlagMoveAggroAndKillInRange(-8871, -9951, '7', $SOO_AGGRO_RANGE)
-		FlagMoveAggroAndKillInRange(-7722, -11522, '8', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(-9358, -12411, '5', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(-10143, -11136, '6', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(-8871, -9951, '7', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(-7722, -11522, '8', $SOO_AGGRO_RANGE)
 
 		MoveTo(-8912, -13586)
 		Sleep(500)
 		Info('Pick up torch')
 		PickUpTorch()
 
-		MoveAggroAndKillInRange(-10500, -9600, '9', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-10500, -9600, '9', $SOO_AGGRO_RANGE)
 		PickUpTorch()
-		MoveAggroAndKillInRange(-11000, -7800, '10', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-11000, -7800, '10', $SOO_AGGRO_RANGE)
 		PickUpTorch()
-		MoveAggroAndKillInRange(-11000, -6000, '11', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-11000, -6000, '11', $SOO_AGGRO_RANGE)
 		; Pick up again in case of death
 		PickUpTorch()
 		$firstRoomfirstTime = False
@@ -1065,7 +1092,7 @@ Func ClearSoOFloor2()
 		; after a wipe we respawn at the shrine and the block above already moves
 		; us back to the torch room 1 exit.
 		If Not $secondRoomfirstTime And Not $wasWiped Then
-			MoveAggroAndKillInRange(-17500, -9500, 'If not first loop, run back from end of floor to torch room 1', $SOO_AGGRO_RANGE)
+			SoOMoveAggroAndKill(-17500, -9500, 'If not first loop, run back from end of floor to torch room 1', $SOO_AGGRO_RANGE)
 			PickUpTorch()
 			MoveTo(-16000, -8700)
 			RandomSleep(500)
@@ -1087,15 +1114,15 @@ Func ClearSoOFloor2()
 		EndIf
 
 		; Poison trap between 12 and 13
-		MoveAggroAndKillInRange(-6900, -4200, '12', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-6900, -4200, '12', $SOO_AGGRO_RANGE)
 		; Pick up again in case of death
 		PickUpTorch()
-		MoveAggroAndKillInRange(-5000, -3500, '13', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-5000, -3500, '13', $SOO_AGGRO_RANGE)
 		; Pick up again in case of death
 		PickUpTorch()
-		MoveAggroAndKillInRange(-4000, -4000, '14', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-4000, -4000, '14', $SOO_AGGRO_RANGE)
 		PickUpTorch()
-		MoveAggroAndKillInRange(-3900, -4163, '15', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-3900, -4163, '15', $SOO_AGGRO_RANGE)
 		PickUpTorch()
 
 		If $soo_floor2_torch_done Then
@@ -1111,16 +1138,16 @@ Func ClearSoOFloor2()
 		DropBundle()
 		RandomSleep(500)
 
-		FlagMoveAggroAndKillInRange(-6553, -2347, '16', $SOO_AGGRO_RANGE)
-		FlagMoveAggroAndKillInRange(-7733, -2487, '17', $SOO_AGGRO_RANGE)
-		FlagMoveAggroAndKillInRange(-6481, -2668, '18', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(-6553, -2347, '16', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(-7733, -2487, '17', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(-6481, -2668, '18', $SOO_AGGRO_RANGE)
 		PickUpItems()
-		MoveAggroAndKillInRange(-9000, -4350, '19', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-9000, -4350, '19', $SOO_AGGRO_RANGE)
 		; Poison trap between 19 and 20
-		MoveAggroAndKillInRange(-11204, -4331, '20', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-11500, -8400, '21', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-16000, -8700, '22', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-17500, -9500, '23', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-11204, -4331, '20', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-11500, -8400, '21', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-16000, -8700, '22', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-17500, -9500, '23', $SOO_AGGRO_RANGE)
 
 		$secondRoomfirstTime = False
 		Info('Going through portal')
@@ -1162,19 +1189,19 @@ Func ClearSoOFloor3()
 		Dialog(0x84)
 		RandomSleep(500)
 
-		FlagMoveAggroAndKillInRange(16337, 16366, '1', $SOO_AGGRO_RANGE)
-		FlagMoveAggroAndKillInRange(16313, 17997, '2', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(16000, 18400, '3', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(10000, 19425, '4', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(16337, 16366, '1', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(16313, 17997, '2', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(16000, 18400, '3', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(10000, 19425, '4', $SOO_AGGRO_RANGE)
 		; Poison trap between 4 and 5
-		MoveAggroAndKillInRange(9600, 18700, '5', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(9100, 18000, '6', $SOO_AGGRO_RANGE)
-		FlagMoveAggroAndKillInRange(9000, 17000, '7', $SOO_AGGRO_RANGE)
-		FlagMoveAggroAndKillInRange(8000, 15000, '8', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(4000, 9200, '9', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(1800, 7500, '10', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(2300, 8000, '11', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(1100, 7100, '12', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(9600, 18700, '5', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(9100, 18000, '6', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(9000, 17000, '7', $SOO_AGGRO_RANGE)
+		SoOFlagMoveAggroAndKill(8000, 15000, '8', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(4000, 9200, '9', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(1800, 7500, '10', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(2300, 8000, '11', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(1100, 7100, '12', $SOO_AGGRO_RANGE)
 	WEnd
 
 	Local $floor3SecondLoopTimer = TimerInit()
@@ -1188,19 +1215,19 @@ Func ClearSoOFloor3()
 		SoOWaitUntilPartyAlive()
 		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
 		UseMoraleConsumableIfNeeded()
-		MoveAggroAndKillInRange(-2300, 8000, 'Triggering beacon 2', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-4500, 6500, '1', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-6523, 5533, '2', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-10000, 3400, '3', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-11500, 3500, '4', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-2300, 8000, 'Triggering beacon 2', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-4500, 6500, '1', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-6523, 5533, '2', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-10000, 3400, '3', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-11500, 3500, '4', $SOO_AGGRO_RANGE)
 
 		Info('Run time, fun time')
-		MoveAggroAndKillInRange(-4723, 6703, '5', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-1337, 7825, '6', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(2913, 8190, '7', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(5846, 11037, '8', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(9796, 18960, '9', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(14068, 19549, '10', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-4723, 6703, '5', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-1337, 7825, '6', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(2913, 8190, '7', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(5846, 11037, '8', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(9796, 18960, '9', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(14068, 19549, '10', $SOO_AGGRO_RANGE)
 
 		If IsPlayerDead() Or SoOIsRunFailed() Then
 			SoOWaitUntilPartyAlive()
@@ -1210,8 +1237,8 @@ Func ClearSoOFloor3()
 
 		If $soo_floor3_torch_sequence_done Then
 			Info('Torch sequence already done, skipping to exit moves')
-			MoveAggroAndKillInRange(-9850, 7600, 'Added extra move to force going past door before endloop 1', $SOO_AGGRO_RANGE)
-			MoveAggroAndKillInRange(-8650, 9200, 'Added extra move to force going past door before endloop 2', $SOO_AGGRO_RANGE)
+			SoOMoveAggroAndKill(-9850, 7600, 'Added extra move to force going past door before endloop 1', $SOO_AGGRO_RANGE)
+			SoOMoveAggroAndKill(-8650, 9200, 'Added extra move to force going past door before endloop 2', $SOO_AGGRO_RANGE)
 			ContinueLoop
 		EndIf
 
@@ -1268,12 +1295,12 @@ Func ClearSoOFloor3()
 			ContinueLoop
 		EndIf
 		Info('Keyboss')
-		MoveAggroAndKillInRange(-11600, 2400, '14', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-10000, 3000, '15', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-11600, 2400, '14', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-10000, 3000, '15', $SOO_AGGRO_RANGE)
 
 		PickUpItems()
 
-		MoveAggroAndKillInRange(-9200, 6000, '16', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-9200, 6000, '16', $SOO_AGGRO_RANGE)
 
 		Info('Open dungeon door')
 		ClearTarget()
@@ -1291,8 +1318,8 @@ Func ClearSoOFloor3()
 
 		$soo_floor3_torch_sequence_done = True
 
-		MoveAggroAndKillInRange(-9850, 7600, 'Added extra move to force going past door before endloop 1', $SOO_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-8650, 9200, 'Added extra move to force going past door before endloop 2', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-9850, 7600, 'Added extra move to force going past door before endloop 1', $SOO_AGGRO_RANGE)
+		SoOMoveAggroAndKill(-8650, 9200, 'Added extra move to force going past door before endloop 2', $SOO_AGGRO_RANGE)
 	WEnd
 
 	Local $largerSoOAggroRange = $RANGE_SPELLCAST + 300
@@ -1314,24 +1341,24 @@ Func ClearSoOFloor3()
 			ContinueLoop
 		EndIf
 		If IsHardmodeEnabled() Then SoOUseConset()
-		MoveAggroAndKillInRange(-9850, 7600, 'Going back to secure door opening in case run failed 1', $largerSoOAggroRange)
-		MoveAggroAndKillInRange(-9200, 6000, 'Going back to secure door opening in case run failed 2', $largerSoOAggroRange)
+		SoOMoveAggroAndKill(-9850, 7600, 'Going back to secure door opening in case run failed 1', $largerSoOAggroRange)
+		SoOMoveAggroAndKill(-9200, 6000, 'Going back to secure door opening in case run failed 2', $largerSoOAggroRange)
 
 		Info('Boss room')
 		UseMoraleConsumableIfNeeded()
 		; Poison trap between 1 2 and 3
-		MoveAggroAndKillInRange(-9850, 7600, '1', $largerSoOAggroRange)
-		MoveAggroAndKillInRange(-8650, 9200, '2', $largerSoOAggroRange)
-		MoveAggroAndKillInRange(-9150, 10250, '3', $largerSoOAggroRange)
-		MoveAggroAndKillInRange(-9450, 10550, '4', $largerSoOAggroRange)
+		SoOMoveAggroAndKill(-9850, 7600, '1', $largerSoOAggroRange)
+		SoOMoveAggroAndKill(-8650, 9200, '2', $largerSoOAggroRange)
+		SoOMoveAggroAndKill(-9150, 10250, '3', $largerSoOAggroRange)
+		SoOMoveAggroAndKill(-9450, 10550, '4', $largerSoOAggroRange)
 		MoveTo(-10000, 11150)
-		MoveAggroAndKillInRange(-13300, 13550, '5', $largerSoOAggroRange)
+		SoOMoveAggroAndKill(-13300, 13550, '5', $largerSoOAggroRange)
 		MoveTo(13900, 13500)
 		; Fire traps between 5 6 and 7
-		FlagMoveAggroAndKillInRange(-15250, 15900, '6', $largerSoOAggroRange)
+		SoOFlagMoveAggroAndKill(-15250, 15900, '6', $largerSoOAggroRange)
 		Info('Boss fight, go in and move around to make sure its aggroed')
-		FlagMoveAggroAndKillInRange(-16300, 16600, '7', $largerSoOAggroRange)
-		FlagMoveAggroAndKillInRange(-15850, 17500, '8', $largerSoOAggroRange)
+		SoOFlagMoveAggroAndKill(-16300, 16600, '7', $largerSoOAggroRange)
+		SoOFlagMoveAggroAndKill(-15850, 17500, '8', $largerSoOAggroRange)
 		Sleep(1000)
 	WEnd
 	AdlibUnRegister('SoOFinalFightConsetUptimeTick')
