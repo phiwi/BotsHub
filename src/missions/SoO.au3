@@ -237,11 +237,11 @@ Func SoOUseConset()
 		EndIf
 	Else
 		; Celerity-only mode: Armor is added on floor 3 for extra survivability during the boss fight
-		;~ If $soo_current_floor >= 3 And GetEffectTimeRemaining(GetEffect($ID_ARMOR_OF_SALVATION_EFFECT)) <= 0 Then
-		;~ 	$soo_armors_used += 1
-		;~ 	Info('SoO con: using Armor of Salvation  (#' & $soo_armors_used & ' this run)')
-		;~ 	UseConsumable($ID_ARMOR_OF_SALVATION, True)
-		;~ EndIf
+		If $soo_current_floor >= 3 And GetEffectTimeRemaining(GetEffect($ID_ARMOR_OF_SALVATION_EFFECT)) <= 0 Then
+			$soo_armors_used += 1
+			Info('SoO con: using Armor of Salvation  (#' & $soo_armors_used & ' this run)')
+			UseConsumable($ID_ARMOR_OF_SALVATION, True)
+		EndIf
 	EndIf
 	If GetEffectTimeRemaining(GetEffect($ID_ESSENCE_OF_CELERITY_EFFECT)) <= 0 Then
 		$soo_essences_used += 1
