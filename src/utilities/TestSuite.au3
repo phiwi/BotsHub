@@ -15,14 +15,16 @@
 #CE ===========================================================================
 
 #include-once
-#RequireAdmin
-#NoTrayIcon
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Items.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
+#include '../../lib/GWA2_ID_Skills.au3'
 #include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 
-Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 Global Const $TEST_SUITE_INFORMATIONS = 'Just a test suite.'
@@ -72,8 +74,21 @@ EndFunc
 
 
 ;~ Method to make manual operations (open Xunlai, send instructions in the GUI input)
+;~ Also shares information with other Hub instances
 Func ManualMode()
+	Local $freePeerIndex = OpenPeersSharedMemoryBlocks()
+	Info('First free peer index: ' & $freePeerIndex)
+	If CreatePeerSharedMemoryBlock($freePeerIndex) Then 
+		AdlibRegister('ShareTeamEffects', $HR_INTERVAL)
+	EndIf
 	Return $PAUSE
+EndFunc
+
+
+;~ Collect player's and heroes effects and share them in shared memory
+Func ShareTeamEffects()
+	Local $map = CollectHeroesEffects()
+	WriteHeroesEffectsToSharedMemory($map)
 EndFunc
 
 
@@ -114,7 +129,7 @@ Func TestMovement()
 
 	Local $myX = DllStructGetData($me, 'X')
 	Local $myY = DllStructGetData($me, 'Y')
-	MoveTo($myX + 200, $myY + 200, 0, 0)
+	MoveTo($myX + 200, $myY + 200, 0)
 	$me = GetMyAgent()
 	If DllStructGetData($me, 'X') == $myX And DllStructGetData($me, 'Y') == $myY Then Return $FAIL
 

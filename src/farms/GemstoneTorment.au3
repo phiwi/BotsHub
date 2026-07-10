@@ -13,13 +13,12 @@ https://gwpvx.fandom.com/wiki/Build:E/A_Obsidian_Flesh_Gloom_Farmer
 #CE ===========================================================================
 
 #include-once
-#RequireAdmin
-#NoTrayIcon
-
-Opt('MustDeclareVars', True)
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
 #include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 
 
@@ -61,11 +60,11 @@ Global Const $TORMENT_WEAPON_SLOT_STAFF = 2
 ; Weapon of enchanting 20% and +5 Energy and a focus +15Energy/-1Regeneration for more energy
 Global Const $TORMENT_WEAPON_SLOT_FOCUS = 3
 
-Global $torment_run_options						= CloneMap($default_move_defend_options)
-$torment_run_options['defendFunction']			= DefendTormentFarm
-$torment_run_options['moveTimeOut']				= 3 * 60 * 1000
-$torment_run_options['randomFactor']			= 200
-$torment_run_options['deathChargeSkillSlot']	= $TORMENT_DEATHS_CHARGE
+Global $torment_run_options						= CloneMap($default_move_options)
+$torment_run_options['movementRoutine']			= SurviveTormentFarm
+$torment_run_options['moveTimeout']				= 3 * 60 * 1000
+$torment_run_options['moveVariance']			= 200
+$torment_run_options['skillSlotDeathsCharge']	= $TORMENT_DEATHS_CHARGE
 ; chests in Ravenheart Gloom should have good loot
 $torment_run_options['openChests']				= True
 
@@ -143,6 +142,7 @@ Func GemstoneTormentFarmLoop()
 	Info('Starting Farm')
 	Local $timerWait
 
+	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_STAFF & ' - Staff')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_STAFF)
 	RandomSleep(250)
 	If GetLightbringerTitle() < 50000 Then
@@ -176,12 +176,14 @@ Func GemstoneTormentFarmLoop()
 	CastBuffsTormentFarm()
 	If RunTormentFarm(10779, 9898) == $FAIL Then Return $FAIL
 	;If RunTormentFarm(11125, 9198) == $FAIL Then Return $FAIL
+	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_FOCUS & ' - Focus')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_FOCUS)
 	RandomSleep(500)
 	If KillTormentMobs() == $FAIL Then Return $FAIL
 	Info('Picking up loot')
 	PickUpItems()
 
+	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_STAFF & ' - Staff')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_STAFF)
 	RandomSleep(250)
 	If RunTormentFarm(11130, 10910) == $FAIL Then Return $FAIL
@@ -196,6 +198,7 @@ Func GemstoneTormentFarmLoop()
 	Info('Second group')
 	CastBuffsTormentFarm()
 	RandomSleep(250)
+	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_FOCUS & ' - Focus')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_FOCUS)
 	RandomSleep(500)
 	If KillTormentMobs() == $FAIL Then Return $FAIL
@@ -221,7 +224,7 @@ Func CastBuffsTormentFarm()
 EndFunc
 
 
-Func DefendTormentFarm()
+Func SurviveTormentFarm()
 	Local $me = GetMyAgent(), $target = Null
 
 	If (DllStructGetData($me, 'HealthPercent') < 0.3 Or _

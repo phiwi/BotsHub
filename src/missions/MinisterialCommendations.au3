@@ -16,13 +16,19 @@
 #CE ===========================================================================
 
 #include-once
-
-#include '../../lib/GWA2.au3'
-#include '../../lib/GWA2_ID.au3'
-#include '../../lib/Utils.au3'
 #include <File.au3>
 
-Opt('MustDeclareVars', True)
+#include '../../lib/GWA2_Assembly.au3'
+#include '../../lib/GWA2_ID_Items.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
+#include '../../lib/GWA2_ID_Skills.au3'
+#include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
+#include '../../lib/Utils.au3'
+
 
 ; ==== Constants ====
 Global Const $DW_COMMENDATIONS_FARMER_SKILLBAR = 'OgGlQlVp6smsJRg19RTKexTkL2XsDC'
@@ -152,7 +158,7 @@ EndFunc
 Func SetupPlayerMinisterialCommendationsFarm()
 	If IsTeamAutoSetup() Then Return $SUCCESS
 	If DllStructGetData(GetMyAgent(), 'Primary') == $ID_DERVISH Then
-		Info('Player''s profession is dervish. Loading up recommended dervish build automatically')
+		Info('Players profession is dervish. Loading up recommended dervish build automatically')
 		LoadSkillTemplate($DW_COMMENDATIONS_FARMER_SKILLBAR)
 		RandomSleep(250)
 	Else
@@ -223,16 +229,14 @@ Func EnterAChanceEncounterQuest()
 	Local $coordsX = DllStructGetData($me, 'X')
 	Local $coordsY = DllStructGetData($me, 'Y')
 
-	If -1400 < $coordsX And $coordsX < -550 And - 2000 < $coordsY And $coordsY < -1100 Then
-		MoveTo(1474, -1197, 25, 0)
-	EndIf
+	If -1400 < $coordsX And $coordsX < -550 And - 2000 < $coordsY And $coordsY < -1100 Then MoveTo(1474, -1197)
 
 	RandomSleep(1000)
 	UseCitySpeedBoost()
 	Local $npc = GetNearestNPCToCoords(2240, -1264)
 	GoToNPC($npc)
 	If GetDistance(GetMyAgent(), $npc) > $RANGE_ADJACENT Then
-		MoveTo(1474, -1197, 25, 0)
+		MoveTo(1474, -1197)
 		GoToNPC($npc)
 	EndIf
 	RandomSleep(250)
@@ -427,7 +431,7 @@ EndFunc
 
 ;~ The soul twisting ritualist uses soul twisting - sic
 Func SoulTwistingRitualistUseSoulTwisting()
-	If GetEffectTimeRemaining(GetEffect($SOUL_TWISTING_SKILL_POSITION, $HERO_RITUALIST_PROT)) == 0 Then
+	If GetEffectTimeRemaining(GetEffect($SOUL_TWISTING_SKILL_POSITION, GetHeroID($HERO_RITUALIST_PROT))) == 0 Then
 		UseHeroSkill($HERO_RITUALIST_PROT, $SOUL_TWISTING_SKILL_POSITION)
 		RandomSleep(50)
 	EndIf
@@ -443,7 +447,7 @@ Func RunToKillSpot()
 	MoveTo(-2096, -1067)
 	MoveTo(-815, -1898)
 	MoveTo(-690, -3769)
-	MoveTo(-850, -3961, 0, 0)
+	MoveTo(-850, -3961, 0)
 	RandomSleep(500)
 EndFunc
 

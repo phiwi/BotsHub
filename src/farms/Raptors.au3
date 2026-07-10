@@ -12,11 +12,12 @@ https://gwpvx.fandom.com/wiki/Build:W/N_Raptor_Farmer
 #CE ===========================================================================
 
 #include-once
-#RequireAdmin
-#NoTrayIcon
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
 #include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 
 ; Possible improvements :
@@ -26,8 +27,6 @@ https://gwpvx.fandom.com/wiki/Build:W/N_Raptor_Farmer
 ; - Optimise first cast of MoP to be made on first target that enters aggro (might be making farm worse : right now MoP is cast quite late which is good)
 ; - Use pumpkin pie slices ? Reduce cast time and increase attack speed reducing chances to be interrupted during MoP or Whirlwind
 
-
-Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 Global Const $WN_RAPTORS_FARMER_SKILLBAR = 'OQQUc4oQt6SWC0kqM5F9Fja7grFA'
@@ -85,9 +84,9 @@ Global Const $RAPTORS_STAND_YOUR_GROUND	= 6
 Global Const $RAPTORS_CANT_TOUCH_THIS	= 7
 Global Const $RAPTORS_BLADETURN_REFRAIN	= 8
 
-Global $raptors_move_options					= CloneMap($default_move_defend_options)
-$raptors_move_options['moveTimeOut']			= 3 * 60 * 1000
-$raptors_move_options['randomFactor']			= 10
+Global $raptors_move_options					= CloneMap($default_move_options)
+$raptors_move_options['moveTimeout']			= 3 * 60 * 1000
+$raptors_move_options['moveVariance']			= 10
 
 Global $raptors_farm_setup = False
 Global $raptors_player_profession = $ID_WARRIOR
@@ -188,7 +187,7 @@ Func RaptorsFarmLoop()
 	If KillRaptors() == $FAIL Then Return $FAIL
 	RandomSleep(1000)
 	Info('Picking up loot')
-	PickUpItems(RaptorsDefend)
+	PickUpItems(RaptorsSurvive)
 	RandomSleep(250)
 	Return CheckFarmResult()
 EndFunc
@@ -277,8 +276,8 @@ EndFunc
 
 
 ;~ Get foe that is a boss - Null if no boss
-Func GetBossFoe()
-	Local $bossFoes = GetFoesInRangeOfAgent(GetMyAgent(), $RANGE_COMPASS, GetIsBoss)
+Func GetBossFoe($range = $RANGE_COMPASS)
+	Local $bossFoes = GetFoesInRangeOfAgent(GetMyAgent(), $range, GetIsBoss)
 	Return IsArray($bossFoes) And UBound($bossFoes) > 0 ? $bossFoes[0] : Null
 EndFunc
 
@@ -290,8 +289,8 @@ Func IsBossAggroed()
 EndFunc
 
 
-;~ Defend skills to use when looting in case some mobs are still alive
-Func RaptorsDefend()
+;~ Survival skills to use when looting in case some mobs are still alive
+Func RaptorsSurvive()
 	Local $energy = GetEnergy()
 	Switch $raptors_player_profession
 		Case $ID_WARRIOR
@@ -355,10 +354,10 @@ Func KillRaptors()
 		$mopTarget = GetNearestEnemyToAgent($rekoffBoss)
 	EndIf
 
-	If GetHasHex($mopTarget) Then
+	While GetHasHex($mopTarget)
 		TargetNextEnemy()
 		$mopTarget = GetCurrentTarget()
-	EndIf
+	WEnd
 
 	If ($raptors_player_profession == $ID_DERVISH) Then
 		UseSkillEx($RAPTORS_DUST_CLOAK)

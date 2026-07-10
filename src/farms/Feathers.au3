@@ -16,15 +16,16 @@
 #CE ===========================================================================
 
 #include-once
-#RequireAdmin
-#NoTrayIcon
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Items.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
+#include '../../lib/GWA2_ID_Skills.au3'
 #include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 
-
-Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 Global Const $DA_FEATHERS_FARMER_SKILLBAR = 'OgCjkmrMbS3ljbHY7XmXsXfbNXA'
@@ -122,10 +123,10 @@ Func FeathersFarmLoop()
 	If GetMapID() <> $ID_JAYA_BLUFFS Then Return $FAIL
 
 	Info('Running to Sensali.')
-	MoveTo(9000, -12400, 0, 0, FeathersRun)
-	MoveTo(7950, -10800, 0, 0, FeathersRun)
-	MoveTo(3300, -8950, 0, 0, FeathersRun)
-	MoveTo(1550, -6650, 0, 0, FeathersRun)
+	MoveTo(9000, -12400, 0, FeathersRun)
+	MoveTo(7950, -10800, 0, FeathersRun)
+	MoveTo(3300, -8950, 0, FeathersRun)
+	MoveTo(1550, -6650, 0, FeathersRun)
 	;ToggleMapping(4)
 
 	; 15 groups to kill

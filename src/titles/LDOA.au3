@@ -16,15 +16,16 @@
 #CE ===========================================================================
 
 #include-once
-#RequireAdmin
-#NoTrayIcon
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Items.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
+#include '../../lib/GWA2_ID_Quests.au3'
 #include '../../lib/GWA2_ID.au3'
-#include '../../lib/Utils.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
 #include '../../lib/Utils-Storage.au3'
+#include '../../lib/Utils.au3'
 
-Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 Global Const $LDOA_INFORMATIONS = 'This bot:' & @CRLF _
@@ -53,9 +54,9 @@ Global Const $LOW_HEALTH_CHECK_INTERVAL = 100
 Global $ldoa_farm_setup = False
 
 Global $ldoa_fight_options = CloneMap($default_move_aggro_kill_options)
-$ldoa_fight_options['openChests']	= False
-$ldoa_fight_options['callTarget']	= False
-$ldoa_fight_options['priorityMobs']	= True
+$ldoa_fight_options['openChests']			= False
+$ldoa_fight_options['callTarget']			= False
+$ldoa_fight_options['priorityTargeting']	= True
 
 ;~ Main method to get LDOA title
 Func LDOATitleFarm()

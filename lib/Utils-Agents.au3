@@ -16,11 +16,11 @@
 #CE ===========================================================================
 
 #include-once
-
 #include 'GWA2.au3'
+#include 'GWA2_ID.au3'
+#include 'GWA2_ID_Skills.au3'
 #include 'Utils.au3'
-
-Opt('MustDeclareVars', True)
+#include 'Utils-Console.au3'
 
 
 #Region Agents distances
@@ -50,19 +50,13 @@ Global $party_is_alive = True
 ;~ Count number of alive heroes of the player's party
 Func CountAliveHeroes()
 	Local $aliveHeroes = 0
-	For $i = 1 to 7
+	For $i = 1 to GetHeroCount()
 		Local $heroID = GetHeroID($i)
-		If GetAgentExists($heroID) And Not GetIsDead(GetAgentByID($heroID)) Then $aliveHeroes += 1
+		If Not GetAgentExists($heroID) Then ContinueLoop
+		Local $hero = GetAgentByID($heroID)
+		If Not GetIsDead($hero) Then $aliveHeroes += 1
 	Next
 	Return $aliveHeroes
-EndFunc
-
-
-;~ Count number of alive members of the player's party including 7 heroes and player
-Func CountAlivePartyMembers()
-	Local $alivePartyMembers = CountAliveHeroes()
-	If Not IsPlayerDead Then $alivePartyMembers += 1
-	Return $alivePartyMembers
 EndFunc
 
 
@@ -150,8 +144,14 @@ Func FindHeroesWithRez()
 	Local $heroes[7]
 	Local $count = 0
 	For $heroNumber = 1 To GetHeroCount()
+		Local $agentID = GetHeroID($heroNumber)
+		If $agentID == 0 Then ContinueLoop
+		Local $agent = GetAgentByID($agentID)
+		If Not IsMine($agent) Then ContinueLoop
+	
+		Local $skillbar = GetSkillbar($heroNumber)
 		For $skillSlot = 1 To 8
-			Local $skill = GetSkillbarSkillID($skillSlot, $heroNumber)
+			Local $skill = DllStructGetData($skillbar, 'SkillID' & $skillSlot)
 			If IsRezSkill($skill) Then
 				$heroes[$count] = $heroNumber
 				$count += 1
@@ -228,6 +228,8 @@ EndFunc
 Func GetTeamMemberWithTooMuchMalus()
 	Local $party = GetParty()
 	For $i = UBound($party) - 1 To 0 Step -1
+		; Can't read malus on other players and their heroes
+		If Not IsMine($party[$i]) Then ContinueLoop
 		If GetMorale($i) < 0 Then Return $i
 	Next
 	Return -1
@@ -502,35 +504,6 @@ Func GetFurthestNPCInRangeOfCoords($npcAllegiance = Null, $coordX = Null, $coord
 EndFunc
 
 
-;~ TODO: check that this method is still better, I improved the original
-;~ Get NPC closest to the given coordinates and within specified range of the given coordinates. If range is Null then all found NPCs are checked, as with infinite range
-Func BetterGetNearestNPCToCoords($npcAllegiance = Null, $coordX = Null, $coordY = Null, $range = $RANGE_AREA, $condition = Null)
-	Local $me = GetMyAgent()
-	Local $agents = GetAgentArray($ID_AGENT_TYPE_NPC)
-	Local $smallestDistance = 99999
-	Local $nearestAgent = Null
-
-	If $coordX == Null Or $coordY == Null Then
-		$coordX = DllStructGetData($me, 'X')
-		$coordY = DllStructGetData($me, 'Y')
-	EndIf
-	For $agent In $agents
-		If $npcAllegiance <> Null And DllStructGetData($agent, 'Allegiance') <> $npcAllegiance Then ContinueLoop
-		If IsNearlyEqual(DllStructGetData($agent, 'HealthPercent'), 0) Then ContinueLoop
-		If GetIsDead($agent) Then ContinueLoop
-		If $MAP_SPIRIT_TYPES[DllStructGetData($agent, 'TypeMap')] <> Null Then ContinueLoop
-		If $condition <> Null And $condition($agent) == False Then ContinueLoop
-		Local $curDistance = GetDistanceToPoint($agent, $coordX, $coordY)
-		If $range < $curDistance Then ContinueLoop
-		If $curDistance < $smallestDistance Then
-			$nearestAgent = $agent
-			$smallestDistance = $curDistance
-		EndIf
-	Next
-	Return $nearestAgent
-EndFunc
-
-
 ;~ Returns the highest priority foe around a target agent
 Func GetHighestPriorityFoe($targetAgent, $range = $RANGE_SPELLCAST)
 	Local Static $mobsPriorityMap = CreateMobsPriorityMap()
@@ -616,7 +589,7 @@ Func GetNearestAgentToAgent($targetAgent, $agentType = $ID_AGENT_TYPE_NPC, $rang
 	Local $nearestAgent = Null, $distance = Null, $nearestDistance = 100000000
 	Local $agents = GetAgentArray($agentType)
 	Local $targetAgentID = DllStructGetData($targetAgent, 'ID')
-	Local $ownID = DllStructGetData(GetMyAgent(), 'ID')
+	Local $ownID = GetMyID()
 
 	For $agent In $agents
 		If DllStructGetData($agent, 'ID') == $targetAgentID Then ContinueLoop
@@ -640,7 +613,7 @@ Func GetFurthestAgentToAgent($targetAgent, $agentType = $ID_AGENT_TYPE_NPC, $ran
 	Local $furthestAgent = Null, $distance = Null, $furthestDistance = -1
 	Local $agents = GetAgentArray($agentType)
 	Local $targetAgentID = DllStructGetData($targetAgent, 'ID')
-	Local $ownID = DllStructGetData(GetMyAgent(), 'ID')
+	Local $ownID = GetMyID()
 
 	For $agent In $agents
 		If DllStructGetData($agent, 'ID') == $targetAgentID Then ContinueLoop
@@ -692,7 +665,7 @@ Func GetNearestAgentToCoords($X, $Y, $agentType = 0, $agentFilter = Null)
 	Local $nearestAgent, $nearestDistance = 100000000
 	Local $distance
 	Local $agents = GetAgentArray($agentType)
-	Local $ownID = DllStructGetData(GetMyAgent(), 'ID')
+	Local $ownID = GetMyID()
 
 	For $agent In $agents
 		If DllStructGetData($agent, 'ID') == $ownID Then ContinueLoop
@@ -737,6 +710,12 @@ EndFunc
 ;~ Tests if an agent is an item.
 Func IsItemAgentType($agent)
 	Return DllStructGetData($agent, 'Type') = $ID_AGENT_TYPE_ITEM
+EndFunc
+
+
+;~ Tests if an agent is mine (ie: either the character or one of his heroes)
+Func IsMine($agent)
+	Return DllStructGetData($agent, 'MaxEnergy') > 0
 EndFunc
 
 

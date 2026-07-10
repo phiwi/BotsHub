@@ -17,13 +17,16 @@ https://gwpvx.fandom.com/wiki/Build:E/Me_Obsidian_Flesh_Vaettir_Farmer
 #CE ===========================================================================
 
 #include-once
-#NoTrayIcon
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Items.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
+#include '../../lib/GWA2_ID_Skills.au3'
 #include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 
-Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 Global Const $AME_VAETTIRS_FARMER_SKILLBAR			= 'OwVU4lPL2hN8Id2BEBSANBLhbK'
@@ -76,14 +79,14 @@ Global Const $VAETTIR_ELEMENTALIST_ELEMENTAL_LORD		= 4
 Global Const $VAETTIR_ELEMENTALIST_MANTRA_OF_EARTH		= 5
 
 ; ==== Global variables ====
-Global $vaettirs_move_options						= CloneMap($default_move_defend_options)
-$vaettirs_move_options['defendFunction']			= VaettirsStayAlive
-$vaettirs_move_options['moveTimeOut']				= 100 * 1000
-$vaettirs_move_options['randomFactor']				= 50
-$vaettirs_move_options['hosSkillSlot']				= $VAETTIR_HEART_OF_SHADOW
+Global $vaettirs_move_options						= CloneMap($default_move_options)
+$vaettirs_move_options['movementRoutine']			= VaettirsStayAlive
+$vaettirs_move_options['moveTimeout']				= 100 * 1000
+$vaettirs_move_options['moveVariance']				= 50
+$vaettirs_move_options['skillSlotHoS']				= $VAETTIR_HEART_OF_SHADOW
 
 Global $vaettirs_move_options_elementalist			= CloneMap($vaettirs_move_options)
-$vaettirs_move_options_elementalist['hosSkillSlot']	= 0
+$vaettirs_move_options_elementalist['skillSlotHoS']	= 0
 
 Global $vaettirs_farm_setup = False
 Global $vaettirs_player_profession = $ID_ASSASSIN
@@ -343,7 +346,7 @@ Func AggroAllMobs()
 	Info('Aggroing left')
 	MoveTo(13172, -22137)
 	For $i = 0 To 13
-		If VaettirsMoveDefending($vaettirs[$i][0], $vaettirs[$i][1]) == $FAIL Then Return $FAIL
+		If VaettirsMoveAndSurvive($vaettirs[$i][0], $vaettirs[$i][1]) == $FAIL Then Return $FAIL
 	Next
 
 	Info('Waiting for left ball')
@@ -360,7 +363,7 @@ Func AggroAllMobs()
 
 	Info('Aggroing right')
 	For $i = 14 To 24
-		If VaettirsMoveDefending($vaettirs[$i][0], $vaettirs[$i][1]) == $FAIL Then Return $FAIL
+		If VaettirsMoveAndSurvive($vaettirs[$i][0], $vaettirs[$i][1]) == $FAIL Then Return $FAIL
 	Next
 
 	Info('Waiting for right ball')
@@ -375,18 +378,18 @@ Func AggroAllMobs()
 	EndIf
 	VaettirsSleepAndStayAlive(5000)
 	For $i = 25 To 29
-		If VaettirsMoveDefending($vaettirs[$i][0], $vaettirs[$i][1]) == $FAIL Then Return $FAIL
+		If VaettirsMoveAndSurvive($vaettirs[$i][0], $vaettirs[$i][1]) == $FAIL Then Return $FAIL
 	Next
 
 	; [12445,	-17327]
 	; Final spot needs to be precise to avoid losing aggro (we need a right wall block)
-	MoveTo(12480, -17336, 0, 0)
+	MoveTo(12480, -17336, 0)
 
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
 
 
-Func VaettirsMoveDefending($destinationX, $destinationY)
+Func VaettirsMoveAndSurvive($destinationX, $destinationY)
 	Local $result = Null
 	Switch $vaettirs_player_profession
 		Case $ID_ASSASSIN, $ID_MESMER, $ID_MONK
@@ -635,8 +638,8 @@ Func RezoneToJagaMoraine()
 	Local $result = $SUCCESS
 
 	Info('Zoning out and back in')
-	VaettirsMoveDefending(12289, -17700)
-	VaettirsMoveDefending(15318, -20351)
+	VaettirsMoveAndSurvive(12289, -17700)
+	VaettirsMoveAndSurvive(15318, -20351)
 
 	Local $deadlockTimer = TimerInit()
 	While IsPlayerDead()

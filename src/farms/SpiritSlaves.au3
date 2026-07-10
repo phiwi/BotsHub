@@ -16,12 +16,16 @@
 #CE ===========================================================================
 
 #include-once
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Items.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
+#include '../../lib/GWA2_ID_Skills.au3'
 #include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 
-Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 Global Const $SPIRIT_SLAVES_RITUALIST_SKILLBAR = 'OAWjMwhM5QRAmAsiLBWMEP0krlA'
@@ -149,7 +153,7 @@ Func SpiritSlavesFarmLoop()
 	Local $topPosition = [-8900, -4600]
 	; 5 Groups to kill
 	For $group = 1 To 5
-		MoveTo(-7465, -7900, 0, 0)
+		If $group <> 4 Then MoveTo(-7465, -7900, 0)
 		; For the first group, we need the allies to die first	-	First wave
 		If $group == 1 Then WaitForAlliesDead()
 		Local $balled = True
@@ -157,8 +161,6 @@ Func SpiritSlavesFarmLoop()
 		If $group >= 1 And $group <= 3 Then $balled = WaitForFoesBall($bottomPosition)
 		; The top group comes twice - 							-	Second and Fourth waves
 		If $group == 2 Or $group == 5 Then $balled = WaitForFoesBall($topPosition)
-		; FIXME: Sometimes groups get in range of player - we could fix with starting the fight
-		; for now we just die and restart the zone
 		If IsPlayerDead() Then Return RestartAfterDeath()
 		Info('Killing group ' & $group)
 		If ($balled ? FarmGroup() : QuickFarmGroup()) == $FAIL Then Return RestartAfterDeath()
@@ -173,9 +175,8 @@ EndFunc
 ;~ Wait for all ennemies to be balled
 Func WaitForFoesBall($position)
 	Local $deadlock = TimerInit()
-	Local $target = GetNearestNPCInRangeOfCoords($position[0], $position[1], $ID_ALLEGIANCE_FOE, $RANGE_EARSHOT)
-
-	Local $foesCount = CountFoesInRangeOfAgent($target, $RANGE_AREA)
+	Local $target = Null
+	Local $foesCount = 0
 	Local $validation = 0
 	Local $me = GetMyAgent()
 	Local $nearestFoe = GetNearestEnemyToAgent($me)
@@ -184,7 +185,7 @@ Func WaitForFoesBall($position)
 		If $foesCount == 8 Then $validation += 1
 		RandomSleep(1000)
 		$target = GetNearestNPCInRangeOfCoords($position[0], $position[1], $ID_ALLEGIANCE_FOE, $RANGE_EARSHOT)
-		$foesCount = CountFoesInRangeOfAgent($target, $RANGE_AREA)
+		If $target <> Null Then $foesCount = CountFoesInRangeOfAgent($target, $RANGE_AREA)
 		$me = GetMyAgent()
 		$nearestFoe = GetNearestEnemyToAgent($me)
 		Debug('foes: ' & $foesCount & '/8')
@@ -237,7 +238,7 @@ Func FarmGroup()
 				$vengeful_was_khanhei_timer = TimerInit()
 			EndIf
 		EndIf
-		If $foesCount < 5 And GetEnergy() >= 15 And IsRecharged($SS_VENGEFUL_WEAPON) Then UseSkillEx($SS_VENGEFUL_WEAPON)
+		If GetEnergy() >= 15 And IsRecharged($SS_VENGEFUL_WEAPON) Then UseSkillEx($SS_VENGEFUL_WEAPON)
 		; No point getting ~2-3 energy
 		If $foesCount > 3 And TimerDiff($channeling_timer) > 44000 Then
 			UseSkillEx($SS_CHANNELING)
@@ -351,17 +352,17 @@ EndFunc
 
 ;~ Sped up version in case we are caught off guard
 Func QuickFarmGroup()
-	MoveTo(-7570,-8320)
+	MoveTo(-7475, -8040)
 
 	UseSkillEx($SS_MANTRA_OF_RESOLVE)
-	RandomSleep(200)
+	PingSleep(50)
 	UseSkillEx($SS_CHANNELING)
 	Local $channeling_timer = TimerInit()
-	RandomSleep(200)
+	PingSleep(50)
 	UseSkillEx($SS_GREAT_DWARF_ARMOR)
 	Local $great_dwarf_armor_timer = TimerInit()
 	UseSkillEx($SS_ARCANE_ECHO)
-	RandomSleep(200)
+	PingSleep(50)
 	UseSkillEx($SS_VENGEFUL_WAS_KHANHEI)
 	Local $vengeful_was_khanhei_timer = TimerInit()
 

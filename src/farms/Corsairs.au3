@@ -16,18 +16,19 @@
 #CE ===========================================================================
 
 #include-once
-#RequireAdmin
-#NoTrayIcon
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
+#include '../../lib/GWA2_ID_Skills.au3'
 #include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 
 ; Performance as of 26.03.02: 100 runs, 98% success, 3h40m
 
 ; Using third hero for more speed is a bad idea - you'd lose aggro
 
-Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 Global Const $RA_CORSAIRS_FARMER_SKILLBAR = 'OgcSc5PT3lCHIQHQj1xlpZ4O'
@@ -46,7 +47,7 @@ Global Const $CORSAIRS_FARM_INFORMATIONS = 'For best results, have :' & @CRLF _
 	& 'https://gwpvx.fandom.com/wiki/Build:R/A_Moddok_Crevice_Corsair_Farmer'
 Global Const $CORSAIRS_FARM_DURATION = (2 * 60 + 15) * 1000
 
-; Skill numbers declared to make the code WAY more readable (UseSkillEx($RAPTORS_MARK_OF_PAIN) is better than UseSkillEx(1))
+; Skill numbers declared to make the code WAY more readable (UseSkillEx($CORSAIRS_DWARVEN_STABILITY) is better than UseSkillEx(1))
 Global Const $CORSAIRS_DWARVEN_STABILITY	= 1
 Global Const $CORSAIRS_WHIRLING_DEFENSE		= 2
 Global Const $CORSAIRS_HEART_OF_SHADOW		= 3
@@ -176,7 +177,7 @@ Func CorsairsFarmLoop()
 	DefendAgainstCorsairs()
 
 	UseHeroSkill(2, $CORSAIRS_WINNOWING)
-	MoveTo(-9783,-7073, 0, 0)
+	MoveTo(-9783,-7073, 0)
 	WaitForBohseda()
 	CommandHero(2, -13778, -10156)
 	UseSkillEx($CORSAIRS_DWARVEN_STABILITY)
@@ -184,7 +185,7 @@ Func CorsairsFarmLoop()
 	CastAllDefensiveSkills()
 	If IsPlayerDead() Then Return $FAIL
 
-	MoveTo(-9730,-7350, 0, 0)
+	MoveTo(-9730,-7350, 0)
 	GoNPC($captainBohseda)
 	RandomSleep(1000)
 	Dialog(0x85)

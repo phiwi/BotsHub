@@ -16,15 +16,16 @@
 #CE ===========================================================================
 
 #include-once
-#RequireAdmin
-#NoTrayIcon
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Items.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
+#include '../../lib/GWA2_ID_Skills.au3'
 #include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 #include '../utilities/SupportTeam.au3'
-
-Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 ; Universal run build for every profession
@@ -121,7 +122,7 @@ Func SetupBorealFarm()
 	SetDisplayedTitle($ID_NORN_TITLE)
 
 	MoveTo(5600, -27900)
-	MoveTo(5200, -27900, $RANGE_ADJACENT, 0)
+	MoveTo(5200, -27900, $RANGE_ADJACENT)
 	If GetDistanceToPoint(GetMyAgent(), 5200, -27900) > $RANGE_ADJACENT Then
 		MoveTo(5350, -27500)
 		MoveTo(5500, -27750)
@@ -411,7 +412,7 @@ Func BorealChestFarmLoop()
 
 	Info('Starting chest farm run')
 
-	MoveTo(5200, -27900, $RANGE_ADJACENT, 0)
+	MoveTo(5200, -27900, $RANGE_ADJACENT)
 	If GetDistanceToPoint(GetMyAgent(), 5200, -27900) > $RANGE_ADJACENT Then
 		MoveTo(5350, -27500)
 		MoveTo(5500, -27750)

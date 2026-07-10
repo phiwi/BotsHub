@@ -55,7 +55,6 @@ Func SetupTunnelsOfTheForsakenFarm()
 	Info('Setting up farm')
 	TravelToOutpost($ID_PIKEN_SQUARE, $district_name)
 	SwitchToHardModeIfEnabled()
-	AbandonQuest($ID_QUEST_THE_DREAMER_AND_THE_ZEALOT)
 	Info('Preparations complete')
 	$tunnels_of_the_forsaken_farm_setup = True
 	Return $SUCCESS
@@ -64,6 +63,7 @@ EndFunc
 
 Func RunToTunnels()
 	TravelToOutpost($ID_PIKEN_SQUARE, $district_name)
+	AbandonQuest($ID_QUEST_THE_DREAMER_AND_THE_ZEALOT)
 	ResetFailuresCounter()
 	Info('Making way to portal')
 	MoveTo(21030, 9015)
@@ -77,20 +77,22 @@ Func RunToTunnels()
 	WEnd
 	Info('Making way to entrance')
 	AdlibRegister('TrackPartyStatus', 10000)
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 17982, 641, $RANGE_LONGBOW)
+	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 18000, -1700, $RANGE_AREA)
 		WaitUntilPartyAlive()
 		UseSummoningStone()
-		MoveAggroAndKillInRange(21264, 3562, '1', $PLAYER_AGGRO_RANGE)
-		MoveAggroAndKillInRange(17982, 641, '2', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(21250, 3550, '1', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(18850, -900, '2', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(19200, -4200, '3', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(18000, -1700, '4', $PLAYER_AGGRO_RANGE)
 	WEnd
 	AdlibUnRegister('TrackPartyStatus')
 
 	$mapLoaded = False
 	Info('Going through door')
 	While Not $mapLoaded
-		MoveTo(17300, -400)
-		Move(17400, -800)
-		RandomSleep(2000)
+		MoveTo(17900, -1600)
+		Move(17600, -1300)
+		Sleep(3000)
 		$mapLoaded = WaitMapLoading($ID_TUNNELS_OF_THE_FORSAKEN_LVL_1)
 	WEnd
 	Return IsRunFailed() ? $FAIL : $SUCCESS
@@ -124,22 +126,23 @@ Func ClearTunnelsOfTheForsakenFloor1()
 		UseSummoningStone()
 		;~ Move next line to avoid aggro of the Storm Riders
 		MoveTo(-15247, -5785)
-		MoveAggroAndKillInRange(-13102, -6841, '2', $PLAYER_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-11660, -7585, '3', $PLAYER_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-7836, -9115, '4', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-13102, -6841, '1', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-11660, -7585, '2', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-7836, -9115, '3', $PLAYER_AGGRO_RANGE)
 
 		Local $questNPC = GetNearestNPCToCoords(-7400, -9462)
 		TakeQuest($questNPC, $ID_QUEST_THE_DREAMER_AND_THE_ZEALOT, 0x85B501)
 
-		MoveAggroAndKillInRange(-9672, -3286, '5', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-9672, -3286, '4', $PLAYER_AGGRO_RANGE)
 		PickUpElementalKeystone()
-		MoveAggroAndKillInRange(-11186, -1788, '6', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-11186, -1788, '5', $PLAYER_AGGRO_RANGE)
 		PickUpElementalKeystone()
-		MoveAggroAndKillInRange(-10727, -304, '7', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-10727, -304, '6', $PLAYER_AGGRO_RANGE)
 		PickUpElementalKeystone()
-		MoveAggroAndKillInRange(-8618, 3132, '8', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-8618, 3132, '7', $PLAYER_AGGRO_RANGE)
 		PickUpElementalKeystone()
 		MoveAggroAndKillInRange(-8684, 4580, '8', $PLAYER_AGGRO_RANGE)
+		PickUpElementalKeystone()
 	WEnd
 	If IsRunFailed() Then Return $FAIL
 
@@ -184,7 +187,10 @@ Func ClearTunnelsOfTheForsakenFloor2()
 		MoveAggroAndKillInRange(-13865, 17135, '15', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-12848, 18506, '16', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-10956, 19044, '17', $PLAYER_AGGRO_RANGE)
-		MoveAggroAndKillInRange(-7875, 18959, '18', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-9889, 18907, '18', $RANGE_NEARBY)
+        MoveAggroAndKillInRange(-8953, 18720, '18', $RANGE_NEARBY)
+        MoveAggroAndKillInRange(-7921, 18913, '18', $RANGE_NEARBY)
+        MoveAggroAndKillInRange(-7456, 18718, '18', $RANGE_NEARBY)
 		MoveAggroAndKillInRange(-6272, 17188, '19', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-5910, 14892, '20', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-7177, 13320, '21', $PLAYER_AGGRO_RANGE)
@@ -263,8 +269,10 @@ Func ClearTunnelsOfTheForsakenFloor3()
 		MoveAggroAndKillInRange(-7771, -6279, '15', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-11025, -7480, '16', $PLAYER_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-12939, -8238, '17', $PLAYER_AGGRO_RANGE)
+		; TODO: replace those sleep with chest detection and a loop
 		RandomSleep(2000)
 		MoveAggroAndKillInRange(-13836, -8918, '18', $PLAYER_AGGRO_RANGE)
+		RandomSleep(2000)
 		MoveAggroAndKillInRange(-16021, -8601, '19', $PLAYER_AGGRO_RANGE)
 		RandomSleep(2000)
 	WEnd

@@ -14,14 +14,16 @@ https://gwpvx.fandom.com/wiki/Build:Team_-_1_Hero_Whirling_Defense_City_Farmer
 #CE ===========================================================================
 
 #include-once
-#RequireAdmin
-#NoTrayIcon
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
+#include '../../lib/GWA2_ID_Quests.au3'
+#include '../../lib/GWA2_ID_Skills.au3'
 #include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 
-Opt('MustDeclareVars', True)
 
 #Region Configuration
 ; === Build ===
@@ -87,9 +89,9 @@ Global Const $GEMSTONE_MARGONITE_FARM_INFORMATIONS = 'For best results, have :' 
 	& '- Monk hero armor and weapons with bonus to energy and HP' & @CRLF _
 	& ' ' & @CRLF _
 	& 'You can run this farm as Assassin or Mesmer or Ranger or Elementalist. Bot will set up build automatically for these professions' & @CRLF _
-	& 'This bot farms margonite gemstones (1 of 4 types) in City of Torc''qua location' & @CRLF _
-	& 'Player needs to have access to Gate of Anguish outpost which has exit to City of Torc''qua location' & @CRLF _
-	& 'This farm reduces energy of margonites to 0 with ancestor''s visage skill which deals damage to margonites because margonites create Famine spirit' & @CRLF _
+	& 'This bot farms margonite gemstones (1 of 4 types) in City of Torcqua location' & @CRLF _
+	& 'Player needs to have access to Gate of Anguish outpost which has exit to City of Torcqua location' & @CRLF _
+	& 'This farm reduces energy of margonites to 0 with ancestors visage skill which deals damage to margonites because margonites create Famine spirit' & @CRLF _
 	& 'Recommended to have maxed out Lightbringer title. If not maxed out then this farm is good for raising lightbringer rank' & @CRLF _
 	& 'Can switch to normal mode in case of low success rate but hard mode has better loots' & @CRLF _
 	& 'Gemstones can be exchanged into armbrace of truth (15 of each type) or coffer of whisper (1 of each type)' & @CRLF _
@@ -102,14 +104,14 @@ Global Const $GEMSTONE_MARGONITE_FARM_DURATION = 5 * 60 * 1000
 Global Const $MAX_GEMSTONE_MARGONITE_FARM_DURATION = 10 * 60 * 1000
 Global Const $MARGONITES_RANGE = 800
 
-Global $margonite_move_options									= CloneMap($default_move_defend_options)
-$margonite_move_options['defendFunction']						= MargoniteDefend
-$margonite_move_options['moveTimeOut']							= 100 * 1000
-$margonite_move_options['randomFactor']							= 25
-$margonite_move_options['deathChargeSkillSlot']					= $MARGONITE_DEATHS_CHARGE
+Global $margonite_move_options									= CloneMap($default_move_options)
+$margonite_move_options['movementRoutine']						= MargoniteSurvive
+$margonite_move_options['moveTimeout']							= 100 * 1000
+$margonite_move_options['moveVariance']							= 25
+$margonite_move_options['skillSlotDeathsCharge']					= $MARGONITE_DEATHS_CHARGE
 
 Global $margonite_move_options_elementalist						= CloneMap($margonite_move_options)
-$margonite_move_options_elementalist['deathChargeSkillSlot']	= 0
+$margonite_move_options_elementalist['skillSlotDeathsCharge']	= 0
 
 Global $margonite_obsidian_flesh_timer		= TimerInit()
 Global $margonite_stoneflesh_aura_timer		= TimerInit()
@@ -217,7 +219,7 @@ EndFunc
 ;~ Exit gate of Anguish outpost by moving into portal that leads into farming location - City of Torc'qua
 Func GoToCityOfTorcqua()
 	TravelToOutpost($ID_GATE_OF_ANGUISH, $district_name)
-	Info('Moving to City of Torc''qua')
+	Info('Moving to City of Torcqua')
 	; Unfortunately all 4 gemstone farm explorable locations have the same map ID as Gate of Anguish outpost, so it is harder to tell if player left the outpost
 	; Therefore below loop checks if player is in close range of coordinates of that start zone where player initially spawns in City of Torc'qua
 	Local Static $startX = -18575
@@ -225,7 +227,7 @@ Func GoToCityOfTorcqua()
 	Local $timerZoning = TimerInit()
 	While Not IsAgentInRange(GetMyAgent(), $startX, $startY, $RANGE_EARSHOT)
 		If TimerDiff($timerZoning) > 120000 Then
-			Info('Could not zone to City of Torc''qua')
+			Info('Could not zone to City of Torcqua')
 			Return $FAIL
 		EndIf
 		MoveTo(6816, -13634)
@@ -291,25 +293,25 @@ Func GemstoneMargoniteFarmLoop()
 
 	Info('Moving to spot and aggroing margonites')
 	MoveTo(-17541, -9431)
-	If MargoniteMoveDefending(-13935, -9850) == $FAIL Then Return $FAIL
+	If MargoniteMoveAndSurvive(-13935, -9850) == $FAIL Then Return $FAIL
 	CommandAll(-16878, -9571)
-	If MargoniteMoveDefending(-14321, -11803) == $FAIL Then Return $FAIL
-	If MargoniteMoveDefending(-12115, -11057) == $FAIL Then Return $FAIL
+	If MargoniteMoveAndSurvive(-14321, -11803) == $FAIL Then Return $FAIL
+	If MargoniteMoveAndSurvive(-12115, -11057) == $FAIL Then Return $FAIL
 	CommandAll(-14879, -11729)
 	WaitAggroMargonites(7000)
 	; below is the furthest location player goes to pull front Margonite mobs but also not let rear margonite mobs leave player and kill monk hero
-	If MargoniteMoveDefending(-10277, -10778) == $FAIL Then Return $FAIL
+	If MargoniteMoveAndSurvive(-10277, -10778) == $FAIL Then Return $FAIL
 	CommandAll(-12861, -12620)
 	; waiting for far margonite group to come into player's range
 	WaitAggroMargonites(50000)
-	If MargoniteMoveDefending(-12065, -10905) == $FAIL Then Return $FAIL
+	If MargoniteMoveAndSurvive(-12065, -10905) == $FAIL Then Return $FAIL
 	WaitAggroMargonites(5000)
-	If MargoniteMoveDefending(-12246, -10149) == $FAIL Then Return $FAIL
+	If MargoniteMoveAndSurvive(-12246, -10149) == $FAIL Then Return $FAIL
 	WaitAggroMargonites(7000)
-	If MargoniteMoveDefending(-12303, -10349) == $FAIL Then Return $FAIL
-	If MargoniteMoveDefending(-11410, -11359) == $FAIL Then Return $FAIL
+	If MargoniteMoveAndSurvive(-12303, -10349) == $FAIL Then Return $FAIL
+	If MargoniteMoveAndSurvive(-11410, -11359) == $FAIL Then Return $FAIL
 	WaitAggroMargonites(3000)
-	If MargoniteMoveDefending(-11484, -11034) == $FAIL Then Return $FAIL
+	If MargoniteMoveAndSurvive(-11484, -11034) == $FAIL Then Return $FAIL
 	If IsPlayerDead() Or IsHeroDead(1) Then Return $FAIL
 
 	; if margonites group is somehow not in the spot then try to get closer to them
@@ -350,14 +352,14 @@ Func WaitAggroMargonites($timeToWait)
 	Local $timerAggro = TimerInit()
 	While TimerDiff($timerAggro) < $timeToWait
 		If IsPlayerDead() Or CheckStuck('Waiting for margonites aggro', $MAX_GEMSTONE_MARGONITE_FARM_DURATION) == $FAIL Then Return $FAIL
-		MargoniteDefend()
+		MargoniteSurvive()
 		RandomSleep(50)
 	WEnd
 	Return $SUCCESS
 EndFunc
 
 
-Func MargoniteMoveDefending($destinationX, $destinationY)
+Func MargoniteMoveAndSurvive($destinationX, $destinationY)
 	Local $result = Null
 	Switch $margonite_player_profession
 		Case $ID_ASSASSIN, $ID_MESMER, $ID_RANGER
@@ -378,7 +380,7 @@ Func MargoniteMoveDefending($destinationX, $destinationY)
 EndFunc
 
 
-Func MargoniteDefend()
+Func MargoniteSurvive()
 	MargoniteCheckBuffs()
 	MargoniteMonkHeroHeal()
 EndFunc
@@ -386,9 +388,8 @@ EndFunc
 
 Func MargoniteMonkHeroHeal()
 	Local $monkHero = GetAgentByID(GetHeroID(1))
-	If IsRecharged($MARGONITE_HERO_TROLL_UNGUENT, 1) And _
-			GetEnergy($monkHero) > 10 And Not IsNearlyEqual(DllStructGetData($monkHero, 'HealthPercent'), 1) And _
-			GetEffect($ID_TROLL_UNGUENT, 1) == Null Then
+	If IsRecharged($MARGONITE_HERO_TROLL_UNGUENT, 1) And GetEnergy($monkHero) > 10 And _
+		Not IsNearlyEqual(DllStructGetData($monkHero, 'HealthPercent'), 1) And GetEffect($ID_TROLL_UNGUENT, 1) == Null Then
 		UseHeroSkill(1, $MARGONITE_HERO_TROLL_UNGUENT)
 	EndIf
 EndFunc
@@ -483,7 +484,7 @@ Func KillMargonitesUsingVisageSkills()
 
 	While CountFoesInRangeOfAgent(GetMyAgent(), $MARGONITES_RANGE) > 0 And TimerDiff($timerKill) < $maxFightTime And Not IsHeroDead(1)
 		RandomSleep(100)
-		MargoniteDefend()
+		MargoniteSurvive()
 
 		If IsRecharged($MARGONITE_ANCESTORS_VISAGE) And GetEffect($ID_ANCESTORS_VISAGE) == Null And GetEffect($ID_SYMPATHETIC_VISAGE) == Null And GetEnergy() > 14 And _
 				(($margonite_player_profession <> $ID_ELEMENTALIST And Not IsRecharged($MARGONITE_SHADOWFORM)) Or ($margonite_player_profession == $ID_ELEMENTALIST And Not IsRecharged($MARGONITE_ELEMENTALIST_OBSIDIAN_FLESH))) Then
@@ -520,7 +521,7 @@ Func KillMargonitesUsingWhirlingDefense()
 
 	While CountFoesInRangeOfAgent(GetMyAgent(), $MARGONITES_RANGE) > 0 And TimerDiff($timerKill) < $maxFightTime And Not IsHeroDead(1)
 		RandomSleep(100)
-		MargoniteDefend()
+		MargoniteSurvive()
 
 		If IsRecharged($MARGONITE_RANGER_DWARVEN_STABILITY) And Not IsRecharged($MARGONITE_SHADOWFORM) And GetEnergy() > 8 Then
 			UseSkillEx($MARGONITE_RANGER_DWARVEN_STABILITY)

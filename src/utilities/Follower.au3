@@ -16,20 +16,20 @@
 #CE ===========================================================================
 
 #include-once
-#RequireAdmin
-#NoTrayIcon
-
-#include '../../lib/GWA2.au3'
+#include '../../lib/GWA2_ID_Maps.au3'
+#include '../../lib/GWA2_ID_Skills.au3'
 #include '../../lib/GWA2_ID.au3'
+#include '../../lib/GWA2.au3'
+#include '../../lib/Utils-Agents.au3'
+#include '../../lib/Utils-Console.au3'
+#include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 
 ; Possible improvements :
 ; - Correct a crash happening when someone picks up items the bot wanted to pick up
-; - Correct a bug that makes the bot want to repeatedly open chests
 ; - speed up the bot by all ways possible (since it casts shouts it is always lagging behind)
 ;		- using a cupcake and a pumpkin pie might be a good idea
 
-Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 Global Const $FOLLOWER_INFORMATIONS = 'This bot makes your character follow the first other player in party.' & @CRLF _
@@ -39,103 +39,34 @@ Global Const $FOLLOWER_INFORMATIONS = 'This bot makes your character follow the 
 
 Global Const $FOLLOWER_LEASH_RANGE = $RANGE_SPELLCAST - 200
 
-; Skill numbers declared to make the code WAY more readable (UseSkillEx($RAPTORS_MARK_OF_PAIN) is better than UseSkillEx(1))
-Global $player_profession_ID
-Global $follower_attack_skill_1 = Null
-Global $follower_attack_skill_2 = Null
-Global $follower_attack_skill_3 = Null
-Global $follower_attack_skill_4 = Null
-Global $follower_attack_skill_5 = Null
-Global $follower_attack_skill_6 = Null
-Global $follower_attack_skill_7 = Null
-Global $follower_attack_skill_8 = Null
-Global $follower_maintain_skill_1 = Null
-Global $follower_maintain_skill_2 = Null
-Global $follower_maintain_skill_3 = Null
-Global $follower_maintain_skill_4 = Null
-Global $follower_maintain_skill_5 = Null
-Global $follower_maintain_skill_6 = Null
-Global $follower_maintain_skill_7 = Null
-Global $follower_maintain_skill_8 = Null
-Global $follower_running_skill = Null
+Global $optionsFollower					= CloneMap($default_move_aggro_kill_options)
+$optionsFollower['fightRange']			= $MOB_AGGRO_RANGE
+$optionsFollower['callTarget']			= False
+$optionsFollower['priorityTargeting']	= False
+$optionsFollower['skillsCostMap']		= Null
+;$optionsFollower['skillsCastTimeMap']	= Null
+$optionsFollower['lootInCombat']		= False
+$optionsFollower['openChests']			= True
+$optionsFollower['chestOpenRange']		= $MOB_AGGRO_RANGE
+$optionsFollower['killMethod']			= UseSkillSequentially
+$optionsFollower['abortCondition']		= FollowerNotInRangeOfLeader
 
-Global $follower_setup = False
+Global $leaderID = Null
 
 ;~ Main loop
 Func FollowerFarm()
-	If Not $follower_setup Then FollowerSetup()
-
 	While $runtime_status == 'RUNNING'
-		Switch $player_profession_ID
-			Case $ID_WARRIOR
-				FollowerLoop()
-			Case $ID_RANGER
-				FollowerLoop()
-			Case $ID_MONK
-				FollowerLoop()
-			Case $ID_MESMER
-				FollowerLoop()
-			Case $ID_NECROMANCER
-				FollowerLoop()
-			Case $ID_ELEMENTALIST
-				FollowerLoop()
-			Case $ID_RITUALIST
-				FollowerLoop()
-			Case $ID_ASSASSIN
-				FollowerLoop()
-			Case $ID_PARAGON
-				FollowerLoop()
-				;FollowerLoop(DefaultRun, ParagonFight)
-			Case $ID_DERVISH
-				FollowerLoop()
-			Case Else
-				FollowerLoop()
-		EndSwitch
+		FollowerLoop()
 	WEnd
-
-	$follower_setup = False
-	AdlibUnRegister()
 	Return $runtime_status <> 'RUNNING' ? $PAUSE : $SUCCESS
 EndFunc
 
 
-;~ Follower setup
-Func FollowerSetup()
-	$player_profession_ID = GetHeroProfession(0, False)
-	Info('Setting up follower bot')
-	Switch $player_profession_ID
-		Case $ID_WARRIOR
-			DefaultSetup()
-		Case $ID_RANGER
-			RangerSetup()
-		Case $ID_MONK
-			DefaultSetup()
-		Case $ID_MESMER
-			DefaultSetup()
-		Case $ID_NECROMANCER
-			DefaultSetup()
-		Case $ID_ELEMENTALIST
-			DefaultSetup()
-		Case $ID_RITUALIST
-			DefaultSetup()
-		Case $ID_ASSASSIN
-			DefaultSetup()
-		Case $ID_PARAGON
-			DefaultSetup()
-			;ParagonSetup()
-		Case $ID_DERVISH
-			DefaultSetup()
-		Case Else
-			DefaultSetup()
-	EndSwitch
-	$follower_setup = True
-EndFunc
-
-
 ;~ Follower loop
-Func FollowerLoop($runFunction = DefaultRun, $fightFunction = DefaultFight)
-	Local Static $leaderID = Null, $currentMap = Null, $resigned = False
+Func FollowerLoop($options = $optionsFollower)
+	Local Static $currentMap = Null, $resigned = False
 
+	; Map change detection (even in outposts !)
 	Local $mapID = GetMapID()
 	If $mapID <> $currentMap Then
 		$currentMap = $mapID
@@ -145,198 +76,81 @@ Func FollowerLoop($runFunction = DefaultRun, $fightFunction = DefaultFight)
 		WaitMapLoading($mapID)
 	EndIf
 
+	; If map is not explorable, no following happening
+	If GetMapType() <> $ID_EXPLORABLE Then
+		Sleep(1000)
+		Return
+	EndIf
+
+	; Resolving leaderID if needed
+	If $leaderID == Null Then $leaderID = FollowerResolveLeaderID()
+	; If no leader found, wait, try next time
 	If $leaderID == Null Then
-		$leaderID = FollowerResolveLeaderID()
-		If $leaderID == Null Then
-			RandomSleep(500)
-			Return
-		EndIf
+		Sleep(1000)
+		Return
 	EndIf
 
-	$runFunction()
+	; Auto resigning
+	If Not $resigned Then
+		Info('Auto-resigning on explorable entry')
+		Resign()
+		$resigned = True
+		RandomSleep(500)
+	EndIf
+
+	; Could set a run function to speed up team/follower
+	If $options['runFunction'] <> Null Then $options['runFunction']()
+
+	; Getting leader and moving to him
 	Local $leader = GetAgentByID($leaderID)
-	GoPlayer($leader)
+	Local $me = GetMyAgent()
 
-	If GetMapType() == $ID_EXPLORABLE Then
-		If Not $resigned Then
-			Info('Auto-resigning on explorable entry')
-			Resign()
-			$resigned = True
-			RandomSleep(500)
+	; Trigger fight only if extremely close to leader - but leave fight if leader is far away
+	If FollowerInRangeOfLeader($leader, $me, $RANGE_NEARBY) Then
+		Local $fightRange			= $options['fightRange'] <> Null ?			$options['fightRange'] : $WIDE_PLAYER_AGGRO_RANGE
+		Local $fightHandler			= $options['fightHandler'] <> Null ?		$options['fightHandler'] : KillFoesInArea
+		Local $unstuckHandler		= $options['unstuckHandler'] <> Null ?		$options['unstuckHandler'] : TryToGetUnstuck
+		Local $openChests			= $options['openChests'] <> Null ?			$options['openChests'] : True
+		Local $chestOpenRange		= $options['chestOpenRange'] <> Null ?		$options['chestOpenRange'] : $RANGE_SPIRIT
+
+		Local $target = GetNearestEnemyToAgent($me)
+		If DllStructGetData($target, 'ID') <> 0 And GetDistance($me, $target) < $fightRange Then
+			; No checks required on failure - follower just follows
+			$fightHandler($options)
+			; FIXME: add rezzing dead party members here
+
+			; Refresh leader if fight happened
+			$leader = GetAgentByID($leaderID)
 		EndIf
 
-		Local $me = GetMyAgent()
-		$leader = GetAgentByID($leaderID)
-		If $leader <> Null And GetDistance($me, $leader) <= $FOLLOWER_LEASH_RANGE Then
-			Local $foesCount = CountFoesInRangeOfAgent($me, $RANGE_EARSHOT)
-			While IsPlayerAlive() And $foesCount > 0
-				$fightFunction()
-				$me = GetMyAgent()
+		; Chest part
+		If $openChests Then
+			Local $chest = FindChest($chestOpenRange)
+			If $chest <> Null Then
+				FindAndOpenChests($chestOpenRange)
+
+				; Refresh leader if chest opening happened
 				$leader = GetAgentByID($leaderID)
-				If $leader <> Null And GetDistance($me, $leader) > $FOLLOWER_LEASH_RANGE Then ExitLoop
-				$foesCount = CountFoesInRangeOfAgent($me, $RANGE_EARSHOT)
-			WEnd
-			FindAndOpenChests()
-
-			If CountSlots(1, $bags_count) > 0 Then PickUpItems(Null, DefaultShouldPickItem, 1500)
+			EndIf
 		EndIf
+
+		; Loot part
+		PickUpItems(Null, DefaultShouldPickItem, $MOB_AGGRO_RANGE)
 	EndIf
 
-	RandomSleep(1000)
-EndFunc
-
-
-;~ Default class setup
-Func DefaultSetup()
-	$follower_attack_skill_1 = 1
-	$follower_attack_skill_2 = 2
-	$follower_attack_skill_3 = 3
-	$follower_attack_skill_4 = 4
-	$follower_attack_skill_5 = 5
-	$follower_attack_skill_6 = 6
-	$follower_attack_skill_7 = 7
-	$follower_attack_skill_8 = 8
-EndFunc
-
-
-;~ Default class run method
-Func DefaultRun()
-	If $follower_running_skill <> Null And IsRecharged($follower_running_skill) Then UseSkillEx($follower_running_skill)
-EndFunc
-
-
-;~ Default class fight method
-Func DefaultFight()
-	AttackOrUseSkill(1000, $follower_maintain_skill_1, $follower_maintain_skill_2, $follower_maintain_skill_3, $follower_maintain_skill_4, $follower_maintain_skill_5, $follower_maintain_skill_6, $follower_maintain_skill_7, $follower_maintain_skill_8)
-	AttackOrUseSkill(1000, $follower_attack_skill_1, $follower_attack_skill_2, $follower_attack_skill_3, $follower_attack_skill_4, $follower_attack_skill_5, $follower_attack_skill_6, $follower_attack_skill_7, $follower_attack_skill_8)
-EndFunc
-
-
-;~ Ranger follower setup
-Func RangerSetup()
-	Local $wildBlow = 1
-	Local $soldiersStrike = 2
-	Local $desperationBlow = 3
-	Local $runAsOne = 4
-	Local $togetherAsOne = 5
-	Local $neverRampageAlone = 6
-	Local $ebonBattleStandardOfHonor = 7
-	Local $comfortAnimal = 8
-
-	$follower_maintain_skill_1 = $togetherAsOne
-	$follower_maintain_skill_2 = $ebonBattleStandardOfHonor
-	$follower_maintain_skill_3 = $runAsOne
-	$follower_maintain_skill_4 = $neverRampageAlone
-	$follower_attack_skill_1 = $wildBlow
-	$follower_attack_skill_2 = $soldiersStrike
-	$follower_attack_skill_3 = $desperationBlow
-	$follower_running_skill = $runAsOne
-EndFunc
-
-
-;~ Paragon follower setup
-Func ParagonSetup()
-	Info('Paragon setup - Heroic Refrain')
-
-	Local $heroicRefrain = 8
-	;Local $aggressiveRefrain = 7
-	Local $burningRefrain = 7
-	Local $forGreatJustice = 6
-	Local $toTheLimit = 5
-	Local $saveYourselves = 4
-	Local $theresNothingToFear = 3
-	Local $standYourGround = 2
-	Local $theyreOnFire = 1
-
-	$follower_maintain_skill_1 = $heroicRefrain
-	$follower_maintain_skill_2 = $burningRefrain
-	$follower_maintain_skill_3 = $forGreatJustice
-	$follower_maintain_skill_4 = $toTheLimit
-	$follower_maintain_skill_5 = $saveYourselves
-	$follower_maintain_skill_6 = $theresNothingToFear
-	$follower_maintain_skill_7 = $standYourGround
-	$follower_maintain_skill_8 = $theyreOnFire
-
-	AdlibRegister('ParagonRefreshShouts', 12000)
-	;AdlibUnRegister()
-EndFunc
-
-
-;~ Paragon function to cast shouts on all party members
-Func ParagonRefreshShouts()
-	Info('Refresh shouts on party')
-	Local Static $selfRecast = False
-	MoveToMiddleOfPartyWithTimeout(5000)
-	RandomSleep(50)
-	Local $partyMembers = GetPartyInRangeOfAgent(GetMyAgent(), $RANGE_SPELLCAST)
-	If UBound($partyMembers) < 4 Then Return
-
-	UseSkillEx($follower_maintain_skill_8)
-	RandomSleep(50)
-	If ($selfRecast Or GetEffectTimeRemaining(GetEffect($ID_HEROIC_REFRAIN)) == 0) And GetEnergy() > 15 Then
-		UseSkillEx($follower_maintain_skill_1, GetMyAgent())
-		RandomSleep(50)
-		If $selfRecast Then
-			UseSkillEx($follower_maintain_skill_2, GetMyAgent())
-			RandomSleep(50)
-			$selfRecast = False
-		Else
-			$selfRecast = True
-		EndIf
-	Else
-		$party = GetParty()
-
-		Local $ownID = DllStructGetData(GetMyAgent(), 'ID')
-
-		; This solution is imperfect because we recast HR every time
-		Local Static $i = 1
-		If UBound($party) > 1 Then
-			If DllStructGetData($party[$i], 'ID') == $ownID Or $i > UBound($party) Then $i = Mod($i, UBound($party)) + 1
-			If GetEnergy() > 15 Then
-				UseSkillEx($follower_maintain_skill_1, $party[$i])
-				RandomSleep(50)
-			EndIf
-			If GetEnergy() > 20 Then
-				UseSkillEx($follower_maintain_skill_2, $party[$i])
-				RandomSleep(50)
-			EndIf
-			$i = Mod($i, UBound($party)) + 1
-		EndIf
-
-		; This solution would be better - but effects cannot be accessed on other account heroes/characters and mercenaries
-		;Local $heroNumber
-		;For $member In $party
-		;	If DllStructGetData($member, 'ID') == $ownID Then ContinueLoop
-		;	$heroNumber = GetHeroNumberByAgentID(DllStructGetData($member, 'ID'))
-		;	If ($heroNumber == Null Or GetEffectTimeRemaining(GetEffect($ID_HEROIC_REFRAIN), $heroNumber) == 0) And GetEnergy() > 15 Then
-		;		UseSkillEx($follower_maintain_skill_1, $member)
-		;		PingSleep(50)
-		;		ExitLoop
-		;	EndIf
-		;	If ($heroNumber == Null Or GetEffectTimeRemaining(GetEffect($ID_BURNING_REFRAIN), $heroNumber) == 0) And GetEnergy() > 20 Then
-		;		UseSkillEx($follower_maintain_skill_2, $member)
-		;		PingSleep(50)
-		;		ExitLoop
-		;	EndIf
-		;Next
-	EndIf
-EndFunc
-
-
-;~ Paragon fight function
-Func ParagonFight()
-	If IsRecharged($follower_maintain_skill_7) Then UseSkillEx($follower_maintain_skill_7)
-	PingSleep(50)
-	If IsRecharged($follower_maintain_skill_6) Then UseSkillEx($follower_maintain_skill_6)
-	PingSleep(50)
-	If IsRecharged($follower_maintain_skill_3) Then UseSkillEx($follower_maintain_skill_3)
-	PingSleep(50)
-	If GetSkillbarSkillAdrenaline($follower_maintain_skill_5) < 200 And IsRecharged($follower_maintain_skill_4) Then UseSkillEx($follower_maintain_skill_4)
-	PingSleep(50)
-	If GetSkillbarSkillAdrenaline($follower_maintain_skill_5) == 200 Then UseSkillEx($follower_maintain_skill_5)
-	PingSleep(50)
-	Attack(GetNearestEnemyToAgent(GetMyAgent()))
+	GoPlayer($leader)
 	Sleep(1000)
+EndFunc
+
+
+;~ Override for callback calls
+Func FollowerNotInRangeOfLeader()
+	Return Not FollowerInRangeOfLeader(GetAgentByID($leaderID), GetMyAgent())
+EndFunc
+
+
+Func FollowerInRangeOfLeader($leader = GetAgentByID($leaderID), $me = GetMyAgent(), $range = $FOLLOWER_LEASH_RANGE)
+	Return $leader == Null Or GetDistance($me, $leader) < $range
 EndFunc
 
 
@@ -353,29 +167,5 @@ Func FollowerResolveLeaderID()
 		If $loginNumber == $myLoginNumber Then ContinueLoop
 		Return DllStructGetData($member, 'ID')
 	Next
-	Return Null
-EndFunc
-
-
-;~ Get first player of the party team other than yourself. If no other player found in the party team then function returns Null
-Func GetFirstPlayerOfParty()
-	Local $selfLoginNumber = DllStructGetData(GetMyAgent(), 'LoginNumber')
-	Local $playerCount = GetPlayerCount()
-
-	Local $party = GetParty()
-
-	For $i = 0 To $playerCount - 1
-		Local $slotLoginNumber = GetPartyPlayerLoginNumber($i)
-
-		If $slotLoginNumber == 0 Then ContinueLoop
-		If $slotLoginNumber == $selfLoginNumber Then ContinueLoop
-
-		For $member In $party
-			If DllStructGetData($member, 'LoginNumber') == $slotLoginNumber Then
-				Return $member
-			EndIf
-		Next
-	Next
-
 	Return Null
 EndFunc
