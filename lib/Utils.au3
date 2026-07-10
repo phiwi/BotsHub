@@ -1012,6 +1012,7 @@ $default_move_aggro_kill_options['chestOpenRange']		= $RANGE_SPIRIT
 $default_move_aggro_kill_options['lootTrappedArea']		= False
 $default_move_aggro_kill_options['ignoreDroppedLoot']	= False
 $default_move_aggro_kill_options['combatFunction']		= UseSkillSequentially
+$default_move_aggro_kill_options['approachBeforeFight']	= False
 ; default 60 seconds fight duration
 $default_move_aggro_kill_options['fightDuration']		= 60000
 
@@ -1125,6 +1126,7 @@ Func MoveAggroAndKill($x, $y, $log = '', $options = $default_move_aggro_kill_opt
 	Local $fightRange			= $options['fightRange'] <> Null ?			$options['fightRange'] : $WIDE_PLAYER_AGGRO_RANGE
 	Local $ignoreDroppedLoot	= $options['ignoreDroppedLoot'] <> Null ?	$options['ignoreDroppedLoot'] : False
 	Local $unstuckFunction		= $options['unstuckFunction'] <> Null ?		$options['unstuckFunction'] : TryToGetUnstuck
+	Local $approachBeforeFight	= $options['approachBeforeFight'] <> Null ?	$options['approachBeforeFight'] : False
 
 	IsPlayerStuck(Default, Default, True) ; init internal state
 
@@ -1139,6 +1141,9 @@ Func MoveAggroAndKill($x, $y, $log = '', $options = $default_move_aggro_kill_opt
 		; Trigger fight function if a foe comes close enough
 		$target = GetNearestEnemyToAgent($me)
 		If DllStructGetData($target, 'ID') <> 0 And GetDistance($me, $target) < $fightRange Then
+			; Optionally approach to aggro edge before engaging — prevents
+			; overstepping into the group and alerting all foes at once.
+			If $approachBeforeFight Then GetAlmostInRangeOfAgent($target)
 			If $fightFunction($options) == $FAIL Then ExitLoop
 			; FIXME: add rezzing dead party members here
 		EndIf
