@@ -1048,10 +1048,10 @@ $default_move_aggro_kill_options['openChests']			= True
 $default_move_aggro_kill_options['chestOpenRange']		= $RANGE_SPIRIT
 $default_move_aggro_kill_options['lootTrappedArea']		= False
 $default_move_aggro_kill_options['ignoreDroppedLoot']	= False
-$default_move_aggro_kill_options['combatFunction']		= UseSkillSequentially
 $default_move_aggro_kill_options['approachBeforeFight']	= False
 ; default 60 seconds fight duration
-$default_move_aggro_kill_options['fightDuration']		= 60000$default_move_aggro_kill_options['killMethod']			= UseSkillSequentially
+$default_move_aggro_kill_options['fightDuration']		= 60000
+$default_move_aggro_kill_options['killMethod']			= UseSkillSequentially
 
 Global $flag_move_aggro_kill_options					= CloneMap($default_move_aggro_kill_options)
 $flag_move_aggro_kill_options['flagHeroesOnFight']		= True

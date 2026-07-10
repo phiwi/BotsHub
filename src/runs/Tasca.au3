@@ -24,7 +24,8 @@
 #include '../../lib/Utils-Console.au3'
 #include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
-#include '../utilities/SupportTeam.au3'#include '../utilities/OmniFarmer.au3'
+#include '../utilities/SupportTeam.au3'
+#include '../utilities/OmniFarmer.au3'
 #include 'Pongmei.au3'
 
 ; Possible improvements :
