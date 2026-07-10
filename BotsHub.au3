@@ -27,24 +27,34 @@
 #RequireAdmin
 #NoTrayIcon
 
+Opt('MustDeclareVars', True)
+;Opt('ExpandEnvStrings', 1)
+
 #Region Includes
+#include-once
 #include <Math.au3>
-#include 'lib/GWA2_Headers.au3'
-#include 'lib/GWA2_ID.au3'
+
+#include 'lib/BotsHub-GUI.au3'
 #include 'lib/GWA2.au3'
 #include 'lib/GWA2_Assembly.au3'
 #include 'lib/GWA2_Assembly_Chatlog.au3'
+#include 'lib/GWA2_ID.au3'
+#include 'lib/GWA2_ID_Maps.au3'
+#include 'lib/GWA2_ID_Skills.au3'
+#include 'lib/JSON.au3'
 #include 'lib/Utils.au3'
-#include 'lib/Utils-Agents.au3'
-#include 'lib/Utils-Storage.au3'
+#include 'lib/Utils-Console.au3'
 #include 'lib/Utils-Debugger.au3'
+#include 'lib/Utils-Items_Modstructs.au3'
+#include 'lib/Utils-Shared_Memory.au3'
+#include 'lib/Utils-Storage.au3'
 #include 'lib/Build_PW_Heroic-Refrain.au3'
-#include 'lib/BotsHub-GUI.au3'
 
 #include 'src/farms/Brightclaw.au3'
 #include 'src/farms/CoF.au3'
 #include 'src/farms/Corsairs.au3'
 #include 'src/farms/DragonMoss.au3'
+#include 'src/farms/DrakeFlesh.au3'
 #include 'src/farms/EdenIris.au3'
 #include 'src/farms/Feathers.au3'
 #include 'src/farms/FeathersSin.au3'
@@ -65,6 +75,8 @@
 #include 'src/farms/Minotaurs.au3'
 #include 'src/farms/OutcastHalcyon.au3'
 #include 'src/farms/Raptors.au3'
+#include 'src/farms/SkaleFins.au3'
+#include 'src/farms/Skrees.au3'
 #include 'src/farms/SpiritSlaves.au3'
 #include 'src/farms/SpiritSlavesCustom.au3'
 #include 'src/farms/SpiritSlavesSin.au3'
@@ -129,11 +141,6 @@ Global Const $SUCCESS = 0
 Global Const $FAIL = 1
 Global Const $PAUSE = 2
 
-Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|FoW|FoW Tower of Courage|Follower|Froggy|' & _
-	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|' & _
-	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|SoO|SoO Celerity|Spirit Slaves Ranger|Storage|Sunspear Armor|Tasca|' & _
-	'TestSuite|Tests|Tunnels Forsaken Custom|TunnelsOfTheForsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
-
 Global Const $AVAILABLE_DISTRICTS = '|Random|Random EU|Random US|Random Asia|America|China|English|French|German|International|Italian|Japan|Korea|Polish|Russian|Spanish'
 
 Global Const $AVAILABLE_HEROES = '||Acolyte Jin|Acolyte Sousuke|Anton|Devona|Dunkoro|General Morgahn|Ghost of Althea|Goren|Gwen|Hayda|Jora|Kahmu|Keiran Thackeray|Koss|Livia|' & _
@@ -153,10 +160,12 @@ Global $loot_configuration = 'Default Loot Configuration'
 Global $inventory_space_needed = 5
 Global $run_timer = Null
 Global $global_farm_setup = False
-Global $log_level = $LVL_INFO
+
+Global $slave_heartbeat = 0
 
 ; Farm Name;Farm function;Inventory space;Farm duration
 Global $farm_map[]
+Global $gui_enabled
 
 Global $inventory_management_cache[]
 Global $run_options_cache[]
@@ -181,13 +190,13 @@ Global $bags_count = 5
 
 
 #Region Main loops
-Main()
+BotsHubMain()
 
 ;------------------------------------------------------
 ; Title...........:	Main
 ; Description.....:	run the main program
 ;------------------------------------------------------
-Func Main()
+Func BotsHubMain()
 	; Verify validity
 	If @AutoItVersion < '3.3.16.1' Then
 		MsgBox(16, 'Error', 'This bot requires AutoIt version 3.3.16.1 or higher. You are using ' & @AutoItVersion & '.')
@@ -206,7 +215,8 @@ Func Main()
 	LoadDefaultLootConfiguration()
 
 	If $run_mode == 'GUI' Then
-		CreateGUI()
+		$gui_enabled = True
+		CreateBotsHubGUI()
 		ApplyConfigToGUI()
 		FillConfigurationCombo()
 		GUISetState(@SW_SHOWNORMAL)
@@ -215,6 +225,7 @@ Func Main()
 		ScanAndUpdateGameClients()
 		RefreshCharactersComboBox()
 	ElseIf $run_mode == 'HEADLESS' Then
+		$gui_enabled = False
 		; Need minimum 4 things to run a bot: slave index, process ID, character name and farm name
 		If $cmdLine[0] < 4 Then
 			MsgBox(0, 'Error', 'The Hub needs 0 or at least 4 arguments.')
@@ -227,19 +238,30 @@ Func Main()
 
 		Info('Running in CMD mode with process ID: ' & $process_id & ' character name: ' & $character_name & ' farm name: ' & $farm_name)
 
-		Local $openProcess = SafeDllCall9($kernel_handle, 'int', 'OpenProcess', 'int', 0x1F0FFF, 'int', 1, 'int', $process_id)
-		Local $processHandle = IsArray($openProcess) ? $openProcess[0] : 0
-		If $processHandle <> 0 Then
-			Local $windowHandle = GetWindowHandleForProcess($process_id)
-			AddClient($process_id, $processHandle, $windowHandle, $character_name)
-			SelectClient(1)
-		Else
-			MsgBox(0, 'Error', 'GW Process with incorrect handle.')
-			Exit
+		If $character_name <> '' Then
+			Local $openProcess = SafeDllCall9($kernel_handle, 'int', 'OpenProcess', 'int', 0x1F0FFF, 'int', 1, 'int', $process_id)
+			Local $processHandle = IsArray($openProcess) ? $openProcess[0] : 0
+			If $processHandle <> 0 Then
+				Local $windowHandle = GetWindowHandleForProcess($process_id)
+				AddClient($process_id, $processHandle, $windowHandle, $character_name)
+				SelectClient(1)
+			Else
+				MsgBox(0, 'Error', 'GW Process with incorrect handle.')
+				Exit
+			EndIf
 		EndIf
 		; Authentication
 		Authentification($character_name)
 		$runtime_status = 'RUNNING'
+
+
+		If $slave_index >= 0 Then
+			If OpenMasterSlaveSharedMemory($slave_index) Then
+				AdlibRegister('UpdateHeartbeat', 5000)
+			Else
+				Error('Unable to open shared memory blocks.')
+			EndIf
+		EndIf
 	Else
 		MsgBox(0, 'Error', 'Unknown run mode: ' & $run_mode)
 		Exit
@@ -255,13 +277,13 @@ Func BotHubLoop()
 	While True
 		If ($runtime_status == 'RUNNING') Then
 			If $run_mode == 'GUI' Then
-				DisableGUIComboboxes()
 				If $farm_name == Null Or $farm_name == '' Then
 					Error('This farm does not exist.')
 					$runtime_status = 'INITIALIZED'
 					EnableStartButton()
 					Return $PAUSE
 				EndIf
+				DisableGUIComboboxes()
 			EndIf
 			Local $result = RunFarmLoop()
 			If ($result == $PAUSE Or $run_options_cache['run.loop_mode'] == False) Then $runtime_status = 'WILL_PAUSE'
@@ -559,6 +581,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'CoF',							CoFFarm,						5,					$COF_FARM_DURATION)
 	AddFarmToFarmMap(	'Corsairs',						CorsairsFarm,					5,					$CORSAIRS_FARM_DURATION)
 	AddFarmToFarmMap(	'Deldrimor',					DeldrimorFarm,					10,					$DELDRIMOR_FARM_DURATION)
+	AddFarmToFarmMap(	'Drake Flesh',					DrakeFleshFarm,					5,					$DRAKE_FLESH_FARM_DURATION)
 	AddFarmToFarmMap(	'Dragon Moss',					DragonMossFarm,					5,					$DRAGONMOSS_FARM_DURATION)
 	AddFarmToFarmMap(	'Eden Iris',					EdenIrisFarm,					2,					$IRIS_FARM_DURATION)
 	AddFarmToFarmMap(	'Feathers',						FeathersFarm,					10,					$FEATHERS_FARM_DURATION)
@@ -609,6 +632,8 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Path Recorder',					PathActionRecorderFarm,			0,					$PATH_ACTION_RECORDER_DURATION)
 	AddFarmToFarmMap(	'Raptors',						RaptorsFarm,					5,					$RAPTORS_FARM_DURATION)
 	AddFarmToFarmMap(	'Sell, Salvage, Stash',		InventoryManagementBeforeRun,	5,					2 * 60 * 1000)
+	AddFarmToFarmMap(	'Skale Fins',					SkaleFinsFarm,					5,					$SKALE_FINS_FARM_DURATION)
+	AddFarmToFarmMap(	'Skrees',						SkreesFarm,						10,					$SKREES_FARM_DURATION)
 	AddFarmToFarmMap(	'SoO',							SoOFarm,						15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SoO Celerity',					SoOCelerityFarm,				15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SpiritSlaves',					SpiritSlavesFarm,				5,					$SPIRIT_SLAVES_FARM_DURATION)
@@ -644,6 +669,7 @@ EndFunc
 Func ResetBotsSetups()
 	$global_farm_setup						= False
 	$boreal_farm_setup						= False
+	$drake_flesh_farm_setup					= False
 	$dm_farm_setup							= False
 	$feathers_farm_setup					= False
 	$feathers_sin_derv_farm_setup		= False
@@ -661,6 +687,7 @@ Func ResetBotsSetups()
 	$pongmei_farm_setup						= False
 	$pongmei_sin_farm_setup					= False
 	$raptors_farm_setup						= False
+	$skrees_farm_setup						= False
 	$soo_farm_setup							= False
 	$spirit_slaves_farm_setup				= False
 	$spirit_slaves_custom_farm_setup		= False
@@ -977,3 +1004,25 @@ Func Authentification($characterName)
 	Return $SUCCESS
 EndFunc
 #EndRegion Authentification and Login
+
+
+Func UpdateHeartbeat()
+	WriteSlaveToMaster($slave_index, 'heartbeat', $slave_heartbeat)
+	$slave_heartbeat += 1
+
+	Info('Master hearbeat: ' & ReadMasterBroadcast('heartbeat'))
+	Local $enableGUICommand = ReadMasterToSlave($slave_index, 'enableGUI')
+	Info('Enable GUI order: ' & $enableGUICommand)
+	If Not $gui_enabled And $enableGUICommand Then
+		CreateBotsHubGUI()
+		ApplyConfigToGUI()
+		FillConfigurationCombo()
+		GUISetState(@SW_SHOWNORMAL)
+		Info('GW Bot Hub ' & $GW_BOT_HUB_VERSION)
+		$gui_enabled = True
+	EndIf
+	If $gui_enabled And Not $enableGUICommand Then
+		GUISetState(@SW_HIDE)
+		$gui_enabled = False
+	EndIf
+EndFunc
