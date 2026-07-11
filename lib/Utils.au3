@@ -1131,8 +1131,8 @@ Func MoveAggroAndKill($x, $y, $log = '', $options = $default_move_aggro_kill_opt
 	Local $fightRange			= $options['fightRange'] <> Null ?			$options['fightRange'] : $WIDE_PLAYER_AGGRO_RANGE
 	Local $fightTimeout			= $options['fightTimeout'] <> Null ?		$options['fightTimeout'] : 10 * 60 * 1000 
 	Local $ignoreDroppedLoot	= $options['ignoreDroppedLoot'] <> Null ?	$options['ignoreDroppedLoot'] : False
-	Local $unstuckFunction		= $options['unstuckFunction'] <> Null ?		$options['unstuckFunction'] : TryToGetUnstuck
-	Local $approachBeforeFight	= $options['approachBeforeFight'] <> Null ?	$options['approachBeforeFight'] : False	Local $unstuckHandler		= $options['unstuckHandler'] <> Null ?		$options['unstuckHandler'] : TryToGetUnstuck
+	Local $unstuckHandler		= $options['unstuckHandler'] <> Null ?		$options['unstuckHandler'] : TryToGetUnstuck
+	Local $approachBeforeFight	= $options['approachBeforeFight'] <> Null ?	$options['approachBeforeFight'] : False
 
 	IsPlayerStuck(Default, Default, True) ; init internal state
 
@@ -1151,7 +1151,7 @@ Func MoveAggroAndKill($x, $y, $log = '', $options = $default_move_aggro_kill_opt
 			; Optionally approach to aggro edge before engaging — prevents
 			; overstepping into the group and alerting all foes at once.
 			If $approachBeforeFight Then GetAlmostInRangeOfAgent($target)
-			If $fightFunction($options) == $FAIL Then ExitLoop			If $fightHandler($options) == $FAIL Then ExitLoop
+			If $fightHandler($options) == $FAIL Then ExitLoop
 			; FIXME: add rezzing dead party members here
 		EndIf
 

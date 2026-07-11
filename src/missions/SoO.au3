@@ -61,7 +61,7 @@ EndFunc
 
 ;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgFTsYmWRCv4dwmcdYXEZQdYaAA' ; Water Magic
 ;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgdTkYm6RaFcXEWgryVEZgp5UAA' ; Earth Magic
-Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RaFkcYX0V8bwNDdYUAA' ; Air Magic
+Global Const $SOO_PLAYER_SKILLBAR = 'OgdTgYm6RicYFcX0V8bwNDdYUAA' ; Air Magic
 
 
 Global Const $SOO_FARM_DURATION = 60 * 60 * 1000
