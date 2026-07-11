@@ -37,6 +37,8 @@ Global Const $AMFAH600_FIRST_PULL_TIMEOUT_MS = 120000
 Global Const $AMFAH600_RAMP_PULL_TIMEOUT_MS = 150000
 Global Const $AMFAH600_ENERGY_WAIT_TIMEOUT_MS = 90000
 Global Const $AMFAH600_MORGAHN_SEND_VERIFY_MS = 9000
+Global Const $AMFAH600_MORGAHN_SPEED_INTERVAL_MS = 10000
+Global Const $AMFAH600_FINISH_HIM_HP_THRESHOLD = 0.45
 Global Const $AMFAH600_DIALOG_ACCEPT_REFUSE_TO_DRINK = 0x814F01
 Global Const $AMFAH600_DIALOG_PROGRESS_REFUSE_TO_DRINK = 0x814F05
 
@@ -45,6 +47,8 @@ Global $amfah600_sb_maintained_precast_done = False
 Global $amfah600_sb_precast7_done = False
 Global $amfah600_sb_precast8_done = False
 Global $amfah600_sb_morgahn_flagged_this_cycle = False
+Global $amfah600_sb_morgahn_last_speed_timer = 0
+Global $amfah600_sb_morgahn_speed_toggle = False
 
 
 Func AmFah600SpiritBondRun()
@@ -112,8 +116,7 @@ Func SetupPlayerAmFah600SpiritBondRun()
 		Return $FAIL
 	EndIf
 
-	; Debug: skip player build load to reduce setup time.
-	; LoadSkillTemplate($AMFAH600_SB_SKILLBAR)
+	LoadSkillTemplate($AMFAH600_SB_SKILLBAR)
 	RandomSleep(250)
 	ChangeWeaponSet(1)
 	RandomSleep(120)
@@ -132,8 +135,7 @@ Func SetupTeamAmFah600SpiritBondRun()
 		Warn('Could not add General Morgahn for approach speed support')
 		Return $FAIL
 	EndIf
-	; Debug: skip hero build load to reduce setup time.
-	; LoadSkillTemplate($AMFAH600_MORGAHN_TEMPLATE, 1)
+	LoadSkillTemplate($AMFAH600_MORGAHN_TEMPLATE, 1)
 	RandomSleep(150)
 	Return $SUCCESS
 EndFunc
@@ -187,6 +189,8 @@ Func AmFah600SpiritBondRunLoop()
 	While IsPlayerAlive()
 		If GetMapID() <> $ID_WAJJUN_BAZAAR Then Return $FAIL
 		$amfah600_sb_morgahn_flagged_this_cycle = False
+		$amfah600_sb_morgahn_last_speed_timer = 0
+		$amfah600_sb_morgahn_speed_toggle = False
 		If AmFah600SpiritBondCastMaintainedPrebuffs() == $FAIL Then Return $FAIL
 		If AmFah600SpiritBondGoToBrotherTosai() == $FAIL Then Return $FAIL
 		AmFah600SpiritBondSendMorgahnToDesert()
@@ -235,6 +239,7 @@ Func AmFah600SpiritBondGoToBrotherTosai()
 	For $i = 0 To UBound($waypoints) - 1
 		If TimerDiff($timer) > $AMFAH600_TOSAI_APPROACH_TIMEOUT_MS Then Return $FAIL
 		If IsPlayerDead() Then Return $FAIL
+		AmFah600SpiritBondTryMorgahnSpeedBoost()
 		AmFah600SpiritBondTryMovementPrebuffCast()
 		MoveTo($waypoints[$i][0], $waypoints[$i][1])
 		AmFah600SpiritBondTryMovementPrebuffCast()
@@ -500,11 +505,12 @@ Func AmFah600SpiritBondTryFinishHimOnLowHealerHp($target = Null)
 	If $healer == Null Then Return False
 
 	Local $healerHp = DllStructGetData($healer, 'HP')
-	If $healerHp > 0.40 Then
+	If $healerHp > $AMFAH600_FINISH_HIM_HP_THRESHOLD Then
 		; In the small endgame, keep pressuring healers with 5 until they drop.
 		If Not AmFah600SpiritBondShouldForceFinishHimOnHealers() Then Return False
 	EndIf
 
+	Info('Am Fah 600: Finish Him triggered on healer at ' & Round($healerHp * 100) & '% HP')
 	UseSkillEx($AMFAH600_FINISH_HIM, $healer)
 	Return True
 EndFunc
@@ -647,14 +653,37 @@ Func AmFah600SpiritBondGetNearestHealerInRange($range)
 	Next
 	If $healerCount == 0 Then
 		If $noneLogTimer == 0 Or TimerDiff($noneLogTimer) > 1500 Then
-			Info('Healer scan: none in range=' & $range & ' (foes=' & UBound($foes) & ')')
+			Info('Am Fah 600: no healer in range=' & $range & ' (foes=' & UBound($foes) & ')')
 			$noneLogTimer = TimerInit()
 		EndIf
 	Else
 		$noneLogTimer = 0
-		Info('Healer scan: found=' & $healerCount & ', nearestDist=' & Round($nearestDist))
+		Info('Am Fah 600: observing healer — found=' & $healerCount & ', nearestDist=' & Round($nearestDist) & ', hp=' & Round(DllStructGetData($nearest, 'HP') * 100) & '%')
 	EndIf
 	Return $nearest
+EndFunc
+
+
+Func AmFah600SpiritBondTryMorgahnSpeedBoost()
+	Local $slot = GetHeroNumberByHeroID($ID_GENERAL_MORGAHN)
+	If $slot == Null Then Return
+	If $amfah600_sb_morgahn_last_speed_timer <> 0 And TimerDiff($amfah600_sb_morgahn_last_speed_timer) < $AMFAH600_MORGAHN_SPEED_INTERVAL_MS Then Return
+
+	If $amfah600_sb_morgahn_speed_toggle Then
+		If IsRecharged(2, $slot) Then
+			Info('Am Fah 600: Morgahn using Fall Back (2)')
+			UseHeroSkill($slot, 2)
+			$amfah600_sb_morgahn_speed_toggle = False
+			$amfah600_sb_morgahn_last_speed_timer = TimerInit()
+		EndIf
+	Else
+		If IsRecharged(1, $slot) Then
+			Info('Am Fah 600: Morgahn using Incoming (1)')
+			UseHeroSkill($slot, 1)
+			$amfah600_sb_morgahn_speed_toggle = True
+			$amfah600_sb_morgahn_last_speed_timer = TimerInit()
+		EndIf
+	EndIf
 EndFunc
 
 
