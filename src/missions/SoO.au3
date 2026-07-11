@@ -34,7 +34,9 @@ Global Const $SOO_FARM_INFORMATIONS = 'For best results, do not cheap out on her
 	& '60mn average in HM with cons (automatically used if HM is on)'
 
 Global Const $ID_SOO_TORCH = 22342
-Global Const $SOO_AGGRO_RANGE = $RANGE_SPELLCAST + 100
+; Detection range wider than approach range ($PLAYER_AGGRO_RANGE=1185) so enemies
+; are spotted early and the bot can stop at aggro edge before they detect the player.
+Global Const $SOO_AGGRO_RANGE = $RANGE_SPELLCAST + 350
 
 ; SoO-specific move+aggro wrappers that approach to aggro edge before engaging.
 ; This prevents overstepping into groups and alerting all foes simultaneously —
@@ -1322,7 +1324,7 @@ Func ClearSoOFloor3()
 		SoOMoveAggroAndKill(-8650, 9200, 'Added extra move to force going past door before endloop 2', $SOO_AGGRO_RANGE)
 	WEnd
 
-	Local $largerSoOAggroRange = $RANGE_SPELLCAST + 300
+	Local $largerSoOAggroRange = $RANGE_SPELLCAST + 500
 	$soo_floor3_final_fight_conset_uptime = True
 	AdlibRegister('SoOFinalFightConsetUptimeTick', 1000)
 	While Not SoOIsRunFailed() And Not IsQuestReward($ID_QUEST_LOST_SOULS)
