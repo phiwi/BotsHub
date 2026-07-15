@@ -64,6 +64,9 @@ Global $path_action_recorder_start_timer = Null
 Global $path_action_recorder_last_pos_x = 0
 Global $path_action_recorder_last_pos_y = 0
 Global $path_action_recorder_last_pos_time = 0
+Global $path_action_recorder_last_hero_x[1]
+Global $path_action_recorder_last_hero_y[1]
+Global $path_action_recorder_hero_flagged[1]
 Global $path_action_recorder_last_skill_id = -1
 Global $path_action_recorder_last_target_id = -1
 Global $path_action_recorder_last_map_id = -1
@@ -160,6 +163,9 @@ Func StartPathActionRecorder()
 	$path_action_recorder_last_static_scan_time = 0
 	$path_action_recorder_last_dp_cast_time = -1000000
 	$path_action_recorder_kill_rotation_seen = False
+	ReDim $path_action_recorder_last_hero_x[1]
+	ReDim $path_action_recorder_last_hero_y[1]
+	ReDim $path_action_recorder_hero_flagged[1]
 
 	Local $me = GetMyAgent()
 	If $me <> Null Then
@@ -175,6 +181,7 @@ Func StartPathActionRecorder()
 	FileWriteLine($path_action_recorder_handle, '# map_id=' & GetMapID() & ';map_type=' & GetMapType())
 	FileWriteLine($path_action_recorder_handle, '# columns: time_ms;event;x;y;hp;energy;map_id;target_id;target_model_id;casting_skill_id;note')
 	FileWriteLine($path_action_recorder_handle, '# HERO_POS uses target_id=hero_agent_id, target_model_id=hero_model_id, note=hero_index=<n>')
+	FileWriteLine($path_action_recorder_handle, '# HERO_FLAGGED uses target_id=hero_agent_id, target_model_id=hero_model_id, note=hero_index=<n>;flag_x=<n>;flag_y=<n>;dist=<n>')
 	FileWriteLine($path_action_recorder_handle, '# STATIC_NEAR uses target_id=static_agent_id, target_model_id=gadget_id, note=model=<model_id>;dist=<n>;known_chest=<0/1>')
 	AdlibRegister('PathActionRecorderTick', $PATH_ACTION_RECORDER_INTERVAL_MS)
 	Info('Recorder started: ' & $path_action_recorder_file)
@@ -212,6 +219,8 @@ Func PathActionRecorderTick()
 	If $mapID <> $path_action_recorder_last_map_id Then
 		PathActionRecorderWriteEvent($timeMs, 'MAP', $x, $y, $hp, $energy, $mapID, 0, 0, $castSkillID, 'Map changed / refreshed')
 		$path_action_recorder_last_map_id = $mapID
+		; Reset hero flag tracking on map change
+		ReDim $path_action_recorder_hero_flagged[1]
 	EndIf
 
 	If Abs($x - $path_action_recorder_last_pos_x) >= $PATH_ACTION_RECORDER_MIN_POS_DELTA _
@@ -261,6 +270,7 @@ Func PathActionRecorderTick()
 		Local $statusNote = 'sf_ms=' & Round($sfMs, 0) & ';sod_ms=' & Round($sodMs, 0) & ';ca_ms=' & Round($caMs, 0)
 		PathActionRecorderWriteEvent($timeMs, 'STATUS', $x, $y, $hp, $energy, $mapID, $targetID, $targetModelID, $castSkillID, $statusNote)
 		PathActionRecorderWriteHeroPositions($timeMs, $mapID)
+		PathActionRecorderDetectHeroFlags($timeMs, $x, $y, $hp, $energy, $mapID)
 		$path_action_recorder_last_status_time = $timeMs
 	EndIf
 
@@ -311,6 +321,57 @@ Func PathActionRecorderWriteHeroPositions($timeMs, $mapID)
 		Local $hEnergy = Round(GetEnergy($heroAgent), 1)
 		Local $hModelID = DllStructGetData($heroAgent, 'ModelID')
 		PathActionRecorderWriteEvent($timeMs, 'HERO_POS', $hx, $hy, $hhp, $hEnergy, $mapID, $heroAgentID, $hModelID, 0, 'hero_index=' & $heroIndex)
+
+		; Track hero positions for flag detection
+		If UBound($path_action_recorder_last_hero_x) <= $heroIndex Then
+			ReDim $path_action_recorder_last_hero_x[$heroIndex + 1]
+			ReDim $path_action_recorder_last_hero_y[$heroIndex + 1]
+			ReDim $path_action_recorder_hero_flagged[$heroIndex + 1]
+		EndIf
+		$path_action_recorder_last_hero_x[$heroIndex] = $hx
+		$path_action_recorder_last_hero_y[$heroIndex] = $hy
+	Next
+EndFunc
+
+
+Func PathActionRecorderDetectHeroFlags($timeMs, $px, $py, $hp, $energy, $mapID)
+	Local $heroCount = GetHeroCount()
+	Local Const $FLAG_DETECT_MIN_DIST = 350      ; Hero must be at least this far from player to be considered flagged
+	Local Const $FLAG_DETECT_FOLLOW_DIST = 600    ; Previously-following threshold
+
+	For $heroIndex = 1 To $heroCount
+		If UBound($path_action_recorder_hero_flagged) > $heroIndex And $path_action_recorder_hero_flagged[$heroIndex] Then ContinueLoop
+
+		Local $heroAgentID = GetHeroID($heroIndex)
+		If $heroAgentID == 0 Then ContinueLoop
+
+		Local $heroAgent = GetAgentByID($heroAgentID)
+		If $heroAgent == Null Then ContinueLoop
+
+		Local $hx = Int(DllStructGetData($heroAgent, 'X'))
+		Local $hy = Int(DllStructGetData($heroAgent, 'Y'))
+
+		; Check if hero was previously near player (following) but is now far away and not dead
+		Local $heroHp = DllStructGetData($heroAgent, 'HealthPercent')
+		If $heroHp <= 0 Then ContinueLoop
+
+		Local $distToPlayer = Sqrt(($hx - $px) ^ 2 + ($hy - $py) ^ 2)
+		If $distToPlayer < $FLAG_DETECT_MIN_DIST Then ContinueLoop
+
+		; Check: was hero near player in the previous interval?
+		Local $prevFollowed = False
+		If UBound($path_action_recorder_last_hero_x) > $heroIndex Then
+			Local $prevDist = Sqrt(($path_action_recorder_last_hero_x[$heroIndex] - $path_action_recorder_last_pos_x) ^ 2 + ($path_action_recorder_last_hero_y[$heroIndex] - $path_action_recorder_last_pos_y) ^ 2)
+			If $prevDist <= $FLAG_DETECT_FOLLOW_DIST Then $prevFollowed = True
+		EndIf
+
+		If $prevFollowed And $distToPlayer > $FLAG_DETECT_MIN_DIST Then
+			$path_action_recorder_hero_flagged[$heroIndex] = True
+			Local $hModelID = DllStructGetData($heroAgent, 'ModelID')
+			Local $note = 'hero_index=' & $heroIndex & ';flag_x=' & $hx & ';flag_y=' & $hy & ';dist=' & Round($distToPlayer)
+			PathActionRecorderWriteEvent($timeMs, 'HERO_FLAGGED', $hx, $hy, Round($heroHp * 100, 1), Round(GetEnergy($heroAgent), 1), $mapID, $heroAgentID, $hModelID, 0, $note)
+			Info('Recorder: hero ' & $heroIndex & ' flagged at (' & $hx & ',' & $hy & ') dist=' & Round($distToPlayer))
+		EndIf
 	Next
 EndFunc
 

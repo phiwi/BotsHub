@@ -75,16 +75,14 @@ Global Const $VAETTIR_ELEMENTALIST_ELEMENTAL_LORD		= 4
 Global Const $VAETTIR_ELEMENTALIST_MANTRA_OF_EARTH		= 5
 
 ; ==== Global variables ====
-Global $vaettirs_move_options = CloneDictMap($default_move_defend_options)
-$vaettirs_move_options.Item('defendFunction')				= VaettirsStayAlive
-$vaettirs_move_options.Item('moveTimeOut')					= 100 * 1000
-$vaettirs_move_options.Item('randomFactor')					= 50
-$vaettirs_move_options.Item('hosSkillSlot')					= $VAETTIR_HEART_OF_SHADOW
-$vaettirs_move_options.Item('deathChargeSkillSlot')			= 0
-$vaettirs_move_options.Item('openChests')					= False
+Global $vaettirs_move_options                                           = CloneMap($default_move_options)
+$vaettirs_move_options['movementRoutine']                       = VaettirsStayAlive
+$vaettirs_move_options['moveTimeout']                           = 100 * 1000
+$vaettirs_move_options['moveVariance']                          = 50
+$vaettirs_move_options['skillSlotHoS']                          = $VAETTIR_HEART_OF_SHADOW
 
-Global $vaettirs_move_options_elementalist = CloneDictMap($vaettirs_move_options)
-$vaettirs_move_options_elementalist.Item('hosSkillSlot')	= 0
+Global $vaettirs_move_options_elementalist                      = CloneMap($vaettirs_move_options)
+$vaettirs_move_options_elementalist['skillSlotHoS']     = 0
 
 Global $vaettirs_farm_setup = False
 Global $vaettirs_player_profession = $ID_ASSASSIN

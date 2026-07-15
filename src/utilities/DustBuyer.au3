@@ -26,7 +26,7 @@ Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 Global Const $DUST_BUYER_DURATION = 10 * 60 * 1000
-Global Const $DUST_BUYER_GOLD_WITHDRAW = 20000
+Global Const $DUST_BUYER_GOLD_WITHDRAW = 40000
 Global Const $DUST_BUYER_BATCH_SIZE = 10
 Global Const $DUST_BUYER_BATCHES = 100
 

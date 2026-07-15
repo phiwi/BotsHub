@@ -381,9 +381,16 @@ Func EnterUnderworld()
 EndFunc
 
 
-Func EnterUrgozsWarren()
-	TravelToOutpost($ID_EMBARK_BEACH, $district_name)
-	If $run_options_cache['run.use_scrolls'] Then
+Func EnterUrgozsWarren($forceScrollUse)
+	; Talk to Vash in Kaineng Center - only 1 week out of 9
+	; IsFactionsEliteBonusWeek() not yet implemented — always use scroll path.
+	If Not $forceScrollUse And Not $run_options_cache['run.use_scrolls'] Then
+		Error('Trying to enter Urgoz Warren without enabling scroll usage.')
+		Return $FAIL
+	Else
+		; Move to House Zu Heltzer and use a scroll
+		TravelToOutpost($ID_HOUSE_ZU_HELTZER, $district_name)
+		;TravelToOutpost($ID_EMBARK_BEACH, $district_name)
 		Info('Using scroll to enter Urgoz Warren')
 		If UseScroll($ID_URGOZ_SCROLL) == $SUCCESS Then
 			WaitMapLoading($ID_URGOZS_WARREN)
@@ -391,9 +398,10 @@ Func EnterUrgozsWarren()
 				Warn('Used scroll but still could not enter Urgoz Warren. Ensure that player has correct scroll in inventory')
 				Return $PAUSE
 			EndIf
+		Else
+			Error('Trying to enter Urgoz Warren without scrolls.')
+			Return $FAIL
 		EndIf
-	Else
-		Return $FAIL
 	EndIf
 	Return $SUCCESS
 EndFunc

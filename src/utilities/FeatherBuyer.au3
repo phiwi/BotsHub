@@ -26,7 +26,7 @@ Opt('MustDeclareVars', True)
 
 ; ==== Constants ====
 Global Const $FEATHER_BUYER_DURATION = 10 * 60 * 1000
-Global Const $FEATHER_BUYER_GOLD_WITHDRAW = 60000
+Global Const $FEATHER_BUYER_GOLD_WITHDRAW = 80000
 Global Const $FEATHER_BUYER_BATCH_SIZE = 10
 Global Const $FEATHER_BUYER_BATCHES = 100
 

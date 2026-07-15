@@ -86,6 +86,7 @@ Opt('MustDeclareVars', True)
 #include 'src/farms/Vanquish Blacktide Lahtenda.au3'
 #include 'src/farms/Warden.au3'
 #include 'src/farms/Wingstorm.au3'
+#include 'src/farms/Zodiac.au3'
 #include 'src/missions/Deldrimor.au3'
 #include 'src/missions/FoW.au3'
 #include 'src/missions/Froggy.au3'
@@ -623,6 +624,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Barbarous Shore Sin',			BarbarousShoreSinChestFarm,		5,					$BARBAROUS_SHORE_SIN_FARM_DURATION)
 	AddFarmToFarmMap(	'Brightclaw',							BrightclawFarm,					5,					5 * 60 * 1000)
 	AddFarmToFarmMap(	'Wingstorm',							WingstormFarm,					5,					$WINGSTORM_RUN_TIMEOUT_MS)
+	AddFarmToFarmMap(	'Zodiac',							ZodiacFarm,						10,					$ZODIAC_FARM_DURATION)
 	AddFarmToFarmMap(	'Buying Bones',					BoneBuyerFarm,					5,					$BONE_BUYER_DURATION)
 	AddFarmToFarmMap(	'Buying Dust',					DustBuyerFarm,					5,					$DUST_BUYER_DURATION)
 	AddFarmToFarmMap(	'Buying All',					BuyAllFarm,					5,					$BUY_ALL_DURATION)
@@ -636,6 +638,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Skrees',						SkreesFarm,						10,					$SKREES_FARM_DURATION)
 	AddFarmToFarmMap(	'SoO',							SoOFarm,						15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SoO Celerity',					SoOCelerityFarm,				15,					$SOO_FARM_DURATION)
+	AddFarmToFarmMap(	'SoO Celerity + Armor',			SoOCelerityArmorFarm,			15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SpiritSlaves',					SpiritSlavesFarm,				5,					$SPIRIT_SLAVES_FARM_DURATION)
 	AddFarmToFarmMap(	'Spirit Slaves Ele',				SpiritSlavesCustomFarm,			5,					$SPIRIT_SLAVES_CUSTOM_FARM_DURATION)
 	AddFarmToFarmMap(	'Spirit Slaves Ranger',			SpiritSlavesRangerDervFarm,		5,					$SPIRIT_SLAVES_RANGER_DERV_FARM_DURATION)

@@ -62,6 +62,7 @@ Opt('GUICloseOnESC', False)
 #include '../src/farms/Raptors.au3'
 #include '../src/farms/SpiritSlaves.au3'
 #include '../src/farms/Vaettirs.au3'
+#include '../src/farms/Zodiac.au3'
 #include '../src/missions/Deldrimor.au3'
 #include '../src/missions/FoW.au3'
 #include '../src/missions/Froggy.au3'
@@ -101,8 +102,8 @@ Global Const $AVAILABLE_WEAPON_SLOTS = '|0|1|2|3|4'
 Global Const $KIT_AMOUNT_CHOICE = '|0|1|2|3|4|5|6|7|8|9|10|11|12'
 Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|' & _
 	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|' & _
-	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|Spirit Slaves Ele|Spirit Slaves Ranger|Spirit Slaves Sin|SpiritSlaves|' & _
-	'Storage|Sunspear Armor|Tasca|TestSuite|Tests|Tunnels Forsaken Custom|TunnelsOfTheForsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm'
+	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|Spirit Slaves Ele|Spirit Slaves Ranger|Spirit Slaves Sin|SpiritSlaves|' & _
+	'Storage|Sunspear Armor|Tasca|TestSuite|Tests|Tunnels Forsaken Custom|TunnelsOfTheForsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
 
 #Region GUI
 
@@ -1120,6 +1121,10 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $AME_VAETTIRS_FARMER_SKILLBAR & @CRLF & _
 				$MEA_VAETTIRS_FARMER_SKILLBAR_FC4 & @CRLF & $MOA_VAETTIRS_FARMER_SKILLBAR & @CRLF & $EME_VAETTIRS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $VAETTIRS_FARM_INFORMATIONS)
+		Case 'Zodiac'
+			GUICtrlSetData($gui_edit_characterbuilds, $RA_ZODIAC_FARMER_SKILLBAR)
+			GUICtrlSetData($gui_edit_heroesbuilds, $ZODIAC_HERO_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $ZODIAC_FARM_INFORMATIONS)
 		Case 'Vanguard'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
