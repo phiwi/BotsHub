@@ -242,7 +242,6 @@ Func RunWayPoints()
 		If CheckStuck('Waypoint ' & $wayPoints[$i][2], $MAX_WAR_SUPPLY_FARM_DURATION) == $FAIL Then Return $FAIL
 		If GetMapID() <> $ID_AUSPICIOUS_BEGINNINGS Then Return $FAIL
 
-		;If GetMapLoading() == 2 Or (GetMapID() <> $ID_AUSPICIOUS_BEGINNINGS And GetMapID() <> $ID_HALL_OF_MONUMENTS) Then Disconnected()
 		If MoveAggroAndKill($wayPoints[$i][0], $wayPoints[$i][1], $wayPoints[$i][2], $warsupply_fight_options) == $FAIL Then Return $FAIL
 
 		; We have to wait for those places (first, second, preforest and last groups)
@@ -346,8 +345,8 @@ Func WarSupplyFarmFight($target, $options = $warsupply_fight_options)
 		; Skill 3 : use to interrupt foes
 		ElseIf IsRecharged($KEIRAN_TERMINAL_VELOCITY) And $interruptFoe <> Null Then
 			; attempt to interrupt dangerous AoE skill
-			; or anoother important skills casted by foes in Auspicious Beginnings quest that are easy to interrupt
-			UseSkillEx($KEIRAN_TERMINAL_VELOCITY, $foe)
+			; or another important skills casted by foes in Auspicious Beginnings quest that are easy to interrupt
+			UseSkillEx($KEIRAN_TERMINAL_VELOCITY, $interruptFoe)
 			; attempt to evade dangerous AoE skill effect just in case interrupt was too late or unsuccessful
 			If $evade Then EvadeAoESkillArea()
 		; Other skills can be used all the time
@@ -395,7 +394,7 @@ EndFunc
 
 
 ;~ Evade circular area affected with AoE skill into outer circular area using 2 random coordinates in polar system
-;~ New random position with absolute offset at least 300, up to 500, which is further than $RANGE_NEARBY=240
+;~ New random position with absolute offset at least 300, up to 500, which is further than $RANGE_NEARBY = 240
 Func EvadeAoESkillArea()
 	Local $me = GetMyAgent()
 	Local $myX = DllStructGetData($me, 'X')

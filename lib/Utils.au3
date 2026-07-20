@@ -34,14 +34,14 @@
 
 
 Global Const $PI = 3.14
-Global Const $RANGE_ADJACENT=156, $RANGE_NEARBY=240, $RANGE_AREA=312, $RANGE_EARSHOT=1000, $RANGE_SPELLCAST=1085, $RANGE_LONGBOW=1250, $RANGE_SPIRIT=2500, $RANGE_COMPASS=5000
-Global Const $RANGE_ADJACENT_2=156^2, $RANGE_NEARBY_2=240^2, $RANGE_AREA_2=312^2, $RANGE_EARSHOT_2=1000^2, $RANGE_SPELLCAST_2=1085^2, $RANGE_LONGBOW_2=1250^2, $RANGE_SPIRIT_2=2500^2, $RANGE_COMPASS_2=5000^2
+Global Const $RANGE_ADJACENT = 156,		$RANGE_NEARBY = 240,		$RANGE_AREA = 312,		$RANGE_EARSHOT = 1000,		$RANGE_SPELLCAST = 1085,		$RANGE_LONGBOW = 1250,		$RANGE_SPIRIT = 2500,		$RANGE_COMPASS = 5000
+Global Const $RANGE_ADJACENT_2 = 156^2,	$RANGE_NEARBY_2 = 240^2,	$RANGE_AREA_2 = 312^2,	$RANGE_EARSHOT_2 = 1000^2,	$RANGE_SPELLCAST_2 = 1085^2,	$RANGE_LONGBOW_2 = 1250^2,	$RANGE_SPIRIT_2 = 2500^2,	$RANGE_COMPASS_2 = 5000^2
 ; Mobs aggro correspond to earshot range + hitbox size (10 diameter) - bosses have larger aggro range
 Global Const $MOB_AGGRO_RANGE = $RANGE_EARSHOT + 10
 ; Aggro range of user in order to surprise mobs
-Global Const $PLAYER_AGGRO_RANGE= $RANGE_SPELLCAST + 100
+Global Const $PLAYER_AGGRO_RANGE = $RANGE_SPELLCAST + 100
 ; Wider aggro range of user used for clears
-Global Const $WIDE_PLAYER_AGGRO_RANGE= $RANGE_EARSHOT * 1.5
+Global Const $WIDE_PLAYER_AGGRO_RANGE = $RANGE_EARSHOT * 1.5
 ; Speed of a character without boosts ~290/s
 Global Const $PLAYER_DEFAULT_SPEED = 290
 
@@ -383,8 +383,23 @@ EndFunc
 
 Func EnterUrgozsWarren($forceScrollUse)
 	; Talk to Vash in Kaineng Center - only 1 week out of 9
-	; IsFactionsEliteBonusWeek() not yet implemented — always use scroll path.
-	If Not $forceScrollUse And Not $run_options_cache['run.use_scrolls'] Then
+	If IsFactionsEliteBonusWeek() Then
+		Info('Bonus week means free entry :D')
+		If GetMapID() <> $ID_KAINENG_CENTER Then TravelToOutpost($ID_KAINENG_CENTER, $district_name)
+		MoveTo(3096, -1984)
+		GoToNPC(GetNearestNPCToCoords(4050, -2150))
+		PingSleep(750)
+		Dialog(0x81)
+		PingSleep(750)
+		Dialog(0x800009)
+		PingSleep(750)
+		Dialog(0x80000B)
+		WaitMapLoading($ID_URGOZS_WARREN)
+		If GetMapID() <> $ID_URGOZS_WARREN Then
+			Warn('Something went wrong with Vash.')
+			Return $PAUSE
+		EndIf
+	ElseIf Not $forceScrollUse And Not $run_options_cache['run.use_scrolls'] Then
 		Error('Trying to enter Urgoz Warren without enabling scroll usage.')
 		Return $FAIL
 	Else
@@ -407,9 +422,31 @@ Func EnterUrgozsWarren($forceScrollUse)
 EndFunc
 
 
-Func EnterTheDeep()
-	TravelToOutpost($ID_EMBARK_BEACH, $district_name)
-	If $run_options_cache['run.use_scrolls'] Then
+Func EnterTheDeep($forceScrollUse)
+	; Talk to Eurayle in Kaineng Center - only 1 week out of 9
+	If IsFactionsEliteBonusWeek() Then
+		Info('Bonus week means free entry :D')
+		If GetMapID() <> $ID_KAINENG_CENTER Then TravelToOutpost($ID_KAINENG_CENTER, $district_name)
+		MoveTo(3095, -1294)
+		GoToNPC(GetNearestNPCToCoords(4050, -930))
+		PingSleep(750)
+		Dialog(0x81)
+		PingSleep(750)
+		Dialog(0x800009)
+		PingSleep(750)
+		Dialog(0x80000B)
+		WaitMapLoading($ID_THE_DEEP)
+		If GetMapID() <> $ID_THE_DEEP Then
+			Warn('Something went wrong with Eurayle.')
+			Return $PAUSE
+		EndIf
+	ElseIf Not $forceScrollUse And Not $run_options_cache['run.use_scrolls'] Then
+		Error('Trying to enter The Deep without enabling scroll usage.')
+		Return $FAIL
+	Else
+		; Move to Cavalon and use a scroll
+		TravelToOutpost($ID_CAVALON, $district_name)
+		;TravelToOutpost($ID_EMBARK_BEACH, $district_name)
 		Info('Using scroll to enter the Deep')
 		If UseScroll($ID_DEEP_SCROLL) == $SUCCESS Then
 			WaitMapLoading($ID_THE_DEEP)
@@ -417,9 +454,10 @@ Func EnterTheDeep()
 				Warn('Used scroll but still could not enter the Deep. Ensure that player has correct scroll in inventory')
 				Return $PAUSE
 			EndIf
+		Else
+			Error('Trying to enter The Deep without scrolls.')
+			Return $FAIL
 		EndIf
-	Else
-		Return $FAIL
 	EndIf
 	Return $SUCCESS
 EndFunc
@@ -1473,6 +1511,63 @@ EndFunc
 Func PackUtc($month, $day, $hour = 0, $minute = 0)
 	Return $month * 1000000 + $day * 10000 + $hour * 100 + $minute
 EndFunc
+
+
+Func IsFactionsEliteBonusWeek()
+	; Known start of a Factions Elite Bonus week (Mon 15:00 UTC)
+	Local $FACTIONS_ELITE_ANCHOR_UTC = '2026/07/13 15:00:00'
+	Return IsWithinRecurringWeek($FACTIONS_ELITE_ANCHOR_UTC)
+EndFunc
+
+Func IsPantheonBonusWeek()
+	; Known start of a Pantheon Bonus week (Mon 15:00 UTC)
+	Global Const $PANTHEON_ANCHOR_UTC = '2026/08/03 15:00:00'
+	Return IsWithinRecurringWeek($PANTHEON_ANCHOR_UTC)
+EndFunc
+
+
+Func IsHeroesAscentZaishenQuest()
+	; Known start of a Heroes Ascent Zaishen Quest occurrence (16:00 UTC), changes daily but repeats every 6 days
+	Local $ZAISHEN_QUEST_ANCHOR_UTC = '2026/07/24 16:00:00'
+
+	Local $SECONDS_PER_DAY = 24 * 60 * 60
+	; 6 day rotation for zaishen combat quests
+	Local $ROTATION_PERIOD_SECONDS = 6 * $SECONDS_PER_DAY
+
+	Return IsWithinRecurringPeriod($ZAISHEN_QUEST_ANCHOR_UTC, $ROTATION_PERIOD_SECONDS, $SECONDS_PER_DAY)
+EndFunc
+
+;~ True if now falls within the 1-week slot starting at $anchorStartUTC, recurring every 9 weeks.
+;~ $anchorStartUTC must be formatted 'YYYY/MM/DD HH:MM:SS' and can be any past OR future occurrence of the event start.
+Func IsWithinRecurringWeek($anchorStartUTC)
+	Global $SECONDS_PER_WEEK = 7 * 24 * 60 * 60
+	; 9 bonus weeks in rotation
+	Global $ROTATION_PERIOD_SECONDS = 9 * $SECONDS_PER_WEEK
+
+	Return IsWithinRecurringPeriod($anchorStartUTC, $ROTATION_PERIOD_SECONDS, $SECONDS_PER_WEEK)
+EndFunc
+
+
+; FIXME: use server time instead of local UTC time
+;~ True if now falls within a $durationSeconds-long slot starting at $anchorStartUTC, recurring every $periodSeconds.
+Func IsWithinRecurringPeriod($anchorStartUTC, $periodSeconds, $durationSeconds)
+	Local $elapsed = _DateDiff('s', $anchorStartUTC, _NowUtcString())
+
+	Local $leftover = Mod($elapsed, $periodSeconds)
+	; Mod() keeps sign of dividend, correct it
+	If $leftover < 0 Then $leftover += $periodSeconds
+
+	Return $leftover < $durationSeconds
+EndFunc
+
+
+;~ Current UTC time as 'YYYY/MM/DD HH:MM:SS', for use with _DateDiff()
+Func _NowUtcString()
+	Local $utc = _Date_Time_GetSystemTime()
+	Return StringFormat('%04d/%02d/%02d %02d:%02d:%02d', _
+			DllStructGetData($utc, 'Year'), DllStructGetData($utc, 'Month'), DllStructGetData($utc, 'Day'), _
+			DllStructGetData($utc, 'Hour'), DllStructGetData($utc, 'Minute'), DllStructGetData($utc, 'Second'))
+EndFunc
 #EndRegion DateTime
 
 
@@ -1663,7 +1758,9 @@ Func ManageFactionPointsFarm($factionName, $getFactionFunction, $getMaxFactionFu
 			Dialog($dialogID)
 			RandomSleep(550)
 		EndIf
+		Return True
 	EndIf
+	Return False
 EndFunc
 #EndRegion Faction
 

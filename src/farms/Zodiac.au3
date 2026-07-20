@@ -66,11 +66,12 @@ Func ZodiacFarm()
 		SetupZodiacFarm()
 		$zodiac_farm_setup = True
 	EndIf
-
 	If $runtime_status <> 'RUNNING' Then Return 2
 
 	Local $result = ZodiacFarmLoop()
 	BackToUrgozWarrenOutpost()
+	; If we need to manage kurzick points we also need to go back to Urgoz Warren afterward
+	If ManageFactionPointsKurzickFarm() And EnterUrgozsWarren(True) == $FAIL Then Return $FAIL
 	Return $result
 EndFunc
 
@@ -108,7 +109,7 @@ Func ZodiacFarmLoop()
 	Sleep(3000)
 	While Not WaitMapLoading()
 		If CheckStuck('Loading Urgoz Warren map', $ZODIAC_FARM_DURATION * 1.5) == $FAIL Then Return $FAIL
-		Sleep(50)
+		Sleep(500)
 	WEnd
 
 	;################ Pre aggro phase ################
@@ -187,6 +188,7 @@ Func ZodiacFarmLoop()
 	FindAndOpenChests($RANGE_AREA)
 	ZodiacMoveToAndStayAlive(15300, 250, False)
 	Local $foe = GetNearestAgentToAgent(GetMyAgent(), $ID_AGENT_TYPE_NPC, $RANGE_SPIRIT, IsGreaterBloodDrinker)
+	ZodiacStayAliveWithoutSpeed()
 	GetAlmostInRangeOfAgent($foe, $RANGE_EARSHOT - 200)
 	Sleep(2000)
 	ZodiacMoveToAndStayAlive(15615, 480, False)
