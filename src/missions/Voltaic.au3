@@ -109,6 +109,16 @@ Global Const $VOLTAIC_SLOT7_HERO_NAME = 'Zhed Shadowhoof'
 Global Const $VOLTAIC_SLOT7_HERO_TEMPLATE = $VOLTAIC_HERO_ZHED_TEMPLATE
 
 Global $voltaic_farm_setup = False
+Global $voltaic_no_builds_mode = False
+
+;~ Main method to farm Voltaic (no builds variant — preserves custom party and skill bars)
+Func VoltaicNoBuildsFarm()
+	$voltaic_no_builds_mode = True
+	Local $result = VoltaicFarm()
+	$voltaic_no_builds_mode = False
+	Return $result
+EndFunc
+
 
 ;~ Main method to farm Voltaic
 Func VoltaicFarm()
@@ -130,7 +140,12 @@ Func SetupVoltaicFarm()
 	If Not SupportTeamStabilizeAfterTravel($ID_UMBRAL_GROTTO, 10000, 250) Then
 		Warn('Voltaic setup: outpost stabilization timed out before team setup')
 	EndIf
-	If SetupVoltaicFlexibleTeam() == $FAIL Then Return $FAIL
+	If Not $voltaic_no_builds_mode Then
+		If SetupVoltaicFlexibleTeam() == $FAIL Then Return $FAIL
+	Else
+		Info('Voltaic no-builds: skipping player and hero template loading')
+		Info('Voltaic no-builds: preserving custom party (' & GetPartySize() & ' members, ' & GetHeroCount() & ' heroes)')
+	EndIf
 	SwitchToHardModeIfEnabled()
 	SetDisplayedTitle($ID_ASURA_TITLE)
 	SupportTeamOpenHeroPanels('Voltaic')
@@ -325,8 +340,8 @@ Func VoltaicFarmLoop()
 	If GetMapID() <> $ID_VERDANT_CASCADES Then Return $FAIL
 	ResetFailuresCounter()
 
-	; Disable Norgu's skill 8 until we reach the dungeon
-	If Not GetIsHeroSkillSlotDisabled(2, 8) Then ToggleHeroSkillSlot(2, 8)
+	; Disable Norgu's skill 8 until we reach the dungeon (only when using standard team)
+	If Not $voltaic_no_builds_mode And Not GetIsHeroSkillSlotDisabled(2, 8) Then ToggleHeroSkillSlot(2, 8)
 
 	MoveAggroAndKillInRange(-19887, 6074, '1', $VS_AGGRO_RANGE)
 	Info('Making way to Slavers')
@@ -413,8 +428,8 @@ Func VoltaicFarmLoop()
 		Return $FAIL
 	EndIf
 	Info('Now in Justicar')
-	; Re-enable Norgu's skill 8 now that we're inside the dungeon
-	If GetIsHeroSkillSlotDisabled(2, 8) Then ToggleHeroSkillSlot(2, 8)
+	; Re-enable Norgu's skill 8 now that we're inside the dungeon (only when using standard team)
+	If Not $voltaic_no_builds_mode And GetIsHeroSkillSlotDisabled(2, 8) Then ToggleHeroSkillSlot(2, 8)
 	Sleep(500)
 	GoToNPC(GetNearestNPCToCoords(-12135, -18210))
 	RandomSleep(250)

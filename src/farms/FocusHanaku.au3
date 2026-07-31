@@ -103,6 +103,8 @@ Global Const $HANAKU_CHAIN_RETRY_MS = 220
 Global Const $HANAKU_FIGHT_LOG_HEARTBEAT_MS = 500
 Global Const $HANAKU_DAMAGE_UNLOCK_TIMEOUT_MS = 3500
 Global Const $HANAKU_DP_ATTACK_LOCK_MS = 300
+Global Const $HANAKU_PULL_WALK_MS = 750
+Global Const $HANAKU_PULL_DISTANCE = 300
 
 Global $hanaku_perma_chain_count = 0
 
@@ -429,7 +431,7 @@ Func WaitAndMaintainPerma($waitMs, $anchorX = Null, $anchorY = Null)
 	While TimerDiff($timer) < $waitMs And IsPlayerAlive()
 		MaintainHanakuPermaTick()
 		If $anchorX <> Null And $anchorY <> Null Then
-			If Not IsPlayerMoving() And GetDistanceToPoint(GetMyAgent(), $anchorX, $anchorY) > 180 Then Move($anchorX, $anchorY, 0)
+			If Not IsPlayerMoving() And GetDistanceToPoint(GetMyAgent(), $anchorX, $anchorY) > 180 Then Move($anchorX, $anchorY)
 		EndIf
 		Sleep(90)
 	WEnd
@@ -506,7 +508,7 @@ EndFunc
 Func MoveToWithRetry($x, $y, $attempts = 3)
 	For $a = 1 To $attempts
 		If IsPlayerDead() Then Return False
-		If MoveTo($x, $y, 25, 0, MaintainHanakuPermaTick) Then Return True
+		If MoveTo($x, $y, 25, MaintainHanakuPermaTick) Then Return True
 
 		; Deterministic anti-block nudges avoid random backward hops.
 		Local $nudgeX = $x
@@ -521,7 +523,7 @@ Func MoveToWithRetry($x, $y, $attempts = 3)
 			Case 0
 				$nudgeY = $y - 180
 		EndSwitch
-		MoveTo($nudgeX, $nudgeY, 25, 0, MaintainHanakuPermaTick)
+		MoveTo($nudgeX, $nudgeY, 25, MaintainHanakuPermaTick)
 		RandomSleep(140)
 	Next
 
@@ -568,14 +570,14 @@ Func HanakuTryRescueSide($targetX, $targetY, $vx, $vy)
 	Local $step2y = Int($my + (420 * $vy))
 
 	If IsPlayerDead() Then Return False
-	MoveTo($step1x, $step1y, 25, 0, MaintainHanakuPermaTick)
+	MoveTo($step1x, $step1y, 25, MaintainHanakuPermaTick)
 	RandomSleep(120)
-	If MoveTo($targetX, $targetY, 25, 0, MaintainHanakuPermaTick) Then Return True
+	If MoveTo($targetX, $targetY, 25, MaintainHanakuPermaTick) Then Return True
 
 	If IsPlayerDead() Then Return False
-	MoveTo($step2x, $step2y, 25, 0, MaintainHanakuPermaTick)
+	MoveTo($step2x, $step2y, 25, MaintainHanakuPermaTick)
 	RandomSleep(120)
-	If MoveTo($targetX, $targetY, 25, 0, MaintainHanakuPermaTick) Then Return True
+	If MoveTo($targetX, $targetY, 25, MaintainHanakuPermaTick) Then Return True
 
 	Return False
 EndFunc
@@ -599,16 +601,16 @@ Func HanakuTryRescueArc($targetX, $targetY, $sideX, $sideY)
 	Local $arc2y = Int($my + (260 * $sideY) + (430 * $fy))
 
 	If IsPlayerDead() Then Return False
-	MoveTo($arc1x, $arc1y, 25, 0, MaintainHanakuPermaTick)
+	MoveTo($arc1x, $arc1y, 25, MaintainHanakuPermaTick)
 	RandomSleep(120)
 	HanakuRetargetForPush()
-	If MoveTo($targetX, $targetY, 25, 0, MaintainHanakuPermaTick) Then Return True
+	If MoveTo($targetX, $targetY, 25, MaintainHanakuPermaTick) Then Return True
 
 	If IsPlayerDead() Then Return False
-	MoveTo($arc2x, $arc2y, 25, 0, MaintainHanakuPermaTick)
+	MoveTo($arc2x, $arc2y, 25, MaintainHanakuPermaTick)
 	RandomSleep(120)
 	HanakuRetargetForPush()
-	If MoveTo($targetX, $targetY, 25, 0, MaintainHanakuPermaTick) Then Return True
+	If MoveTo($targetX, $targetY, 25, MaintainHanakuPermaTick) Then Return True
 
 	Return False
 EndFunc
@@ -825,6 +827,56 @@ Func HanakuSetAllHeroesGuard()
 EndFunc
 
 
+;~ Run forward past Hanaku so that mobs standing behind the player are
+;~ pulled through the boss and re-cluster in the scythe arc.  A small
+;~ lateral offset alternates left / right to avoid body-blocking Hanaku.
+Func HanakuPullEnemies($hanaku)
+	If $hanaku == Null Then Return
+	Local $me = GetMyAgent()
+	If $me == Null Then Return
+
+	Local $px = DllStructGetData($me, 'X')
+	Local $py = DllStructGetData($me, 'Y')
+	Local $hx = DllStructGetData($hanaku, 'X')
+	Local $hy = DllStructGetData($hanaku, 'Y')
+
+	; Forward direction: from Player towards Hanaku.
+	Local $dx = $hx - $px
+	Local $dy = $hy - $py
+	Local $len = Sqrt($dx * $dx + $dy * $dy)
+	If $len < 1 Then Return
+	$dx /= $len
+	$dy /= $len
+
+	; Alternate lateral offset so we don't always try the same side.
+	Local Static $pullSide = 1
+	Local $lateralX = -$dy * $pullSide * 180
+	Local $lateralY =  $dx * $pullSide * 180
+	$pullSide *= -1
+
+	; Target is BEYOND Hanaku, continuing forward.
+	Local $tx = $hx + $dx * $HANAKU_PULL_DISTANCE + $lateralX
+	Local $ty = $hy + $dy * $HANAKU_PULL_DISTANCE + $lateralY
+
+	Move($tx, $ty)
+
+	; Walk for PULL_WALK_MS while keeping perma buffs alive.
+	Local $timer = TimerInit()
+	While TimerDiff($timer) < $HANAKU_PULL_WALK_MS And IsPlayerAlive()
+		MaintainHanakuPermaTick()
+		Sleep(50)
+	WEnd
+
+	; Re-engage Hanaku — Attack() cancels the Move() and sends us back
+	; through the freshly-clustered mobs.
+	$hanaku = GetHanakuTarget()
+	If $hanaku <> Null Then
+		ChangeTarget($hanaku)
+		Attack($hanaku)
+	EndIf
+EndFunc
+
+
 Func KillHanaku()
 	If IsPlayerDead() Then Return $FAIL
 	HanakuFightLogWrite('kill_start')
@@ -854,6 +906,7 @@ Func KillHanaku()
 	Local $lastAdrenalineDiagnostic = TimerInit()
 	Local $lastAdrenalineWarn = TimerInit()
 	Local $lastCAMaintenanceCheck = TimerInit()
+	Local $pullDone = False
 
 	Local $fightTimer = TimerInit()
 	While IsPlayerAlive() And TimerDiff($fightTimer) < $HANAKU_FIGHT_TIMEOUT_MS
@@ -869,6 +922,15 @@ Func KillHanaku()
 			EndIf
 		EndIf
 		If GetIsDead($hanaku) Or DllStructGetData($hanaku, 'HealthPercent') <= 0 Then Return $SUCCESS
+
+		; ---- Single enemy pull: run forward past Hanaku so mobs behind the
+		; player re-path and cluster in the scythe arc.  Executed at most
+		; ONCE per fight — melee may die early but casters cannot be lured.
+		; Skipped during the CV->Reap chain window (state==1).
+		If Not $pullDone And $comboState == 0 Then
+			HanakuPullEnemies($hanaku)
+			$pullDone = True
+		EndIf
 
 		ChangeTarget($hanaku)
 		If TimerDiff($lastWeaponRefresh) > 650 Then

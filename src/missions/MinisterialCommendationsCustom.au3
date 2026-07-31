@@ -297,29 +297,13 @@ Func MinisterialCommendationsCustomFarmLoop()
 
     RandomSleep(1000)
     Info('Picking up loot')
-    ; Sweep until no GUI-allowed items remain nearby (or timeout), instead of fixed pass count.
-    Local $lootDeadlock = TimerInit()
-    Local $lootPasses = 0
-    Local $stalledPasses = 0
-    While IsPlayerAlive() And TimerDiff($lootDeadlock) < 45000
-        Local $remainingBefore = CountPickableItemsCustom($RANGE_SPIRIT, DefaultShouldPickItem)
-        If $remainingBefore == 0 Then ExitLoop
-
+    ; Multiple passes with delays so ownership expires on hero-assigned drops
+    ; (event consumables, summoning stones etc. are initially assigned to heroes).
+    For $pass = 1 To 8
         PickUpItems(HealWhilePickingItemsCustom, DefaultShouldPickItem, $RANGE_SPIRIT)
-        RandomSleep(1000)
-        $lootPasses += 1
-
-        Local $remainingAfter = CountPickableItemsCustom($RANGE_SPIRIT, DefaultShouldPickItem)
-        If $remainingAfter >= $remainingBefore Then
-            $stalledPasses += 1
-        Else
-            $stalledPasses = 0
-        EndIf
-
-        ; Prevent endless loops if ownership/pathing blocks specific drops temporarily.
-        If $stalledPasses >= 2 Then ExitLoop
-    WEnd
-    Info('Loot sweep done: passes=' & $lootPasses & ' remaining=' & CountPickableItemsCustom($RANGE_SPIRIT, DefaultShouldPickItem))
+        RandomSleep(3000)
+    Next
+    Info('Loot sweep done: 6 passes')
 
     If $log_level == 0 Then FileClose($logging_file_commendations_custom)
     Return $SUCCESS

@@ -60,10 +60,8 @@ Func SoOFlagMoveAggroAndKill($x, $y, $log = '', $range = $SOO_AGGRO_RANGE)
 EndFunc
 
 
-;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgFTsYmWRCv4dwmcdYXEZQdYaAA' ; Water Magic
-Global Const $SOO_PLAYER_SKILLBAR = 'OgdDgYysS7ilCQf2kuZIDpOZDA' ; Earth Magic (Shockwave)
-;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgBDgYysS7ilCQfIDnCENjCuCA' ; Earth Magic (RTL)
-;~ Global Const $SOO_PLAYER_SKILLBAR = 'OgFTgYmWRicQlxmcX0V8bAdYUAA' ; Air Magic + Prot Defense
+
+Global Const $SOO_PLAYER_SKILLBAR = 'OgBDg6ucSqDkDtl7irDylJRHOA'
 
 
 
@@ -82,31 +80,24 @@ Global Const $SOO_EXPLORE_ESCAPE_ATTEMPTS = 2
 Global Const $SOO_EXPLORE_ESCAPE_WAIT_MS = 3500
 Global Const $SOO_TEMPLATE_LOAD_RETRIES = 3
 
-Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkA9UTAEBA' ; Inep + Frust
-Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB' ; Esurge
-Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMwQ4iB'
+Global Const $SOO_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArATAEBA' ; Inep + Frust
+Global Const $SOO_HERO_NORGU_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMgg7iB'
+Global Const $SOO_HERO_RAZAH_TEMPLATE = 'OQhkAoC8AGKzJAna6me5gMgg7iB'
 Global Const $SOO_HERO_MOW_TEMPLATE = 'OANTY0G/QKuqB0jY67jQLqqqeA' ; Healer's Boon Hybrid
+Global Const $SOO_HERO_JIN_TEMPLATE = 'OgUUY5LijsSuS4G/GfGghQH0GOBA'
 
 
-;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44HC1xnhXvI3juY9QLeXBA' ; RoJ + Prot
-Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + SoW
+Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44XA5xndPwrUfXSX8iU9BA' ; RoJ + Command
 
-;~ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'Owkj4sQqpO+sqPe9iQ9dJ74uIA' ; RoJ + Fall Back
-Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhmwrqKNncDzqHA' ; BiP Resto + Blood Bond
-;~ Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhmwrqKNncDzxJA' ; BiP Resto
-Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OABDUshnSANUBfBbhlBWCVCJgA' ; Bone Fiends + Golem
+Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQoG4hEyzdoqyFEeSzJ3ws6B'
+Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OAhjUwGYoSxMVBoBnObhSTTODTA'
 Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgVDIJycO5gwxV9bo0GCXgiA' ; BlindingS + Dom
-Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTnp17xFOhmWTkLA' ; Spirit's Gift
+Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNdmWvHX4EaOPRuA'
 
 
 Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1j62dNgA' ; Ether Renewal Prot
-;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1Do2dNgA' ; Ether Renewal Prot
-;~ Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1jbydNgA' ; Ether Renewal Prot (Draw)
-Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBEgkqLzHlysOoOMNAJaM8nBNA' ; Water Magic Burning Variant
-;~ Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBFgYeKuIrjY9PjVVHrjeYOcsC' ; MoM
-Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT44HC1xnhXvI3juY9QLeXBA' ; RoJ + Prot
-;~ Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT44XA5xndPwrXEqvLpLW9BA' ; RoJ + SoW
-
+Global Const $SOO_HERO_SOUSUKE_TEMPLATE = 'OgBCoMzSvMLNtukz7CpgLA' ; Fire Mage
+Global Const $SOO_HERO_OGDEN_TEMPLATE = 'OwAT42nC1xndPwrXkuY9QLGQAA'
 Global Const $SOO_HERO_TAHLKORA_TEMPLATE = 'OwAS8YIPPt6xM5uGQEIaROC' ; Healer's Boon Prot
 
 
@@ -126,27 +117,21 @@ Global Const $SOO_SLOT3_HERO_TEMPLATE = $SOO_HERO_RAZAH_TEMPLATE
 Global Const $SOO_SLOT4_HERO_ID = $ID_XANDRA
 Global Const $SOO_SLOT4_HERO_NAME = 'Xandra'
 Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_XANDRA_TEMPLATE
-;~ Global Const $SOO_SLOT4_HERO_ID = $ID_VEKK
-;~ Global Const $SOO_SLOT4_HERO_NAME = 'Vekk'
-;~ Global Const $SOO_SLOT4_HERO_TEMPLATE = $SOO_HERO_VEKK_TEMPLATE
 
 Global Const $SOO_SLOT5_HERO_ID = $ID_OLIAS
 Global Const $SOO_SLOT5_HERO_NAME = 'Olias'
 Global Const $SOO_SLOT5_HERO_TEMPLATE = $SOO_HERO_OLIAS_TEMPLATE
 
-Global Const $SOO_SLOT6_HERO_ID = $ID_DUNKORO
-Global Const $SOO_SLOT6_HERO_NAME = 'Dunkoro'
-Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
-;~ Global Const $SOO_SLOT6_HERO_ID = $ID_ZHED_SHADOWHOOF
-;~ Global Const $SOO_SLOT6_HERO_NAME = 'Zhed'
-;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_ZHED_TEMPLATE
+;~ Global Const $SOO_SLOT6_HERO_ID = $ID_DUNKORO
+;~ Global Const $SOO_SLOT6_HERO_NAME = 'Dunkoro'
+;~ Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_DUNKORO_TEMPLATE
+Global Const $SOO_SLOT6_HERO_ID = $ID_LIVIA
+Global Const $SOO_SLOT6_HERO_NAME = 'Livia'
+Global Const $SOO_SLOT6_HERO_TEMPLATE = $SOO_HERO_LIVIA_TEMPLATE
 
 Global Const $SOO_SLOT7_HERO_ID = $ID_OGDEN
 Global Const $SOO_SLOT7_HERO_NAME = 'Ogden Stonehealer'
 Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_OGDEN_TEMPLATE
-;~ Global Const $SOO_SLOT7_HERO_ID = $ID_MASTER_OF_WHISPERS
-;~ Global Const $SOO_SLOT7_HERO_NAME = 'Master of Whispers'
-;~ Global Const $SOO_SLOT7_HERO_TEMPLATE = $SOO_HERO_MOW_TEMPLATE
 
 Global $soo_farm_setup = False
 Global $soo_consecutive_run_failures = 0
@@ -159,6 +144,7 @@ Global $soo_essences_used = 0
 Global $soo_last_conset_timer = TimerInit()
 Global $soo_celerity_only = False
 Global $soo_armor_on_floor3 = False
+Global $soo_no_builds_mode = False
 Global $soo_current_floor = 0
 
 
@@ -181,6 +167,93 @@ Func SoOCelerityFarm()
 	Local $result = SoOFarm()
 	$soo_celerity_only = False
 	Return $result
+EndFunc
+
+
+;~ Main method to farm SoO (Celerity + Armor, no build loading — uses current player/hero builds)
+Func SoOCelerityNoBuildsFarm()
+	$soo_celerity_only = True
+	$soo_armor_on_floor3 = True
+	$soo_no_builds_mode = True
+	Local $result = SoOFarmNoBuilds()
+	$soo_celerity_only = False
+	$soo_armor_on_floor3 = False
+	$soo_no_builds_mode = False
+	Return $result
+EndFunc
+
+
+;~ Main method to farm SoO (Celerity-only, no build loading — no Armor, uses current player/hero builds)
+Func SoOCelerityOnlyNoBuildsFarm()
+	$soo_celerity_only = True
+	$soo_armor_on_floor3 = False
+	$soo_no_builds_mode = True
+	Local $result = SoOFarmNoBuilds()
+	$soo_celerity_only = False
+	$soo_no_builds_mode = False
+	Return $result
+EndFunc
+
+
+;~ Like SoOFarm() but skips player template and hero team setup.
+Func SoOFarmNoBuilds()
+	Local $result = $FAIL
+	SoOForceOutpostRecoveryIfNeeded()
+	If Not $soo_farm_setup Then
+		Local $setupResult = SetupSoOFarmNoBuilds()
+		If $setupResult <> $SUCCESS Then
+			SoOHandleRunFailure('setup failed')
+			If $setupResult == $PAUSE Then Return $PAUSE
+			Return $FAIL
+		EndIf
+	Else
+		SoOHasEnoughConsets()
+	EndIf
+
+	$result = SoOFarmLoop()
+	If $result == $SUCCESS Then
+		SoOHandleRunSuccess()
+	Else
+		SoOHandleRunFailure('run failed')
+	EndIf
+	Return $result
+EndFunc
+
+
+;~ SetupSoOFarm without player template load and hero team assembly.
+Func SetupSoOFarmNoBuilds()
+	Info('Setting up farm (no builds)')
+	$soo_setup_outpost_recovery_attempted = False
+	Local $escapeResult = SoOEnsureOutpostContext($ID_VLOXS_FALLS, 'SoO no-builds setup')
+	If $escapeResult <> $SUCCESS Then Return $escapeResult
+	If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
+	If Not SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250) Then
+		Warn('SoO no-builds setup: outpost stabilization timed out')
+	EndIf
+	SoOHasEnoughConsets()
+	SwitchToHardModeIfEnabled()
+	SetDisplayedTitle($ID_ASURA_TITLE)
+	Info('SoO no-builds: skipping player and hero template loading')
+	Info('SoO no-builds: preserving custom party (' & GetPartySize() & ' members, ' & GetHeroCount() & ' heroes)')
+	For $attempt = 1 To $SOO_SETUP_RUN_TO_DUNGEON_RETRIES
+		If RunToShardsOfOrrDungeon() == $SUCCESS Then
+			$soo_farm_setup = True
+			ExitLoop
+		EndIf
+
+		Warn('SoO no-builds setup: failed to reach Shards of Orr on attempt ' & $attempt & '/' & $SOO_SETUP_RUN_TO_DUNGEON_RETRIES)
+		If $attempt < $SOO_SETUP_RUN_TO_DUNGEON_RETRIES Then
+			Sleep(2000)
+			If TravelToOutpost($ID_VLOXS_FALLS, $district_name) == $FAIL Then Return $FAIL
+			SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250)
+		EndIf
+	Next
+	If Not $soo_farm_setup Then
+		Warn('SoO no-builds setup aborted: could not reach Shards of Orr after bounded retries')
+		Return $FAIL
+	EndIf
+	Info('Preparations complete')
+	Return $SUCCESS
 EndFunc
 
 
@@ -322,8 +395,11 @@ EndFunc
 Func SoOWaitUntilPartyAlive()
 	Local $wasWiped = IsPlayerAndPartyWiped()
 	Local $wasDead = IsPlayerDead()
-	WaitUntilPartyAlive()
+	; Un-flag heroes immediately if player is dead so they can walk to the corpse and resurrect.
+	; If we wait until after WaitUntilPartyAlive(), the player may have already auto-respawned
+	; at the shrine and heroes are still flagged at fight positions — too far to help.
 	If $wasWiped Or $wasDead Then CancelAllHeroes()
+	WaitUntilPartyAlive()
 EndFunc
 
 
@@ -361,7 +437,9 @@ Func SoOForceOutpostRecovery()
 
 	SupportTeamStabilizeAfterTravel($ID_VLOXS_FALLS, 10000, 250)
 
-	If GetPartySize() > 1 Then
+	If $soo_no_builds_mode Then
+		Info('SoO force recovery: no-builds mode — preserving custom party')
+	ElseIf GetPartySize() > 1 Then
 		SoOEnsureSoloParty(12000)
 	EndIf
 
@@ -1043,164 +1121,168 @@ EndFunc
 Func ClearSoOFloor2()
 	Info('------------------------------------')
 	Info('Second floor')
-	$soo_current_floor = 2
 	If IsHardmodeEnabled() Then SoOUseConset()
 
 	Local $firstRoomfirstTime = True
-	Local $soo_floor1_torch_done = False
-	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), -11000, -6000, 1250)
+	Local $braziersLit = False
+	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -11000, -6000, $RANGE_EARSHOT)
 		If CheckStuck('SoO Floor 2 - First Room', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
-		CancelAllHeroes()
-		SoOWaitUntilPartyAlive()
+		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
+		UseSummoningStone()
 		Info('Getting blessing')
 		GoToNPC(GetNearestNPCToCoords(-14076, -19457))
 		RandomSleep(250)
 		Dialog(0x84)
 		RandomSleep(500)
 
-		If Not $soo_floor1_torch_done Then
-			If Not $firstRoomfirstTime Then
-				MoveTo(-10033, -12701)
-				RandomSleep(500)
-				MoveTo(-9300, -17300)
-				RandomSleep(500)
-				MoveTo(-14600, -16650)
-				RandomSleep(500)
-			EndIf
+		; Remember wipe count so we can detect new wipes even after party has respawned
+		Local $wipesBefore = $party_failures_count
 
-			SoOMoveAggroAndKill(-14600, -16650, '1', $SOO_AGGRO_RANGE)
-			SoOMoveAggroAndKill(-16600, -16500, '2', $SOO_AGGRO_RANGE)
+		; ---- Recovery path ----
+		; Triggered when we've already made progress: either this is not the first
+		; loop iteration, OR the braziers are already lit (wipe during first pass).
+		; In both cases we must sweep enemies from shrine to destination before any
+		; other action — otherwise the party walks into the same mobs that caused
+		; the previous wipe.
+		If Not $firstRoomfirstTime Or $braziersLit Then
+			; Always start with a shrine→torch-room sweep so the path is clear.
+			MoveAggroAndKillInRange(-14600, -16650, 'Recovery: shrine to step 1', $PLAYER_AGGRO_RANGE)
+			MoveAggroAndKillInRange(-16600, -16500, 'Recovery: step 2 torch chest area', $PLAYER_AGGRO_RANGE)
+			MoveAggroAndKillInRange(-9300, -17300, 'Recovery: step 3 area', $PLAYER_AGGRO_RANGE)
+			MoveAggroAndKillInRange(-9600, -16600, 'Recovery: step 4 approach', $PLAYER_AGGRO_RANGE)
+			MoveAggroAndKillInRange(-10033, -12701, 'Recovery: torch room entrance', $PLAYER_AGGRO_RANGE)
 
-			Info('Open torch chest')
-			ClearTarget()
-			Sleep(500)
-
-			; Open chest — use a single interact so we don't accidentally
-			; auto-pick the torch before PickUpTorch() runs below.
-			For $i = 1 To 2
-				MoveTo(-14709, -16548)
-				TargetNearestItem()
-				RandomSleep(1500)
-				ActionInteract()
-				RandomSleep(500)
-			Next
-
-			Info('Pick up torch')
-			RandomSleep(750)
-			; Retry chest+pickup if torch wasn't acquired (common after a wipe)
-			For $torchAttempt = 1 To 3
-				If PickUpTorch() Then ExitLoop
-				Warn('SoO torch: pickup attempt ' & $torchAttempt & '/3 failed, reopening chest')
-				MoveTo(-14709, -16548)
-				TargetNearestItem()
-				RandomSleep(1500)
-				ActionInteract()
-				RandomSleep(500)
-			Next
-
-			; If torch still not acquired after retries, restart the room loop
-			If Not PickUpTorch() Then
-				Warn('SoO torch: could not acquire torch after all attempts, restarting torch room')
+			If $braziersLit Then
+				; Braziers already lit — sweep exit corridor and go straight to exit.
+				Info('Recovery: braziers already lit, sweeping corridor to exit')
+				MoveAggroAndKillInRange(-9358, -12411, 'Recovery: torch room center', $PLAYER_AGGRO_RANGE)
+				MoveAggroAndKillInRange(-10500, -9600, 'Recovery: step 9', $PLAYER_AGGRO_RANGE)
+				MoveAggroAndKillInRange(-11000, -7800, 'Recovery: step 10', $PLAYER_AGGRO_RANGE)
+				MoveAggroAndKillInRange(-11000, -6000, 'Recovery: step 11 exit', $PLAYER_AGGRO_RANGE)
+				If $party_failures_count > $wipesBefore Then ContinueLoop
+				; Walk to exit point so the outer While condition sees us there.
+				MoveTo(-11000, -6000)
 				ContinueLoop
-			EndIf
-
-			SoOMoveAggroAndKill(-9300, -17300, '3', $SOO_AGGRO_RANGE)
-			; Pick up again in case of death
-			PickUpTorch()
-			SoOMoveAggroAndKill(-9600, -16600, '4', $SOO_AGGRO_RANGE)
-			; Pick up again in case of death
-			PickUpTorch()
-			InteractWithTorchOrBrazierAt(-11242, -14612, 'Light up torch')
-
-			Info('Get in torch room')
-			MoveTo(-10033, -12701)
-			InteractWithTorchOrBrazierAt(-11019, -11550, 'Lighting brazier 1')
-			InteractWithTorchOrBrazierAt(-9028, -9021, 'Lighting brazier 2')
-			InteractWithTorchOrBrazierAt(-6805, -11511, 'Lighting brazier 3')
-			InteractWithTorchOrBrazierAt(-8984, -13842, 'Lighting brazier 4')
-
-			Info('Drop torch')
-			DropBundle()
-			RandomSleep(500)
-			$soo_floor1_torch_done = True
-		Else
-			Info('Torch/brazier sequence already done, skipping to group clearing')
-			If Not $firstRoomfirstTime Then
-				MoveTo(-9358, -12411)
-				RandomSleep(500)
+			Else
+				; Braziers not lit yet — sweep the rest of torch room and corridor,
+				; then sweep back to shrine so the party can safely restart.
+				MoveAggroAndKillInRange(-10500, -9600, 'Recovery: step 9', $PLAYER_AGGRO_RANGE)
+				MoveAggroAndKillInRange(-11000, -7800, 'Recovery: step 10', $PLAYER_AGGRO_RANGE)
+				MoveAggroAndKillInRange(-11000, -6000, 'Recovery: step 11 exit', $PLAYER_AGGRO_RANGE)
+				MoveAggroAndKillInRange(-14076, -19457, 'Recovery: back to shrine', $PLAYER_AGGRO_RANGE)
+				If $party_failures_count > $wipesBefore Then ContinueLoop
+				; Now that enemies are cleared, restart the normal torch sequence.
 			EndIf
 		EndIf
 
+		; ---- Normal sequence (first pass or after recovery sweep) ----
+		MoveAggroAndKillInRange(-14600, -16650, '1', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-16600, -16500, '2', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
+
+		; Fight any nearby foes before touching the chest — opening it mid-combat is suicide.
+		If CountFoesInRangeOfAgent(GetMyAgent(), $PLAYER_AGGRO_RANGE) > 0 Then
+			Info('Enemies near torch chest — clearing first')
+			MoveAggroAndKillInRange(-14709, -16548, 'Clear before torch chest', $PLAYER_AGGRO_RANGE)
+			If $party_failures_count > $wipesBefore Then ContinueLoop
+		EndIf
+
+		Info('Open torch chest')
+		ClearTarget()
+		Sleep(500)
+
+		; Doubled to secure bot
+		For $i = 1 To 2
+			MoveTo(-14709, -16548)
+			TargetNearestItem()
+			RandomSleep(1500)
+			ActionInteract()
+			RandomSleep(500)
+			ActionInteract()
+			RandomSleep(500)
+		Next
+
+		Info('Pick up torch')
+		PickUpTorch()
+
+		MoveAggroAndKillInRange(-9300, -17300, '3', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
+		; Pick up again in case of death
+		PickUpTorch()
+		MoveAggroAndKillInRange(-9600, -16600, '4', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
+		; Pick up again in case of death
+		PickUpTorch()
+		InteractWithTorchOrBrazierAt(-11242, -14612, 'Light up torch')
+
+		Info('Get in torch room')
+		MoveTo(-10033, -12701)
+		; Fight any foes that followed us before lighting braziers.
+		If CountFoesInRangeOfAgent(GetMyAgent(), $PLAYER_AGGRO_RANGE) > 0 Then
+			Info('Enemies at torch room entrance — clearing first')
+			MoveAggroAndKillInRange(-10033, -12701, 'Clear torch room entrance', $PLAYER_AGGRO_RANGE)
+			If $party_failures_count > $wipesBefore Then ContinueLoop
+		EndIf
+		InteractWithTorchOrBrazierAt(-11019, -11550, 'Lighting brazier 1')
+		InteractWithTorchOrBrazierAt(-9028, -9021, 'Lighting brazier 2')
+		InteractWithTorchOrBrazierAt(-6805, -11511, 'Lighting brazier 3')
+		InteractWithTorchOrBrazierAt(-8984, -13842, 'Lighting brazier 4')
+		$braziersLit = True
+		If $party_failures_count > $wipesBefore Then ContinueLoop
+
+		Info('Drop torch')
+		DropBundle()
+		RandomSleep(500)
 		Info('Kill group')
-		SoOFlagMoveAggroAndKill(-9358, -12411, '5', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
-		SoOFlagMoveAggroAndKill(-10143, -11136, '6', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
-		SoOFlagMoveAggroAndKill(-8871, -9951, '7', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
-		SoOFlagMoveAggroAndKill(-7722, -11522, '8', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
+		MoveAggroAndKillInRange(-9358, -12411, '5', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-10143, -11136, '6', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-8871, -9951, '7', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-7722, -11522, '8', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
 
 		MoveTo(-8912, -13586)
 		Sleep(500)
 		Info('Pick up torch')
 		PickUpTorch()
 
-		SoOMoveAggroAndKill(-10500, -9600, '9', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
+		MoveAggroAndKillInRange(-10500, -9600, '9', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
 		PickUpTorch()
-		SoOMoveAggroAndKill(-11000, -7800, '10', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
+		MoveAggroAndKillInRange(-11000, -7800, '10', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
 		PickUpTorch()
-		SoOMoveAggroAndKill(-11000, -6000, '11', $SOO_AGGRO_RANGE)
+		MoveAggroAndKillInRange(-11000, -6000, '11', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
+		; Pick up again in case of death
+		PickUpTorch()
+		; Ensure player is at exit point so the while condition passes
+		MoveTo(-11000, -6000)
 		$firstRoomfirstTime = False
 	WEnd
 
-	Local $soo_floor2_torch_done = False
-	Local $wasWiped = False
 	Local $secondRoomfirstTime = True
 	Local $mapLoaded = False
-	Local $portalAttempts = 0
-	While Not SoOIsRunFailed() And Not $mapLoaded
+	While Not IsRunFailed() And Not $mapLoaded
 		If CheckStuck('SoO Floor 2 - Second Room', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
-		CancelAllHeroes()
-		$wasWiped = IsPlayerAndPartyWiped()
-		SoOWaitUntilPartyAlive()
-		If $wasWiped Then CancelAllHeroes()
+		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
+		UseSummoningStone()
 
+		Local $shrineRecovered = False
 		If IsAgentInRange(GetMyAgent(), -14076, -19457, 1250) Then
-			Info('Group wiped, moving from shrine to torch room 1 exit')
+			Info('Group wiped, fighting back from shrine to exit corridor')
 			CancelAll()
-			MoveTo(-9300, -17300)
-			RandomSleep(500)
-			MoveTo(-9600, -16600)
-			RandomSleep(500)
-			MoveTo(-10033, -12701)
-			RandomSleep(500)
-			MoveTo(-10500, -9600)
-			RandomSleep(500)
-			MoveTo(-11000, -6000)
-			RandomSleep(500)
+			MoveAggroAndKillInRange(-9600, -16600, 'Recovery: shrine to step 4', $PLAYER_AGGRO_RANGE)
+			MoveAggroAndKillInRange(-10033, -12701, 'Recovery: torch room entrance', $PLAYER_AGGRO_RANGE)
+			MoveAggroAndKillInRange(-10500, -9600, 'Recovery: step 9', $PLAYER_AGGRO_RANGE)
+			MoveAggroAndKillInRange(-11000, -6000, 'Recovery: exit', $PLAYER_AGGRO_RANGE)
 			PickUpTorch()
-			; Prevent the "return from end of floor" path from triggering
-			; after a wipe recovery — we're already back at the start.
-			$secondRoomfirstTime = True
+			$shrineRecovered = True
 		EndIf
 
-		; Only run the "end-of-floor → torch room 1" return path when the portal
-		; didn't open and we need to retry the entire room. Skip it after a wipe —
-		; after a wipe we respawn at the shrine and the block above already moves
-		; us back to the torch room 1 exit.
-		If Not $secondRoomfirstTime And Not $wasWiped Then
-			$portalAttempts += 1
-			If $portalAttempts > 3 Then
-				Error('SoO Floor 2: portal failed ' & ($portalAttempts - 1) & ' times, aborting run')
-				Return $FAIL
-			EndIf
-			Warn('SoO Floor 2: portal attempt ' & $portalAttempts & '/3 — running back to retry entire floor')
-			SoOMoveAggroAndKill(-17500, -9500, 'If not first loop, run back from end of floor to torch room 1', $SOO_AGGRO_RANGE)
+		If Not $secondRoomfirstTime And Not $shrineRecovered Then
+			MoveAggroAndKillInRange(-17500, -9500, 'If not first loop, run back from end of floor to torch room 1', $PLAYER_AGGRO_RANGE)
 			PickUpTorch()
 			MoveTo(-16000, -8700)
 			RandomSleep(500)
@@ -1221,57 +1303,70 @@ Func ClearSoOFloor2()
 			PickUpTorch()
 		EndIf
 
+		; Remember wipe count so we can detect new wipes in the second room
+		Local $wipesBefore = $party_failures_count
+
 		; Poison trap between 12 and 13
-		SoOMoveAggroAndKill(-6900, -4200, '12', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
+		MoveAggroAndKillInRange(-6900, -4200, '12', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
 		; Pick up again in case of death
 		PickUpTorch()
-		SoOMoveAggroAndKill(-5000, -3500, '13', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
+		MoveAggroAndKillInRange(-5000, -3500, '13', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
 		; Pick up again in case of death
 		PickUpTorch()
-		SoOMoveAggroAndKill(-4000, -4000, '14', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
+		MoveAggroAndKillInRange(-4000, -4000, '14', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
 		PickUpTorch()
-		SoOMoveAggroAndKill(-3900, -4163, '15', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
+		MoveAggroAndKillInRange(-3900, -4163, '15', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
 		PickUpTorch()
 
-		If $soo_floor2_torch_done Then
-			Info('Torch sequence already done, skipping to group clearing')
-		Else
-			InteractWithTorchOrBrazierAt(-3717, -4254, 'Light up torch')
-			InteractWithTorchOrBrazierAt(-8251, -3240, 'Light up brazier 1')
-			InteractWithTorchOrBrazierAt(-8278, -1670, 'Light up brazier 2')
-			$soo_floor2_torch_done = True
+		; Fight any nearby foes before lighting braziers — walking into fire mid-combat is suicide.
+		If CountFoesInRangeOfAgent(GetMyAgent(), $PLAYER_AGGRO_RANGE) > 0 Then
+			Info('Enemies near second-room braziers — clearing first')
+			MoveAggroAndKillInRange(-3717, -4254, 'Clear before torch lighting', $PLAYER_AGGRO_RANGE)
+			If $party_failures_count > $wipesBefore Then ContinueLoop
 		EndIf
+
+		InteractWithTorchOrBrazierAt(-3717, -4254, 'Light up torch')
+		InteractWithTorchOrBrazierAt(-8251, -3240, 'Light up brazier 1')
+		InteractWithTorchOrBrazierAt(-8278, -1670, 'Light up brazier 2')
 
 		Info('Drop torch')
 		DropBundle()
 		RandomSleep(500)
 
-		SoOFlagMoveAggroAndKill(-6553, -2347, '16', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
-		SoOFlagMoveAggroAndKill(-7733, -2487, '17', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
-		SoOFlagMoveAggroAndKill(-6481, -2668, '18', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
+		MoveAggroAndKillInRange(-6553, -2347, '16', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
+		MoveAggroAndKillInRange(-7733, -2487, '17', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
+		MoveAggroAndKillInRange(-6481, -2668, '18', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
 		PickUpItems()
-		SoOMoveAggroAndKill(-9000, -4350, '19', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
+		MoveAggroAndKillInRange(-9000, -4350, '19', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
 		; Poison trap between 19 and 20
-		SoOMoveAggroAndKill(-11204, -4331, '20', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
-		SoOMoveAggroAndKill(-11500, -8400, '21', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
-		SoOMoveAggroAndKill(-16000, -8700, '22', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
-		SoOMoveAggroAndKill(-17500, -9500, '23', $SOO_AGGRO_RANGE)
-		If IsPlayerAndPartyWiped() Then ContinueLoop
+		MoveAggroAndKillInRange(-11204, -4331, '20', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
+		MoveAggroAndKillInRange(-11500, -8400, '21', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
+		MoveAggroAndKillInRange(-16000, -8700, '22', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
+		MoveAggroAndKillInRange(-17500, -9500, '23', $PLAYER_AGGRO_RANGE)
+		If $party_failures_count > $wipesBefore Then ContinueLoop
 
 		$secondRoomfirstTime = False
 		Info('Going through portal')
 		If CheckStuck('SoO Floor 2 - Opening door', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
+
+		; Fight any stragglers before fumbling with the dungeon door.
+		If CountFoesInRangeOfAgent(GetMyAgent(), $PLAYER_AGGRO_RANGE) > 0 Then
+			Info('Enemies near dungeon door — clearing first')
+			MoveAggroAndKillInRange(-18725, -9171, 'Clear before dungeon door', $PLAYER_AGGRO_RANGE)
+			If $party_failures_count > $wipesBefore Then ContinueLoop
+		EndIf
+
 		Info('Open dungeon door')
 		ClearTarget()
 		; Tripled to secure bot
@@ -1288,7 +1383,7 @@ Func ClearSoOFloor2()
 		RandomSleep(2000)
 		$mapLoaded = WaitMapLoading($ID_SHARDS_OF_ORR_LVL_3)
 	WEnd
-	Return SoOIsRunFailed() ? $FAIL : $SUCCESS
+	Return IsRunFailed() ? $FAIL : $SUCCESS
 EndFunc
 
 
@@ -1370,13 +1465,14 @@ Func ClearSoOFloor3()
 
 		Info('Open torch chest')
 		ClearTarget()
-		; Open chest — use a single interact so we don't accidentally
-		; auto-pick the torch before PickUpTorch() runs below.
+		; Doubled to secure bot
 		For $i = 1 To 2
 			RandomSleep(500)
 			MoveTo(16134, 17590)
 			TargetNearestItem()
 			RandomSleep(1500)
+			ActionInteract()
+			RandomSleep(500)
 			ActionInteract()
 			RandomSleep(500)
 		Next
@@ -1537,10 +1633,6 @@ EndFunc
 
 ;~ Pick up the torch
 Func PickUpTorch()
-	; If the torch is already held as a bundle (e.g. auto-picked by a second
-	; ActionInteract on the chest), return success immediately.
-	If IsPlayerHoldingTorchBundle() Then Return True
-
 	Local $agents = GetAgentArray($ID_AGENT_TYPE_ITEM)
 	Local $deadlock
 	For $agent In $agents
@@ -1553,7 +1645,6 @@ Func PickUpTorch()
 				PickUpItem($item)
 				RandomSleep(500)
 				If IsPlayerDead() Then Return False
-				If IsPlayerHoldingTorchBundle() Then Return True
 				If TimerDiff($deadlock) > 20000 Then
 					Error('Could not get torch at (' & DllStructGetData($agent, 'X') & ', ' & DllStructGetData($agent, 'Y') & ')')
 					Return False
@@ -1563,17 +1654,4 @@ Func PickUpTorch()
 		EndIf
 	Next
 	Return False
-EndFunc
-
-
-;~ Returns True if the player is already holding the torch as a bundle.
-Func IsPlayerHoldingTorchBundle()
-	Return GetItemByFilter(IsTorchBundleFilter) <> Null
-EndFunc
-
-
-;~ Item filter: matches the SoO torch held as a bundle.
-Func IsTorchBundleFilter($itemStruct, $unused = Null)
-	Return DllStructGetData($itemStruct, 'ModelID') == $ID_SOO_TORCH And _
-		DllStructGetData($itemStruct, 'Type') == $ID_TYPE_BUNDLE
 EndFunc

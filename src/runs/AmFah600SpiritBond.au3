@@ -210,6 +210,13 @@ Func AmFah600SpiritBondRunLoop()
 
 		; Spot 1: Brother Tosai — fight first two groups.
 		If AmFah600SpiritBondFightFirstTwoGroups() == $FAIL Then Return $FAIL
+		; Sanity check: all foes near the Tosai area must be dead before we
+		; walk through hostile territory toward Spot 2.
+		Local $remainingFoes = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_EARSHOT)
+		If $remainingFoes > 0 Then
+			Warn('FightFirstTwoGroups returned SUCCESS but ' & $remainingFoes & ' foes remain — re-entering combat')
+			ContinueLoop
+		EndIf
 		PickUpItems()
 		; Spot 2: Marksman group (Morgahn flag location).
 		If AmFah600SpiritBondGoToSpot2() == $FAIL Then Return $FAIL
@@ -345,9 +352,35 @@ Func AmFah600SpiritBondActivateQuest()
 		Return $SUCCESS
 	EndIf
 
+	; Abandon any stale quest state from previous failed attempts.
+	; Partial activation (Dialog+AcceptQuest may make enemies hostile without
+	; the quest registering as 'active') poisons the next run — the approach
+	; waypoints don't maintain PS/SB and the player dies during movement.
+	If Not IsQuestNotFound($ID_QUEST_REFUSE_TO_DRINK) Then
+		Warn('Refuse to Drink quest in non-active state — abandoning to reset')
+		AbandonQuest($ID_QUEST_REFUSE_TO_DRINK)
+		PingSleep(500)
+	EndIf
+
 	; Cast fresh defensive enchants NOW — don't rely on PrepareBeforeQuestTrigger's
 	; casts which may have expired during the approach to Tosai.
 	AmFah600SpiritBondMaintainCoreUpkeep()
+
+	; Ensure all four pre-buffs (1/2/3/4) are active BEFORE the first dialog
+	; attempt, so AcceptQuest fires immediately instead of wasting a cycle.
+	Local $prebuffTimer = TimerInit()
+	While IsPlayerAlive() And TimerDiff($prebuffTimer) < 15000
+		If GetEffect($ID_PROTECTIVE_SPIRIT) <> Null _
+			And GetEffect($ID_SPIRIT_BOND) <> Null _
+			And GetEffect($ID_EBON_BATTLE_STANDARD_OF_WISDOM) <> Null _
+			And GetEffect($ID_VENGEFUL_WAS_KHANHEI) <> Null Then ExitLoop
+		AmFah600SpiritBondMaintainCoreUpkeep()
+		RandomSleep(80)
+	WEnd
+	If IsPlayerDead() Then
+		AmFah600SpiritBondCsvLog('ActivateQuest', 'dead_during_prebuff')
+		Return $FAIL
+	EndIf
 
 	Local $timerQuest = TimerInit()
 	Local $attempt = 0
@@ -359,6 +392,11 @@ Func AmFah600SpiritBondActivateQuest()
 		If TimerDiff($timerQuest) > 30000 Then
 			Warn('Could not activate Refuse to Drink quest after 30s')
 			AmFah600SpiritBondCsvLog('ActivateQuest', 'timeout_30s')
+			; Abandon to reset enemies that may have become hostile via partial
+			; activation — otherwise the next run dies during approach.
+			If Not IsQuestNotFound($ID_QUEST_REFUSE_TO_DRINK) Then
+				AbandonQuest($ID_QUEST_REFUSE_TO_DRINK)
+			EndIf
 			Return $FAIL
 		EndIf
 		$attempt += 1
@@ -368,20 +406,35 @@ Func AmFah600SpiritBondActivateQuest()
 		Local $tosai = GetNearestNPCToCoords($AMFAH600_TOSAI_X, $AMFAH600_TOSAI_Y)
 		GoToNPC($tosai)
 		PingSleep(500)
+		; ⚠️ If the quest became active during the approach (e.g. from a
+		; previous attempt that partially succeeded), stop talking to Tosai
+		; immediately — re-entering dialogs will delay SB maintenance.
+		If IsQuestActive($ID_QUEST_REFUSE_TO_DRINK) Then ExitLoop
 		Dialog(0x84)
 		PingSleep(500)
 		Dialog($AMFAH600_DIALOG_ACCEPT_REFUSE_TO_DRINK)
 		PingSleep(250)
 
 		; AcceptQuest turns both Ambush groups HOSTILE immediately.
-		; Cast core upkeep BEFORE the progress dialog so 1/2/4 are up.
+		; MUST refresh PS+SB+4 NOW — the 1.75 s of dialogs above may have let
+		; enchantments tick dangerously low.  Do multiple passes so that if PS
+		; is cast first, SB is caught on the next pass.
 		AcceptQuest($ID_QUEST_REFUSE_TO_DRINK)
-		AmFah600SpiritBondMaintainCoreUpkeep()
+		For $postAccept = 1 To 10
+			AmFah600SpiritBondMaintainCoreUpkeep()
+			RandomSleep(25)
+		Next
 		AmFah600SpiritBondCsvLog('ActivateQuest_post_accept', 'hp=' & Round(DllStructGetData(GetMyAgent(), 'HealthPercent') * 100) & '% sb=' & (GetEffect($ID_SPIRIT_BOND) <> Null ? 'on' : 'off') & ' ps=' & (GetEffect($ID_PROTECTIVE_SPIRIT) <> Null ? 'on' : 'off'))
 
 		PingSleep(500)
 		Dialog($AMFAH600_DIALOG_PROGRESS_REFUSE_TO_DRINK)
 		PingSleep(250)
+		; Refresh PS+SB after the progress dialog — the 750 ms pause may have
+		; let them tick close to expiry.
+		For $postProgress = 1 To 5
+			AmFah600SpiritBondMaintainCoreUpkeep()
+			RandomSleep(25)
+		Next
 
 		If IsQuestActive($ID_QUEST_REFUSE_TO_DRINK) Then ExitLoop
 	WEnd
@@ -439,14 +492,8 @@ Func AmFah600SpiritBondFightWindow($label, $timeoutMs)
 
 		$me = GetMyAgent()
 		Local $foes = CountFoesInRangeOfAgent($me, $RANGE_EARSHOT)
-		If $label == 'First two groups' Then
-			If AmFah600SpiritBondShouldEndFirstFight() Then
-				Info('First-fight stop condition met (only necromancers or only monks remain)')
-				Return $SUCCESS
-			EndIf
-		Else
-			If $foes == 0 And TimerDiff($timer) > 5000 Then Return $SUCCESS
-		EndIf
+		; All foes must be dead before we move on — same rule for every phase.
+		If $foes == 0 And TimerDiff($timer) > 5000 Then Return $SUCCESS
 		AmFah600SpiritBondHoldPosition($anchorX, $anchorY)
 
 		Local $target = AmFah600SpiritBondGetNearestHealerInRange($RANGE_COMPASS)
@@ -506,54 +553,67 @@ Func AmFah600SpiritBondMaintainCoreUpkeep()
 	If IsPlayerDead() Then Return
 	Local $energy = GetEnergy()
 	Local $me = GetMyAgent()
-	Local $foesNearby = CountFoesInRangeOfAgent($me, $RANGE_EARSHOT)
-	Local $highPressure = $foesNearby >= 5
-	Local $sbRecastWindow = $highPressure ? 5000 : $AMFAH600_PRECAST_RECAST_EARLY_MS
-	Static $sbLastCastTimer = 0
 
 	; Read both remaining times first to avoid one blocking the other.
 	Local $psRemaining = GetEffectTimeRemaining(GetEffect($ID_PROTECTIVE_SPIRIT))
 	Local $sbRemaining = GetEffectTimeRemaining(GetEffect($ID_SPIRIT_BOND))
-	Local $psExpired   = ($psRemaining == 0)
-	Local $psCritical  = ($psRemaining <= $AMFAH600_PRECAST_RECAST_EARLY_MS)
-	Local $sbCritical  = ($sbRemaining <= $sbRecastWindow)
+
+	Local $castAnything = False
 
 	; Priority #1: Protective Spirit COMPLETELY expired — cast immediately or die.
-	If $psExpired And IsRecharged($AMFAH600_PROTECTIVE_SPIRIT) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT] Then
+	If $psRemaining == 0 And IsRecharged($AMFAH600_PROTECTIVE_SPIRIT) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT] Then
 		UseSkillEx($AMFAH600_PROTECTIVE_SPIRIT)
+		$castAnything = True
+		$energy -= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT]
 		RandomSleep(25)
-		Return
 	EndIf
 
-	; Priority #2: Spirit Bond needs refresh — always prefer SB over a pre-emptive PS
-	; recast. SB is the active healing engine; without it the 600hp char has zero sustain.
-	If $sbCritical And IsRecharged($AMFAH600_SPIRIT_BOND) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND] Then
+	; Priority #2: Spirit Bond COMPLETELY expired — cast immediately, this is the
+	; active healing engine; without it the 600hp char has zero sustain.
+	; ALSO cast if PS was just cast above (both were critical).
+	If $sbRemaining == 0 And IsRecharged($AMFAH600_SPIRIT_BOND) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND] Then
 		UseSkillEx($AMFAH600_SPIRIT_BOND)
-		$sbLastCastTimer = TimerInit()
+		$castAnything = True
+		$energy -= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND]
 		RandomSleep(25)
-		Return
 	EndIf
 
-	; Priority #3: Protective Spirit pre-emptive recast (≤1s window).
-	; Only cast when SB doesn't need refreshing — SB takes precedence above.
-	If $psCritical And IsRecharged($AMFAH600_PROTECTIVE_SPIRIT) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT] Then
+	If $castAnything Then Return
+
+	; Priority #3: Spirit Bond about to expire (≤1.5 s) — pre-emptive recast.
+	; SB lasts 8 s + 20 % = ~9.6 s, so recast at ~8.1 s.  This keeps the
+	; healing engine running without gaps even when aftercast delays pile up.
+	If $sbRemaining <= 1500 And IsRecharged($AMFAH600_SPIRIT_BOND) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND] Then
+		UseSkillEx($AMFAH600_SPIRIT_BOND)
+		$castAnything = True
+		$energy -= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND]
+		RandomSleep(25)
+	EndIf
+
+	; Priority #4: Protective Spirit pre-emptive recast (≤1 s window).
+	; PS lasts 18 s + 20 % = ~21.6 s, so recast at ~20.6 s.
+	; ALSO cast if SB was just recast above and PS is close to expiry.
+	If $psRemaining <= $AMFAH600_PRECAST_RECAST_EARLY_MS And IsRecharged($AMFAH600_PROTECTIVE_SPIRIT) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT] Then
 		UseSkillEx($AMFAH600_PROTECTIVE_SPIRIT)
+		$castAnything = True
+		$energy -= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT]
 		RandomSleep(25)
-		Return
 	EndIf
 
-	; Priority #4: Ebon Wisdom (3) — 50% faster recharge, cast before VWK so
-	; VWK benefits from the recharge bonus. Skip under high pressure.
-	If Not $highPressure And GetEffectTimeRemaining(GetEffect($ID_EBON_BATTLE_STANDARD_OF_WISDOM)) == 0 _
+	If $castAnything Then Return
+
+	; Priority #5: Ebon Wisdom (3) — 50 % faster recharge, cast before VWK so
+	; VWK benefits from the recharge bonus.
+	If GetEffectTimeRemaining(GetEffect($ID_EBON_BATTLE_STANDARD_OF_WISDOM)) == 0 _
 		And IsRecharged($AMFAH600_EBON_WISDOM) _
-		And $energy > 25 _
+		And $energy >= 15 _
 		And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_EBON_WISDOM] Then
 		UseSkillEx($AMFAH600_EBON_WISDOM)
 		RandomSleep(25)
 		Return
 	EndIf
 
-	; Priority #5: Vengeful Was Khanhei (4) — healing + damage.
+	; Priority #6: Vengeful Was Khanhei (4) — healing + damage.
 	If GetEffectTimeRemaining(GetEffect($ID_VENGEFUL_WAS_KHANHEI)) == 0 _
 		And IsRecharged($AMFAH600_VWK) _
 		And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_VWK] Then
@@ -872,7 +932,11 @@ Func AmFah600SpiritBondGoToSpot2()
 	Local $waypoints[][2] = [[15388, -13325], [14966, -12071], [14019, -11786], [12378, -11805], [11230, -12575], [10087, -12923], [12656, -9000], [12656, -7000], [12656, -5164]]
 	For $i = 0 To UBound($waypoints) - 1
 		If IsPlayerDead() Then Return $FAIL
+		; Keep PS+SB+4 refreshed during the entire trek — walking without
+		; maintained enchantments is a guaranteed death.
+		AmFah600SpiritBondMaintainCoreUpkeep()
 		MoveTo($waypoints[$i][0], $waypoints[$i][1])
+		AmFah600SpiritBondMaintainCoreUpkeep()
 		RandomSleep(120)
 	Next
 	Return $SUCCESS
@@ -927,12 +991,15 @@ Func AmFah600SpiritBondCsvLog($event, $detail = '')
 		Local $csvPath = @ScriptDir & '/logs/amfah600_sb_debug-' & GetCharacterName() & '.csv'
 		$csvHandle = FileOpen($csvPath, $FO_APPEND + $FO_CREATEPATH + $FO_UTF8)
 		If $csvHandle == -1 Then Return ; silently skip if file can't be opened
-		FileWriteLine($csvHandle, 'timestamp,elapsed_ms,event,detail,map_id,player_hp%,quest_active,foes_earshot')
+		FileWriteLine($csvHandle, 'timestamp,elapsed_ms,event,detail,map_id,player_hp%,quest_active,foes_earshot,ps_ms,sb_ms,energy')
 	EndIf
 	Local $elapsed = TimerDiff($run_timer)
 	Local $hp = IsPlayerAlive() ? Round(DllStructGetData(GetMyAgent(), 'HealthPercent') * 100, 1) : 0
 	Local $quest = IsQuestActive($ID_QUEST_REFUSE_TO_DRINK) ? 1 : 0
 	Local $foes = IsPlayerAlive() ? CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_EARSHOT) : 0
+	Local $psMs = IsPlayerAlive() ? Round(GetEffectTimeRemaining(GetEffect($ID_PROTECTIVE_SPIRIT))) : 0
+	Local $sbMs = IsPlayerAlive() ? Round(GetEffectTimeRemaining(GetEffect($ID_SPIRIT_BOND))) : 0
+	Local $energy = IsPlayerAlive() ? Round(GetEnergy()) : 0
 	Local $ts = @YEAR & '-' & @MON & '-' & @MDAY & ' ' & @HOUR & ':' & @MIN & ':' & @SEC
-	FileWriteLine($csvHandle, $ts & ',' & Round($elapsed, 0) & ',' & $event & ',' & $detail & ',' & GetMapID() & ',' & $hp & ',' & $quest & ',' & $foes)
+	FileWriteLine($csvHandle, $ts & ',' & Round($elapsed, 0) & ',' & $event & ',' & $detail & ',' & GetMapID() & ',' & $hp & ',' & $quest & ',' & $foes & ',' & $psMs & ',' & $sbMs & ',' & $energy)
 EndFunc

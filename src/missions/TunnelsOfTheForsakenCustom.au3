@@ -35,20 +35,17 @@ Global Const $MAX_TUNNELS_FORSAKEN_CUSTOM_DURATION = 60 * 60 * 1000
 ;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwcT4Y44ZaX0mcB6ewV0NTiBnAA'
 ;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwcT8Wo6VaXcBKmMgAkRR8N7iAA'
 Global Const $TFC_PLAYER_SKILLBAR = 'OwgiAyiMVNNAeNd24DWOBNxMBA'
-Global Const $TFC_HERO_MOW_TEMPLATE = 'OAhjQoGYIP3hq61TaO5EeDzxJA'
 Global Const $TFC_HERO_ZHED_TEMPLATE = 'OgljgwMpZS0ChDXVfDeD6QLgIDA' ; BSurge
-;~ Global Const $TFC_HERO_ZHED_TEMPLATE = 'OgBFgYeKuIrjY9PjVVHrjeYOcsC' ; Master of Magic
 
-Global Const $TFC_HERO_OGDEN_TEMPLATE = 'OwUUMw2+S4NexNydrecX1iT/MAA' ; Healnig Burst Hybrid
-Global Const $TFC_HERO_GWEN_TEMPLATE = 'OQhkAoC8AGKyJMEm+0nDZARcxA' ; Esurge
-;~ Global Const $TFC_HERO_GWEN_TEMPLATE = 'OQhkAoC8AGKjbTDwBMd40MAR4iB'
+Global Const $TFC_HERO_OGDEN_TEMPLATE = 'OwUUMO3+OoO+sMw94igXdJ1j7KA' 
+Global Const $TFC_HERO_GWEN_TEMPLATE = 'OQhkAoC8AGKjbTDwBMd40MwIMHA'
 Global Const $TFC_HERO_XANDRA_TEMPLATE = 'OAOjAyhDJPYTnp17xFOhmtkLGA'
 Global Const $TFC_HERO_ALTHEA_TEMPLATE = 'OQhkAoB8AGK0LACYeGJAHUGARwFD'
 Global Const $TFC_HERO_VEKK_TEMPLATE = 'OgNDwbrvO0iaBJRLWPWJQNPC'
-;~ Old team (Olias/Livia/MoW) — kept for reference
-;~ Global Const $TFC_HERO_OLIAS_TEMPLATE = 'OANDUshvSxMVBoBbhKg3V1DBEA'
-;~ Global Const $TFC_HERO_LIVIA_TEMPLATE = 'OAhkUsG3RFuTMzOgIkmTuhJ1+iB'
-;~ Global Const $TFC_HERO_MOW_TEMPLATE = 'OAhjUoGYIPxsjaGTaO5GmjzLGA'
+Global Const $TFC_HERO_OLIAS_TEMPLATE = 'OAhkQkG5xEyzdo6VVveTOp5wM5C'
+Global Const $TFC_HERO_DUNKORO_TEMPLATE = 'OwAT44HC1xnhXvI3juoLpeoFBA'
+Global Const $TFC_HERO_LIVIA_TEMPLATE = 'OANDUspPSyBUBHVKg4BLCaRrEA'
+Global Const $TFC_HERO_MOW_TEMPLATE = 'OANDUspPSyBUBHVKgbhLCaR1DA'
 
 Global $tunnels_forsaken_custom_setup = False
 
@@ -108,10 +105,14 @@ Func SetupTunnelsForsakenCustomTeam()
 	;~ Local $heroNames[3] = ['Master of Whispers', 'Gwen', 'Xandra']
 	;~ Local $heroTemplates[3] = [$TFC_HERO_MOW_TEMPLATE, $TFC_HERO_GWEN_TEMPLATE, $TFC_HERO_XANDRA_TEMPLATE]
 	;~ Local $heroIDs[3] = [$ID_GWEN, $ID_MASTER_OF_WHISPERS, $ID_XANDRA]
-	Local $heroIDs[3] = [$ID_GWEN, $ID_GHOST_OF_ALTHEA, $ID_VEKK]
-	Local $heroNames[3] = ['Gwen', 'Althea', 'Vekk']
-	;~ Local $heroNames[3] = ['Gwen', 'Althea', 'Ogden']
-	Local $heroTemplates[3] = [$TFC_HERO_GWEN_TEMPLATE, $TFC_HERO_MOW_TEMPLATE, $TFC_HERO_XANDRA_TEMPLATE]
+	;~ Local $heroIDs[3] = [$ID_GWEN, $ID_GHOST_OF_ALTHEA, $ID_VEKK]
+	;~ Local $heroNames[3] = ['Gwen', 'Althea', 'Vekk']
+	;~ Local $heroIDs[3] = [$ID_DUNKORO, $ID_OGDEN, $ID_OLIAS]
+	;~ Local $heroNames[3] = ['Dunkoro', 'Ogden', 'Olias']
+	;~ Local $heroTemplates[3] = [$TFC_HERO_MOW_TEMPLATE, $TFC_HERO_LIVIA_TEMPLATE, $TFC_HERO_OLIAS_TEMPLATE]
+	Local $heroIDs[3] = [$ID_DUNKORO, $ID_GWEN, $ID_OLIAS]
+	Local $heroNames[3] = ['Dunkoro', 'Gwen', 'Olias']
+	Local $heroTemplates[3] = [$TFC_HERO_MOW_TEMPLATE, $TFC_HERO_GWEN_TEMPLATE, $TFC_HERO_OLIAS_TEMPLATE]
 
 	For $i = 0 To 2
 		For $attempt = 1 To 5
@@ -156,7 +157,7 @@ EndFunc
 
 Func RunToTunnelsCustom()
 	TravelToOutpost($ID_PIKEN_SQUARE, $district_name)
-	ResetFailuresCounter()
+	AbandonQuest($ID_QUEST_THE_DREAMER_AND_THE_ZEALOT)
 	Info('Making way to portal')
 	MoveTo(21030, 9015)
 	MoveTo(20255, 8712)
@@ -169,20 +170,22 @@ Func RunToTunnelsCustom()
 	WEnd
 	Info('Making way to entrance')
 	AdlibRegister('TrackPartyStatus', 10000)
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 17982, 641, $RANGE_LONGBOW)
+	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), 18000, -1700, $RANGE_AREA)
 		WaitUntilPartyAlive()
 		UseSummoningStone()
-		MoveAggroAndKillInRange(21264, 3562, '1', $PLAYER_AGGRO_RANGE)
-		MoveAggroAndKillInRange(17982, 641, '2', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(21250, 3550, '1', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(18850, -900, '2', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(19200, -4200, '3', $PLAYER_AGGRO_RANGE)
+		MoveAggroAndKillInRange(18000, -1700, '4', $PLAYER_AGGRO_RANGE)
 	WEnd
 	AdlibUnRegister('TrackPartyStatus')
 
 	$mapLoaded = False
 	Info('Going through door')
 	While Not $mapLoaded
-		MoveTo(17300, -400)
-		Move(17400, -800)
-		RandomSleep(2000)
+		MoveTo(17900, -1600)
+		Move(17600, -1300)
+		Sleep(3000)
 		$mapLoaded = WaitMapLoading($ID_TUNNELS_OF_THE_FORSAKEN_LVL_1)
 	WEnd
 	Return IsRunFailed() ? $FAIL : $SUCCESS

@@ -67,6 +67,7 @@ Opt('MustDeclareVars', True)
 #include 'src/farms/GemstoneStygian.au3'
 #include 'src/farms/GemstoneTorment.au3'
 #include 'src/farms/JadeBrotherhood.au3'
+#include 'src/farms/Kappa.au3'
 #include 'src/farms/MissingDaughter.au3'
 #include 'src/farms/Lightbringer-Sunspear.au3'
 #include 'src/farms/Lightbringer.au3'
@@ -78,8 +79,7 @@ Opt('MustDeclareVars', True)
 #include 'src/farms/SkaleFins.au3'
 #include 'src/farms/Skrees.au3'
 #include 'src/farms/SpiritSlaves.au3'
-#include 'src/farms/SpiritSlavesCustom.au3'
-#include 'src/farms/SpiritSlavesSin.au3'
+#include 'src/farms/SpiritSlavesGeneral.au3'
 #include 'src/farms/SpiritSlavesRangerDerv.au3'
 #include 'src/farms/Vaettirs.au3'
 #include 'src/farms/Vanquish.au3'
@@ -593,6 +593,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'FoW Tower of Courage',			FoWToCFarm,						10,					$FOW_TOC_FARM_DURATION)
 	AddFarmToFarmMap(	'Focus Hanaku',						FocusHanakuFarm,					5,					$HANAKU_FARM_DURATION)
 	AddFarmToFarmMap(	'Froggy',						FroggyFarm,						10,					$FROGGY_FARM_DURATION)
+	AddFarmToFarmMap(	'Froggy No Builds',				FroggyNoBuildsFarm,				10,					$FROGGY_FARM_DURATION)
 	AddFarmToFarmMap(	'Froggy Hero Panels Test',		FroggyHeroPanelsPseudoFarm,		0,					$FROGGY_HERO_PANELS_TEST_DURATION)
 	AddFarmToFarmMap(	'Gemstones',					GemstonesFarm,					10,					$GEMSTONES_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Margonite',			GemstoneMargoniteFarm,			10,					$GEMSTONE_MARGONITE_FARM_DURATION)
@@ -600,6 +601,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Gemstone Torment',				GemstoneTormentFarm,			10,					$GEMSTONE_TORMENT_FARM_DURATION)
 	AddFarmToFarmMap(	'Glint Challenge',				GlintChallengeFarm,				5,					$GLINT_CHALLENGE_DURATION)
 	AddFarmToFarmMap(	'Jade Brotherhood',				JadeBrotherhoodFarm,			5,					$JADEBROTHERHOOD_FARM_DURATION)
+	AddFarmToFarmMap(	'Kappa',							KappaFarm,							5,					$KAPPA_FARM_DURATION)
 	AddFarmToFarmMap(	'Kilroy',						KilroyFarm,						10,					$KILROY_FARM_DURATION)
 	AddFarmToFarmMap(	'Missing Daughter',				MissingDaughterFarm,			5,					$MISSING_DAUGHTER_FARM_DURATION)
 	AddFarmToFarmMap(	'Kournans',						KournansFarm,					5,					$KOURNANS_FARM_DURATION)
@@ -639,10 +641,11 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'SoO',							SoOFarm,						15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SoO Celerity',					SoOCelerityFarm,				15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SoO Celerity + Armor',			SoOCelerityArmorFarm,			15,					$SOO_FARM_DURATION)
+	AddFarmToFarmMap(	'SoO Celerity + Armor no builds',	SoOCelerityNoBuildsFarm,		15,					$SOO_FARM_DURATION)
+	AddFarmToFarmMap(	'SoO Celerity no builds',		SoOCelerityOnlyNoBuildsFarm,	15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SpiritSlaves',					SpiritSlavesFarm,				5,					$SPIRIT_SLAVES_FARM_DURATION)
-	AddFarmToFarmMap(	'Spirit Slaves Ele',				SpiritSlavesCustomFarm,			5,					$SPIRIT_SLAVES_CUSTOM_FARM_DURATION)
+	AddFarmToFarmMap(	'Spirit Slaves General',		SpiritSlavesGeneralFarm,			0,					$SPIRIT_SLAVES_GENERAL_FARM_DURATION)
 	AddFarmToFarmMap(	'Spirit Slaves Ranger',			SpiritSlavesRangerDervFarm,		5,					$SPIRIT_SLAVES_RANGER_DERV_FARM_DURATION)
-	AddFarmToFarmMap(	'Spirit Slaves Sin',				SpiritSlavesSinFarm,				5,					$SPIRIT_SLAVES_SIN_FARM_DURATION)
 	AddFarmToFarmMap(	'Sunspear Armor',				SunspearArmorFarm,				5,					$SUNSPEAR_ARMOR_FARM_DURATION)
 	AddFarmToFarmMap(	'Tasca',						TascaChestFarm,					5,					$TASCA_FARM_DURATION)
 	AddFarmToFarmMap(	'Wajjun Bazar',				WajjunBazarRun,					5,					$WAJJUN_BAZAR_FARM_DURATION)
@@ -657,6 +660,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Vanquish Blacktide Lahtenda',		VanquishBlackTideLahtendaFarm,	5,					$VANQBT_RUN_TIMEOUT_MS)
 	AddFarmToFarmMap(	'Vanquish Jokanur Zehlon',			VanquishFarm,					5,					$VANQ_RUN_TIMEOUT_MS)
 	AddFarmToFarmMap(	'Voltaic',						VoltaicFarm,					10,					$VOLTAIC_FARM_DURATION)
+	AddFarmToFarmMap(	'Voltaic No Builds',			VoltaicNoBuildsFarm,			10,					$VOLTAIC_FARM_DURATION)
 	AddFarmToFarmMap(	'VSF Perma Tank',				VSFPermaTankFarm,				5,					$VSF_PERMA_TANK_FARM_DURATION)
 	AddFarmToFarmMap(	'VSF Perma Tank Thommis',		VSFPermaTankThommisFarm,		5,					$VSF_PERMA_TANK_THOMMIS_FARM_DURATION)
 	AddFarmToFarmMap(	'Warden Farm',					WardenFarm,					5,					$WARDEN_FARM_DURATION)
@@ -681,6 +685,7 @@ Func ResetBotsSetups()
 	$hanaku_farm_setup						= False
 	$iris_farm_setup						= False
 	$jade_brotherhood_farm_setup			= False
+	$kappa_farm_setup						= False
 	$missing_daughter_farm_setup			= False
 	$kournans_farm_setup					= False
 	$ldoa_farm_setup						= False
@@ -693,10 +698,8 @@ Func ResetBotsSetups()
 	$skrees_farm_setup						= False
 	$soo_farm_setup							= False
 	$spirit_slaves_farm_setup				= False
-	$spirit_slaves_custom_farm_setup		= False
 	$spirit_slaves_ranger_derv_farm_setup	= False
 	$spirit_slaves_ranger_derv_build_setup	= False
-	$spirit_slaves_sin_farm_setup			= False
 	$tasca_farm_setup						= False
 	$wajjun_bazar_run_setup				= False
 	$amfah600_sb_setup_done				= False

@@ -72,7 +72,7 @@ Func MoveTo($X, $Y, $precision = 100, $doWhileRunning = Null)
 	; Precision can't be smaller than 1 - we set it to 2 by precaution
 	If $precision < 2 Then $precision = 2
 	While GetDistanceToPoint($me, $X, $Y) > $precision
-		If $doWhileRunning <> Null Then $doWhileRunning()
+		If IsFunc($doWhileRunning) Then $doWhileRunning()
 		Move($X, $Y)
 		PingSleep(100)
 		If Not IsPlayerMoving() Then
@@ -1226,6 +1226,8 @@ Func MoveAggroAndKill($x, $y, $log = '', $options = $default_move_aggro_kill_opt
 			EndIf
 		EndIf
 		$me = GetMyAgent()
+		; When player is dead, cancel flagged heroes so they can walk to the corpse and resurrect.
+		If IsPlayerDead() Then CancelAllHeroes()
 		If IsPlayerAndPartyWiped() Then Return $FAIL
 	WEnd
 	Return $SUCCESS
@@ -1340,6 +1342,9 @@ Func KillFoesInArea($options = $default_move_aggro_kill_options)
 		If $lootInCombat And IsPlayerAlive() Then PickUpItems(Null, DefaultShouldPickItem, $fightRange)
 		$me = GetMyAgent()
 		$foesCount = CountFoesInRangeOfAgent($me, $fightRange)
+		; Cancel fan formation when player is dead so heroes can walk to the corpse and resurrect.
+		; Otherwise flagged heroes stay at their positions and never reach the player — stalemate.
+		If IsPlayerDead() And $flagHeroes Then CancelAllHeroes()
 		If IsPlayerAndPartyWiped() Then
 			If $flagHeroes Then CancelAllHeroes()
 			Return $FAIL

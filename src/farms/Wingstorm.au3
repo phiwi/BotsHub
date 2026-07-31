@@ -29,9 +29,9 @@ Opt('MustDeclareVars', True)
 ; ==== Constants ====
 Global Const $WINGSTORM_PLAYER_SKILLBAR = 'OwhiAyiMVNdNVO5D+Nd2ABtCCA'
 Global Const $WINGSTORM_RUN_TIMEOUT_MS = 5 * 60 * 1000
-Global Const $WINGSTORM_SKIP_PLAYER_BUILD_SETUP_DEBUG = True
+Global Const $WINGSTORM_SKIP_PLAYER_BUILD_SETUP_DEBUG = False
 Global Const $WINGSTORM_SKIP_TEAM_SETUP_DEBUG = False
-Global Const $WINGSTORM_WEAPON_SET_RUNNER = 2
+Global Const $WINGSTORM_WEAPON_SET_RUNNER = 3
 
 ; Hanaku-aligned team templates
 Global Const $WINGSTORM_HERO_MORGAHN_SKILLBAR = 'OQijEqmMKODbe8OmEbi7x3YWMA'
@@ -129,7 +129,11 @@ Func SetupPlayerWingstormFarm()
 	EndIf
 
 	If DllStructGetData(GetMyAgent(), 'Primary') == $ID_ASSASSIN Then
-		LoadSkillTemplate($WINGSTORM_PLAYER_SKILLBAR)
+		If HeroHasTemplate(0, $WINGSTORM_PLAYER_SKILLBAR) Then
+			Info('Wingstorm player: template already loaded, skipping')
+		Else
+			LoadSkillTemplate($WINGSTORM_PLAYER_SKILLBAR)
+		EndIf
 	Else
 		Warn('Should run this farm as assassin')
 		Return $FAIL
@@ -219,19 +223,47 @@ Func SetupTeamWingstormFarm()
 		Return $FAIL
 	EndIf
 
-	LoadSkillTemplate($WINGSTORM_HERO_MORGAHN_SKILLBAR, 1)
+	If HeroHasTemplate(1, $WINGSTORM_HERO_MORGAHN_SKILLBAR) Then
+		Info('Wingstorm Morgahn: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($WINGSTORM_HERO_MORGAHN_SKILLBAR, 1)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($WINGSTORM_HERO_MOW_SKILLBAR, 2)
+	If HeroHasTemplate(2, $WINGSTORM_HERO_MOW_SKILLBAR) Then
+		Info('Wingstorm MoW: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($WINGSTORM_HERO_MOW_SKILLBAR, 2)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($WINGSTORM_HERO_OLIAS_SKILLBAR, 3)
+	If HeroHasTemplate(3, $WINGSTORM_HERO_OLIAS_SKILLBAR) Then
+		Info('Wingstorm Olias: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($WINGSTORM_HERO_OLIAS_SKILLBAR, 3)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($WINGSTORM_HERO_DUNKORO_SKILLBAR, 4)
+	If HeroHasTemplate(4, $WINGSTORM_HERO_DUNKORO_SKILLBAR) Then
+		Info('Wingstorm Dunkoro: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($WINGSTORM_HERO_DUNKORO_SKILLBAR, 4)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($WINGSTORM_HERO_NORGU_SKILLBAR, 5)
+	If HeroHasTemplate(5, $WINGSTORM_HERO_NORGU_SKILLBAR) Then
+		Info('Wingstorm Norgu: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($WINGSTORM_HERO_NORGU_SKILLBAR, 5)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($WINGSTORM_HERO_RAZAH_SKILLBAR, 6)
+	If HeroHasTemplate(6, $WINGSTORM_HERO_RAZAH_SKILLBAR) Then
+		Info('Wingstorm Razah: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($WINGSTORM_HERO_RAZAH_SKILLBAR, 6)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($WINGSTORM_HERO_GWEN_SKILLBAR, 7)
+	If HeroHasTemplate(7, $WINGSTORM_HERO_GWEN_SKILLBAR) Then
+		Info('Wingstorm Gwen: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($WINGSTORM_HERO_GWEN_SKILLBAR, 7)
+	EndIf
 	RandomSleep(250)
 
 	ClearPartyCommands()

@@ -134,33 +134,41 @@ EndFunc
 
 Func SetupPlayerTascaChestFarm()
 	Info('Setting up player build skill bar')
+	Local $template = ''
 	Switch DllStructGetData(GetMyAgent(), 'Primary')
 		Case $ID_DERVISH
 			$tasca_player_profession = $ID_DERVISH
-			LoadSkillTemplate($TASCA_DERVISH_CHESTRUNNER_SKILLBAR)
+			$template = $TASCA_DERVISH_CHESTRUNNER_SKILLBAR
 		Case $ID_ASSASSIN
 			$tasca_player_profession = $ID_ASSASSIN
-			LoadSkillTemplate($TASCA_ASSASSIN_CHESTRUNNER_SKILLBAR)
+			$template = $TASCA_ASSASSIN_CHESTRUNNER_SKILLBAR
 		Case $ID_MESMER
 			$tasca_player_profession = $ID_MESMER
-			LoadSkillTemplate($TASCA_MESMER_CHESTRUNNER_SKILLBAR)
+			$template = $TASCA_MESMER_CHESTRUNNER_SKILLBAR
 		Case $ID_MONK
 			$tasca_player_profession = $ID_MONK
-			LoadSkillTemplate($TASCA_MONK_CHESTRUNNER_SKILLBAR)
+			$template = $TASCA_MONK_CHESTRUNNER_SKILLBAR
 		Case $ID_ELEMENTALIST
 			$tasca_player_profession = $ID_ELEMENTALIST
-			LoadSkillTemplate($TASCA_ELEMENTALIST_CHESTRUNNER_SKILLBAR)
+			$template = $TASCA_ELEMENTALIST_CHESTRUNNER_SKILLBAR
 		Case $ID_NECROMANCER
 			$tasca_player_profession = $ID_NECROMANCER
-			LoadSkillTemplate($TASCA_NECROMANCER_CHESTRUNNER_SKILLBAR)
+			$template = $TASCA_NECROMANCER_CHESTRUNNER_SKILLBAR
 		Case $ID_RITUALIST
 			$tasca_player_profession = $ID_RITUALIST
-			LoadSkillTemplate($TASCA_RITUALIST_CHESTRUNNER_SKILLBAR)
+			$template = $TASCA_RITUALIST_CHESTRUNNER_SKILLBAR
 		Case Else
 			; other characters have too few energy
 			Warn('Should run this farm as Dervish, Assassin, Mesmer, Monk, Elementalist, Necromancer or Ritualist')
 			Return $FAIL
 	EndSwitch
+	If $template <> '' Then
+		If HeroHasTemplate(0, $template) Then
+			Info('Tasca player: template already loaded, skipping')
+		Else
+			LoadSkillTemplate($template)
+		EndIf
+	EndIf
 	RandomSleep(250)
 	Return $SUCCESS
 EndFunc
@@ -217,19 +225,47 @@ Func SetupTeamTascaChestFarm()
 	$tasca_mow_index = SupportTeamResolveHeroIndex($ID_MASTER_OF_WHISPERS, $TASCA_HERO_MOW_INDEX)
 	$tasca_olias_index = SupportTeamResolveHeroIndex($ID_OLIAS, $TASCA_HERO_OLIAS_INDEX)
 
-	LoadSkillTemplate($TASCA_HERO_KAHMU_TEMPLATE, $tasca_kahmu_index)
+	If HeroHasTemplate($tasca_kahmu_index, $TASCA_HERO_KAHMU_TEMPLATE) Then
+		Info('Tasca Kahmu: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($TASCA_HERO_KAHMU_TEMPLATE, $tasca_kahmu_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($TASCA_HERO_MELONNI_TEMPLATE, $tasca_melonni_index)
+	If HeroHasTemplate($tasca_melonni_index, $TASCA_HERO_MELONNI_TEMPLATE) Then
+		Info('Tasca Melonni: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($TASCA_HERO_MELONNI_TEMPLATE, $tasca_melonni_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($TASCA_HERO_MOX_TEMPLATE, $tasca_mox_index)
+	If HeroHasTemplate($tasca_mox_index, $TASCA_HERO_MOX_TEMPLATE) Then
+		Info('Tasca M.O.X.: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($TASCA_HERO_MOX_TEMPLATE, $tasca_mox_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($TASCA_HERO_TAHLKORA_TEMPLATE, $tasca_tahlkora_index)
+	If HeroHasTemplate($tasca_tahlkora_index, $TASCA_HERO_TAHLKORA_TEMPLATE) Then
+		Info('Tasca Tahlkora: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($TASCA_HERO_TAHLKORA_TEMPLATE, $tasca_tahlkora_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($TASCA_HERO_MORGAHN_TEMPLATE, $tasca_morgahn_index)
+	If HeroHasTemplate($tasca_morgahn_index, $TASCA_HERO_MORGAHN_TEMPLATE) Then
+		Info('Tasca Morgahn: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($TASCA_HERO_MORGAHN_TEMPLATE, $tasca_morgahn_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($TASCA_HERO_MOW_TEMPLATE, $tasca_mow_index)
+	If HeroHasTemplate($tasca_mow_index, $TASCA_HERO_MOW_TEMPLATE) Then
+		Info('Tasca MoW: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($TASCA_HERO_MOW_TEMPLATE, $tasca_mow_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($TASCA_HERO_OLIAS_TEMPLATE, $tasca_olias_index)
+	If HeroHasTemplate($tasca_olias_index, $TASCA_HERO_OLIAS_TEMPLATE) Then
+		Info('Tasca Olias: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($TASCA_HERO_OLIAS_TEMPLATE, $tasca_olias_index)
+	EndIf
 	RandomSleep(250)
 
 	DisableAllHeroSkills($tasca_kahmu_index)
@@ -552,7 +588,10 @@ EndFunc
 
 ;~ Use defensive skills while opening chests
 Func TascaDefendFunction($X, $Y)
-	TickTascaSupportCasts()Func TascaSurviveFunction($X, $Y)
+	TickTascaSupportCasts()
+EndFunc
+
+Func TascaSurviveFunction($X, $Y)
 	; Using timers here reduce DllCalls and make bot more reactive
 	Local Static $timer_ShroudOfDistress = Null
 	Local Static $timer_Shadowform = Null

@@ -125,7 +125,11 @@ EndFunc
 Func SetupPlayerPongmeiSinChestFarm()
 	Info('Setting up player build skill bar')
 	If DllStructGetData(GetMyAgent(), 'Primary') == $ID_ASSASSIN Then
-		LoadSkillTemplate($PONGMEI_SIN_CHESTRUNNER_SKILLBAR)
+		If HeroHasTemplate(0, $PONGMEI_SIN_CHESTRUNNER_SKILLBAR) Then
+			Info('Pongmei Sin player: template already loaded, skipping')
+		Else
+			LoadSkillTemplate($PONGMEI_SIN_CHESTRUNNER_SKILLBAR)
+		EndIf
 		RandomSleep(250)
 	Else
 		Warn('Should run this farm as assassin')
@@ -160,19 +164,47 @@ Func SetupTeamPongmeiSinChestFarm()
 	$pongmei_sin_mow_index = SupportTeamResolveHeroIndex($PONGMEI_SIN_ID_MOW, $PONGMEI_SIN_HERO_MOW_INDEX)
 	$pongmei_sin_olias_index = SupportTeamResolveHeroIndex($PONGMEI_SIN_ID_OLIAS, $PONGMEI_SIN_HERO_OLIAS_INDEX)
 
-	LoadSkillTemplate($PONGMEI_SIN_KAHMU_TEMPLATE, $pongmei_sin_kahmu_index)
+	If HeroHasTemplate($pongmei_sin_kahmu_index, $PONGMEI_SIN_KAHMU_TEMPLATE) Then
+		Info('Pongmei Sin Kahmu: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($PONGMEI_SIN_KAHMU_TEMPLATE, $pongmei_sin_kahmu_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($PONGMEI_SIN_MELONNI_TEMPLATE, $pongmei_sin_melonni_index)
+	If HeroHasTemplate($pongmei_sin_melonni_index, $PONGMEI_SIN_MELONNI_TEMPLATE) Then
+		Info('Pongmei Sin Melonni: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($PONGMEI_SIN_MELONNI_TEMPLATE, $pongmei_sin_melonni_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($PONGMEI_SIN_MOX_TEMPLATE, $pongmei_sin_mox_index)
+	If HeroHasTemplate($pongmei_sin_mox_index, $PONGMEI_SIN_MOX_TEMPLATE) Then
+		Info('Pongmei Sin M.O.X.: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($PONGMEI_SIN_MOX_TEMPLATE, $pongmei_sin_mox_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($PONGMEI_SIN_TAHLKORA_TEMPLATE, $pongmei_sin_tahlkora_index)
+	If HeroHasTemplate($pongmei_sin_tahlkora_index, $PONGMEI_SIN_TAHLKORA_TEMPLATE) Then
+		Info('Pongmei Sin Tahlkora: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($PONGMEI_SIN_TAHLKORA_TEMPLATE, $pongmei_sin_tahlkora_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($PONGMEI_SIN_MORGAHN_TEMPLATE, $pongmei_sin_morgahn_index)
+	If HeroHasTemplate($pongmei_sin_morgahn_index, $PONGMEI_SIN_MORGAHN_TEMPLATE) Then
+		Info('Pongmei Sin Morgahn: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($PONGMEI_SIN_MORGAHN_TEMPLATE, $pongmei_sin_morgahn_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($PONGMEI_SIN_MOW_TEMPLATE, $pongmei_sin_mow_index)
+	If HeroHasTemplate($pongmei_sin_mow_index, $PONGMEI_SIN_MOW_TEMPLATE) Then
+		Info('Pongmei Sin MoW: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($PONGMEI_SIN_MOW_TEMPLATE, $pongmei_sin_mow_index)
+	EndIf
 	RandomSleep(150)
-	LoadSkillTemplate($PONGMEI_SIN_OLIAS_TEMPLATE, $pongmei_sin_olias_index)
+	If HeroHasTemplate($pongmei_sin_olias_index, $PONGMEI_SIN_OLIAS_TEMPLATE) Then
+		Info('Pongmei Sin Olias: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($PONGMEI_SIN_OLIAS_TEMPLATE, $pongmei_sin_olias_index)
+	EndIf
 	RandomSleep(250)
 
 	DisableAllHeroSkills($pongmei_sin_kahmu_index)

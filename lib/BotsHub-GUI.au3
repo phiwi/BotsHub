@@ -100,10 +100,10 @@ Global Const $GUI_COMBOBOX_DROPDOWN_OPENED = 7
 Global Const $AVAILABLE_BAG_COUNTS = '|1|2|3|4|5'
 Global Const $AVAILABLE_WEAPON_SLOTS = '|0|1|2|3|4'
 Global Const $KIT_AMOUNT_CHOICE = '|0|1|2|3|4|5|6|7|8|9|10|11|12'
-Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|' & _
-	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|' & _
-	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|Spirit Slaves Ele|Spirit Slaves Ranger|Spirit Slaves Sin|SpiritSlaves|' & _
-	'Storage|Sunspear Armor|Tasca|TestSuite|Tests|Tunnels Forsaken Custom|TunnelsOfTheForsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
+Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Froggy No Builds|' & _
+	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kappa|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|' & _
+	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|SoO Celerity + Armor no builds|SoO Celerity no builds|Spirit Slaves General|Spirit Slaves Ranger|SpiritSlaves|' & _
+	'Storage|Sunspear Armor|Tasca|TestSuite|Tests|Tunnels Forsaken Custom|TunnelsOfTheForsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|Voltaic No Builds|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
 
 #Region GUI
 
@@ -993,6 +993,10 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $FROGGY_FARM_INFORMATIONS)
+		Case 'Froggy No Builds'
+			GUICtrlSetData($gui_edit_characterbuilds, 'No builds loaded — preserves your custom party and skill bars.')
+			GUICtrlSetData($gui_edit_heroesbuilds, '')
+			GUICtrlSetData($gui_label_farminformations, $FROGGY_FARM_INFORMATIONS)
 		Case 'Gemstones'
 			GUICtrlSetData($gui_edit_characterbuilds, $GEMSTONES_MESMER_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $GEMSTONES_HERO_1_SKILLBAR & @CRLF & _
@@ -1024,6 +1028,10 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $JB_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $JB_HERO_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $JB_FARM_INFORMATIONS)
+		Case 'Kappa'
+			GUICtrlSetData($gui_edit_characterbuilds, $RA_KAPPA_FARMER_SKILLBAR)
+			GUICtrlSetData($gui_edit_heroesbuilds, $KAPPA_P1_HERO_SKILLBAR & @CRLF & $KAPPA_P2_HERO_SKILLBAR & @CRLF & $KAPPA_BIP_HERO_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $KAPPA_FARM_INFORMATIONS)
 		Case 'Kilroy'
 			GUICtrlSetData($gui_label_farminformations, $KILROY_FARM_INFORMATIONS)
 		Case 'Kournans'
@@ -1134,6 +1142,10 @@ Func UpdateFarmDescription($farm)
 		Case 'Voltaic'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
+			GUICtrlSetData($gui_label_farminformations, $VOLTAIC_FARM_INFORMATIONS)
+		Case 'Voltaic No Builds'
+			GUICtrlSetData($gui_edit_characterbuilds, 'No builds loaded — preserves your custom party and skill bars.')
+			GUICtrlSetData($gui_edit_heroesbuilds, '')
 			GUICtrlSetData($gui_label_farminformations, $VOLTAIC_FARM_INFORMATIONS)
 		Case 'War Supply Keiran'
 			GUICtrlSetData($gui_label_farminformations, $WAR_SUPPLY_KEIRAN_INFORMATIONS)

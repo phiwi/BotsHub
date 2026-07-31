@@ -260,7 +260,12 @@ Func MinisterialCommendationsFarmLoop()
 	RandomSleep(1000)
 
 	Info('Picking up loot')
-	PickUpItems(HealWhilePickingItems)
+	; Multiple passes with delays so ownership expires on hero-assigned drops
+	; (event consumables, summoning stones, tonics etc. are initially assigned to heroes).
+	For $pass = 1 To 8
+		PickUpItems(HealWhilePickingItems)
+		RandomSleep(3000)
+	Next
 
 	If $log_level == 0 Then FileClose($logging_file)
 	Return $SUCCESS
