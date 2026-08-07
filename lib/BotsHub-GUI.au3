@@ -1005,8 +1005,8 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $FROGGY_FARM_INFORMATIONS)
 		Case 'Froggy no builds'
-			GUICtrlSetData($gui_edit_characterbuilds, 'No builds loaded — preserves your custom party and skill bars.')
-			GUICtrlSetData($gui_edit_heroesbuilds, '')
+			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
+			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $FROGGY_FARM_INFORMATIONS)
 		Case 'Gemstones'
 			GUICtrlSetData($gui_edit_characterbuilds, $GEMSTONES_MESMER_SKILLBAR)
@@ -1111,7 +1111,7 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $SKREES_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $SKREES_RANGER_HERO_SKILLBAR & @CRLF & $SKREES_PARAGON_HERO_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $SKREES_FARM_INFORMATIONS)
-		Case 'SoO'
+		Case 'SoO', 'SoO Celerity', 'SoO Celerity + Armor', 'SoO Celerity + Armor no builds', 'SoO Celerity no builds'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $SOO_FARM_INFORMATIONS)
@@ -1155,8 +1155,8 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $VOLTAIC_FARM_INFORMATIONS)
 		Case 'Voltaic no builds'
-			GUICtrlSetData($gui_edit_characterbuilds, 'No builds loaded — preserves your custom party and skill bars.')
-			GUICtrlSetData($gui_edit_heroesbuilds, '')
+			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
+			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $VOLTAIC_FARM_INFORMATIONS)
 		Case 'War Supply Keiran'
 			GUICtrlSetData($gui_label_farminformations, $WAR_SUPPLY_KEIRAN_INFORMATIONS)
