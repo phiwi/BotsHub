@@ -195,15 +195,21 @@ EndFunc
 
 
 ;~ Farm group — balled enemies, Ranger combat choreography
-;~ Matches original Dervish flow: get in range, move directly to a foe, then engage.
+;~ Pre-cast Dwarven Stability + Escape + Mystic Vigor before engaging (Escape gives IMS + 75% block).
 Func SpiritSlavesRangerFarmGroup()
 	$spirit_slaves_ranger_center_started = False
 	Local $targetFoe = GetNearestNPCInRangeOfCoords(-8850, -5500, $ID_ALLEGIANCE_FOE, $RANGE_EARSHOT * 2)
 	GetAlmostInRangeOfAgent($targetFoe)
 	SpiritSlavesRangerEnsureWeaponSet3('farm-group')
 
+	; Ranger choreography: Dwarven Stability -> Escape -> Mystic Vigor before engaging
+	If IsRecharged($SSRD_DWARVEN_STABILITY) Then UseSkillEx($SSRD_DWARVEN_STABILITY)
+	RandomSleep(50)
+	If IsRecharged($SSRD_ESCAPE) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_ESCAPE] Then UseSkillEx($SSRD_ESCAPE)
+	RandomSleep(50)
+	If IsRecharged($SSRD_MYSTIC_VIGOR) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_MYSTIC_VIGOR] Then UseSkillEx($SSRD_MYSTIC_VIGOR)
+
 	; Move directly to the target — same pattern as the original Dervish.
-	; FindMiddleOfFoes causes bodyblock; direct Move avoids it.
 	Move(DllStructGetData($targetFoe, 'X'), DllStructGetData($targetFoe, 'Y'))
 	RandomSleep(100)
 	$targetFoe = GetNearestEnemyToAgent(GetMyAgent())
@@ -222,6 +228,13 @@ Func SpiritSlavesRangerQuickFarmGroup()
 	$spirit_slaves_ranger_center_started = False
 	MoveTo(-7475, -8040)
 	SpiritSlavesRangerEnsureWeaponSet3('quick-farm-group')
+
+	; Ranger choreography: Dwarven Stability -> Escape -> Mystic Vigor before engaging
+	If IsRecharged($SSRD_DWARVEN_STABILITY) Then UseSkillEx($SSRD_DWARVEN_STABILITY)
+	RandomSleep(50)
+	If IsRecharged($SSRD_ESCAPE) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_ESCAPE] Then UseSkillEx($SSRD_ESCAPE)
+	RandomSleep(50)
+	If IsRecharged($SSRD_MYSTIC_VIGOR) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_MYSTIC_VIGOR] Then UseSkillEx($SSRD_MYSTIC_VIGOR)
 
 	Local $targetFoe = GetNearestEnemyToAgent(GetMyAgent())
 	If $targetFoe == Null Then Return $SUCCESS
@@ -243,6 +256,7 @@ EndFunc
 Func SpiritSlavesRangerMaintainUpkeep($target = Null)
 	; Only cast during combat (foes in range) to avoid wasting energy during staging/looting.
 	If CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY) == 0 Then Return
+	SpiritSlavesRangerMaintainDefensiveUpkeep()
 	; Grenth's Aura for sustain
 	If IsRecharged($SSRD_GRENTHS_AURA) And GetEnergy() > 20 Then UseSkillEx($SSRD_GRENTHS_AURA)
 	; You Are All Weaklings — AoE weakness on foes
