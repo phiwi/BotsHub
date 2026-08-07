@@ -248,8 +248,10 @@ EndFunc
 
 
 Func SpiritSlavesRangerMaintainDefensiveUpkeep()
+	If IsRecharged($SSRD_DWARVEN_STABILITY) And GetEffectTimeRemaining(GetEffect($ID_DWARVEN_STABILITY)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_DWARVEN_STABILITY] Then UseSkillEx($SSRD_DWARVEN_STABILITY)
 	If IsRecharged($SSRD_ESCAPE) And GetEffectTimeRemaining(GetEffect($ID_ESCAPE)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_ESCAPE] Then UseSkillEx($SSRD_ESCAPE)
 	If IsRecharged($SSRD_MYSTIC_VIGOR) And GetEffectTimeRemaining(GetEffect($ID_MYSTIC_VIGOR)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_MYSTIC_VIGOR] Then UseSkillEx($SSRD_MYSTIC_VIGOR)
+	If IsRecharged($SSRD_MENTAL_BLOCK) And GetEffectTimeRemaining(GetEffect($ID_MENTAL_BLOCK)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_MENTAL_BLOCK] Then UseSkillEx($SSRD_MENTAL_BLOCK)
 EndFunc
 
 

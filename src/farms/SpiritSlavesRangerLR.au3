@@ -260,6 +260,11 @@ Func SpiritSlavesRangerLRMaintainDefensiveUpkeep()
 	If Not $hasLR And Not $hasEscape Then
 		If IsRecharged($SSRL_ESCAPE) And GetEnergy() >= $SSRL_SKILL_COSTS_MAP[$SSRL_ESCAPE] Then UseSkillEx($SSRL_ESCAPE)
 	EndIf
+
+	; Dwarven Stability — extends stance duration
+	If IsRecharged($SSRL_DWARVEN_STABILITY) And GetEffectTimeRemaining(GetEffect($ID_DWARVEN_STABILITY)) == 0 And GetEnergy() >= $SSRL_SKILL_COSTS_MAP[$SSRL_DWARVEN_STABILITY] Then UseSkillEx($SSRL_DWARVEN_STABILITY)
+	; Mental Block — 50% block, self-reapplies on hit
+	If IsRecharged($SSRL_MENTAL_BLOCK) And GetEffectTimeRemaining(GetEffect($ID_MENTAL_BLOCK)) == 0 And GetEnergy() >= $SSRL_SKILL_COSTS_MAP[$SSRL_MENTAL_BLOCK] Then UseSkillEx($SSRL_MENTAL_BLOCK)
 EndFunc
 
 
