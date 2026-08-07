@@ -71,7 +71,6 @@ Opt('GUICloseOnESC', False)
 #include '../src/missions/Froggy.au3'
 #include '../src/missions/GlintChallenge.au3'
 #include '../src/missions/Kilroy.au3'
-#include '../src/missions/MinisterialCommendationsAny.au3'
 #include '../src/missions/NexusChallenge.au3'
 #include '../src/missions/SoO.au3'
 #include '../src/missions/SunspearArmor.au3'
@@ -103,10 +102,10 @@ Global Const $GUI_COMBOBOX_DROPDOWN_OPENED = 7
 Global Const $AVAILABLE_BAG_COUNTS = '|1|2|3|4|5'
 Global Const $AVAILABLE_WEAPON_SLOTS = '|0|1|2|3|4'
 Global Const $KIT_AMOUNT_CHOICE = '|0|1|2|3|4|5|6|7|8|9|10|11|12'
-Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|CoF Sin|CoF Sin CA|CoF Sin Sand Shards|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Froggy No Builds|' & _
-	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kappa|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Custom|' & _
-	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|OmniFarm|Outcast Halcyon|Outcast Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|SoO Celerity + Armor no builds|SoO Celerity no builds|Spirit Slaves General|Spirit Slaves Ranger|SpiritSlaves|' & _
-	'Storage|Sunspear Armor|Tasca|TestSuite|Tests|Tunnels Forsaken Custom|TunnelsOfTheForsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|Voltaic No Builds|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
+Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|CoF Sin|CoF Sin CA|CoF Sin Sand Shards|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Froggy no builds|' & _
+	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kappa|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Sin|' & _
+	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|Omni Farm|Outcast Halcyon|Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|SoO Celerity + Armor no builds|SoO Celerity no builds|Spirit Slaves Ranger|Spirit Slaves|' & _
+	'Storage|Sunspear Armor|Tasca|Test Suite|Tests|Tunnels Forsaken Custom|Tunnels Forsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|Voltaic no builds|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazaar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
 
 #Region GUI
 
@@ -1005,7 +1004,7 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $FROGGY_FARM_INFORMATIONS)
-		Case 'Froggy No Builds'
+		Case 'Froggy no builds'
 			GUICtrlSetData($gui_edit_characterbuilds, 'No builds loaded — preserves your custom party and skill bars.')
 			GUICtrlSetData($gui_edit_heroesbuilds, '')
 			GUICtrlSetData($gui_label_farminformations, $FROGGY_FARM_INFORMATIONS)
@@ -1096,7 +1095,7 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $NORN_FARM_INFORMATIONS)
-		Case 'Omnifarm'
+		Case 'Omni Farm'
 			GUICtrlSetData($gui_label_farminformations, '')
 		Case 'Pongmei'
 			GUICtrlSetData($gui_edit_characterbuilds, $PONGMEI_CHESTRUNNER_SKILLBAR)
@@ -1116,7 +1115,7 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $SOO_FARM_INFORMATIONS)
-		Case 'SpiritSlaves'
+		Case 'Spirit Slaves'
 			GUICtrlSetData($gui_edit_characterbuilds, $SPIRIT_SLAVES_RITUALIST_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $SPIRIT_SLAVES_FARM_INFORMATIONS)
 		Case 'Sunspear Armor'
@@ -1129,7 +1128,7 @@ Func UpdateFarmDescription($farm)
 				$TASCA_ELEMENTALIST_CHESTRUNNER_SKILLBAR & @CRLF & $TASCA_MONK_CHESTRUNNER_SKILLBAR & @CRLF & _
 				$TASCA_NECROMANCER_CHESTRUNNER_SKILLBAR & @CRLF & $TASCA_RITUALIST_CHESTRUNNER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $TASCA_CHESTRUN_INFORMATIONS)
-		Case 'TunnelsOfTheForsaken'
+		Case 'Tunnels Forsaken'
 		 	GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 		 	GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 		 	GUICtrlSetData($gui_label_farminformations, $TUNNELS_OF_THE_FORSAKEN_FARM_INFORMATIONS)
@@ -1155,7 +1154,7 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $VOLTAIC_FARM_INFORMATIONS)
-		Case 'Voltaic No Builds'
+		Case 'Voltaic no builds'
 			GUICtrlSetData($gui_edit_characterbuilds, 'No builds loaded — preserves your custom party and skill bars.')
 			GUICtrlSetData($gui_edit_heroesbuilds, '')
 			GUICtrlSetData($gui_label_farminformations, $VOLTAIC_FARM_INFORMATIONS)
@@ -1172,7 +1171,7 @@ Func UpdateFarmDescription($farm)
 		Case 'Tests'
 			GUICtrlSetData($gui_label_farminformations, 'This runs the RunTests function at the top of the TestSuite.au3 file,' & _
 				'allowing you to run anything you want to test.')
-		Case 'TestSuite'
+		Case 'Test Suite'
 			GUICtrlSetData($gui_label_farminformations, 'This runs a tests suite to verify some required behaviours from the Hub.')
 		Case Else
 			Return

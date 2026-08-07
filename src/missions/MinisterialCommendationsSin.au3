@@ -25,59 +25,59 @@
 
 Opt('MustDeclareVars', True)
 
-Global Const $A_COMMENDATIONS_CUSTOM_FARMER_SKILLBAR = 'OwFTQ5q+R6qgnovYHMAwlhSMXEA'
-Global Const $COMMENDATIONS_CUSTOM_FARM_INFORMATIONS = 'Custom variant:' & @CRLF _
+Global Const $A_COMMENDATIONS_SIN_FARMER_SKILLBAR = 'OwFTQ5q+R6qgnovYHMAwlhSMXEA'
+Global Const $COMMENDATIONS_SIN_FARM_INFORMATIONS = 'Custom variant:' & @CRLF _
     & '- expects an Assassin player build' & @CRLF _
     & '- same player flow as original Ministerial run' & @CRLF _
     & '- no hero role validation and no hero skill micromanagement'
-Global Const $COMMENDATIONS_CUSTOM_FARM_DURATION = (3 * 60 + 20) * 1000
-Global Const $COMMENDATIONS_CUSTOM_MIKU_AGENT_ID = 58
+Global Const $COMMENDATIONS_SIN_FARM_DURATION = (3 * 60 + 20) * 1000
+Global Const $COMMENDATIONS_SIN_MIKU_AGENT_ID = 58
 
-Global Const $COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE = 1
-Global Const $COMMENDATIONS_CUSTOM_SKILL_TO_THE_LIMIT = 2
-Global Const $COMMENDATIONS_CUSTOM_SKILL_HUNDRED_BLADES = 3
-Global Const $COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK = 4
-Global Const $COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET = 5
-Global Const $COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE = 6
-Global Const $COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED = 7
-Global Const $COMMENDATIONS_CUSTOM_SKILL_EBON_BATTLE_STANDARD_OF_HONOR = 8
-Global Const $COMMENDATIONS_CUSTOM_MAX_SPIKE_WAIT_MS = 22000
-Global Const $COMMENDATIONS_CUSTOM_FAST_RESET_ENABLED = True
-Global Const $COMMENDATIONS_CUSTOM_FAST_RESIGN_SLEEP_MS = 400
-Global Const $COMMENDATIONS_CUSTOM_FAST_AFTER_RETURN_SLEEP_MS = 400
-Global Const $COMMENDATIONS_CUSTOM_FAST_WAIT_MAP_MS = 5000
-Global Const $COMMENDATIONS_CUSTOM_FAST_WAIT_POLL_MS = 400
-Global Const $COMMENDATIONS_CUSTOM_XANDRA_HERO_SLOT = 7
-Global Const $COMMENDATIONS_CUSTOM_XANDRA_SOUL_TWISTING = 1
-Global Const $COMMENDATIONS_CUSTOM_XANDRA_SHELTER = 2
-Global Const $COMMENDATIONS_CUSTOM_XANDRA_UNION = 3
-Global Const $COMMENDATIONS_CUSTOM_XANDRA_DISPLACEMENT = 4
-Global Const $COMMENDATIONS_CUSTOM_XANDRA_ARMOR_OF_UNFEELING = 5
-Global Const $COMMENDATIONS_CUSTOM_ZHED_WARD_AGAINST_MELEE = 7
+Global Const $COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE = 1
+Global Const $COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT = 2
+Global Const $COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES = 3
+Global Const $COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK = 4
+Global Const $COMMENDATIONS_SIN_SKILL_HEALING_SIGNET = 5
+Global Const $COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE = 6
+Global Const $COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED = 7
+Global Const $COMMENDATIONS_SIN_SKILL_EBON_BATTLE_STANDARD_OF_HONOR = 8
+Global Const $COMMENDATIONS_SIN_MAX_SPIKE_WAIT_MS = 22000
+Global Const $COMMENDATIONS_SIN_FAST_RESET_ENABLED = True
+Global Const $COMMENDATIONS_SIN_FAST_RESIGN_SLEEP_MS = 400
+Global Const $COMMENDATIONS_SIN_FAST_AFTER_RETURN_SLEEP_MS = 400
+Global Const $COMMENDATIONS_SIN_FAST_WAIT_MAP_MS = 5000
+Global Const $COMMENDATIONS_SIN_FAST_WAIT_POLL_MS = 400
+Global Const $COMMENDATIONS_SIN_XANDRA_HERO_SLOT = 7
+Global Const $COMMENDATIONS_SIN_XANDRA_SOUL_TWISTING = 1
+Global Const $COMMENDATIONS_SIN_XANDRA_SHELTER = 2
+Global Const $COMMENDATIONS_SIN_XANDRA_UNION = 3
+Global Const $COMMENDATIONS_SIN_XANDRA_DISPLACEMENT = 4
+Global Const $COMMENDATIONS_SIN_XANDRA_ARMOR_OF_UNFEELING = 5
+Global Const $COMMENDATIONS_SIN_ZHED_WARD_AGAINST_MELEE = 7
 
-Global Const $COMMENDATIONS_CUSTOM_HERO_NORGU_TEMPLATE = 'OQREAsIjU8MV5aI/dwPgnWFQDA'
-Global Const $COMMENDATIONS_CUSTOM_HERO_RAZAH_TEMPLATE = 'OQREAsIjU8MV5aI/ewPgnWFQDA'
-Global Const $COMMENDATIONS_CUSTOM_HERO_GWEN_TEMPLATE = 'OQhjAwBc4QkA5ZIg3ATAcQFVXMA'
-Global Const $COMMENDATIONS_CUSTOM_HERO_ZHED_TEMPLATE = 'OgBCkMnTqYHy06znCVBsAZA'
-; Global Const $COMMENDATIONS_CUSTOM_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgWsS0i1Do2dtuB'
-Global Const $COMMENDATIONS_CUSTOM_HERO_OGDEN_TEMPLATE = 'Owkj4wQopO+sqPetLS9dJ7YfMA'
-Global Const $COMMENDATIONS_CUSTOM_HERO_LIVIA_TEMPLATE = 'OAhjQoGYIP3hhWVVaO5EeDzxJA'
-Global Const $COMMENDATIONS_CUSTOM_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00ZOPLYA'
+Global Const $COMMENDATIONS_SIN_HERO_NORGU_TEMPLATE = 'OQREAsIjU8MV5aI/dwPgnWFQDA'
+Global Const $COMMENDATIONS_SIN_HERO_RAZAH_TEMPLATE = 'OQREAsIjU8MV5aI/ewPgnWFQDA'
+Global Const $COMMENDATIONS_SIN_HERO_GWEN_TEMPLATE = 'OQhjAwBc4QkA5ZIg3ATAcQFVXMA'
+Global Const $COMMENDATIONS_SIN_HERO_ZHED_TEMPLATE = 'OgBCkMnTqYHy06znCVBsAZA'
+; Global Const $COMMENDATIONS_SIN_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgWsS0i1Do2dtuB'
+Global Const $COMMENDATIONS_SIN_HERO_OGDEN_TEMPLATE = 'Owkj4wQopO+sqPetLS9dJ7YfMA'
+Global Const $COMMENDATIONS_SIN_HERO_LIVIA_TEMPLATE = 'OAhjQoGYIP3hhWVVaO5EeDzxJA'
+Global Const $COMMENDATIONS_SIN_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00ZOPLYA'
 
-Global Const $COMMENDATIONS_CUSTOM_HERO_NORGU_SLOT = 1
-Global Const $COMMENDATIONS_CUSTOM_HERO_RAZAH_SLOT = 2
-Global Const $COMMENDATIONS_CUSTOM_HERO_GWEN_SLOT = 3
-Global Const $COMMENDATIONS_CUSTOM_HERO_ZHED_SLOT = 4
-; Global Const $COMMENDATIONS_CUSTOM_HERO_VEKK_SLOT = 5
-Global Const $COMMENDATIONS_CUSTOM_HERO_OGDEN_SLOT = 5
-Global Const $COMMENDATIONS_CUSTOM_HERO_LIVIA_SLOT = 6
-Global Const $COMMENDATIONS_CUSTOM_HERO_XANDRA_SLOT = 7
+Global Const $COMMENDATIONS_SIN_HERO_NORGU_SLOT = 1
+Global Const $COMMENDATIONS_SIN_HERO_RAZAH_SLOT = 2
+Global Const $COMMENDATIONS_SIN_HERO_GWEN_SLOT = 3
+Global Const $COMMENDATIONS_SIN_HERO_ZHED_SLOT = 4
+; Global Const $COMMENDATIONS_SIN_HERO_VEKK_SLOT = 5
+Global Const $COMMENDATIONS_SIN_HERO_OGDEN_SLOT = 5
+Global Const $COMMENDATIONS_SIN_HERO_LIVIA_SLOT = 6
+Global Const $COMMENDATIONS_SIN_HERO_XANDRA_SLOT = 7
 
-Global $ministerial_commendations_custom_farm_setup = False
-Global $logging_file_commendations_custom
+Global $ministerial_commendations_sin_farm_setup = False
+Global $logging_file_commendations_sin
 
-Global Const $COMMENDATIONS_CUSTOM_DEBUG_SKIP_SETUP_TRAVEL_TO_KAINENG = False
-Global Const $COMMENDATIONS_CUSTOM_DEBUG_SKIP_PLAYER_BUILD_SETUP = False
+Global Const $COMMENDATIONS_SIN_DEBUG_SKIP_SETUP_TRAVEL_TO_KAINENG = False
+Global Const $COMMENDATIONS_SIN_DEBUG_SKIP_PLAYER_BUILD_SETUP = False
 
 
 Func ResolveCommendationsCustomDistrict($district)
@@ -86,7 +86,7 @@ Func ResolveCommendationsCustomDistrict($district)
             Return $district
     EndSwitch
 
-    Warn('Unsupported district ' & $district & ' for MinisterialCommendationsCustom. Falling back to Random EU')
+    Warn('Unsupported district ' & $district & ' for MinisterialCommendationsSin. Falling back to Random EU')
     Return 'Random EU'
 EndFunc
 
@@ -99,10 +99,10 @@ Func IsCommendationsCustomKainengStartMap()
 EndFunc
 
 
-Func MinisterialCommendationsCustomFarm()
-    If Not $ministerial_commendations_custom_farm_setup Then SetupMinisterialCommendationsCustomFarm()
+Func MinisterialCommendationsSinFarm()
+    If Not $ministerial_commendations_sin_farm_setup Then SetupMinisterialCommendationsSinFarm()
 
-    Local $result = MinisterialCommendationsCustomFarmLoop()
+    Local $result = MinisterialCommendationsSinFarmLoop()
     If GetMapType() <> $ID_OUTPOST Then
         Info('Reset reason (custom): result=' & $result & ', mapType=' & GetMapType() & ', mapId=' & GetMapID())
         Info('Resetting custom run state: resign and return to Kaineng outpost')
@@ -117,16 +117,16 @@ EndFunc
 
 
 Func ReturnToKainengAfterCustomRun()
-    If Not $COMMENDATIONS_CUSTOM_FAST_RESET_ENABLED Then
+    If Not $COMMENDATIONS_SIN_FAST_RESET_ENABLED Then
         Return ResignAndReturnToOutpost($ID_Kaineng_Center, True)
     EndIf
 
     Info('Custom Ministerial: fast outpost reset path')
     Resign()
-    Sleep($COMMENDATIONS_CUSTOM_FAST_RESIGN_SLEEP_MS)
+    Sleep($COMMENDATIONS_SIN_FAST_RESIGN_SLEEP_MS)
     ReturnToOutpost()
-    Sleep($COMMENDATIONS_CUSTOM_FAST_AFTER_RETURN_SLEEP_MS)
-    WaitMapLoading($ID_Kaineng_Center, $COMMENDATIONS_CUSTOM_FAST_WAIT_MAP_MS, $COMMENDATIONS_CUSTOM_FAST_WAIT_POLL_MS)
+    Sleep($COMMENDATIONS_SIN_FAST_AFTER_RETURN_SLEEP_MS)
+    WaitMapLoading($ID_Kaineng_Center, $COMMENDATIONS_SIN_FAST_WAIT_MAP_MS, $COMMENDATIONS_SIN_FAST_WAIT_POLL_MS)
     If GetMapID() == $ID_Kaineng_Center Then Return $SUCCESS
 
     Warn('Custom Ministerial: fast reset fallback to standard outpost return')
@@ -134,9 +134,9 @@ Func ReturnToKainengAfterCustomRun()
 EndFunc
 
 
-Func SetupMinisterialCommendationsCustomFarm()
-    Info('Setting up MinisterialCommendationsCustom farm')
-    If Not $COMMENDATIONS_CUSTOM_DEBUG_SKIP_SETUP_TRAVEL_TO_KAINENG Then
+Func SetupMinisterialCommendationsSinFarm()
+    Info('Setting up MinisterialCommendationsSin farm')
+    If Not $COMMENDATIONS_SIN_DEBUG_SKIP_SETUP_TRAVEL_TO_KAINENG Then
         If Not IsCommendationsCustomKainengStartMap() Then
             If TravelToOutpost($ID_Kaineng_Center, ResolveCommendationsCustomDistrict($district_name)) == $FAIL Then Return $FAIL
         EndIf
@@ -144,29 +144,29 @@ Func SetupMinisterialCommendationsCustomFarm()
         Info('Debug: skip initial travel to Kaineng in custom setup')
     EndIf
 
-    SetupPlayerMinisterialCommendationsCustomFarm()
-    SetupTeamMinisterialCommendationsCustomFarm()
+    SetupPlayerMinisterialCommendationsSinFarm()
+    SetupTeamMinisterialCommendationsSinFarm()
 
     SwitchMode($ID_HARD_MODE)
-    $ministerial_commendations_custom_farm_setup = True
+    $ministerial_commendations_sin_farm_setup = True
     Info('Custom Ministerial preparations complete')
     Return $SUCCESS
 EndFunc
 
 
-Func SetupPlayerMinisterialCommendationsCustomFarm()
+Func SetupPlayerMinisterialCommendationsSinFarm()
     If IsTeamAutoSetup() Then Return $SUCCESS
-    If $COMMENDATIONS_CUSTOM_DEBUG_SKIP_PLAYER_BUILD_SETUP Then
+    If $COMMENDATIONS_SIN_DEBUG_SKIP_PLAYER_BUILD_SETUP Then
         Info('Debug: skip player build auto-load (custom)')
         Return $SUCCESS
     EndIf
 
     If DllStructGetData(GetMyAgent(), 'Primary') == $ID_ASSASSIN Then
         Info('Custom Ministerial expects assassin. Loading recommended assassin build automatically')
-        If HeroHasTemplate(0, $A_COMMENDATIONS_CUSTOM_FARMER_SKILLBAR) Then
+        If HeroHasTemplate(0, $A_COMMENDATIONS_SIN_FARMER_SKILLBAR) Then
             Info('Ministerial Custom player: template already loaded, skipping')
         Else
-            LoadSkillTemplate($A_COMMENDATIONS_CUSTOM_FARMER_SKILLBAR)
+            LoadSkillTemplate($A_COMMENDATIONS_SIN_FARMER_SKILLBAR)
             RandomSleep(250)
         EndIf
     Else
@@ -187,7 +187,7 @@ Func ComCustomLoadIfNeeded($template, $heroIndex, $heroName)
 EndFunc
 
 
-Func SetupTeamMinisterialCommendationsCustomFarm()
+Func SetupTeamMinisterialCommendationsSinFarm()
     Info('Custom Ministerial: setting fixed hero team (slots 2-8)')
 
     If CommendationsCustomEnsureSoloParty() == $FAIL Then
@@ -210,23 +210,23 @@ Func SetupTeamMinisterialCommendationsCustomFarm()
     EndIf
 
     ; Enforce exact party order so Xandra remains in slot 8 (hero slot 7).
-    If GetHeroNumberByHeroID($ID_NORGU) <> $COMMENDATIONS_CUSTOM_HERO_NORGU_SLOT Then Return $FAIL
-    If GetHeroNumberByHeroID($ID_RAZAH) <> $COMMENDATIONS_CUSTOM_HERO_RAZAH_SLOT Then Return $FAIL
-    If GetHeroNumberByHeroID($ID_GWEN) <> $COMMENDATIONS_CUSTOM_HERO_GWEN_SLOT Then Return $FAIL
-    If GetHeroNumberByHeroID($ID_ZHED_SHADOWHOOF) <> $COMMENDATIONS_CUSTOM_HERO_ZHED_SLOT Then Return $FAIL
-    ; If GetHeroNumberByHeroID($ID_VEKK) <> $COMMENDATIONS_CUSTOM_HERO_VEKK_SLOT Then Return $FAIL
-    If GetHeroNumberByHeroID($ID_OGDEN) <> $COMMENDATIONS_CUSTOM_HERO_OGDEN_SLOT Then Return $FAIL
-    If GetHeroNumberByHeroID($ID_LIVIA) <> $COMMENDATIONS_CUSTOM_HERO_LIVIA_SLOT Then Return $FAIL
-    If GetHeroNumberByHeroID($ID_XANDRA) <> $COMMENDATIONS_CUSTOM_HERO_XANDRA_SLOT Then Return $FAIL
+    If GetHeroNumberByHeroID($ID_NORGU) <> $COMMENDATIONS_SIN_HERO_NORGU_SLOT Then Return $FAIL
+    If GetHeroNumberByHeroID($ID_RAZAH) <> $COMMENDATIONS_SIN_HERO_RAZAH_SLOT Then Return $FAIL
+    If GetHeroNumberByHeroID($ID_GWEN) <> $COMMENDATIONS_SIN_HERO_GWEN_SLOT Then Return $FAIL
+    If GetHeroNumberByHeroID($ID_ZHED_SHADOWHOOF) <> $COMMENDATIONS_SIN_HERO_ZHED_SLOT Then Return $FAIL
+    ; If GetHeroNumberByHeroID($ID_VEKK) <> $COMMENDATIONS_SIN_HERO_VEKK_SLOT Then Return $FAIL
+    If GetHeroNumberByHeroID($ID_OGDEN) <> $COMMENDATIONS_SIN_HERO_OGDEN_SLOT Then Return $FAIL
+    If GetHeroNumberByHeroID($ID_LIVIA) <> $COMMENDATIONS_SIN_HERO_LIVIA_SLOT Then Return $FAIL
+    If GetHeroNumberByHeroID($ID_XANDRA) <> $COMMENDATIONS_SIN_HERO_XANDRA_SLOT Then Return $FAIL
 
-    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_NORGU_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_NORGU_SLOT, 'Norgu')
-    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_RAZAH_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_RAZAH_SLOT, 'Razah')
-    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_GWEN_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_GWEN_SLOT, 'Gwen')
-    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_ZHED_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_ZHED_SLOT, 'Zhed')
-    ; ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_VEKK_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_VEKK_SLOT, 'Vekk')
-    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_OGDEN_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_OGDEN_SLOT, 'Ogden')
-    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_LIVIA_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_LIVIA_SLOT, 'Livia')
-    ComCustomLoadIfNeeded($COMMENDATIONS_CUSTOM_HERO_XANDRA_TEMPLATE, $COMMENDATIONS_CUSTOM_HERO_XANDRA_SLOT, 'Xandra')
+    ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_NORGU_TEMPLATE, $COMMENDATIONS_SIN_HERO_NORGU_SLOT, 'Norgu')
+    ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_RAZAH_TEMPLATE, $COMMENDATIONS_SIN_HERO_RAZAH_SLOT, 'Razah')
+    ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_GWEN_TEMPLATE, $COMMENDATIONS_SIN_HERO_GWEN_SLOT, 'Gwen')
+    ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_ZHED_TEMPLATE, $COMMENDATIONS_SIN_HERO_ZHED_SLOT, 'Zhed')
+    ; ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_VEKK_TEMPLATE, $COMMENDATIONS_SIN_HERO_VEKK_SLOT, 'Vekk')
+    ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_OGDEN_TEMPLATE, $COMMENDATIONS_SIN_HERO_OGDEN_SLOT, 'Ogden')
+    ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_LIVIA_TEMPLATE, $COMMENDATIONS_SIN_HERO_LIVIA_SLOT, 'Livia')
+    ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_XANDRA_TEMPLATE, $COMMENDATIONS_SIN_HERO_XANDRA_SLOT, 'Xandra')
     RandomSleep(250)
 
     CancelAllHeroes()
@@ -265,14 +265,14 @@ Func CommendationsCustomTryAddHero($heroID, $heroName, $expectedSize)
 EndFunc
 
 
-Func MinisterialCommendationsCustomFarmLoop()
+Func MinisterialCommendationsSinFarmLoop()
     ChangeWeaponSet(1)
     RandomSleep(100)
 
     If Not IsCommendationsCustomKainengStartMap() Then
         If TravelToOutpost($ID_Kaineng_Center, ResolveCommendationsCustomDistrict($district_name)) == $FAIL Then Return $FAIL
     EndIf
-    If $log_level == 0 Then $logging_file_commendations_custom = FileOpen(@ScriptDir & '/logs/commendation_custom_farm-' & GetCharacterName() & '.log', $FO_APPEND + $FO_CREATEPATH + $FO_UTF8)
+    If $log_level == 0 Then $logging_file_commendations_sin = FileOpen(@ScriptDir & '/logs/commendation_custom_farm-' & GetCharacterName() & '.log', $FO_APPEND + $FO_CREATEPATH + $FO_UTF8)
 
     Info('Entering quest (custom)')
     EnterAChanceEncounterQuestCustom()
@@ -305,7 +305,7 @@ Func MinisterialCommendationsCustomFarmLoop()
     Next
     Info('Loot sweep done: 6 passes')
 
-    If $log_level == 0 Then FileClose($logging_file_commendations_custom)
+    If $log_level == 0 Then FileClose($logging_file_commendations_sin)
     Return $SUCCESS
 EndFunc
 
@@ -340,10 +340,10 @@ Func PrepareToFightCustom()
     RandomSleep(11000)
     UseConsumable($ID_BIRTHDAY_CUPCAKE)
     ; Original run used a hero shout to make enemies hostile; Xandra responds right after that shout.
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
     PrecastXandraSpiritsCustom()
     RandomSleep(2500)
-    UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_EBON_BATTLE_STANDARD_OF_HONOR)
+    UseSkillEx($COMMENDATIONS_SIN_SKILL_EBON_BATTLE_STANDARD_OF_HONOR)
     RandomSleep(1000)
 EndFunc
 
@@ -374,7 +374,7 @@ EndFunc
 
 Func PrecastXandraSpiritsCustom()
     Local $availableHeroes = GetPartySize() - 1
-    If $COMMENDATIONS_CUSTOM_XANDRA_HERO_SLOT > $availableHeroes Then
+    If $COMMENDATIONS_SIN_XANDRA_HERO_SLOT > $availableHeroes Then
         Info('Custom Ministerial: skipping Xandra spirit pre-cast (hero slot missing)')
         LogIntoFileCustom('Xandra pre-cast skipped: hero slot missing')
         Return
@@ -386,22 +386,22 @@ Func PrecastXandraSpiritsCustom()
 
     Info('Custom Ministerial: Xandra cast #1 Soul Twisting')
     LogIntoFileCustom('Xandra cast #1 Soul Twisting')
-    UseHeroSkill($COMMENDATIONS_CUSTOM_XANDRA_HERO_SLOT, $COMMENDATIONS_CUSTOM_XANDRA_SOUL_TWISTING)
+    UseHeroSkill($COMMENDATIONS_SIN_XANDRA_HERO_SLOT, $COMMENDATIONS_SIN_XANDRA_SOUL_TWISTING)
     RandomSleep(2000)
 
     Info('Custom Ministerial: Xandra cast #2 Shelter')
     LogIntoFileCustom('Xandra cast #2 Shelter')
-    UseHeroSkill($COMMENDATIONS_CUSTOM_XANDRA_HERO_SLOT, $COMMENDATIONS_CUSTOM_XANDRA_SHELTER)
+    UseHeroSkill($COMMENDATIONS_SIN_XANDRA_HERO_SLOT, $COMMENDATIONS_SIN_XANDRA_SHELTER)
     RandomSleep(2000)
 
     Info('Custom Ministerial: Xandra cast #3 Union')
     LogIntoFileCustom('Xandra cast #3 Union')
-    UseHeroSkill($COMMENDATIONS_CUSTOM_XANDRA_HERO_SLOT, $COMMENDATIONS_CUSTOM_XANDRA_UNION)
+    UseHeroSkill($COMMENDATIONS_SIN_XANDRA_HERO_SLOT, $COMMENDATIONS_SIN_XANDRA_UNION)
     RandomSleep(2000)
 
     Info('Custom Ministerial: Xandra cast #4 Displacement')
     LogIntoFileCustom('Xandra cast #4 Displacement')
-    UseHeroSkill($COMMENDATIONS_CUSTOM_XANDRA_HERO_SLOT, $COMMENDATIONS_CUSTOM_XANDRA_DISPLACEMENT)
+    UseHeroSkill($COMMENDATIONS_SIN_XANDRA_HERO_SLOT, $COMMENDATIONS_SIN_XANDRA_DISPLACEMENT)
 
     Info('Custom Ministerial: Xandra waiting 10s before cast #5 Armor of Unfeeling')
     LogIntoFileCustom('Xandra wait 10s before cast #5 Armor of Unfeeling')
@@ -409,12 +409,12 @@ Func PrecastXandraSpiritsCustom()
 
     Info('Custom Ministerial: Xandra cast #5 Armor of Unfeeling')
     LogIntoFileCustom('Xandra cast #5 Armor of Unfeeling')
-    UseHeroSkill($COMMENDATIONS_CUSTOM_XANDRA_HERO_SLOT, $COMMENDATIONS_CUSTOM_XANDRA_ARMOR_OF_UNFEELING)
+    UseHeroSkill($COMMENDATIONS_SIN_XANDRA_HERO_SLOT, $COMMENDATIONS_SIN_XANDRA_ARMOR_OF_UNFEELING)
     RandomSleep(2000)
 
     Info('Custom Ministerial: Zhed cast #7 Ward Against Melee')
     LogIntoFileCustom('Zhed cast #7 Ward Against Melee')
-    UseHeroSkill($COMMENDATIONS_CUSTOM_HERO_ZHED_SLOT, $COMMENDATIONS_CUSTOM_ZHED_WARD_AGAINST_MELEE)
+    UseHeroSkill($COMMENDATIONS_SIN_HERO_ZHED_SLOT, $COMMENDATIONS_SIN_ZHED_WARD_AGAINST_MELEE)
     RandomSleep(2000)
 
     Info('Custom Ministerial: Xandra pre-cast done')
@@ -423,7 +423,7 @@ EndFunc
 
 
 Func GetMikuAgentOrMineCustom()
-    If GetAgentExists($COMMENDATIONS_CUSTOM_MIKU_AGENT_ID) Then Return GetAgentByID($COMMENDATIONS_CUSTOM_MIKU_AGENT_ID)
+    If GetAgentExists($COMMENDATIONS_SIN_MIKU_AGENT_ID) Then Return GetAgentByID($COMMENDATIONS_SIN_MIKU_AGENT_ID)
     Return GetMyAgent()
 EndFunc
 
@@ -443,11 +443,11 @@ Func InitialFightCustom()
     If $foesInRange == 0 Then
         Info('No initial aggro detected, forcing a short pull')
         If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.85 Then
-            If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE)
-            If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.75 And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET)
+            If IsRecharged($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
+            If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.75 And IsRecharged($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET)
             RandomSleep(300)
         EndIf
-        If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED)
+        If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
         MoveTo(-6150, -5150)
         RandomSleep(500)
         MoveTo(-6285, -5343)
@@ -455,7 +455,7 @@ Func InitialFightCustom()
 
         Local $pullTimer = TimerInit()
         While $foesInRange == 0 And TimerDiff($pullTimer) < 7000
-            If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE)
+            If IsRecharged($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
             RandomSleep(750)
             $foesInRange = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_COMPASS)
             If IsCommendationsCustomFail() Then Return $FAIL
@@ -475,15 +475,15 @@ Func InitialFightCustom()
 
         ; Survival first: keep player and Miku stable, then pressure.
         If $mikuHp < 0.60 Or $meHp < 0.45 Then
-            If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE)
-            If DllStructGetData($me, 'HealthPercent') < 0.70 And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET)
+            If IsRecharged($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
+            If DllStructGetData($me, 'HealthPercent') < 0.70 And IsRecharged($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET)
             RandomSleep(350)
         EndIf
 
-        If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE)
-        If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_HUNDRED_BLADES) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_HUNDRED_BLADES)
-        If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_TO_THE_LIMIT) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_TO_THE_LIMIT)
-        AttackOrUseSkill(1300, $COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE, $COMMENDATIONS_CUSTOM_SKILL_HUNDRED_BLADES)
+        If IsRecharged($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
+        If IsRecharged($COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES)
+        If IsRecharged($COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT)
+        AttackOrUseSkill(1300, $COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE, $COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES)
 
         ; Allow player deaths here so heroes can resurrect.
         ; Bail immediately only on full party wipe — no one left to rez.
@@ -500,25 +500,25 @@ Func InitialFightCustom()
     PickUpItems(Null, PickOnlyImportantItem)
 
     CancelAllHeroes()
-    Local $mikuPressure = CountFoesInRangeOfAgent($COMMENDATIONS_CUSTOM_MIKU_AGENT_ID, $RANGE_SPELLCAST)
+    Local $mikuPressure = CountFoesInRangeOfAgent($COMMENDATIONS_SIN_MIKU_AGENT_ID, $RANGE_SPELLCAST)
     Local $stabilizeTimer = TimerInit()
     While $mikuPressure > 2 And TimerDiff($stabilizeTimer) < 9000 And Not IsCommendationsCustomFail()
         If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.85 Then
-            If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE)
-            If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.70 And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET)
+            If IsRecharged($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
+            If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.70 And IsRecharged($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET)
         EndIf
-        AttackOrUseSkill(1200, $COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE, $COMMENDATIONS_CUSTOM_SKILL_HUNDRED_BLADES)
+        AttackOrUseSkill(1200, $COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE, $COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES)
         RandomSleep(250)
-        $mikuPressure = CountFoesInRangeOfAgent($COMMENDATIONS_CUSTOM_MIKU_AGENT_ID, $RANGE_SPELLCAST)
+        $mikuPressure = CountFoesInRangeOfAgent($COMMENDATIONS_SIN_MIKU_AGENT_ID, $RANGE_SPELLCAST)
     WEnd
 
     CommandAll(-6699, -5645)
 
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
     Move(-4693, -3137)
 
     $deadlock = TimerInit()
-    While (CountFoesInRangeOfAgent($COMMENDATIONS_CUSTOM_MIKU_AGENT_ID, $RANGE_SPELLCAST) > 0 And TimerDiff($deadlock) < 45000 And Not IsCommendationsCustomFail())
+    While (CountFoesInRangeOfAgent($COMMENDATIONS_SIN_MIKU_AGENT_ID, $RANGE_SPELLCAST) > 0 And TimerDiff($deadlock) < 45000 And Not IsCommendationsCustomFail())
         Move(-4693, -3137)
         RandomSleep(750)
     WEnd
@@ -533,21 +533,21 @@ EndFunc
 
 
 Func RunToKillSpotCustom()
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
     MoveTo(-4199, -1475)
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
     MoveTo(-4709, -609)
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
     MoveTo(-3116, 650)
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
     MoveTo(-2518, 631)
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
     MoveTo(-2096, -1067)
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
     MoveTo(-815, -1898)
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
     MoveTo(-690, -3769)
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SOLDIERS_SPEED)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
     MoveTo(-850, -3961, 0, 0)
     RandomSleep(500)
     Return $SUCCESS
@@ -563,32 +563,32 @@ Func WaitForPurityBallCustom()
         $foesCount = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_SPELLCAST)
     WEnd
 
-    LogIntoFileCustom('Ball wait start foes=' & $foesCount & ' wwAdr=' & GetSkillbarSkillAdrenaline($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK))
+    LogIntoFileCustom('Ball wait start foes=' & $foesCount & ' wwAdr=' & GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK))
 
     Local $ping = GetPing()
     Local $spikeWaitTimer = TimerInit()
-    While IsPlayerAlive() And TimerDiff($deadlock) < 75000 And (Not IsFurthestMobInBallCustom() Or GetSkillbarSkillAdrenaline($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK) < 130)
-        If TimerDiff($spikeWaitTimer) >= $COMMENDATIONS_CUSTOM_MAX_SPIKE_WAIT_MS Then
-            LogIntoFileCustom('Ball wait forced engage at ' & Round(TimerDiff($spikeWaitTimer) / 1000) & 's (foes=' & $foesCount & ', wwAdr=' & GetSkillbarSkillAdrenaline($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK) & ')')
+    While IsPlayerAlive() And TimerDiff($deadlock) < 75000 And (Not IsFurthestMobInBallCustom() Or GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK) < 130)
+        If TimerDiff($spikeWaitTimer) >= $COMMENDATIONS_SIN_MAX_SPIKE_WAIT_MS Then
+            LogIntoFileCustom('Ball wait forced engage at ' & Round(TimerDiff($spikeWaitTimer) / 1000) & 's (foes=' & $foesCount & ', wwAdr=' & GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK) & ')')
             ExitLoop
         EndIf
 
-        If ($foesCount > 3 And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_TO_THE_LIMIT) And GetSkillbarSkillAdrenaline($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK) < 130) Then
-            UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_TO_THE_LIMIT)
+        If ($foesCount > 3 And IsRecharged($COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT) And GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK) < 130) Then
+            UseSkillEx($COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT)
             RandomSleep(50)
         EndIf
 
         Local $meHp = DllStructGetData(GetMyAgent(), 'HealthPercent')
         If $meHp < 0.90 Then
             ; Prioritize Shadow Refuge whenever healing is needed at hold spot.
-            While IsPlayerAlive() And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE)
-                UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE)
+            While IsPlayerAlive() And IsRecharged($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
+                UseSkillEx($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
                 RandomSleep(50)
             WEnd
 
             $meHp = DllStructGetData(GetMyAgent(), 'HealthPercent')
-            If $meHp < 0.82 And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET) Then
-                UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET)
+            If $meHp < 0.82 And IsRecharged($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET) Then
+                UseSkillEx($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET)
                 Sleep(100 + $ping)
             EndIf
         EndIf
@@ -597,7 +597,7 @@ Func WaitForPurityBallCustom()
         RandomSleep(250)
     WEnd
 
-    LogIntoFileCustom('Ball wait end t=' & Round(TimerDiff($deadlock) / 1000) & 's foes=' & $foesCount & ' furthestInBall=' & IsFurthestMobInBallCustom() & ' wwAdr=' & GetSkillbarSkillAdrenaline($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK))
+    LogIntoFileCustom('Ball wait end t=' & Round(TimerDiff($deadlock) / 1000) & 's foes=' & $foesCount & ' furthestInBall=' & IsFurthestMobInBallCustom() & ' wwAdr=' & GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK))
     If IsPlayerDead() Then
         Warn('Player died at hold spot during wait.')
         LogIntoFileCustom('Player died at hold spot during wait.')
@@ -619,13 +619,13 @@ Func KillMinistryOfPurityCustom()
     Local $foesCount
 
     If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.90 Then
-        While IsPlayerAlive() And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE)
-            UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE)
+        While IsPlayerAlive() And IsRecharged($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
+            UseSkillEx($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
             RandomSleep(50)
         WEnd
 
-        If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.65 And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET) Then
-            UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET)
+        If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.65 And IsRecharged($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET) Then
+            UseSkillEx($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET)
             RandomSleep(50)
         EndIf
     EndIf
@@ -639,7 +639,7 @@ Func KillMinistryOfPurityCustom()
     ; Give the ball two more seconds to tighten before starting the spike sequence.
     RandomSleep(2000)
 
-    UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_EBON_BATTLE_STANDARD_OF_HONOR)
+    UseSkillEx($COMMENDATIONS_SIN_SKILL_EBON_BATTLE_STANDARD_OF_HONOR)
     RandomSleep(50)
 
     If IsPlayerDead() Then
@@ -647,12 +647,12 @@ Func KillMinistryOfPurityCustom()
         LogIntoFileCustom('Player died at hold spot during spike.')
         Return $FAIL
     EndIf
-    UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_HUNDRED_BLADES)
+    UseSkillEx($COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES)
     RandomSleep(50)
 
-    If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE) Then
-        While IsRecharged($COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE)
-            UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE)
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE) Then
+        While IsRecharged($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
+            UseSkillEx($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
             RandomSleep(50)
             If IsPlayerDead() Then
                 Warn('Player died at hold spot during spike.')
@@ -663,9 +663,9 @@ Func KillMinistryOfPurityCustom()
     EndIf
 
     Local $initialFoeCount = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY)
-    Local $initialAdrenaline = GetSkillbarSkillAdrenaline($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK)
+    Local $initialAdrenaline = GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK)
     Local $adrenaline = $initialAdrenaline
-    While IsRecharged($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK) And $adrenaline >= $initialAdrenaline
+    While IsRecharged($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK) And $adrenaline >= $initialAdrenaline
         If IsPlayerDead() Then
             Warn('Player died at hold spot during spike.')
             LogIntoFileCustom('Player died at hold spot during spike.')
@@ -673,13 +673,13 @@ Func KillMinistryOfPurityCustom()
         EndIf
         RandomSleep(200)
 
-        $adrenaline = GetSkillbarSkillAdrenaline($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK)
-        If (IsRecharged($COMMENDATIONS_CUSTOM_SKILL_TO_THE_LIMIT) And $adrenaline < 130) Then
-            UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_TO_THE_LIMIT)
+        $adrenaline = GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK)
+        If (IsRecharged($COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT) And $adrenaline < 130) Then
+            UseSkillEx($COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT)
             RandomSleep(50)
         EndIf
 
-        UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK, GetNearestEnemyToAgent(GetMyAgent()))
+        UseSkillEx($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK, GetNearestEnemyToAgent(GetMyAgent()))
         RandomSleep(50)
     WEnd
 
@@ -698,35 +698,35 @@ Func KillMinistryOfPurityCustom()
             Return $FAIL
         EndIf
 
-        If (IsRecharged($COMMENDATIONS_CUSTOM_SKILL_TO_THE_LIMIT) And GetSkillbarSkillAdrenaline($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK) < 130) Then
-            UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_TO_THE_LIMIT)
+        If (IsRecharged($COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT) And GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK) < 130) Then
+            UseSkillEx($COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT)
             RandomSleep(50)
         EndIf
 
         Local $meHp = DllStructGetData(GetMyAgent(), 'HealthPercent')
         If $meHp < 0.90 Then
-            While IsPlayerAlive() And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE)
-                UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE)
+            While IsPlayerAlive() And IsRecharged($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
+                UseSkillEx($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
                 RandomSleep(50)
             WEnd
 
             $meHp = DllStructGetData(GetMyAgent(), 'HealthPercent')
-            If $meHp < 0.60 And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET) Then
-                UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET)
+            If $meHp < 0.60 And IsRecharged($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET) Then
+                UseSkillEx($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET)
                 RandomSleep(1000)
             EndIf
-        ElseIf GetSkillbarSkillAdrenaline($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK) == 130 Then
-            While IsRecharged($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK) And TimerDiff($deadlock) < 10000
+        ElseIf GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK) == 130 Then
+            While IsRecharged($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK) And TimerDiff($deadlock) < 10000
                 If IsPlayerDead() Then
                     Warn('Player died at hold spot during spike.')
                     LogIntoFileCustom('Player died at hold spot during spike.')
                     Return $FAIL
                 EndIf
-                UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_WHIRLWIND_ATTACK, GetNearestEnemyToAgent(GetMyAgent()))
+                UseSkillEx($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK, GetNearestEnemyToAgent(GetMyAgent()))
                 RandomSleep(250)
             WEnd
         Else
-            AttackOrUseSkill(1300, $COMMENDATIONS_CUSTOM_SKILL_FOR_GREAT_JUSTICE)
+            AttackOrUseSkill(1300, $COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
         EndIf
 
         $foesCount = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY)
@@ -744,12 +744,12 @@ EndFunc
 
 Func HealWhilePickingItemsCustom()
     If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.90 Then
-        If IsRecharged($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE) Then
-            UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_SHADOW_REFUGE)
+        If IsRecharged($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE) Then
+            UseSkillEx($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
             RandomSleep(50)
         EndIf
-        If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.80 And IsRecharged($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET) Then
-            UseSkillEx($COMMENDATIONS_CUSTOM_SKILL_HEALING_SIGNET)
+        If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.80 And IsRecharged($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET) Then
+            UseSkillEx($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET)
             Sleep(20 + GetPing())
         EndIf
     EndIf
@@ -785,5 +785,5 @@ EndFunc
 
 
 Func LogIntoFileCustom($string)
-    If $log_level == 0 Then _FileWriteLog($logging_file_commendations_custom, $string)
+    If $log_level == 0 Then _FileWriteLog($logging_file_commendations_sin, $string)
 EndFunc
