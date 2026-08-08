@@ -79,8 +79,12 @@ Func SetupPlayerSpiritSlavesRangerFarm()
 
 	If Not $spirit_slaves_ranger_build_setup Then
 		SpiritSlavesRangerLogInfo('Setting up player build skill bar')
-		LoadSkillTemplate($SPIRIT_SLAVES_RANGER_SKILLBAR)
-		RandomSleep(250)
+		If HeroHasTemplate(0, $SPIRIT_SLAVES_RANGER_SKILLBAR) Then
+			SpiritSlavesRangerLogInfo('Player build already on bar, skipping template load')
+		Else
+			LoadSkillTemplate($SPIRIT_SLAVES_RANGER_SKILLBAR)
+			RandomSleep(250)
+		EndIf
 		$spirit_slaves_ranger_build_setup = True
 	Else
 		SpiritSlavesRangerLogInfo('Player build already configured: skipping skillbar reload')
