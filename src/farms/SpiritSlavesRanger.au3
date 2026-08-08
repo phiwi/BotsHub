@@ -323,6 +323,10 @@ Func SpiritSlavesRangerKillSequence()
 	WEnd
 
 	If IsPlayerDead() Then Return $FAIL
+	If $foesCount > 0 Then
+		SpiritSlavesRangerLogWarn('Kill sequence deadlock: ' & $foesCount & ' foes still alive after timeout')
+		Return $FAIL
+	EndIf
 	SpiritSlavesRangerEnsureWeaponSet3('kill-sequence-end')
 	$spirit_slaves_ranger_center_started = False
 	SpiritSlavesRangerMaintainDefensiveUpkeep()
