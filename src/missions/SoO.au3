@@ -92,7 +92,7 @@ Global Const $SOO_HERO_DUNKORO_TEMPLATE = 'OwAT44XA5xndPwrUfXSX8iU9BA' ; RoJ + C
 Global Const $SOO_HERO_OLIAS_TEMPLATE = 'OAhkQoG4hEyzdoqyFEeSzJ3ws6B'
 Global Const $SOO_HERO_LIVIA_TEMPLATE = 'OAhjUwGYoSxMVBoBnObhSTTODTA'
 Global Const $SOO_HERO_ZHED_TEMPLATE = 'OgVDIJycO5gwxV9bo0GCXgiA' ; BlindingS + Dom
-Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNdmWvHX4EaOPRuA'
+Global Const $SOO_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNdmWvHX4Eae2QuA'
 
 
 Global Const $SOO_HERO_VEKK_TEMPLATE = 'OgNCw8zTtgksS0i1j62dNgA' ; Ether Renewal Prot

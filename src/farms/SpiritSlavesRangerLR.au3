@@ -261,10 +261,10 @@ Func SpiritSlavesRangerLRMaintainDefensiveUpkeep()
 		If IsRecharged($SSRL_ESCAPE) And GetEnergy() >= $SSRL_SKILL_COSTS_MAP[$SSRL_ESCAPE] Then UseSkillEx($SSRL_ESCAPE)
 	EndIf
 
-	; Dwarven Stability — extends stance duration
+	; Dwarven Stability — extends stance duration, cheap (5e)
 	If IsRecharged($SSRL_DWARVEN_STABILITY) And GetEffectTimeRemaining(GetEffect($ID_DWARVEN_STABILITY)) == 0 And GetEnergy() >= $SSRL_SKILL_COSTS_MAP[$SSRL_DWARVEN_STABILITY] Then UseSkillEx($SSRL_DWARVEN_STABILITY)
-	; Mental Block — 50% block, self-reapplies on hit
-	If IsRecharged($SSRL_MENTAL_BLOCK) And GetEffectTimeRemaining(GetEffect($ID_MENTAL_BLOCK)) == 0 And GetEnergy() >= $SSRL_SKILL_COSTS_MAP[$SSRL_MENTAL_BLOCK] Then UseSkillEx($SSRL_MENTAL_BLOCK)
+	; Mental Block — 50% block, self-reapplies on hit. Only when energy is comfortable.
+	If IsRecharged($SSRL_MENTAL_BLOCK) And GetEffectTimeRemaining(GetEffect($ID_MENTAL_BLOCK)) == 0 And GetEnergy() > 15 Then UseSkillEx($SSRL_MENTAL_BLOCK)
 EndFunc
 
 
@@ -272,13 +272,13 @@ Func SpiritSlavesRangerLRMaintainUpkeep($target = Null)
 	; Only cast during combat (foes in range) to avoid wasting energy during staging/looting.
 	If CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY) == 0 Then Return
 	SpiritSlavesRangerLRMaintainDefensiveUpkeep()
-	; Grenth's Aura for sustain
-	If IsRecharged($SSRL_GRENTHS_AURA) And GetEnergy() > 20 Then UseSkillEx($SSRL_GRENTHS_AURA)
-	; You Are All Weaklings — AoE weakness on foes
+	; YaAW — cheap (5e), AoE weakness, top priority for damage mitigation + amplification
 	If IsRecharged($SSRL_YOU_ARE_ALL_WEAKLINGS) And GetEnergy() >= $SSRL_SKILL_COSTS_MAP[$SSRL_YOU_ARE_ALL_WEAKLINGS] Then
 		If $target == Null Then $target = GetNearestEnemyToAgent(GetMyAgent(), $RANGE_COMPASS)
 		If $target <> Null Then UseSkillEx($SSRL_YOU_ARE_ALL_WEAKLINGS, $target)
 	EndIf
+	; Grenth's Aura — sustain, but expensive (10e). Only when energy is comfortable.
+	If IsRecharged($SSRL_GRENTHS_AURA) And GetEnergy() >= 15 Then UseSkillEx($SSRL_GRENTHS_AURA)
 EndFunc
 
 

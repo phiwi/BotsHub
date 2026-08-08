@@ -251,7 +251,8 @@ Func SpiritSlavesRangerMaintainDefensiveUpkeep()
 	If IsRecharged($SSRD_DWARVEN_STABILITY) And GetEffectTimeRemaining(GetEffect($ID_DWARVEN_STABILITY)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_DWARVEN_STABILITY] Then UseSkillEx($SSRD_DWARVEN_STABILITY)
 	If IsRecharged($SSRD_ESCAPE) And GetEffectTimeRemaining(GetEffect($ID_ESCAPE)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_ESCAPE] Then UseSkillEx($SSRD_ESCAPE)
 	If IsRecharged($SSRD_MYSTIC_VIGOR) And GetEffectTimeRemaining(GetEffect($ID_MYSTIC_VIGOR)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_MYSTIC_VIGOR] Then UseSkillEx($SSRD_MYSTIC_VIGOR)
-	If IsRecharged($SSRD_MENTAL_BLOCK) And GetEffectTimeRemaining(GetEffect($ID_MENTAL_BLOCK)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_MENTAL_BLOCK] Then UseSkillEx($SSRD_MENTAL_BLOCK)
+	; Mental Block — 50% block, self-reapplies on hit. Only when energy is comfortable.
+	If IsRecharged($SSRD_MENTAL_BLOCK) And GetEffectTimeRemaining(GetEffect($ID_MENTAL_BLOCK)) == 0 And GetEnergy() > 15 Then UseSkillEx($SSRD_MENTAL_BLOCK)
 EndFunc
 
 
@@ -259,13 +260,13 @@ Func SpiritSlavesRangerMaintainUpkeep($target = Null)
 	; Only cast during combat (foes in range) to avoid wasting energy during staging/looting.
 	If CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY) == 0 Then Return
 	SpiritSlavesRangerMaintainDefensiveUpkeep()
-	; Grenth's Aura for sustain
-	If IsRecharged($SSRD_GRENTHS_AURA) And GetEnergy() > 20 Then UseSkillEx($SSRD_GRENTHS_AURA)
-	; You Are All Weaklings — AoE weakness on foes
+	; YaAW — cheap (5e), AoE weakness, top priority for damage mitigation + amplification
 	If IsRecharged($SSRD_YOU_ARE_ALL_WEAKLINGS) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_YOU_ARE_ALL_WEAKLINGS] Then
 		If $target == Null Then $target = GetNearestEnemyToAgent(GetMyAgent(), $RANGE_COMPASS)
 		If $target <> Null Then UseSkillEx($SSRD_YOU_ARE_ALL_WEAKLINGS, $target)
 	EndIf
+	; Grenth's Aura — sustain, but expensive (10e). Only when energy is comfortable.
+	If IsRecharged($SSRD_GRENTHS_AURA) And GetEnergy() >= 15 Then UseSkillEx($SSRD_GRENTHS_AURA)
 EndFunc
 
 
