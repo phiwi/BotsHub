@@ -65,6 +65,13 @@ Func SetupSpiritSlavesRangerFarm()
 			If SpiritSlavesRangerRunToShatteredRavines() == $FAIL Then ContinueLoop
 			$spirit_slaves_ranger_farm_setup = True
 		WEnd
+	Else
+		; Already in Shattered Ravines — at rez shrine from a previous run.
+		; Skip the Bone Palace travel, just rezone and go.
+		SpiritSlavesRangerLogInfo('Already in Shattered Ravines — rezoning from shrine')
+		SpiritSlavesRangerEnsureWeaponSet3('shrine-recovery')
+		SpiritSlavesRangerRezoneToTheShatteredRavines()
+		$spirit_slaves_ranger_farm_setup = True
 	EndIf
 	SpiritSlavesRangerLogInfo('Preparations complete')
 	Return $SUCCESS
