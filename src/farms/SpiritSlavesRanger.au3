@@ -213,8 +213,10 @@ Func SpiritSlavesRangerFarmGroup()
 	GetAlmostInRangeOfAgent($targetFoe)
 	SpiritSlavesRangerEnsureWeaponSet3('farm-group')
 
-	; Ranger choreography: Dwarven Stability -> Escape -> Mystic Vigor before engaging
+	; Ranger choreography: DwS(8) -> MB(7) -> Escape(1) -> MV(3) before engaging
 	If IsRecharged($SSRD_DWARVEN_STABILITY) Then UseSkillEx($SSRD_DWARVEN_STABILITY)
+	RandomSleep(50)
+	If IsRecharged($SSRD_MENTAL_BLOCK) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_MENTAL_BLOCK] Then UseSkillEx($SSRD_MENTAL_BLOCK)
 	RandomSleep(50)
 	If IsRecharged($SSRD_ESCAPE) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_ESCAPE] Then UseSkillEx($SSRD_ESCAPE)
 	RandomSleep(50)
@@ -240,8 +242,10 @@ Func SpiritSlavesRangerQuickFarmGroup()
 	MoveTo(-7475, -8040)
 	SpiritSlavesRangerEnsureWeaponSet3('quick-farm-group')
 
-	; Ranger choreography: Dwarven Stability -> Escape -> Mystic Vigor before engaging
+	; Ranger choreography: DwS(8) -> MB(7) -> Escape(1) -> MV(3) before engaging
 	If IsRecharged($SSRD_DWARVEN_STABILITY) Then UseSkillEx($SSRD_DWARVEN_STABILITY)
+	RandomSleep(50)
+	If IsRecharged($SSRD_MENTAL_BLOCK) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_MENTAL_BLOCK] Then UseSkillEx($SSRD_MENTAL_BLOCK)
 	RandomSleep(50)
 	If IsRecharged($SSRD_ESCAPE) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_ESCAPE] Then UseSkillEx($SSRD_ESCAPE)
 	RandomSleep(50)
@@ -262,8 +266,8 @@ Func SpiritSlavesRangerMaintainDefensiveUpkeep()
 	If IsRecharged($SSRD_DWARVEN_STABILITY) And GetEffectTimeRemaining(GetEffect($ID_DWARVEN_STABILITY)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_DWARVEN_STABILITY] Then UseSkillEx($SSRD_DWARVEN_STABILITY)
 	If IsRecharged($SSRD_ESCAPE) And GetEffectTimeRemaining(GetEffect($ID_ESCAPE)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_ESCAPE] Then UseSkillEx($SSRD_ESCAPE)
 	If IsRecharged($SSRD_MYSTIC_VIGOR) And GetEffectTimeRemaining(GetEffect($ID_MYSTIC_VIGOR)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_MYSTIC_VIGOR] Then UseSkillEx($SSRD_MYSTIC_VIGOR)
-	; Mental Block — 50% block, self-reapplies on hit. Only when energy is comfortable.
-	If IsRecharged($SSRD_MENTAL_BLOCK) And GetEffectTimeRemaining(GetEffect($ID_MENTAL_BLOCK)) == 0 And GetEnergy() > 15 Then UseSkillEx($SSRD_MENTAL_BLOCK)
+	; Mental Block — 50% block, self-reapplies on hit
+	If IsRecharged($SSRD_MENTAL_BLOCK) And GetEffectTimeRemaining(GetEffect($ID_MENTAL_BLOCK)) == 0 And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_MENTAL_BLOCK] Then UseSkillEx($SSRD_MENTAL_BLOCK)
 EndFunc
 
 
@@ -276,8 +280,8 @@ Func SpiritSlavesRangerMaintainUpkeep($target = Null)
 		If $target == Null Then $target = GetNearestEnemyToAgent(GetMyAgent(), $RANGE_COMPASS)
 		If $target <> Null Then UseSkillEx($SSRD_YOU_ARE_ALL_WEAKLINGS, $target)
 	EndIf
-	; Grenth's Aura — sustain, but expensive (10e). Only when energy is comfortable.
-	If IsRecharged($SSRD_GRENTHS_AURA) And GetEnergy() >= 15 Then UseSkillEx($SSRD_GRENTHS_AURA)
+	; Grenth's Aura — sustain + AoE life steal on cast. Cast when HP dropping.
+	If IsRecharged($SSRD_GRENTHS_AURA) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_GRENTHS_AURA] And DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.90 Then UseSkillEx($SSRD_GRENTHS_AURA)
 EndFunc
 
 
