@@ -53,8 +53,6 @@ Opt('MustDeclareVars', True)
 #include 'src/farms/Brightclaw.au3'
 #include 'src/farms/CoF.au3'
 #include 'src/farms/CoF Sin.au3'
-#include 'src/farms/CoF Sin CA.au3'
-#include 'src/farms/CoF Sin Sand Shards.au3'
 #include 'src/farms/Corsairs.au3'
 #include 'src/farms/DragonMoss.au3'
 #include 'src/farms/DrakeFlesh.au3'
@@ -584,8 +582,6 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Boreal',						BorealChestFarm,				5,					$BOREAL_FARM_DURATION)
 	AddFarmToFarmMap(	'CoF',							CoFFarm,						5,					$COF_FARM_DURATION)
 	AddFarmToFarmMap(	'CoF Sin',						CoFSinFarm,						5,					$COFSIN_FARM_DURATION)
-	AddFarmToFarmMap(	'CoF Sin CA',					CoFSinCAFarm,					5,					$COFSINCA_FARM_DURATION)
-	AddFarmToFarmMap(	'CoF Sin Sand Shards',			CoFSinSSFarm,					5,					$COFSINSS_FARM_DURATION)
 	AddFarmToFarmMap(	'Corsairs',						CorsairsFarm,					5,					$CORSAIRS_FARM_DURATION)
 	AddFarmToFarmMap(	'Deldrimor',					DeldrimorFarm,					10,					$DELDRIMOR_FARM_DURATION)
 	AddFarmToFarmMap(	'Drake Flesh',					DrakeFleshFarm,					5,					$DRAKE_FLESH_FARM_DURATION)
