@@ -111,15 +111,17 @@ EndFunc
 
 Func SpiritSlavesRangerRunToShatteredRavines()
 	TravelToOutpost($ID_BONE_PALACE, $district_name)
-	MoveTo(-14520, 6009)
-	Move(-14820, 3400)
+	; Exiting to Jokos Domain
+	MoveTo(-14500, 6000)
+	Move(-14800, 3400)
 	RandomSleep(1000)
 	If Not WaitMapLoading($ID_JOKOS_DOMAIN) Then Return $FAIL
+
 	RandomSleep(500)
-	MoveTo(-12657, 2609)
-	SpiritSlavesRangerEnsureWeaponSet3('run-to-ravines')
-	MoveTo(-10938, 4254)
-	ChangeTarget(GetNearestSignpostToCoords(-10938, 4254))
+	MoveTo(-12650, 2600)
+	MoveTo(-10950, 4250)
+	; Going to wurms spoor
+	ChangeTarget(GetNearestSignpostToCoords(-10950, 4250))
 	RandomSleep(500)
 	SpiritSlavesRangerLogInfo('Taking wurm')
 	TargetNearestItem()
@@ -127,38 +129,38 @@ Func SpiritSlavesRangerRunToShatteredRavines()
 	RandomSleep(1500)
 	UseSkillEx(5)
 	MoveTo(-8255, 5320)
+
+	; Starting from there, there might be enemies on the way
 	Local $me = GetMyAgent()
 	If (CountFoesInRangeOfAgent($me, $RANGE_EARSHOT) > 0) Then UseSkillEx(5)
-	; Escape for IMS + 75% block during the long wurm sprint
-	If IsRecharged($SSRD_ESCAPE) And GetEnergy() >= $SSRD_SKILL_COSTS_MAP[$SSRD_ESCAPE] Then UseSkillEx($SSRD_ESCAPE)
-	MoveTo(-8624, 10636)
+	MoveTo(-8600, 10600)
 	$me = GetMyAgent()
 	If (CountFoesInRangeOfAgent($me, $RANGE_EARSHOT) > 0) Then UseSkillEx(5)
-	MoveTo(-8261, 12808)
-	Move(-3838, 19196)
+	MoveTo(-8250, 12800)
+	Move(-3850, 19200)
 	$me = GetMyAgent()
-	While IsPlayerAlive() And IsPlayerMoving()
+	While IsPlayerMoving()
 		If (CountFoesInRangeOfAgent($me, $RANGE_NEARBY) > 0 And IsRecharged(5)) Then UseSkillEx(5)
 		RandomSleep(500)
 		$me = GetMyAgent()
+		; If dead it is not worth rezzing better just restart running
+		If IsPlayerDead() Then Return $FAIL
 	WEnd
-
-	If IsPlayerDead() Then Return $FAIL
-
-	MoveTo(-4486, 19700)
+	MoveTo(-4500, 19700)
 	RandomSleep(3000)
-	MoveTo(-4486, 19700)
-
+	MoveTo(-4500, 19700)
+	; If dead it is not worth rezzing better just restart running
 	If IsPlayerDead() Then Return $FAIL
 
-	SpiritSlavesRangerEnsureWeaponSet3('before-ravines-entry')
+	; Entering The Shattered Ravines
 	SpiritSlavesRangerLogInfo('Entering The Shattered Ravines : careful')
 	MoveTo(-4500, 20150)
 	Move(-4500, 21000)
 	RandomSleep(1000)
 	If Not WaitMapLoading($ID_THE_SHATTERED_RAVINES, 10000, 2000) Then Return $FAIL
-	MoveTo(-9714, -10767)
-	MoveTo(-7919, -10530)
+	; Hurry up before dying
+	MoveTo(-9700, -10750)
+	MoveTo(-7900, -10550)
 	Return $SUCCESS
 EndFunc
 
@@ -200,8 +202,9 @@ Func SpiritSlavesRangerRezoneToTheShatteredRavines()
 	Move(-4500, 21000)
 	RandomSleep(1000)
 	WaitMapLoading($ID_THE_SHATTERED_RAVINES, 10000, 2000)
-	MoveTo(-9714, -10767)
-	MoveTo(-7919, -10530)
+	; Hurry up before dying
+	MoveTo(-9700, -10750)
+	MoveTo(-7900, -10550)
 EndFunc
 
 
@@ -342,13 +345,18 @@ Func SpiritSlavesRangerWaitForFoesBall($position)
 	Local $target = Null
 	Local $foesCount = 0
 	Local $validation = 0
+	Local $me = GetMyAgent()
+	Local $nearestFoe = GetNearestEnemyToAgent($me)
 	; Wait until all foes are balled - as long as foes are not aggroed
 	While IsPlayerAlive() And $foesCount < 8 And $validation < 2 And TimerDiff($deadlock) < 120000
 		If $foesCount == 8 Then $validation += 1
 		RandomSleep(1000)
 		$target = GetNearestNPCInRangeOfCoords($position[0], $position[1], $ID_ALLEGIANCE_FOE, $RANGE_EARSHOT)
 		If $target <> Null Then $foesCount = CountFoesInRangeOfAgent($target, $RANGE_AREA)
+		$me = GetMyAgent()
+		$nearestFoe = GetNearestEnemyToAgent($me)
 		SpiritSlavesRangerLogDebug('foes: ' & $foesCount & '/8')
+		If GetDistance($me, $nearestFoe) <= $MOB_AGGRO_RANGE Then Return False
 	WEnd
 	If (TimerDiff($deadlock) > 120000) Then SpiritSlavesRangerLogWarn('Timed out waiting for mobs to ball')
 	Return True
@@ -373,20 +381,14 @@ EndFunc
 
 
 Func SpiritSlavesRangerRestartAfterDeath()
-	If Not IsPlayerDead() Then
-		SpiritSlavesRangerLogInfo('Restart requested after kill-timeout/abort: rezoning now')
-		SpiritSlavesRangerRezoneToTheShatteredRavines()
-		Return $FAIL
-	EndIf
-
 	Local $deadlockTimer = TimerInit()
 	SpiritSlavesRangerLogInfo('Waiting for resurrection')
 	While IsPlayerDead()
 		RandomSleep(1000)
 		If TimerDiff($deadlockTimer) > 60000 Then
-			$spirit_slaves_ranger_farm_setup = False
+			$spirit_slaves_ranger_farm_setup = True
 			SpiritSlavesRangerLogInfo('Travelling to Bone Palace')
-			TravelToOutpost($ID_BONE_PALACE, $district_name)
+			DistrictTravel($ID_BONE_PALACE, $district_name)
 			Return $FAIL
 		EndIf
 	WEnd
