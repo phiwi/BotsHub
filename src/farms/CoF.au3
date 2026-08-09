@@ -424,4 +424,3 @@ Func CoFSinLogWrite($eventName, $note = '')
 EndFunc
 #EndRegion Debug CSV logging
 #EndRegion Assassin SinCA variant
-EndFunc
