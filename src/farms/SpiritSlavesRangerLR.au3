@@ -430,9 +430,9 @@ Func SpiritSlavesRangerLRRestartAfterDeath()
 	While IsPlayerDead()
 		RandomSleep(1000)
 		If TimerDiff($deadlockTimer) > 60000 Then
-			$spirit_slaves_ranger_lr_farm_setup = False
+			$spirit_slaves_ranger_lr_farm_setup = True
 			SpiritSlavesRangerLRLogInfo('Travelling to Bone Palace')
-			TravelToOutpost($ID_BONE_PALACE, $district_name)
+			DistrictTravel($ID_BONE_PALACE, $district_name)
 			Return $FAIL
 		EndIf
 	WEnd
