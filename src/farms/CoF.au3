@@ -262,7 +262,9 @@ Func IsUndead($agent)
 		Or $modelID == $MODELID_ASH_PHANTOM)
 
 
-#Region Assassin SinCA variant
+; ============================================================
+; Assassin SinCA variant
+; ============================================================
 Func CoFSinFarmLoop()
 	$cof_sin_log_run += 1
 	CoFSinLogInit()
@@ -387,7 +389,9 @@ Func CleanCoFSinMobs()
 EndFunc
 
 
-#Region Debug CSV logging
+; ------------------------------------------------------------
+; Debug CSV logging
+; ------------------------------------------------------------
 Func CoFSinLogInit()
 	If Not $COF_SIN_DEBUG_LOG Then Return
 	Local $timestamp = @YEAR & @MON & @MDAY & '_' & @HOUR & @MIN & @SEC
@@ -422,5 +426,5 @@ Func CoFSinLogWrite($eventName, $note = '')
 	Local $safeNote = StringReplace($note, ';', ',')
 	FileWriteLine($cof_sin_log_handle, $timeMs & ';' & $cof_sin_log_run & ';' & $eventName & ';' & $energy & ';' & $hp & ';' & $sfMs & ';' & $sodMs & ';' & $caMs & ';' & $sfReady & ';' & $dpReady & ';' & $sodReady & ';' & $a4 & ';' & $a5 & ';' & $safeNote)
 EndFunc
-#EndRegion Debug CSV logging
-#EndRegion Assassin SinCA variant
+; ------------------------------------------------------------
+; ============================================================
