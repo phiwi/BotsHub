@@ -260,6 +260,7 @@ Func IsUndead($agent)
 		Or $modelID == $MODELID_CRYPT_SLASHER Or $modelID == $MODELID_CRYPT_WRAITH _
 		Or $modelID == $MODELID_CRYPT_BANSHEE Or $modelID == $MODELID_SHOCK_PHANTOM _
 		Or $modelID == $MODELID_ASH_PHANTOM)
+EndFunc
 
 
 ; ============================================================
