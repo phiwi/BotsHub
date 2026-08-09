@@ -76,8 +76,9 @@ Global Const $COFSIN_SIGNET_OF_MYSTIC_SPEED	= 8
 ; Perma SF+DP timing (same rhythm as FocusHanaku)
 Global Const $COFSIN_SF_DP_MIN_ENERGY = 20
 Global Const $COFSIN_DP_AFTER_SF_DELAY_MS = 500
-Global Const $COFSIN_SF_QUEUE_RETRY_MS = 1500 ; Guard against Adlib re-cast during DP delay
+Global Const $COFSIN_SF_QUEUE_RETRY_MS = 1500
 Global Const $COFSIN_COMBAT_TIMEOUT_MS = 10 * 60 * 1000 ; Abort combat after 10 min
+Global Const $COFSIN_DEBUG_LOG = False ; Set to True to enable CSV debug logging (logs/cofsin_debug-*.csv)
 
 Global $cofsin_farm_setup = False
 Global $cofsin_log_handle = -1
@@ -170,9 +171,7 @@ Func CoFSinFarmLoop()
 
 	AggroAndPrepareSinCA()
 	Info('Farming Cryptos')
-	AdlibRegister('MaintainCoFSinPermaAdlib', 200)
 	CleanCoFSinMobs()
-	AdlibUnRegister('MaintainCoFSinPermaAdlib')
 	If IsPlayerDead() Then Return $FAIL
 
 	Info('Picking up loot')
@@ -198,12 +197,6 @@ Func AggroAndPrepareSinCA()
 	RandomSleep(80)
 	MoveTo(-15220, -8950)
 	Sleep(500)
-EndFunc
-
-
-;~ AdlibRegister wrapper: calls perma maintenance with utility casts allowed.
-Func MaintainCoFSinPermaAdlib()
-	MaintainCoFSinPerma(True)
 EndFunc
 
 
@@ -314,6 +307,7 @@ EndFunc
 
 #Region Debug CSV logging
 Func CoFSinLogInit()
+	If Not $COFSIN_DEBUG_LOG Then Return
 	Local $timestamp = @YEAR & @MON & @MDAY & '_' & @HOUR & @MIN & @SEC
 	Local $path = @ScriptDir & '/logs/cofsin_debug-' & GetCharacterName() & '-run' & $cofsin_log_run & '-' & $timestamp & '.csv'
 	$cofsin_log_handle = FileOpen($path, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)

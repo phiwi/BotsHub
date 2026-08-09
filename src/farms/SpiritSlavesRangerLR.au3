@@ -28,6 +28,7 @@ Global Const $SSRL_SKILLS_COSTS_ARRAY = [5, 10, 5, 10, 6, 5, 10, 5]
 Global Const $SSRL_SKILL_COSTS_MAP = MapFromArrays($SSRL_SKILLS_ARRAY, $SSRL_SKILLS_COSTS_ARRAY)
 Global Const $SSRL_CHAIN_MIN_ADREN5 = 6
 Global Const $SSRL_CHAIN_MIN_ADREN6 = 5
+Global Const $SSRL_DEBUG_LOG = False ; Set to True to enable CSV debug logging (logs/ssrl_debug-*.csv)
 
 Global $spirit_slaves_ranger_lr_farm_setup = False
 Global $spirit_slaves_ranger_lr_build_setup = False
@@ -448,6 +449,7 @@ EndFunc
 
 #Region Debug CSV logging
 Func SSRLLogInit()
+	If Not $SSRL_DEBUG_LOG Then Return
 	Local $timestamp = @YEAR & @MON & @MDAY & '_' & @HOUR & @MIN & @SEC
 	Local $path = @ScriptDir & '/logs/ssrl_debug-' & GetCharacterName() & '-run' & $ssrl_log_run & '-' & $timestamp & '.csv'
 	$ssrl_log_handle = FileOpen($path, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
