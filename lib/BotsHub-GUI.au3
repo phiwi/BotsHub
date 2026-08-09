@@ -43,7 +43,6 @@ Opt('GUICloseOnESC', False)
 #include '../lib/Utils-Storage.au3'
 
 #include '../src/farms/CoF.au3'
-#include '../src/farms/CoF Sin.au3'
 #include '../src/farms/Corsairs.au3'
 #include '../src/farms/DrakeFlesh.au3'
 #include '../src/farms/DragonMoss.au3'
@@ -100,7 +99,7 @@ Global Const $GUI_COMBOBOX_DROPDOWN_OPENED = 7
 Global Const $AVAILABLE_BAG_COUNTS = '|1|2|3|4|5'
 Global Const $AVAILABLE_WEAPON_SLOTS = '|0|1|2|3|4'
 Global Const $KIT_AMOUNT_CHOICE = '|0|1|2|3|4|5|6|7|8|9|10|11|12'
-Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|CoF Sin|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Froggy no builds|' & _
+Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Froggy no builds|' & _
 	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kappa|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Sin|' & _
 	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|Omni Farm|Outcast Halcyon|Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|SoO Celerity + Armor no builds|SoO Celerity no builds|Spirit Slaves Ranger LR|Spirit Slaves Ranger|Spirit Slaves|' & _
 	'Storage|Sunspear Armor|Tasca|Test Suite|Tests|Tunnels Forsaken Custom|Tunnels Forsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|Voltaic no builds|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazaar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
@@ -957,11 +956,8 @@ Func UpdateFarmDescription($farm)
 				$BOREAL_DERVISH_CHEST_RUNNER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $BOREAL_CHESTRUN_INFORMATIONS)
 		Case 'CoF'
-			GUICtrlSetData($gui_edit_characterbuilds, $D_COF_SKILLBAR)
+			GUICtrlSetData($gui_edit_characterbuilds, $D_COF_SKILLBAR & @CRLF & $COF_SIN_PLAYER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $COF_FARM_INFORMATIONS)
-		Case 'CoF Sin'
-			GUICtrlSetData($gui_edit_characterbuilds, $COFSIN_PLAYER_SKILLBAR)
-			GUICtrlSetData($gui_label_farminformations, $COFSIN_FARM_INFORMATIONS)
 		Case 'Corsairs'
 			GUICtrlSetData($gui_edit_characterbuilds, $RA_CORSAIRS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $MOP_CORSAIRS_HERO_SKILLBAR & @CRLF & $DR_CORSAIRS_HERO_SKILLBAR)
