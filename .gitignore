@@ -5,6 +5,7 @@ doc/*_manual_recorder.log
 tests/**
 conf/farm/*
 conf/loot/*
+conf/last_farm.txt
 !conf/farm/Default Farm Configuration.json
 !conf/loot/Default Loot Configuration.json
 .*/

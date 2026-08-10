@@ -101,7 +101,7 @@ Global Const $AVAILABLE_WEAPON_SLOTS = '|0|1|2|3|4'
 Global Const $KIT_AMOUNT_CHOICE = '|0|1|2|3|4|5|6|7|8|9|10|11|12'
 Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Froggy no builds|' & _
 	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kappa|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Sin|' & _
-	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|Omni Farm|Outcast Halcyon|Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|SoO Celerity + Armor no builds|SoO Celerity no builds|Spirit Slaves Ranger LR|Spirit Slaves Ranger|Spirit Slaves|' & _
+	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|Omni Farm|Outcast Halcyon|Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|SoO Celerity + Armor no builds|SoO Celerity no builds|Spirit Slaves Sin|Spirit Slaves Ranger LR|Spirit Slaves Ranger|Spirit Slaves|' & _
 	'Storage|Sunspear Armor|Tasca|Test Suite|Tests|Tunnels Forsaken Custom|Tunnels Forsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|Voltaic no builds|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazaar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
 
 #Region GUI
@@ -1106,6 +1106,9 @@ Func UpdateFarmDescription($farm)
 		Case 'Spirit Slaves'
 			GUICtrlSetData($gui_edit_characterbuilds, $SPIRIT_SLAVES_RITUALIST_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $SPIRIT_SLAVES_FARM_INFORMATIONS)
+		Case 'Spirit Slaves Sin'
+			GUICtrlSetData($gui_edit_characterbuilds, $SSS_SIN_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $SSS_FARM_INFORMATIONS)
 		Case 'Sunspear Armor'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
@@ -1949,5 +1952,27 @@ EndFunc
 Func IsAnyLootOptionInBranchChecked($startNodePath, $treeViewHandle = $gui_treeview_lootoptions, $pathDelimiter = '.')
 	Local $treeViewItem = FindNodeInTreeView($treeViewHandle, Null, $startNodePath, $pathDelimiter)
 	Return $treeViewItem == Null ? False : IsAnyChildInBranchChecked($treeViewHandle, $treeViewItem)
+EndFunc
+
+
+;~ Save the currently selected farm to a file so it can be restored next session
+Func SaveLastFarmSelection()
+	Local $path = @ScriptDir & '/conf/last_farm.txt'
+	Local $handle = FileOpen($path, $FO_OVERWRITE + $FO_CREATEPATH)
+	If $handle == -1 Then Return
+	FileWrite($handle, $farm_name)
+	FileClose($handle)
+EndFunc
+
+
+;~ Restore the last selected farm in the dropdown (called after GUI setup)
+Func RestoreLastFarmSelection()
+	Local $path = @ScriptDir & '/conf/last_farm.txt'
+	Local $lastFarm = FileRead($path)
+	If @error Or $lastFarm == '' Then Return
+	$lastFarm = StringStripWS($lastFarm, $STR_STRIPLEADING + $STR_STRIPTRAILING)
+	GUICtrlSetData($gui_combo_farmchoice, $lastFarm)
+	$farm_name = $lastFarm
+	UpdateFarmDescription($lastFarm)
 EndFunc
 #EndRegion Dead GUI code but keep because it could come handy
