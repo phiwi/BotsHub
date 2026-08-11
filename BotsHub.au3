@@ -79,8 +79,6 @@ Opt('MustDeclareVars', True)
 #include 'src/farms/SkaleFins.au3'
 #include 'src/farms/Skrees.au3'
 #include 'src/farms/SpiritSlaves.au3'
-#include 'src/farms/SpiritSlavesRanger.au3'
-#include 'src/farms/SpiritSlavesRangerLR.au3'
 #include 'src/farms/SpiritSlavesSin.au3'
 #include 'src/farms/Vaettirs.au3'
 #include 'src/farms/Vanquish.au3'
@@ -647,8 +645,6 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'SoO Celerity + Armor no builds',	SoOCelerityNoBuildsFarm,		15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'SoO Celerity no builds',		SoOCelerityOnlyNoBuildsFarm,	15,					$SOO_FARM_DURATION)
 	AddFarmToFarmMap(	'Spirit Slaves',				SpiritSlavesFarm,				5,					$SPIRIT_SLAVES_FARM_DURATION)
-	AddFarmToFarmMap(	'Spirit Slaves Ranger',			SpiritSlavesRangerFarm,		5,					$SPIRIT_SLAVES_RANGER_FARM_DURATION)
-	AddFarmToFarmMap(	'Spirit Slaves Ranger LR',		SpiritSlavesRangerLRFarm,		5,					$SPIRIT_SLAVES_RANGER_LR_FARM_DURATION)
 	AddFarmToFarmMap(	'Spirit Slaves Sin',			SpiritSlavesSinFarm,			5,					$SSS_FARM_DURATION)
 	AddFarmToFarmMap(	'Sunspear Armor',				SunspearArmorFarm,				5,					$SUNSPEAR_ARMOR_FARM_DURATION)
 	AddFarmToFarmMap(	'Tasca',						TascaChestFarm,					5,					$TASCA_FARM_DURATION)
@@ -702,10 +698,6 @@ Func ResetBotsSetups()
 	$skrees_farm_setup						= False
 	$soo_farm_setup							= False
 	$spirit_slaves_farm_setup				= False
-	$spirit_slaves_ranger_farm_setup	= False
-	$spirit_slaves_ranger_build_setup	= False
-	$spirit_slaves_ranger_lr_farm_setup	= False
-	$spirit_slaves_ranger_lr_build_setup	= False
 	$spirit_slaves_sin_farm_setup		= False
 	$tasca_farm_setup						= False
 	$wajjun_bazar_run_setup				= False
