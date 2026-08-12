@@ -1,4 +1,4 @@
-CS ===========================================================================
+#CS ===========================================================================
 ; Author: caustic-kronos (aka Kronos, Night, Svarog)
 ; Contributor: Gahais, phiwi
 ; Copyright 2025 caustic-kronos
@@ -318,6 +318,7 @@ Func SSSKill()
 	Local $currentFoes
 	Local $repositionTarget = Null ; When set, commit to reaching this cluster before attacking
 	Local $reposStuckCount = 0     ; Bail out of repositioning if bodyblocked too long
+	Local $reposCooldown = 0       ; Don't retry repositioning immediately after timeout
 
 	While True
 		$currentFoes = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_SPELLCAST + 200)
@@ -331,7 +332,7 @@ Func SSSKill()
 		EndIf
 		If IsPlayerDead() Then Return $FAIL
 
-		; Repositioning mode: advance toward cluster. If bodyblocked by a foe → kill it first.
+		; Repositioning mode: advance toward cluster — NO ATTACKS, pure movement only.
 		If $repositionTarget <> Null Then
 			If GetIsDead($repositionTarget) Then
 				$repositionTarget = Null
@@ -341,15 +342,16 @@ Func SSSKill()
 				If $clusterDist > $RANGE_ADJACENT Then
 					$reposStuckCount += 1
 					SSSMaintainDefense()
-					; Aggressive timeout — bail after ~1.4s (7 iterations)
+					; Timeout after ~1.4s (7 iterations) — give up, fight where we are, and don't retry immediately
 					If $reposStuckCount > 6 Then
-						SSSLogWrite('repos_timeout', 'stuck=' & $reposStuckCount)
+						SSSLogWrite('repos_timeout', 'stuck=' & $reposStuckCount & ';dist=' & Int($clusterDist))
 						$repositionTarget = Null
 						$reposStuckCount = 0
+						$reposCooldown = 20   ; ~4s cooldown before retrying reposition
 						Sleep(10)
 						ContinueLoop
 					EndIf
-					; Hook immediately at stuck 2/4 — don't waste iterations on blocked Move
+					; Sidestep hooks at stuck 2/4 — slip past bodyblock without attacking
 					If $reposStuckCount == 2 Or $reposStuckCount == 4 Then
 						Local $me = GetMyAgent()
 						Local $tx = DllStructGetData($repositionTarget, 'X')
@@ -360,28 +362,18 @@ Func SSSKill()
 						Local $sign = ($reposStuckCount == 2) ? -1 : 1
 						Local $strafeX = $mx - $dy * 0.7 * $sign
 						Local $strafeY = $my + $dx * 0.7 * $sign
-						SSSLogWrite('repos_hook', 'dir=' & ($sign < 0 ? 'L' : 'R') & ';stuck=' & $reposStuckCount)
+						SSSLogWrite('repos_hook', 'dir=' & ($sign < 0 ? 'L' : 'R') & ';stuck=' & $reposStuckCount & ';dist=' & Int($clusterDist))
 						Move($strafeX, $strafeY)
 						Sleep(10)
 						ContinueLoop
 					EndIf
-					; Attack at stuck 3/5 — if hooks didn't work, kill the bodyblocker
-					If $reposStuckCount == 3 Or $reposStuckCount == 5 Then
-						Local $nearFoe = GetNearestEnemyToAgent(GetMyAgent())
-						If $nearFoe <> Null And GetDistance(GetMyAgent(), $nearFoe) <= $RANGE_ADJACENT Then
-							ChangeTarget($nearFoe)
-							Attack($nearFoe)
-							SSSLogWrite('repos_fight', 'stuck=' & $reposStuckCount & ';dist=' & Int($clusterDist))
-							Sleep(10)
-							ContinueLoop
-						EndIf
-					EndIf
-					; Fallback: normal movement (stuck=1 or stuck=6 — first/last attempt)
+					; All other iterations: just move toward cluster center
 					Move(DllStructGetData($repositionTarget, 'X'), DllStructGetData($repositionTarget, 'Y'))
 					Sleep(10)
 					ContinueLoop
 				EndIf
 				; Reached the cluster — resume normal combat
+				SSSLogWrite('repos_arrive', 'dist=' & Int($clusterDist))
 				$repositionTarget = Null
 				$reposStuckCount = 0
 			EndIf
@@ -438,29 +430,29 @@ Func SSSKill()
 			CheckAndSendStuckCommand()
 		EndIf
 
-		; Reposition to densest enemy cluster when ≤2 foes in melee range
-		; Sets $repositionTarget to commit to reaching the cluster without interruption
-		If $repositionTarget == Null And CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_ADJACENT) <= 2 Then
+		; Reposition to densest enemy cluster when ≤2 foes in melee range.
+		; If the best cluster is already adjacent, stay put — no need to move.
+		; After a timeout, cooldown prevents immediate retry to avoid death-loops.
+		If $reposCooldown > 0 Then
+			$reposCooldown -= 1
+		ElseIf $repositionTarget == Null And CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_ADJACENT) <= 2 Then
 			Local $clusterStart = TimerInit()
-			$repositionTarget = SSSFindDensestCluster()
+			Local $candidate = SSSFindDensestCluster()
 			Local $clusterElapsed = TimerDiff($clusterStart)
 			If $clusterElapsed > 500 Then Debug('SSSFindDensestCluster took ' & Int($clusterElapsed) & 'ms')
-			If $repositionTarget <> Null Then
+			If $candidate <> Null Then
+				Local $candDist = GetDistance(GetMyAgent(), $candidate)
 				Local $adjForLog = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_ADJACENT)
 				Local $farForLog = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_SPELLCAST + 200)
-				SSSLogWrite('repos_start', 'adj=' & $adjForLog & ';far=' & $farForLog & ';clusterDist=' & Int(GetDistance(GetMyAgent(), $repositionTarget)))
-			EndIf
-			If $repositionTarget <> Null And GetDistance(GetMyAgent(), $repositionTarget) <= $RANGE_ADJACENT Then
-				; Cluster center is adjacent but we may be bodyblocked from casters — try furthest foe
-				Local $farCount = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_SPELLCAST + 200)
-				If $farCount > 2 Then
-					$repositionTarget = SSSFindFurthestFoe()
-					SSSLogWrite('repos_furthest', 'bypassing bodyblock, farFoes=' & $farCount)
+				If $candDist <= $RANGE_ADJACENT Then
+					; Best cluster is already right here — nothing to reposition to
+					SSSLogWrite('repos_skip', 'adj=' & $adjForLog & ';far=' & $farForLog & ';clusterDist=' & Int($candDist))
 				Else
-					$repositionTarget = Null
+					$repositionTarget = $candidate
+					SSSLogWrite('repos_start', 'adj=' & $adjForLog & ';far=' & $farForLog & ';clusterDist=' & Int($candDist))
+					$reposStuckCount = 0
 				EndIf
 			EndIf
-			$reposStuckCount = 0
 		EndIf
 
 		Local $iterElapsed = TimerDiff($iterStart)
