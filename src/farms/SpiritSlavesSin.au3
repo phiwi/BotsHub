@@ -98,9 +98,10 @@ EndFunc
 Func SetupPlayerSpiritSlavesSinFarm()
 	Info('Setting up player build skill bar')
 	If DllStructGetData(GetMyAgent(), 'Primary') == $ID_ASSASSIN Then
-		If HeroHasTemplate(0, $SSS_SIN_SKILLBAR) Then
+		If SSSHasExpectedBuild() Then
 			Info('Spirit Slaves Sin : template already loaded, skipping')
 		Else
+			Info('Spirit Slaves Sin : loading template')
 			LoadSkillTemplate($SSS_SIN_SKILLBAR)
 			RandomSleep(250)
 		EndIf
@@ -109,6 +110,20 @@ Func SetupPlayerSpiritSlavesSinFarm()
 		Return $FAIL
 	EndIf
 	Return $SUCCESS
+EndFunc
+
+
+;~ Quick player-skillbar check — avoids HeroHasTemplate(0) round-trip through the hero list
+Func SSSHasExpectedBuild()
+	If GetSkillbarSkillID(1) <> $ID_YOU_ARE_ALL_WEAKLINGS Then Return False
+	If GetSkillbarSkillID(2) <> $ID_CRIPPLING_VICTORY Then Return False
+	If GetSkillbarSkillID(3) <> $ID_REAP_IMPURITIES Then Return False
+	If GetSkillbarSkillID(4) <> $ID_VOW_OF_STRENGTH Then Return False
+	If GetSkillbarSkillID(5) <> $ID_GRENTHS_AURA Then Return False
+	If GetSkillbarSkillID(6) <> $ID_SHROUD_OF_DISTRESS Then Return False
+	If GetSkillbarSkillID(7) <> $ID_I_AM_UNSTOPPABLE Then Return False
+	If GetSkillbarSkillID(8) <> $ID_CRITICAL_AGILITY Then Return False
+	Return True
 EndFunc
 
 
@@ -300,7 +315,6 @@ EndFunc
 
 ;~ VoS + CV/Reap kill loop (adrenal chain pattern)
 Func SSSKill()
-	CheckAndSendStuckCommand()
 	SSSMaintainDefense(True)
 	ChangeWeaponSet($SSS_WEAPON_SET)
 
@@ -318,6 +332,7 @@ Func SSSKill()
 	Local $currentFoes
 	Local $repositionTarget = Null ; When set, commit to reaching this cluster before attacking
 	Local $reposStuckCount = 0     ; Bail out of repositioning if bodyblocked too long
+	Local $reposRetry = False      ; True = second attempt (furthest foe) after first timeout
 	Local $reposCooldown = 0       ; Don't retry repositioning immediately after timeout
 
 	While True
@@ -342,11 +357,27 @@ Func SSSKill()
 				If $clusterDist > $RANGE_ADJACENT Then
 					$reposStuckCount += 1
 					SSSMaintainDefense()
-					; Timeout after ~1.4s (7 iterations) — give up, fight where we are, and don't retry immediately
+					; Timeout after ~1.4s (7 iterations).
+					; If first attempt (densest cluster) failed → immediately retry with furthest foe.
+					; If retry also fails → cooldown, fight where we are.
 					If $reposStuckCount > 6 Then
-						SSSLogWrite('repos_timeout', 'stuck=' & $reposStuckCount & ';dist=' & Int($clusterDist))
+						If Not $reposRetry Then
+							; First attempt failed — retry with furthest foe for a different approach path
+							Local $farFoe = SSSFindFurthestFoe()
+							If $farFoe <> Null Then
+								SSSLogWrite('repos_retry', 'stuck=' & $reposStuckCount & ';dist=' & Int($clusterDist) & ';farFoeDist=' & Int(GetDistance(GetMyAgent(), $farFoe)))
+								$repositionTarget = $farFoe
+								$reposStuckCount = 0
+								$reposRetry = True
+								Sleep(10)
+								ContinueLoop
+							EndIf
+						EndIf
+						; Retry also failed (or no furthest foe) — give up and fight
+						SSSLogWrite('repos_timeout', 'stuck=' & $reposStuckCount & ';dist=' & Int($clusterDist) & ';retry=' & $reposRetry)
 						$repositionTarget = Null
 						$reposStuckCount = 0
+						$reposRetry = False
 						$reposCooldown = 20   ; ~4s cooldown before retrying reposition
 						Sleep(10)
 						ContinueLoop
@@ -372,10 +403,11 @@ Func SSSKill()
 					Sleep(10)
 					ContinueLoop
 				EndIf
-				; Reached the cluster — resume normal combat
+				; Reached the cluster — resume normal combat, reset retry flag
 				SSSLogWrite('repos_arrive', 'dist=' & Int($clusterDist))
 				$repositionTarget = Null
 				$reposStuckCount = 0
+				$reposRetry = False
 			EndIf
 		EndIf
 

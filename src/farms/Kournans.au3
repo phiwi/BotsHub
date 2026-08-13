@@ -29,7 +29,7 @@
 
 ; ==== Constants ====
 Global Const $ELA_KOURNANS_FARMER_SKILLBAR = 'OgdTkYG/HCHMXctUVwHC3xVI1BA'
-Global Const $R_KOURNANS_HERO_SKILLBAR = 'OgATYnLjZB6C+Zn76OzGAAAA'
+Global Const $R_KOURNANS_HERO_SKILLBAR = 'OgATYpriZB6C+Zn76OzGAAAA'
 Global Const $RT_KOURNANS_HERO_SKILLBAR = 'OACjAyhDJPBTy58M5CAAAAAAAA'
 Global Const $P_KOURNANS_HERO_SKILLBAR = 'OQijEqmMKO84dM92HbiH26YcMA'
 Global Const $KOURNANS_FARM_INFORMATIONS = 'For best results, have :' & @CRLF _
@@ -78,6 +78,8 @@ Global Const $KOURNANS_RITUAL_LORD			= 1
 Global Const $KOURNANS_EARTHBIND			= 2
 Global Const $KOURNANS_VITAL_WEAPON			= 3
 Global Const $KOURNANS_DEATH_PACT_SIGNET	= 4
+; One spirit/binding ritual cast takes ~3s - command the next one only after 4s to avoid self-interruption (matches Missing Daughter)
+Global Const $KOURNANS_SPIRIT_CAST_SLEEP_MS	= 4000
 
 Global $kournans_farm_setup = False
 
@@ -117,8 +119,12 @@ EndFunc
 Func SetupPlayerKournansFarm()
 	Info('Setting up player build skill bar')
 	If DllStructGetData(GetMyAgent(), 'Primary') == $ID_ELEMENTALIST Then
-		LoadSkillTemplate($ELA_KOURNANS_FARMER_SKILLBAR)
-		RandomSleep(250)
+		If HeroHasTemplate(0, $ELA_KOURNANS_FARMER_SKILLBAR) Then
+			Info('Kournans player: template already loaded, skipping')
+		Else
+			LoadSkillTemplate($ELA_KOURNANS_FARMER_SKILLBAR)
+			RandomSleep(250)
+		EndIf
 	Else
 		Warn('Should run this farm as elementalist')
 		Return $FAIL
@@ -140,9 +146,21 @@ Func SetupTeamKournansFarm()
 		Warn('Could not set up party correctly. Team size different than 4')
 		Return $FAIL
 	EndIf
-	LoadSkillTemplate($R_KOURNANS_HERO_SKILLBAR, $KOURNANS_RANGER_HERO_POSITION)
-	LoadSkillTemplate($RT_KOURNANS_HERO_SKILLBAR, $KOURNANS_RITUALIST_HERO_POSITION)
-	LoadSkillTemplate($P_KOURNANS_HERO_SKILLBAR, $KOURNANS_PARAGON_HERO_POSITION)
+	If HeroHasTemplate($KOURNANS_RANGER_HERO_POSITION, $R_KOURNANS_HERO_SKILLBAR) Then
+		Info('Kournans Ranger: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($R_KOURNANS_HERO_SKILLBAR, $KOURNANS_RANGER_HERO_POSITION)
+	EndIf
+	If HeroHasTemplate($KOURNANS_RITUALIST_HERO_POSITION, $RT_KOURNANS_HERO_SKILLBAR) Then
+		Info('Kournans Ritualist: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($RT_KOURNANS_HERO_SKILLBAR, $KOURNANS_RITUALIST_HERO_POSITION)
+	EndIf
+	If HeroHasTemplate($KOURNANS_PARAGON_HERO_POSITION, $P_KOURNANS_HERO_SKILLBAR) Then
+		Info('Kournans Paragon: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($P_KOURNANS_HERO_SKILLBAR, $KOURNANS_PARAGON_HERO_POSITION)
+	EndIf
 	RandomSleep(250)
 	DisableAllHeroSkills(1)
 	DisableAllHeroSkills(2)
@@ -193,7 +211,7 @@ Func KournansFarmLoop()
 	Local $y = DllStructGetData($me, 'Y')
 	CommandAll($X, $y)
 	RandomSleep(2000)
-	CastOnlyNecessarySpiritsAndBoons($x, $y)
+	CastFullSpiritsAndBoons($x, $y)
 	CommandAll(16000, -7000)
 
 	UseSkillEx($KOURNANS_INTENSITY)
@@ -242,28 +260,26 @@ EndFunc
 
 ;~ Cast all of the spirits and boons - it is not necessary
 Func CastFullSpiritsAndBoons($safeX, $safeY)
-	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_EDGE_OF_EXTINCTION)
 	; Get closer to the non-enemies to trigger them into enemies
 	Local $targetFoe = GetFurthestNPCInRangeOfCoords(Null, 9600, -650, $RANGE_EARSHOT)
 	GetAlmostInRangeOfAgent($targetFoe, $RANGE_EARSHOT - 50)
 	; Move back to be safe for a few seconds
 	MoveTo($safeX, $safeY)
-	RandomSleep(2000)
-	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_BRAMBLES)
-	RandomSleep(2500)
-	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_LACERATE)
-	RandomSleep(2500)
-	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_NATURES_RENEWAL)
-	RandomSleep(2500)
-	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_MUDDY_TERRAIN)
-	RandomSleep(2500)
-	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_PESTILENCE)
-	RandomSleep(1000)
-	UseHeroSkill($KOURNANS_RITUALIST_HERO_POSITION, $KOURNANS_RITUAL_LORD)
-	UseHeroSkill($KOURNANS_RITUALIST_HERO_POSITION, $KOURNANS_EARTHBIND)
-	RandomSleep(1500)
+
+	; Margrid casts all 5 ranger spirits in one go; Xandra's boons/rituals run in parallel (separate hero)
 	UseHeroSkillEx($KOURNANS_RITUALIST_HERO_POSITION, $KOURNANS_VITAL_WEAPON, GetMyAgent())
-	RandomSleep(200)
+	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_EDGE_OF_EXTINCTION)
+	RandomSleep($KOURNANS_SPIRIT_CAST_SLEEP_MS)
+	UseHeroSkill($KOURNANS_RITUALIST_HERO_POSITION, $KOURNANS_RITUAL_LORD)
+	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_BRAMBLES)
+	RandomSleep($KOURNANS_SPIRIT_CAST_SLEEP_MS)
+	UseHeroSkill($KOURNANS_RITUALIST_HERO_POSITION, $KOURNANS_EARTHBIND)
+	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_LACERATE)
+	RandomSleep($KOURNANS_SPIRIT_CAST_SLEEP_MS)
+	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_NATURES_RENEWAL)
+	RandomSleep($KOURNANS_SPIRIT_CAST_SLEEP_MS)
+	UseHeroSkill($KOURNANS_RANGER_HERO_POSITION, $KOURNANS_PESTILENCE)
+	RandomSleep($KOURNANS_SPIRIT_CAST_SLEEP_MS)
 EndFunc
 
 

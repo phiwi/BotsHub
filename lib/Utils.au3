@@ -3116,16 +3116,41 @@ Func HeroHasTemplate($heroIndex, $templateCode)
 	; primaryProfession (P bits)
 	Local $primaryProfession = Bin64ToDec(StringLeft($buildTemplate, $professionBits))
 	$buildTemplate = StringTrimLeft($buildTemplate, $professionBits)
-	If $primaryProfession <> GetHeroProfession($heroIndex) Then Return False
-	; Skip secondary (always same bits as primary in modern templates)
+	; GetHeroProfession and GetSkillbar both iterate hero NPC list — player (index 0) is never there.
+	; For the player we read profession and skillbar directly from the player agent.
+	If $heroIndex == 0 Then
+		If $primaryProfession <> DllStructGetData(GetMyAgent(), 'Primary') Then Return False
+	Else
+		If $primaryProfession <> GetHeroProfession($heroIndex) Then Return False
+	EndIf
+	; secondary profession (P bits) - skip
 	$buildTemplate = StringTrimLeft($buildTemplate, $professionBits)
-	; attributes (8 bits each, 5 attributes max) — skip
-	$buildTemplate = StringTrimLeft($buildTemplate, 8 * 5)
-	; Now 8 skill slots (11 bits each)
+
+	; attribute count (4 bits)
+	Local $attributeCount = Bin64ToDec(StringLeft($buildTemplate, 4))
+	$buildTemplate = StringTrimLeft($buildTemplate, 4)
+	; attribute bit length (4 bits) => A
+	Local $attributeBits = Bin64ToDec(StringLeft($buildTemplate, 4)) + 4
+	$buildTemplate = StringTrimLeft($buildTemplate, 4)
+	; skip attributes: each is A bits (ID) + 4 bits (level)
+	$buildTemplate = StringTrimLeft($buildTemplate, ($attributeBits + 4) * $attributeCount)
+
+	; skill bit length (4 bits) => S
+	Local $skillsBits = Bin64ToDec(StringLeft($buildTemplate, 4)) + 8
+	$buildTemplate = StringTrimLeft($buildTemplate, 4)
+
+	; 8 skill slots (S bits each)
+	Local $playerSkillbar = ($heroIndex == 0) ? GetSkillbar(0) : Null
 	For $slot = 1 To 8
-		Local $expectedSkillID = Bin64ToDec(StringLeft($buildTemplate, 11))
-		$buildTemplate = StringTrimLeft($buildTemplate, 11)
-		Local $actualSkillID = GetSkillbarSkillID($slot, $heroIndex)
+		Local $expectedSkillID = Bin64ToDec(StringLeft($buildTemplate, $skillsBits))
+		$buildTemplate = StringTrimLeft($buildTemplate, $skillsBits)
+		Local $actualSkillID
+		If $heroIndex == 0 Then
+			; Read directly from already-fetched player skillbar struct to avoid the hero-list search
+			$actualSkillID = DllStructGetData($playerSkillbar, 'SkillID' & $slot)
+		Else
+			$actualSkillID = GetSkillbarSkillID($slot, $heroIndex)
+		EndIf
 		If $actualSkillID <> $expectedSkillID And $expectedSkillID > 0 Then Return False
 	Next
 	Return True
