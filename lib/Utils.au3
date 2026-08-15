@@ -141,8 +141,9 @@ EndFunc
 
 
 ;~ Travel to specified map and specified district
-Func DistrictTravel($mapID, $district = 'Random EU')
+Func DistrictTravel($mapID, $district = 'Default')
 	If GetMapID() == $mapID Then Return
+	If $district == 'Default' Then $district = GetDistrictFromUTCOffset()
 	Switch $district
 		Case 'Random'
 			RandomDistrictTravel($mapID, 0, 11)
@@ -303,22 +304,26 @@ Func EnterFissureOfWoe()
 					MoveTo(-4650, 18700)
 					MoveTo(-3600, 18700)
 					MoveTo(-3100, 18000)
-					MoveTo(-2500, 18700)
+					MoveTo(-2400, 18750)
 				EndIf
-				$npcCoordinates[0] = -2500
-				$npcCoordinates[1] = 18700
+				$npcCoordinates[0] = -2400
+				$npcCoordinates[1] = 18750
 			Case $ID_CHANTRY_OF_SECRETS
-				MoveTo(-9870, 990)
-				If GetDistanceToPoint(GetMyAgent(), -9870, 990) > $RANGE_ADJACENT Then
+				MoveTo(-9900, 1000)
+				If GetDistanceToPoint(GetMyAgent(), -9900, 1000) > $RANGE_ADJACENT Then
 					MoveTo(-10400, 770)
-					MoveTo(-9870, 990)
+					MoveTo(-9900, 1000)
 				EndIf
-				$npcCoordinates[0] = -9870
-				$npcCoordinates[1] = 990
+				$npcCoordinates[0] = -9900
+				$npcCoordinates[1] = 1000
 		EndSwitch
-		SendChat('/kneel', '')
-		PingSleep(3000)
-		GoToNPC(GetNearestNPCToCoords($npcCoordinates[0], $npcCoordinates[1]))
+		Local $championOfBalthazar = GetNearestNPCToCoords($npcCoordinates[0], $npcCoordinates[1])
+		If $championOfBalthazar == Null Or GetDistanceToPoint($championOfBalthazar, $npcCoordinates[0], $npcCoordinates[1]) > $RANGE_ADJACENT Then
+			SendChat('/kneel', '')
+			PingSleep(3000)
+			$championOfBalthazar = GetNearestNPCToCoords($npcCoordinates[0], $npcCoordinates[1])
+		EndIf
+		GoToNPC($championOfBalthazar)
 		PingSleep(750)
 		Dialog(0x85)
 		PingSleep(750)
@@ -352,9 +357,9 @@ Func EnterUnderworld()
 		Switch GetMapID()
 			Case $ID_TEMPLE_OF_THE_AGES
 				MoveTo(-4170, 19759)
-				MoveTo(-4124, 19829)
-				$npcCoordinates[0] = -4124
-				$npcCoordinates[1] = 19829
+				MoveTo(-4100, 19800)
+				$npcCoordinates[0] = -4100
+				$npcCoordinates[1] = 19800
 			Case $ID_CHANTRY_OF_SECRETS
 				MoveTo(-9000, 3900)
 				If GetDistanceToPoint(GetMyAgent(), -9000, 3900) > $RANGE_ADJACENT Then
@@ -364,9 +369,13 @@ Func EnterUnderworld()
 				$npcCoordinates[0] = -9000
 				$npcCoordinates[1] = 3900
 		EndSwitch
-		SendChat('/kneel', '')
-		PingSleep(3000)
-		GoToNPC(GetNearestNPCToCoords($npcCoordinates[0], $npcCoordinates[1]))
+		Local $voiceOfGrenth = GetNearestNPCToCoords($npcCoordinates[0], $npcCoordinates[1])
+		If $voiceOfGrenth == Null Or GetDistanceToPoint($voiceOfGrenth, $npcCoordinates[0], $npcCoordinates[1]) > $RANGE_ADJACENT Then
+			SendChat('/kneel', '')
+			PingSleep(3000)
+			$voiceOfGrenth = GetNearestNPCToCoords($npcCoordinates[0], $npcCoordinates[1])
+		EndIf
+		GoToNPC($voiceOfGrenth)
 		PingSleep(750)
 		Dialog(0x85)
 		PingSleep(750)
@@ -464,6 +473,7 @@ EndFunc
 
 
 Func NPCCoordinatesInTown($town = $ID_EYE_OF_THE_NORTH, $type = 'Merchant')
+	If $town == $ID_EMBARK_BEACH Then MoveTo(1950, 0)
 	Local $coordinates[] = [-1, -1]
 	Switch $type
 		Case 'Merchant'
@@ -474,6 +484,12 @@ Func NPCCoordinatesInTown($town = $ID_EYE_OF_THE_NORTH, $type = 'Merchant')
 				Case $ID_EYE_OF_THE_NORTH
 					$coordinates[0] = -2700
 					$coordinates[1] = 1075
+				Case $ID_GREAT_TEMPLE_OF_BALTHAZAR
+					$coordinates[0] = -4800
+					$coordinates[1] = -7400
+				Case $ID_WIZARDS_ISLE
+					$coordinates[0] = 3550
+					$coordinates[1] = 9050
 				Case Else
 					Warn('For provided town coordinates of that NPC are not mapped yet')
 			EndSwitch
@@ -485,6 +501,9 @@ Func NPCCoordinatesInTown($town = $ID_EYE_OF_THE_NORTH, $type = 'Merchant')
 				Case $ID_EYE_OF_THE_NORTH
 					$coordinates[0] = -1850
 					$coordinates[1] = 875
+				Case $ID_WIZARDS_ISLE
+					$coordinates[0] = 3750
+					$coordinates[1] = 10000
 				Case Else
 					Warn('For provided town coordinates of that NPC are not mapped yet')
 			EndSwitch
@@ -496,6 +515,9 @@ Func NPCCoordinatesInTown($town = $ID_EYE_OF_THE_NORTH, $type = 'Merchant')
 				Case $ID_EYE_OF_THE_NORTH
 					$coordinates[0] = -2100
 					$coordinates[1] = 1125
+				Case $ID_WIZARDS_ISLE
+					$coordinates[0] = 3250
+					$coordinates[1] = 9950
 				Case Else
 					Warn('For provided town coordinates of that NPC are not mapped yet')
 			EndSwitch
@@ -1334,8 +1356,8 @@ Func KillFoesInArea($options = $default_move_aggro_kill_options)
 		If Not $priorityTargeting Or $target == Null Then $target = GetNearestEnemyToAgent($me)
 		If IsPlayerAlive() And $target <> Null And DllStructGetData($target, 'ID') <> 0 And Not GetIsDead($target) And GetDistance($me, $target) < $fightRange Then
 			ChangeTarget($target)
-			PingSleep(100)
 			If $callTarget Then CallTargetOnce($target)
+			PingSleep(100)
 			$killMethod($target, $options)
 		EndIf
 
@@ -1364,9 +1386,6 @@ Func UseSkillSequentially($target, $options = $default_move_aggro_kill_options)
 
 	; get as close as possible to target foe to have a surprise effect when attacking
 	GetAlmostInRangeOfAgent($target)
-	Attack($target)
-	PingSleep(100)
-
 	Local $i = 0
 	; casting skills from 1 to 8 in inner loop and leaving it only after target or player is dead
 	While $target <> Null And Not GetIsDead($target) And DllStructGetData($target, 'HealthPercent') > 0 And DllStructGetData($target, 'ID') <> 0 And DllStructGetData($target, 'Allegiance') == $ID_ALLEGIANCE_FOE
@@ -1394,17 +1413,14 @@ Func FanFlagHeroes($range = 250)
 	Local $heroCount = GetHeroCount()
 	; Change your hero locations here
 	Switch $heroCount
-		Case 3
-			; right, left, behind
-			Local $heroFlagPositions[] = [1, 2, 3]
-		Case 5
+		Case 1 To 5
 			; right, left, behind, behind right, behind left
-			Local $heroFlagPositions[] = [1, 2, 3, 4, 5]
-		Case 7
+			Local $heroFlagPositions = [1, 2, 3, 4, 5]
+		Case 6 To 7
 			; right, left, behind, behind right, behind left, way behind right, way behind left
-			Local $heroFlagPositions[] = [1, 2, 6, 3, 4, 5, 7]
+			Local $heroFlagPositions = [1, 2, 6, 3, 4, 5, 7]
 		Case Else
-			Local $heroFlagPositions[0] = []
+			Local $heroFlagPositions = []
 	EndSwitch
 
 	Local $me = GetMyAgent()
@@ -1437,7 +1453,6 @@ Func FanFlagHeroes($range = 250)
 	If $heroCount > 5 Then CommandHero($heroFlagPositions[5], $x + ($rotationY / 2 - 2 * $rotationX) * $distance, $y - (2 * $rotationY + $rotationX / 2) * $distance)
 	; To the left, way behind
 	If $heroCount > 6 Then CommandHero($heroFlagPositions[6], $x - ($rotationY / 2 + 2 * $rotationX) * $distance, $y + ($rotationX / 2 - 2 * $rotationY) * $distance)
-
 EndFunc
 #EndRegion Map Clearing Utilities
 #EndRegion Advanced actions
@@ -1572,6 +1587,44 @@ Func _NowUtcString()
 	Return StringFormat('%04d/%02d/%02d %02d:%02d:%02d', _
 			DllStructGetData($utc, 'Year'), DllStructGetData($utc, 'Month'), DllStructGetData($utc, 'Day'), _
 			DllStructGetData($utc, 'Hour'), DllStructGetData($utc, 'Minute'), DllStructGetData($utc, 'Second'))
+EndFunc
+
+
+;~ Return closest region corresponding to the local system time zone, based on UTC offset
+Func GetDistrictFromUTCOffset()
+	Local $RegionUS = 0, $RegionEU = 1, $RegionAsia = 2
+	Local $utcOffset = GetUTCOffset()
+	Switch True
+		Case $utcOffset < 0
+			Return 'Random US'
+		Case $utcOffset <= 240 ; UTC+4:00 (UAE)
+			Return 'Random EU'
+		Case Else
+			Return 'Random Asia'
+	EndSwitch
+EndFunc
+
+
+;~ Returns the UTC offset in minutes for the local system time zone, taking into account DST if applicable
+Func GetUTCOffset()
+	Local $timezoneInformation = _Date_Time_GetTimeZoneInformation()
+	Local $bias = $timezoneInformation[1]
+	Switch $timezoneInformation[0]
+		Case 1 ; Standard time
+			$bias += $timezoneInformation[4]
+		Case 2 ; Daylight saving time
+			$bias += $timezoneInformation[7]
+		; Case 0 ; Unknown time zone
+			; Do nothing, bias is already set to the default value
+	EndSwitch
+	Local $utcOffset = -$bias
+	Return $utcOffset
+EndFunc
+
+
+;~ Return GeoID of system to determine country - cannot be used to determiner server location as it is based on system locale
+Func GetSystemGeoID()
+	Return RegRead('HKEY_CURRENT_USER\Control Panel\International\Geo', 'Nation')
 EndFunc
 #EndRegion DateTime
 
@@ -1734,38 +1787,39 @@ EndFunc
 
 ;~ Manage excess faction points by either donating them, buying materials or elite zone scrolls
 Func ManageFactionPointsFarm($factionName, $getFactionFunction, $getMaxFactionFunction, $mapForFactionExchange, $npcX, $npcY)
-	If $getFactionFunction() > ($getMaxFactionFunction() - 25000) Then
-		TravelToOutpost($mapForFactionExchange, $district_name)
-		RandomSleep(200)
-		GoNearestNPCToCoords($npcX, $npcY)
-		If $run_options_cache['run.donate_faction_points'] Then
-			Info('Donating ' & $factionName & ' faction points')
-			While $getFactionFunction() >= 5000
-				DonateFaction($factionName)
-				RandomSleep(500)
-			WEnd
-		ElseIf $run_options_cache['run.buy_faction_resources'] Then
-			Info('Converting ' & $factionName & ' faction points into materials')
-			Dialog(0x83)
-			RandomSleep(550)
-			Local $numberOfChunks = Floor($getFactionFunction() / 5000)
-			; number of chunks = bits from 9th position (binary, not hex), e.g. 0x800101 = 1 chunk, 0x800201 = 2 chunks
-			Local $dialogID = 0x800001 + (0x100 * $numberOfChunks)
-			Dialog($dialogID)
-			RandomSleep(550)
-		ElseIf $run_options_cache['run.buy_faction_scrolls'] Then
-			Info('Converting ' & $factionName & ' faction points into Passage Scrolls')
-			Dialog(0x83)
-			RandomSleep(550)
-			Local $numberOfScrolls = Floor($getFactionFunction() / 1000)
-			; number of scrolls = bits from 9th position (binary, not hex), e.g. 0x800102 = 1 scroll, 0x800202 = 2 scrolls, 0x800A02 = 10 scrolls
-			Local $dialogID = 0x800002 + (0x100 * $numberOfScrolls)
-			Dialog($dialogID)
-			RandomSleep(550)
-		EndIf
-		Return True
+	Local $maxFactionPoints = $getMaxFactionFunction()
+	Local $currentFactionPoints = $getFactionFunction()
+	If $currentFactionPoints < 5000 Or $currentFactionPoints < ($maxFactionPoints - 25000) Then Return False
+
+	TravelToOutpost($mapForFactionExchange, $district_name)
+	RandomSleep(200)
+	GoNearestNPCToCoords($npcX, $npcY)
+	If $run_options_cache['run.donate_faction_points'] Then
+		Info('Donating ' & $factionName & ' faction points')
+		While $getFactionFunction() >= 5000
+			DonateFaction($factionName)
+			RandomSleep(500)
+		WEnd
+	ElseIf $run_options_cache['run.buy_faction_resources'] Then
+		Info('Converting ' & $factionName & ' faction points into materials')
+		Dialog(0x83)
+		RandomSleep(550)
+		Local $numberOfChunks = Floor($getFactionFunction() / 5000)
+		; number of chunks = bits from 9th position (binary, not hex), e.g. 0x800101 = 1 chunk, 0x800201 = 2 chunks
+		Local $dialogID = 0x800001 + (0x100 * $numberOfChunks)
+		Dialog($dialogID)
+		RandomSleep(550)
+	ElseIf $run_options_cache['run.buy_faction_scrolls'] Then
+		Info('Converting ' & $factionName & ' faction points into Passage Scrolls')
+		Dialog(0x83)
+		RandomSleep(550)
+		Local $numberOfScrolls = Floor($getFactionFunction() / 1000)
+		; number of scrolls = bits from 9th position (binary, not hex), e.g. 0x800102 = 1 scroll, 0x800202 = 2 scrolls, 0x800A02 = 10 scrolls
+		Local $dialogID = 0x800002 + (0x100 * $numberOfScrolls)
+		Dialog($dialogID)
+		RandomSleep(550)
 	EndIf
-	Return False
+	Return True
 EndFunc
 #EndRegion Faction
 

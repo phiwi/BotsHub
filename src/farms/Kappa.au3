@@ -25,29 +25,32 @@
 
 
 ; ==== Constants ====
-Global Const $RA_KAPPA_FARMER_SKILLBAR = 'OgcUY3rhlPT3l8I6MEQHHHQCHQHA'
+Global Const $RA_KAPPA_FARMER_SKILLBAR = 'OgcUY3rhlPT3l8I6MHHHQEHCHQHA'
 Global Const $KAPPA_P1_HERO_SKILLBAR = 'OQqjYyojKP3Xa8O2EfjBAAgyLA'
 Global Const $KAPPA_P2_HERO_SKILLBAR = 'OQqjYyojKP3Xa8OmFTirxAgyLA'
 Global Const $KAPPA_BIP_HERO_SKILLBAR = 'OApjQoGoKP3XAAAAAAAAA3hyLA'
+Global Const $KAPPA_DERVISH_HERO_SKILLBAR = 'Ogmioys8cfpxAAAAAAAAAKvA'
+Global Const $KAPPA_RANGER_HERO_SKILLBAR = 'OgojYNYsKP3XAAAAAAAQObnyLA'
 Global Const $KAPPA_FARM_INFORMATIONS = 'For best results, have :' & @CRLF _
 	& '- the quest The Challenge' & @CRLF _
-	& '- 10 in Expertise' & @CRLF _
+	& '- 10 minimum in Expertise' & @CRLF _
 	& '- 12 in Shadow Arts' & @CRLF _
-	& '- 13 in Beast Mastery' & @CRLF _
+	& '- 14 in Beast Mastery' & @CRLF _
+	& '- the rest in Wilderness Survival' & @CRLF _
 	& '- A shield with the inscription +10 armor against Cold damage' & @CRLF _
 	& '- A one hand weapon with +5 energy +20% enchantment duration' & @CRLF _
-	& '- Sentry or Blessed insignias on all the armor pieces' & @CRLF _
-	& '- A superior vigor rune'
+	& '- Frostbound (best), Sentry or Blessed (a bit worse) insignias on all the armor pieces' & @CRLF _
+	& '- A superior vigor rune' & @CRLF _
+	& 'This bot will fail for 3 main reasons: bodyblock by Am Fah or by the Kappas, Kappas having aggroed on Am Fah,' & @CRLF _
+	& 'and pressure being too high and character dying. First 2 reasons are unavoidable, last one can be mitigated with good build, gear and proper heroes.'
 Global Const $KAPPA_FARM_DURATION = 2 * 60 * 1000
 
 ; Skill numbers declared to make the code WAY more readable (UseSkillEx($KAPPA_DWARVEN_STABILITY) is better than UseSkillEx(1))
 Global Const $KAPPA_DWARVEN_STABILITY		= 1
 Global Const $KAPPA_DEADLY_PARADOX			= 2
 Global Const $KAPPA_SHADOWFORM				= 3
-;~ Global Const $KAPPA_WAY_OF_PERFECTION		= 4
 Global Const $KAPPA_STORM_CHASER			= 4
 Global Const $KAPPA_SHROUD_OF_DISTRESS		= 5
-;~ Global Const $KAPPA_SHADOW_SANCTUARY		= 6
 Global Const $KAPPA_DRYDERS_DEFENSE			= 6
 Global Const $KAPPA_WHIRLING_DEFENSE		= 7
 Global Const $KAPPA_EDGE_OF_EXTINCTION		= 8
@@ -72,6 +75,9 @@ Global Const $KAPPA_STAND_YOUR_GROUND		= 6
 ; Necro only
 Global Const $KAPPA_BLOOD_IS_POWER			= 7
 
+; Ranger only
+Global Const $KAPPA_SERPENTS_QUICKNESS		= 6
+Global Const $KAPPA_QUICKENING_ZEPHYR		= 7
 
 Global $kappa_farm_setup = False
 
@@ -93,8 +99,8 @@ Func SetupKappaFarm()
 	If TravelToOutpost($ID_VIZUNAH_SQUARE_LOCAL_QUARTER, $district_name) == $FAIL Then Return $FAIL
 	SwitchMode($ID_HARD_MODE)
 
-	;If SetupPlayerKappaFarm() == $FAIL Then Return $FAIL
-	;If SetupTeamKappaFarm() == $FAIL Then Return $FAIL
+	If SetupPlayerKappaFarm() == $FAIL Then Return $FAIL
+	If SetupTeamKappaFarm() == $FAIL Then Return $FAIL
 
 	GoToTheUndercity()
 	MoveTo(19750, 17050)
@@ -128,13 +134,25 @@ Func SetupTeamKappaFarm()
 	If AddHeroByProfession($ID_PARAGON, $ID_GENERAL_MORGAHN) == $FAIL Then Return $FAIL
 	If AddHeroByProfession($ID_PARAGON, $ID_HAYDA) == $FAIL Then Return $FAIL
 	If AddHeroByProfession($ID_NECROMANCER, $ID_OLIAS) == $FAIL Then Return $FAIL
+	If AddHeroByProfession($ID_DERVISH, $ID_MELONNI) == $FAIL Then Return $FAIL
+	If AddHeroByProfession($ID_DERVISH, $ID_MOX) == $FAIL Then Return $FAIL
+	If AddHeroByProfession($ID_DERVISH, $ID_KAHMU) == $FAIL Then Return $FAIL
+	If AddHeroByProfession($ID_RANGER, $ID_PYRE_FIERCESHOT) == $FAIL Then Return $FAIL
 	LoadSkillTemplate($KAPPA_P1_HERO_SKILLBAR, 1)
 	LoadSkillTemplate($KAPPA_P2_HERO_SKILLBAR, 2)
 	LoadSkillTemplate($KAPPA_BIP_HERO_SKILLBAR, 3)
+	LoadSkillTemplate($KAPPA_DERVISH_HERO_SKILLBAR, 4)
+	LoadSkillTemplate($KAPPA_DERVISH_HERO_SKILLBAR, 5)
+	LoadSkillTemplate($KAPPA_DERVISH_HERO_SKILLBAR, 6)
+	LoadSkillTemplate($KAPPA_RANGER_HERO_SKILLBAR, 7)
 	RandomSleep(250)
 	DisableAllHeroSkills(1)
 	DisableAllHeroSkills(2)
 	DisableAllHeroSkills(3)
+	DisableAllHeroSkills(4)
+	DisableAllHeroSkills(5)
+	DisableAllHeroSkills(6)
+	DisableAllHeroSkills(7)
 	Return $SUCCESS
 EndFunc
 
@@ -188,6 +206,7 @@ Func KappaFarmLoop()
 	MoveTo(10750,	1500, $RANGE_NEARBY, KappaCastDefensiveSkills)
 	MoveTo(10000,	1000, $RANGE_NEARBY, KappaCastDefensiveSkills)
 	If IsPlayerDead() Then Return $FAIL
+	AdlibRegister('KappaHealingSpam', 1600)
 
 	; Aggro and kill, North Side way
 	Info('Reached Kappas - killing, North-side way')
@@ -199,12 +218,18 @@ Func KappaFarmLoop()
 	RandomSleep(2000)
 	MoveTo(6550,	1050, $RANGE_NEARBY, KappaCastDefensiveSkills)
 	RandomSleep(500)
-	If IsPlayerDead() Then Return $FAIL
+	If IsPlayerDead() Then
+		AdlibUnregister('KappaHealingSpam')
+		Return $FAIL
+	EndIf
 
 	; Balling spot
 	MoveTo(5775, 850, 100, KappaCastDefensiveSkills)
 	KappaWaitForFoesBall(6350, 850)
-	If IsPlayerDead() Then Return $FAIL
+	If IsPlayerDead() Then
+		AdlibUnregister('KappaHealingSpam')
+		Return $FAIL
+	EndIf
 	MoveTo(6400, 1200, 100, KappaCastDefensiveSkills)
 	KillKappas(6350, 850)
 
@@ -212,7 +237,8 @@ Func KappaFarmLoop()
 	Info('Picking up loot')
 	PickUpItems(KappaCastDefensiveSkills)
 	FindAndOpenChests($RANGE_SPIRIT, KappaCastDefensiveSkills)
-	Return $SUCCESS
+	AdlibUnregister('KappaHealingSpam')
+	Return IsPlayerDead() ? $FAIL : $SUCCESS
 EndFunc
 
 
@@ -221,15 +247,12 @@ Func KappaCastDefensiveSkills($useStormChaser = True)
 	Local Static $shadow_form_timer = Null
 	Local Static $dwarven_stability_timer = Null
 	Local Static $shroud_of_distress_timer = Null
-	KappaHealPlayer()
+	;KappaHealPlayer()
+	KappaCurePlayer()
 	If $shadow_form_timer == Null Or TimerDiff($shadow_form_timer) > 20000 Then
 		If GetEnergy() >= 20 Then AdlibRegister('UseKappaDeadlyParadox', 750)
 		UseSkillEx($KAPPA_SHADOWFORM)
 		$shadow_form_timer = TimerInit()
-		;~ If GetEnergy() >= 5 Then
-		;~ 	PingSleep(50)
-		;~ 	UseSkillEx($KAPPA_WAY_OF_PERFECTION)
-		;~ EndIf
 		If $useStormChaser Then
 			If IsRecharged($KAPPA_DWARVEN_STABILITY) Then UseSkillEx($KAPPA_DWARVEN_STABILITY)
 			PingSleep(50)
@@ -269,7 +292,7 @@ Func KappaWaitForFoesBall($x, $y)
 		$target = GetFurthestNPCInRangeOfCoords($ID_ALLEGIANCE_FOE, $x, $y, $RANGE_SPELLCAST)
 		If IsPlayerDead() Then Return $FAIL
 	WEnd
-	Sleep(500)
+	Sleep(1500)
 	Return $SUCCESS
 EndFunc
 
@@ -316,13 +339,11 @@ EndFunc
 
 
 ;~ Use Cautery Signet and Mystic Healing to heal player
-Func KappaHealPlayer()
-	Local Static $healerPosition = 1
+Func KappaCurePlayer()
 	Local Static $cauteryPosition = 1
-	Local Static $healTimer = Null
 	Local Static $cauteryTimer = Null
 
-	; Both skills have a 1s cast time - it makes no sense checking things again while skills are being casted
+	; Cautery Signet has a 1s cast time - it makes no sense checking things again while skills are being casted
 	Local $me = GetMyAgent()
 	; Only removing conditions if we are past halfway of the farm (should be closing in on the Kappa at that point)
 	If TimerDiff($run_timer) > 75000 And GetHasCondition($me) Then
@@ -336,6 +357,16 @@ Func KappaHealPlayer()
 			Return
 		EndIf
 	EndIf
+EndFunc
+
+
+;~ Use Cautery Signet and Mystic Healing to heal player
+Func KappaHealPlayer()
+	Local Static $healerPosition = 1
+	Local Static $healTimer = Null
+
+	; Both skills have a 1s cast time - it makes no sense checking things again while skills are being casted
+	Local $me = GetMyAgent()
 	If DllStructGetData($me, 'HealthPercent') < 0.5 Then
 		; This timer condition doesn't ensure unicity of mystic healing usage
 		; Command queue could make it several heroes cast it - but it doesn't matter
@@ -347,4 +378,42 @@ Func KappaHealPlayer()
 			Return
 		EndIf
 	EndIf
+EndFunc
+
+
+Func KappaHealingSpam()
+	Local Static $quickeningZephyrCastTime = 2000
+	Local Static $quickeningZephyrDuration = 75000
+	Local Static $adlibBusy = False
+	Local Static $steadyHealingHealerIndex = 0
+	Local Static $quickeningZephyrTimer
+
+	If $adlibBusy Then Return
+	$adlibBusy = True
+
+	If $quickeningZephyrTimer == Null Then
+		UseHeroSkill(7, $KAPPA_SERPENTS_QUICKNESS)
+		PingSleep(100)
+		UseHeroSkill(7, $KAPPA_QUICKENING_ZEPHYR)
+		$quickeningZephyrTimer = TimerInit()
+	ElseIf TimerDiff($quickeningZephyrTimer) > ($quickeningZephyrDuration - 5000) Then
+		UseHeroSkill(7, $KAPPA_QUICKENING_ZEPHYR)
+		$quickeningZephyrTimer = TimerInit()
+	EndIf
+
+	; Heroes with Mystic Healing provide additional long range support
+	If $steadyHealingHealerIndex == 0 Then
+		UseHeroSkill(4, $KAPPA_MYSTIC_HEALING)
+		UseHeroSkill(5, $KAPPA_MYSTIC_HEALING)
+		UseHeroSkill(3, $KAPPA_MYSTIC_HEALING)
+		$steadyHealingHealerIndex = 1
+	Else
+		UseHeroSkill(1, $KAPPA_MYSTIC_HEALING)
+		UseHeroSkill(2, $KAPPA_MYSTIC_HEALING)
+		UseHeroSkill(6, $KAPPA_MYSTIC_HEALING)
+		If TimerDiff($quickeningZephyrTimer) > ($quickeningZephyrCastTime + 500) Then UseHeroSkill(7, $KAPPA_MYSTIC_HEALING)
+		$steadyHealingHealerIndex = 0
+	EndIf
+
+	$adlibBusy = False
 EndFunc

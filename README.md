@@ -50,6 +50,7 @@ To use it:
 | Fish in a Barrel (Kournans)			| Q8 items, runes																|
 | Glint’s Challenge						| Cloth of Brotherhood, hero armor, Destroyer cores								|
 | Jaya Bluffs (Sensali)					| Feathers, bones																|
+| Kappa									| Kappa shields, Celestial weapons, bones										|
 | Minotaurs								| Materials																		|
 | Missing Daughter (Jade Brotherhood)	| Q8 items, jade bracelets														|
 | Moddok Crevice (Corsairs)				| Runes, Colossal Scimitar, Q8													|
@@ -94,6 +95,7 @@ To use it:
 | Stygian Veil					| Stygian Gemstones														|
 | Tunnels of the Forsaken		| E-blade																|
 | Underworld					| Globs of Ectoplasm													|
+| Underworld Pantheon			| Globs of Ectoplasm													|
 | Kilroy						| Alcohol, Glacial Blades, Stone Summit Shield, Summit Warlord Shield	|
 
 ### Chest Runs
@@ -107,6 +109,7 @@ To use it:
 ### Others
 - Follower bot
 - Inventory management
+- Automatic Tonic consumer
 
 ---
 
@@ -215,7 +218,6 @@ You are welcome to create and contribute new bots 👍
 - 💡🕓 **Improve the Pongmei chest farm with Tasca chest farm capabilities**
 - 💡💭 **Pahnai Salad - Iboga Petals farm**
 - 💡💭 **Bandit raid**
-- 💡💭 **Kappa farm** (shield)
 - 🧠💭 **Nicholas the traveler items (gifties)**
 - 🧠💭 **Improve crash recovery**
 

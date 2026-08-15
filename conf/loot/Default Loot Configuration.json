@@ -949,6 +949,7 @@
 			"Torment Gemstone": true,
 			"Diessa Chalice": true,
 			"Golden Rin Relic": true,
+			"Superb Charr Carving": true,
 			"Chunk of Drake Flesh": true,
 			"Skale Fin": true,
 			"Iboga Petal": true,
@@ -1023,7 +1024,8 @@
 			"Map pieces": false
 		},
 		"Lockpicks": true,
-		"Keys": true
+		"Keys": true,
+		"Miniatures": true
 	},
 	"Identify items": {
 		"Blue": true,
@@ -1043,7 +1045,7 @@
 					"Sentrys": false
 				},
 				"Runes": {
-					"Minor Vigor": false,
+					"Minor Vigor": true,
 					"Vitae": false,
 					"Attunement": false,
 					"Major Vigor": true,
@@ -1062,7 +1064,7 @@
 					"Nightstalkers": false
 				},
 				"Runes": {
-					"Minor Critical Strikes": false,
+					"Minor Critical Strikes": true,
 					"Minor Dagger Mastery": false,
 					"Minor Deadly Arts": false,
 					"Minor Shadow Arts": false,
@@ -1174,7 +1176,7 @@
 					"Undertakers": false
 				},
 				"Runes": {
-					"Minor Blood Magic": false,
+					"Minor Blood Magic": true,
 					"Minor Curses": false,
 					"Minor Death Magic": false,
 					"Minor Soul Reaping": false,
@@ -1214,7 +1216,7 @@
 					"Stormbound": false,
 					"Scouts": false,
 					"Earthbound": false,
-					"Beastmasters": false
+					"Beastmasters": true
 				},
 				"Runes": {
 					"Minor Beast Mastery": false,
@@ -1265,7 +1267,7 @@
 					"Minor Axe Mastery": false,
 					"Minor Hammer Mastery": false,
 					"Minor Strength": false,
-					"Minor Swordsmanship": false,
+					"Minor Swordsmanship": true,
 					"Minor Tactics": false,
 					"Major Absorption": false,
 					"Major Axe Mastery": false,
@@ -1624,7 +1626,7 @@
 					"Of The Mesmer": false,
 					"Of The Elementalist": false,
 					"Of The Monk": false,
-					"Of The Ritualist": false,
+					"Of The Ritualist": true,
 					"Of The Assassin": false,
 					"Of The Paragon": false,
 					"Of The Dervish": false,
@@ -1700,7 +1702,7 @@
 					"Of The Mesmer": false,
 					"Of The Elementalist": false,
 					"Of The Monk": false,
-					"Of The Ritualist": false,
+					"Of The Ritualist": true,
 					"Of The Assassin": false,
 					"Of The Paragon": false,
 					"Of The Dervish": false
@@ -2456,6 +2458,7 @@
 			"Jadeite Shard": false
 		},
 		"Trophies": {
+			"Superb Charr Carving": false,
 			"Chunk of Drake Flesh": false,
 			"Skale Fin": false,
 			"Iboga Petal": false,
@@ -3228,6 +3231,7 @@
 			"Jadeite Shard": false
 		},
 		"Trophies": {
+			"Superb Charr Carving": false,
 			"Chunk of Drake Flesh": false,
 			"Skale Fin": false,
 			"Iboga Petal": false,
@@ -3295,8 +3299,12 @@
 	"Store items": {
 		"Gold": true,
 		"Consumables": true,
-		"Alcohols": true,
-		"Unidentified gold items": true,
+		"Alcohols": {
+			"Minor (1pt)": true,
+			"Major (3pt)": true,
+			"Superior (50pt)": true
+		},
+		"Unidentified gold items": false,
 		"Weapons and offhands": {
 			"White": {
 				"Axe": {
@@ -4241,6 +4249,7 @@
 			"Torment Gemstone": true,
 			"Diessa Chalice": true,
 			"Golden Rin Relic": true,
+			"Superb Charr Carving": true,
 			"Chunk of Drake Flesh": true,
 			"Skale Fin": true,
 			"Iboga Petal": true,
