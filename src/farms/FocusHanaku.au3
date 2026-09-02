@@ -105,6 +105,7 @@ Global Const $HANAKU_DAMAGE_UNLOCK_TIMEOUT_MS = 3500
 Global Const $HANAKU_DP_ATTACK_LOCK_MS = 300
 Global Const $HANAKU_PULL_WALK_MS = 750
 Global Const $HANAKU_PULL_DISTANCE = 300
+Global Const $HANAKU_PULL_INTERVAL_MS = 12000
 
 Global $hanaku_perma_chain_count = 0
 
@@ -906,7 +907,7 @@ Func KillHanaku()
 	Local $lastAdrenalineDiagnostic = TimerInit()
 	Local $lastAdrenalineWarn = TimerInit()
 	Local $lastCAMaintenanceCheck = TimerInit()
-	Local $pullDone = False
+	Local $lastPullAttempt = TimerInit()
 
 	Local $fightTimer = TimerInit()
 	While IsPlayerAlive() And TimerDiff($fightTimer) < $HANAKU_FIGHT_TIMEOUT_MS
@@ -923,13 +924,13 @@ Func KillHanaku()
 		EndIf
 		If GetIsDead($hanaku) Or DllStructGetData($hanaku, 'HealthPercent') <= 0 Then Return $SUCCESS
 
-		; ---- Single enemy pull: run forward past Hanaku so mobs behind the
-		; player re-path and cluster in the scythe arc.  Executed at most
-		; ONCE per fight — melee may die early but casters cannot be lured.
-		; Skipped during the CV->Reap chain window (state==1).
-		If Not $pullDone And $comboState == 0 Then
+		; ---- Periodic enemy pull: run forward past Hanaku so mobs behind the
+		; player re-path and cluster in the scythe arc.  Re-clusters melee
+		; periodically throughout the fight.  Skipped during the CV->Reap
+		; chain window (state==1).
+		If $comboState == 0 And TimerDiff($lastPullAttempt) > $HANAKU_PULL_INTERVAL_MS Then
 			HanakuPullEnemies($hanaku)
-			$pullDone = True
+			$lastPullAttempt = TimerInit()
 		EndIf
 
 		ChangeTarget($hanaku)

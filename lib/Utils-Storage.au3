@@ -64,6 +64,12 @@ Func ResetGWA2State()
 EndFunc
 
 
+;~ Store unidentified gold items except armor salvageables, so gold armor can be identified separately
+Func ShouldStoreUnidentifiedGoldItem($item)
+	Return IsUnidentifiedGoldItem($item) And Not IsArmorSalvageItem($item)
+EndFunc
+
+
 ;~ Function to deal with inventory before farm run
 Func InventoryManagementBeforeRun()
 	; Clarity rename
@@ -81,7 +87,7 @@ Func InventoryManagementBeforeRun()
 	; 10-Store items
 	If $cache['Store items.Unidentified gold items'] And HasGoldUnidentifiedItems() Then
 		If GetMapType() <> $ID_OUTPOST Then TravelToOutpost($trade_town, $district_name)
-		StoreItemsInXunlaiStorage(IsUnidentifiedGoldItem)
+		StoreItemsInXunlaiStorage(ShouldStoreUnidentifiedGoldItem)
 	EndIf
 	If $run_options_cache['run.sort_items'] Then SortInventory()
 	If $cache['@identify.something'] And HasUnidentifiedItems() Then
@@ -1198,7 +1204,12 @@ Func IdentifyItems($buyKit = True)
 			If Not IsIdentified($item) Then
 				Local $rarity = GetRarity($item)
 				Local $rarityName = $RARITY_NAMES_FROM_IDS[$rarity]
-				If Not $inventory_management_cache['Identify items.' & $rarityName] Then ContinueLoop
+				Local $shouldIdentify = $inventory_management_cache['Identify items.' & $rarityName]
+				; Gold armor salvageables are identified separately, even when gold items in general are not
+				If Not $shouldIdentify And $rarity == $RARITY_GOLD And IsArmorSalvageItem($item) Then
+					$shouldIdentify = $inventory_management_cache['Identify items.Gold armor salvageables']
+				EndIf
+				If Not $shouldIdentify Then ContinueLoop
 
 				Local $identificationKit = FindIdentificationKit()
 				If $identificationKit == Null Then

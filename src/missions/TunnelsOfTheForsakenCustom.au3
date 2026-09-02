@@ -32,20 +32,21 @@ Global Const $TUNNELS_FORSAKEN_CUSTOM_INFORMATIONS = 'Custom Tunnels Forsaken fa
 Global Const $TUNNELS_FORSAKEN_CUSTOM_DURATION = 40 * 60 * 1000
 Global Const $MAX_TUNNELS_FORSAKEN_CUSTOM_DURATION = 60 * 60 * 1000
 
-;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwcT4Y44ZaX0mcB6ewV0NTiBnAA'
-;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwcT8Wo6VaXcBKmMgAkRR8N7iAA'
-Global Const $TFC_PLAYER_SKILLBAR = 'OwgiAyiMVNNAeNd24DWOBNxMBA'
+;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwgiAyiMVNNAeNd24DWOBNxMBA'
+;~ Global Const $TFC_PLAYER_SKILLBAR = 'OwcT4Y44ZaXst0VcBy67eILKfAA' ; AP Smite
+Global Const $TFC_PLAYER_SKILLBAR = 'OwIT4Y4YZaX8zotc3wVE3QWi2AA' ; Beastmaster
+
 Global Const $TFC_HERO_ZHED_TEMPLATE = 'OgljgwMpZS0ChDXVfDeD6QLgIDA' ; BSurge
 
 Global Const $TFC_HERO_OGDEN_TEMPLATE = 'OwUUMO3+OoO+sMw94igXdJ1j7KA' 
-Global Const $TFC_HERO_GWEN_TEMPLATE = 'OQhkAoC8AGKjbTDwBMd40MwIMHA'
+Global Const $TFC_HERO_GWEN_TEMPLATE = 'OQhkAoC8AGKjbTDwBMd40MAR4iB'
 Global Const $TFC_HERO_XANDRA_TEMPLATE = 'OAOjAyhDJPYTnp17xFOhmtkLGA'
-Global Const $TFC_HERO_ALTHEA_TEMPLATE = 'OQhkAoB8AGK0LACYeGJAHUGARwFD'
+Global Const $TFC_HERO_ALTHEA_TEMPLATE = 'OQhkAoB8AGK0LACIHUeGJwKARwFD'
 Global Const $TFC_HERO_VEKK_TEMPLATE = 'OgNDwbrvO0iaBJRLWPWJQNPC'
-Global Const $TFC_HERO_OLIAS_TEMPLATE = 'OAhkQkG5xEyzdo6VVveTOp5wM5C'
+Global Const $TFC_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hq61TaO5EeDzxJ'
 Global Const $TFC_HERO_DUNKORO_TEMPLATE = 'OwAT44HC1xnhXvI3juoLpeoFBA'
-Global Const $TFC_HERO_LIVIA_TEMPLATE = 'OANDUspPSyBUBHVKg4BLCaRrEA'
-Global Const $TFC_HERO_MOW_TEMPLATE = 'OANDUspPSyBUBHVKgbhLCaR1DA'
+Global Const $TFC_HERO_LIVIA_TEMPLATE = 'OANTUYD+UKmpKANYLUB8uqeIgA'
+Global Const $TFC_HERO_MOW_TEMPLATE = 'OAhjUoGYIPxsjaGTaO5GmjzLG'
 
 Global $tunnels_forsaken_custom_setup = False
 
@@ -97,22 +98,18 @@ EndFunc
 
 
 Func SetupTunnelsForsakenCustomTeam()
-	Info('Tunnels Forsaken Custom team: Master of Whispers, Gwen, Xandra')
 	LeaveParty()
 	RandomSleep(200)
 
-	;~ Local $heroIDs[3] = [$ID_MASTER_OF_WHISPERS, $ID_GWEN, $ID_XANDRA]
-	;~ Local $heroNames[3] = ['Master of Whispers', 'Gwen', 'Xandra']
-	;~ Local $heroTemplates[3] = [$TFC_HERO_MOW_TEMPLATE, $TFC_HERO_GWEN_TEMPLATE, $TFC_HERO_XANDRA_TEMPLATE]
-	;~ Local $heroIDs[3] = [$ID_GWEN, $ID_MASTER_OF_WHISPERS, $ID_XANDRA]
 	;~ Local $heroIDs[3] = [$ID_GWEN, $ID_GHOST_OF_ALTHEA, $ID_VEKK]
 	;~ Local $heroNames[3] = ['Gwen', 'Althea', 'Vekk']
-	;~ Local $heroIDs[3] = [$ID_DUNKORO, $ID_OGDEN, $ID_OLIAS]
-	;~ Local $heroNames[3] = ['Dunkoro', 'Ogden', 'Olias']
-	;~ Local $heroTemplates[3] = [$TFC_HERO_MOW_TEMPLATE, $TFC_HERO_LIVIA_TEMPLATE, $TFC_HERO_OLIAS_TEMPLATE]
-	Local $heroIDs[3] = [$ID_DUNKORO, $ID_GWEN, $ID_OLIAS]
-	Local $heroNames[3] = ['Dunkoro', 'Gwen', 'Olias']
-	Local $heroTemplates[3] = [$TFC_HERO_MOW_TEMPLATE, $TFC_HERO_GWEN_TEMPLATE, $TFC_HERO_OLIAS_TEMPLATE]
+	;~ Local $heroTemplates[3] = [$TFC_HERO_GWEN_TEMPLATE, $TFC_HERO_ALTHEA_TEMPLATE, $TFC_HERO_VEKK_TEMPLATE]
+	;~ Local $heroIDs[3] = [$ID_OLIAS, $ID_MASTER_OF_WHISPERS, $ID_LIVIA]
+	;~ Local $heroNames[3] = ['Olias', 'MoW', 'Livia']
+	;~ Local $heroTemplates[3] = [$TFC_HERO_OLIAS_TEMPLATE, $TFC_HERO_MOW_TEMPLATE, $TFC_HERO_LIVIA_TEMPLATE]
+	Local $heroIDs[3] = [$ID_GWEN, $ID_OLIAS, $ID_XANDRA]
+	Local $heroNames[3] = ['Gwen', 'Olias', 'Xandra']
+	Local $heroTemplates[3] = [$TFC_HERO_GWEN_TEMPLATE, $TFC_HERO_OLIAS_TEMPLATE, $TFC_HERO_XANDRA_TEMPLATE]
 
 	For $i = 0 To 2
 		For $attempt = 1 To 5

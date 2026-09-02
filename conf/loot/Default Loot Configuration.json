@@ -1030,7 +1030,8 @@
 	"Identify items": {
 		"Blue": true,
 		"Purple": true,
-		"Gold": false
+		"Gold": false,
+		"Gold armor salvageables": true
 	},
 	"Keep components": {
 		"Armor upgrades": {

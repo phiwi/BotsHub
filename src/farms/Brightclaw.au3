@@ -198,7 +198,8 @@ Func FollowPathToBrightclaw()
 	Local $midPointIndex = 10
 
 	InitializeHeroSpeedSupport()
-	ChangeWeaponSet(1)
+	; Hold the bow already while running — no extra switch needed when pulling.
+	ChangeWeaponSet(4)
 
 	For $i = 0 To UBound($path) - 1
 		If IsPlayerDead() Then Return $FAIL
@@ -256,7 +257,7 @@ EndFunc
 
 Func PullBrightclaw()
 	Info('Targeting Brightclaw')
-	ChangeWeaponSet(1)
+	ChangeWeaponSet(4)
 	MoveTo($BRIGHTCLAW_PULL_SPOT_X, $BRIGHTCLAW_PULL_SPOT_Y, 25, 0)
 	If WaitForPlayerNearPoint($BRIGHTCLAW_PULL_SPOT_X, $BRIGHTCLAW_PULL_SPOT_Y, 260, 7000) == $FAIL Then Return $FAIL
 	LogOwnPosition('Pull spot reached')
@@ -280,6 +281,8 @@ Func PullBrightclaw()
 	RandomSleep(250)
 	Attack($boss)
 	RandomSleep(2500)
+	; Bow shot fired — switch to spear+shield for the energy bonus on the way to the nest.
+	ChangeWeaponSet(3)
 
 	If $BRIGHTCLAW_MANUAL_TUNE_MODE Then
 		Info('Bow pull done. Skipping automatic nest movement (manual tune mode)')
@@ -632,7 +635,7 @@ Func LootBrightclawFast()
 	Info('Boss dead. Rushing to loot spot')
 	If IsRecharged($BRIGHT_DARK_ESCAPE) Then UseSkillEx($BRIGHT_DARK_ESCAPE)
 	RandomSleep(50)
-	ChangeWeaponSet(1)
+	ChangeWeaponSet(4)
 
 	; Sprint straight to the recorded boss death location to avoid stair detours.
 	If $brightclaw_last_boss_death_x <> 0 And $brightclaw_last_boss_death_y <> 0 Then
