@@ -12,3 +12,6 @@ conf/last_farm.txt
 !.github/
 .*
 !.gitignore
+
+# VS Code workspace
+BotsHub.code-workspace
