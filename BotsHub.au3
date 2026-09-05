@@ -81,6 +81,7 @@ Opt('MustDeclareVars', True)
 #include 'src/farms/SpiritSlaves.au3'
 #include 'src/farms/SpiritSlavesSin.au3'
 #include 'src/farms/Vaettirs.au3'
+#include 'src/farms/VarajarBerserkers.au3'
 #include 'src/farms/Vanquish.au3'
 #include 'src/farms/Vanquish Blacktide Lahtenda.au3'
 #include 'src/farms/Warden.au3'
@@ -110,6 +111,7 @@ Opt('MustDeclareVars', True)
 #include 'src/runs/Pongmei.au3'
 #include 'src/runs/PongmeiSin.au3'
 #include 'src/runs/BarbarousShoreSin.au3'
+#include 'src/runs/NfQ8ChestRun.au3'
 #include 'src/runs/Tasca.au3'
 #include 'src/runs/WajjunBazar.au3'
 #include 'src/runs/AmFah600SpiritBond.au3'
@@ -626,6 +628,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Pongmei',						PongmeiChestFarm,				5,					$PONGMEI_FARM_DURATION)
 	AddFarmToFarmMap(	'Pongmei Sin',					PongmeiSinChestFarm,				5,					$PONGMEI_SIN_FARM_DURATION)
 	AddFarmToFarmMap(	'Barbarous Shore Sin',			BarbarousShoreSinChestFarm,		5,					$BARBAROUS_SHORE_SIN_FARM_DURATION)
+	AddFarmToFarmMap(	'NF Q8 Chest Run',			NfQ8ChestFarm,				5,					$NFQ8_CHESTRUNNER_FARM_DURATION)
 	AddFarmToFarmMap(	'Brightclaw',							BrightclawFarm,					5,					5 * 60 * 1000)
 	AddFarmToFarmMap(	'Wingstorm',							WingstormFarm,					5,					$WINGSTORM_RUN_TIMEOUT_MS)
 	AddFarmToFarmMap(	'Zodiac',							ZodiacFarm,						10,					$ZODIAC_FARM_DURATION)
@@ -658,6 +661,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'UW Chamber Traps',				UWChamberTrapsFarm,				5,					$UWCT_FARM_DURATION)
 	AddFarmToFarmMap(	'UnderworldPantheon',			UnderworldFarmPantheon,		    5,					$UW_FARM_PANTHEON_DURATION)
 	AddFarmToFarmMap(	'Vaettirs',						VaettirsFarm,					5,					$VAETTIRS_FARM_DURATION)
+	AddFarmToFarmMap(	'Varajar Berserkers',			VarajarBerserkersFarm,			5,					$VARAJAR_BERSERKERS_FARM_DURATION)
 	AddFarmToFarmMap(	'Vanguard',						VanguardTitleFarm,				5,					$VANGUARD_TITLE_FARM_DURATION)
 	AddFarmToFarmMap(	'Vanquish Blacktide Lahtenda',		VanquishBlackTideLahtendaFarm,	5,					$VANQBT_RUN_TIMEOUT_MS)
 	AddFarmToFarmMap(	'Vanquish Jokanur Zehlon',			VanquishFarm,					5,					$VANQ_RUN_TIMEOUT_MS)
@@ -697,6 +701,7 @@ Func ResetBotsSetups()
 	$outcast_rheas_crater_farm_setup		= False
 	$pongmei_farm_setup						= False
 	$pongmei_sin_farm_setup					= False
+	$nfq8_farm_setup						= False
 	$raptors_farm_setup						= False
 	$skrees_farm_setup						= False
 	$soo_farm_setup							= False

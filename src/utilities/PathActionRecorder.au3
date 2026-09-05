@@ -219,7 +219,9 @@ Func PathActionRecorderTick()
 	If $mapID <> $path_action_recorder_last_map_id Then
 		PathActionRecorderWriteEvent($timeMs, 'MAP', $x, $y, $hp, $energy, $mapID, 0, 0, $castSkillID, 'Map changed / refreshed')
 		$path_action_recorder_last_map_id = $mapID
-		; Reset hero flag tracking on map change
+		; Reset hero tracking on map change to keep the tracking arrays in sync
+		ReDim $path_action_recorder_last_hero_x[1]
+		ReDim $path_action_recorder_last_hero_y[1]
 		ReDim $path_action_recorder_hero_flagged[1]
 	EndIf
 
@@ -366,6 +368,10 @@ Func PathActionRecorderDetectHeroFlags($timeMs, $px, $py, $hp, $energy, $mapID)
 		EndIf
 
 		If $prevFollowed And $distToPlayer > $FLAG_DETECT_MIN_DIST Then
+			; Ensure the flagged tracking array covers this hero index
+			If UBound($path_action_recorder_hero_flagged) <= $heroIndex Then
+				ReDim $path_action_recorder_hero_flagged[$heroIndex + 1]
+			EndIf
 			$path_action_recorder_hero_flagged[$heroIndex] = True
 			Local $hModelID = DllStructGetData($heroAgent, 'ModelID')
 			Local $note = 'hero_index=' & $heroIndex & ';flag_x=' & $hx & ';flag_y=' & $hy & ';dist=' & Round($distToPlayer)

@@ -198,8 +198,7 @@ Func FollowPathToBrightclaw()
 	Local $midPointIndex = 10
 
 	InitializeHeroSpeedSupport()
-	; Hold the bow already while running — no extra switch needed when pulling.
-	ChangeWeaponSet(4)
+	ChangeWeaponSet(3)
 
 	For $i = 0 To UBound($path) - 1
 		If IsPlayerDead() Then Return $FAIL
@@ -281,8 +280,6 @@ Func PullBrightclaw()
 	RandomSleep(250)
 	Attack($boss)
 	RandomSleep(2500)
-	; Bow shot fired — switch to spear+shield for the energy bonus on the way to the nest.
-	ChangeWeaponSet(3)
 
 	If $BRIGHTCLAW_MANUAL_TUNE_MODE Then
 		Info('Bow pull done. Skipping automatic nest movement (manual tune mode)')

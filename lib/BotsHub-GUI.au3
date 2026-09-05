@@ -63,6 +63,7 @@ Opt('GUICloseOnESC', False)
 #include '../src/farms/SpiritSlaves.au3'
 #include '../src/farms/SpiritSlavesSin.au3'
 #include '../src/farms/Vaettirs.au3'
+#include '../src/farms/VarajarBerserkers.au3'
 #include '../src/farms/Zodiac.au3'
 #include '../src/missions/Deldrimor.au3'
 #include '../src/missions/FoW.au3'
@@ -78,6 +79,7 @@ Opt('GUICloseOnESC', False)
 #include '../src/missions/WarSupplyKeiran.au3'
 #include '../src/runs/Boreal.au3'
 #include '../src/runs/Pongmei.au3'
+#include '../src/runs/NfQ8ChestRun.au3'
 #include '../src/runs/Tasca.au3'
 #include '../src/titles/LDOA.au3'
 #include '../src/utilities/Follower.au3'
@@ -100,10 +102,10 @@ Global Const $GUI_COMBOBOX_DROPDOWN_OPENED = 7
 Global Const $AVAILABLE_BAG_COUNTS = '|1|2|3|4|5'
 Global Const $AVAILABLE_WEAPON_SLOTS = '|0|1|2|3|4'
 Global Const $KIT_AMOUNT_CHOICE = '|0|1|2|3|4|5|6|7|8|9|10|11|12'
-Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Froggy no builds|' & _
+Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|NF Q8 Chest Run|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Froggy no builds|' & _
 	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kappa|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Sin|' & _
 	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|Omni Farm|Outcast Halcyon|Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|SoO Celerity + Armor no builds|SoO Celerity no builds|Spirit Slaves|Spirit Slaves Sin|' & _
-	'Storage|Sunspear Armor|Tasca|Test Suite|Tests|Tonic Spammer|Tunnels Forsaken Custom|Tunnels Forsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|UnderworldPantheon|Vaettirs|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|Voltaic no builds|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazaar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
+	'Storage|Sunspear Armor|Tasca|Test Suite|Tests|Tonic Spammer|Tunnels Forsaken Custom|Tunnels Forsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|UnderworldPantheon|Vaettirs|Varajar Berserkers|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|Voltaic no builds|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazaar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
 
 #Region GUI
 
@@ -1113,6 +1115,9 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_label_farminformations, $NORN_FARM_INFORMATIONS)
 		Case 'Omni Farm'
 			GUICtrlSetData($gui_label_farminformations, '')
+		Case 'NF Q8 Chest Run'
+			GUICtrlSetData($gui_edit_characterbuilds, $NFQ8_CHESTRUNNER_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $NFQ8_CHESTRUN_INFORMATIONS)
 		Case 'Pongmei'
 			GUICtrlSetData($gui_edit_characterbuilds, $PONGMEI_CHESTRUNNER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $PONGMEI_CHESTRUN_INFORMATIONS)
@@ -1187,6 +1192,10 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_characterbuilds, $AME_VAETTIRS_FARMER_SKILLBAR & @CRLF & _
 				$MEA_VAETTIRS_FARMER_SKILLBAR & @CRLF & $MOA_VAETTIRS_FARMER_SKILLBAR & @CRLF & $EME_VAETTIRS_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_label_farminformations, $VAETTIRS_FARM_INFORMATIONS)
+		Case 'Varajar Berserkers'
+			GUICtrlSetData($gui_edit_characterbuilds, $VARAJAR_BERSERKERS_SKILLBAR)
+			GUICtrlSetData($gui_edit_heroesbuilds, $VARAJAR_MARGRID_SKILLBAR & @CRLF & $VARAJAR_MORGAHN_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $VARAJAR_BERSERKERS_FARM_INFORMATIONS)
 		Case 'Zodiac'
 			GUICtrlSetData($gui_edit_characterbuilds, $RA_ZODIAC_FARMER_SKILLBAR)
 			GUICtrlSetData($gui_edit_heroesbuilds, $ZODIAC_HERO_SKILLBAR)
