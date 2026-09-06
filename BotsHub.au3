@@ -82,6 +82,7 @@ Opt('MustDeclareVars', True)
 #include 'src/farms/SpiritSlavesSin.au3'
 #include 'src/farms/Vaettirs.au3'
 #include 'src/farms/VarajarBerserkers.au3'
+#include 'src/farms/VarajarBerserkersPathRecord.au3'
 #include 'src/farms/Vanquish.au3'
 #include 'src/farms/Vanquish Blacktide Lahtenda.au3'
 #include 'src/farms/Warden.au3'
@@ -662,6 +663,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'UnderworldPantheon',			UnderworldFarmPantheon,		    5,					$UW_FARM_PANTHEON_DURATION)
 	AddFarmToFarmMap(	'Vaettirs',						VaettirsFarm,					5,					$VAETTIRS_FARM_DURATION)
 	AddFarmToFarmMap(	'Varajar Berserkers',			VarajarBerserkersFarm,			5,					$VARAJAR_BERSERKERS_FARM_DURATION)
+	AddFarmToFarmMap(	'Varajar Berserkers Path Record',	VarajarBerserkersPathRecordFarm,	5,					$VARAJAR_BERSERKERS_PATH_RECORD_DURATION)
 	AddFarmToFarmMap(	'Vanguard',						VanguardTitleFarm,				5,					$VANGUARD_TITLE_FARM_DURATION)
 	AddFarmToFarmMap(	'Vanquish Blacktide Lahtenda',		VanquishBlackTideLahtendaFarm,	5,					$VANQBT_RUN_TIMEOUT_MS)
 	AddFarmToFarmMap(	'Vanquish Jokanur Zehlon',			VanquishFarm,					5,					$VANQ_RUN_TIMEOUT_MS)

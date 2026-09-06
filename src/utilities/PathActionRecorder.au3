@@ -43,8 +43,10 @@ Global Const $PATH_ACTION_RECORDER_INFORMATIONS = 'Utility recorder for farm rou
 	& '- Ctrl+Alt+P: toggle PacketSend logging ON/OFF (captures outgoing network packets)'
 Global Const $PATH_ACTION_RECORDER_DURATION = 30 * 60 * 1000
 Global Const $PATH_ACTION_RECORDER_INTERVAL_MS = 200
+Global Const $PATH_ACTION_RECORDER_SKILL_POLL_MS = 20
 Global Const $PATH_ACTION_RECORDER_STATUS_INTERVAL_MS = 1500
 Global Const $PATH_ACTION_RECORDER_MIN_POS_DELTA = 35
+Global Const $PATH_ACTION_RECORDER_FLAG_STOP_DIST = 60
 Global Const $PATH_ACTION_RECORDER_STATIC_SCAN_INTERVAL_MS = 1200
 Global Const $PATH_ACTION_RECORDER_STATIC_SCAN_RANGE = $RANGE_COMPASS
 Global Const $PATH_ACTION_RECORDER_STATIC_SCAN_MAX_ROWS = 8
@@ -67,6 +69,9 @@ Global $path_action_recorder_last_pos_time = 0
 Global $path_action_recorder_last_hero_x[1]
 Global $path_action_recorder_last_hero_y[1]
 Global $path_action_recorder_hero_flagged[1]
+Global $path_action_recorder_flag_tracking[1]
+Global $path_action_recorder_flag_dest_x[1]
+Global $path_action_recorder_flag_dest_y[1]
 Global $path_action_recorder_last_skill_id = -1
 Global $path_action_recorder_last_target_id = -1
 Global $path_action_recorder_last_map_id = -1
@@ -166,6 +171,9 @@ Func StartPathActionRecorder()
 	ReDim $path_action_recorder_last_hero_x[1]
 	ReDim $path_action_recorder_last_hero_y[1]
 	ReDim $path_action_recorder_hero_flagged[1]
+	ReDim $path_action_recorder_flag_tracking[1]
+	ReDim $path_action_recorder_flag_dest_x[1]
+	ReDim $path_action_recorder_flag_dest_y[1]
 
 	Local $me = GetMyAgent()
 	If $me <> Null Then
@@ -182,8 +190,10 @@ Func StartPathActionRecorder()
 	FileWriteLine($path_action_recorder_handle, '# columns: time_ms;event;x;y;hp;energy;map_id;target_id;target_model_id;casting_skill_id;note')
 	FileWriteLine($path_action_recorder_handle, '# HERO_POS uses target_id=hero_agent_id, target_model_id=hero_model_id, note=hero_index=<n>')
 	FileWriteLine($path_action_recorder_handle, '# HERO_FLAGGED uses target_id=hero_agent_id, target_model_id=hero_model_id, note=hero_index=<n>;flag_x=<n>;flag_y=<n>;dist=<n>')
+	FileWriteLine($path_action_recorder_handle, '# HERO_FLAG_DEST uses target_id=hero_agent_id, target_model_id=hero_model_id, note=hero_index=<n>;dest_x=<n>;dest_y=<n>')
 	FileWriteLine($path_action_recorder_handle, '# STATIC_NEAR uses target_id=static_agent_id, target_model_id=gadget_id, note=model=<model_id>;dist=<n>;known_chest=<0/1>')
 	AdlibRegister('PathActionRecorderTick', $PATH_ACTION_RECORDER_INTERVAL_MS)
+	AdlibRegister('PathActionRecorderSkillPoll', $PATH_ACTION_RECORDER_SKILL_POLL_MS)
 	Info('Recorder started: ' & $path_action_recorder_file)
 EndFunc
 
@@ -191,6 +201,7 @@ EndFunc
 Func StopPathActionRecorder()
 	If Not $path_action_recorder_active Then Return
 	AdlibUnRegister('PathActionRecorderTick')
+	AdlibUnRegister('PathActionRecorderSkillPoll')
 
 	PathActionRecorderMark('RECORDING_STOP')
 	If $path_action_recorder_handle <> -1 Then FileClose($path_action_recorder_handle)
@@ -223,6 +234,9 @@ Func PathActionRecorderTick()
 		ReDim $path_action_recorder_last_hero_x[1]
 		ReDim $path_action_recorder_last_hero_y[1]
 		ReDim $path_action_recorder_hero_flagged[1]
+		ReDim $path_action_recorder_flag_tracking[1]
+		ReDim $path_action_recorder_flag_dest_x[1]
+		ReDim $path_action_recorder_flag_dest_y[1]
 	EndIf
 
 	If Abs($x - $path_action_recorder_last_pos_x) >= $PATH_ACTION_RECORDER_MIN_POS_DELTA _
@@ -234,15 +248,8 @@ Func PathActionRecorderTick()
 		$path_action_recorder_last_pos_time = $timeMs
 	EndIf
 
-	If $castSkillID <> $path_action_recorder_last_skill_id Then
-		If $castSkillID <> 0 Then
-			Local $castSlot = GetSkillSlotForSkillID($castSkillID)
-			Local $castNote = $castSlot == 0 ? '' : 'slot=' & $castSlot
-			PathActionRecorderWriteEvent($timeMs, 'SKILL_CAST', $x, $y, $hp, $energy, $mapID, 0, 0, $castSkillID, $castNote)
-			PathActionRecorderAutoMarkSkill($timeMs, $x, $y, $hp, $energy, $mapID, $castSkillID)
-		EndIf
-		$path_action_recorder_last_skill_id = $castSkillID
-	EndIf
+	; Skill-cast change detection now lives in PathActionRecorderSkillPoll (fast 20ms poll),
+	; so instant skills (shouts/stances) are caught even though the main tick only runs every 200ms.
 
 	Local $target = GetCurrentTarget()
 	Local $targetID = 0
@@ -280,6 +287,35 @@ Func PathActionRecorderTick()
 		PathActionRecorderWriteStaticObjects($timeMs, $x, $y, $hp, $energy, $mapID, $castSkillID)
 		$path_action_recorder_last_static_scan_time = $timeMs
 	EndIf
+EndFunc
+
+
+;~ Fast skill poll (every 20ms) so instant-cast skills (shouts, stances) are not missed.
+;~ The main PathActionRecorderTick samples the agent 'Skill' field every 200ms, which is too
+;~ slow to catch a single-frame (~33ms) instant cast. This runs a lightweight poll that only
+;~ tracks the 'Skill' field and writes SKILL_CAST as soon as it flips to a non-zero ID.
+Func PathActionRecorderSkillPoll()
+	If Not $path_action_recorder_active Or $path_action_recorder_handle == -1 Then Return
+	Local $me = GetMyAgent()
+	If $me == Null Then Return
+
+	Local $castSkillID = DllStructGetData($me, 'Skill')
+	If $castSkillID == $path_action_recorder_last_skill_id Then Return
+
+	Local $x = Int(DllStructGetData($me, 'X'))
+	Local $y = Int(DllStructGetData($me, 'Y'))
+	Local $hp = Round(DllStructGetData($me, 'HealthPercent') * 100, 1)
+	Local $energy = Round(GetEnergy($me), 1)
+	Local $mapID = GetMapID()
+	Local $timeMs = Round(TimerDiff($path_action_recorder_start_timer), 0)
+
+	If $castSkillID <> 0 Then
+		Local $castSlot = GetSkillSlotForSkillID($castSkillID)
+		Local $castNote = $castSlot == 0 ? '' : 'slot=' & $castSlot
+		PathActionRecorderWriteEvent($timeMs, 'SKILL_CAST', $x, $y, $hp, $energy, $mapID, 0, 0, $castSkillID, $castNote)
+		PathActionRecorderAutoMarkSkill($timeMs, $x, $y, $hp, $energy, $mapID, $castSkillID)
+	EndIf
+	$path_action_recorder_last_skill_id = $castSkillID
 EndFunc
 
 
@@ -332,6 +368,19 @@ Func PathActionRecorderWriteHeroPositions($timeMs, $mapID)
 		EndIf
 		$path_action_recorder_last_hero_x[$heroIndex] = $hx
 		$path_action_recorder_last_hero_y[$heroIndex] = $hy
+
+		; If this hero was flagged, track its position until it stops at the flag destination.
+		If UBound($path_action_recorder_flag_tracking) > $heroIndex And $path_action_recorder_flag_tracking[$heroIndex] Then
+			Local $flagDestDelta = Sqrt(($hx - $path_action_recorder_flag_dest_x[$heroIndex]) ^ 2 + ($hy - $path_action_recorder_flag_dest_y[$heroIndex]) ^ 2)
+			If $flagDestDelta < $PATH_ACTION_RECORDER_FLAG_STOP_DIST Then
+				$path_action_recorder_flag_tracking[$heroIndex] = False
+				PathActionRecorderWriteEvent($timeMs, 'HERO_FLAG_DEST', $hx, $hy, $hhp, $hEnergy, $mapID, $heroAgentID, $hModelID, 0, 'hero_index=' & $heroIndex & ';dest_x=' & $hx & ';dest_y=' & $hy)
+				Info('Recorder: hero ' & $heroIndex & ' flag destination (' & $hx & ',' & $hy & ')')
+			Else
+				$path_action_recorder_flag_dest_x[$heroIndex] = $hx
+				$path_action_recorder_flag_dest_y[$heroIndex] = $hy
+			EndIf
+		EndIf
 	Next
 EndFunc
 
@@ -377,6 +426,16 @@ Func PathActionRecorderDetectHeroFlags($timeMs, $px, $py, $hp, $energy, $mapID)
 			Local $note = 'hero_index=' & $heroIndex & ';flag_x=' & $hx & ';flag_y=' & $hy & ';dist=' & Round($distToPlayer)
 			PathActionRecorderWriteEvent($timeMs, 'HERO_FLAGGED', $hx, $hy, Round($heroHp * 100, 1), Round(GetEnergy($heroAgent), 1), $mapID, $heroAgentID, $hModelID, 0, $note)
 			Info('Recorder: hero ' & $heroIndex & ' flagged at (' & $hx & ',' & $hy & ') dist=' & Round($distToPlayer))
+
+			; Start tracking this hero so we can log its actual flag destination once it stops.
+			If UBound($path_action_recorder_flag_tracking) <= $heroIndex Then
+				ReDim $path_action_recorder_flag_tracking[$heroIndex + 1]
+				ReDim $path_action_recorder_flag_dest_x[$heroIndex + 1]
+				ReDim $path_action_recorder_flag_dest_y[$heroIndex + 1]
+			EndIf
+			$path_action_recorder_flag_tracking[$heroIndex] = True
+			$path_action_recorder_flag_dest_x[$heroIndex] = $hx
+			$path_action_recorder_flag_dest_y[$heroIndex] = $hy
 		EndIf
 	Next
 EndFunc
