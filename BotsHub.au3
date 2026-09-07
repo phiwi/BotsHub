@@ -50,6 +50,7 @@ Opt('MustDeclareVars', True)
 #include 'lib/Utils-Storage.au3'
 #include 'lib/Build_PW_Heroic-Refrain.au3'
 
+#include 'src/farms/Brightclaw.au3'
 #include 'src/farms/CoF.au3'
 #include 'src/farms/Corsairs.au3'
 #include 'src/farms/DragonMoss.au3'
@@ -539,6 +540,7 @@ Func FillFarmMap()
 	;					Farm Name						Farm function					Inventory space		Farm duration
 	AddFarmToFarmMap(	'Asuran',						AsuranTitleFarm,				5,					$ASURAN_FARM_DURATION)
 	AddFarmToFarmMap(	'Boreal',						BorealChestFarm,				5,					$BOREAL_FARM_DURATION)
+	AddFarmToFarmMap(	'Brightclaw',							BrightclawFarm,						5,					$BRIGHTCLAW_FARM_DURATION)
 	AddFarmToFarmMap(	'CoF',							CoFFarm,						5,					$COF_FARM_DURATION)
 	AddFarmToFarmMap(	'Corsairs',						CorsairsFarm,					5,					$CORSAIRS_FARM_DURATION)
 	AddFarmToFarmMap(	'Deldrimor',					DeldrimorFarm,					10,					$DELDRIMOR_FARM_DURATION)
