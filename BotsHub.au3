@@ -73,6 +73,7 @@ Opt('MustDeclareVars', True)
 #include 'src/farms/Skrees.au3'
 #include 'src/farms/SpiritSlaves.au3'
 #include 'src/farms/Vaettirs.au3'
+#include 'src/farms/VarajarBerserkers.au3'
 #include 'src/farms/Zodiac.au3'
 #include 'src/missions/Deldrimor.au3'
 #include 'src/missions/FoW.au3'
@@ -584,6 +585,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Underworld',					UnderworldFarm,					5,					$UW_DURATION)
 	AddFarmToFarmMap(	'UnderworldPantheon',			UnderworldFarmPantheon,		    5,					$UW_FARM_PANTHEON_DURATION)
 	AddFarmToFarmMap(	'Vaettirs',						VaettirsFarm,					5,					$VAETTIRS_FARM_DURATION)
+	AddFarmToFarmMap(	'Varajar Berserkers',					VarajarBerserkersFarm,					5,					$VARAJAR_BERSERKERS_FARM_DURATION)
 	AddFarmToFarmMap(	'Vanguard',						VanguardTitleFarm,				5,					$VANGUARD_TITLE_FARM_DURATION)
 	AddFarmToFarmMap(	'Voltaic',						VoltaicFarm,					10,					$VOLTAIC_FARM_DURATION)
 	AddFarmToFarmMap(	'War Supply Keiran',			WarSupplyKeiranFarm,			10,					$WAR_SUPPLY_FARM_DURATION)
