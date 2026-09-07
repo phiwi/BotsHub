@@ -1,7 +1,7 @@
 ﻿{
 	"main": {
 		"character": "A R U Synthesis",
-		"farm": "Boreal",
+		"farm": "Path Recorder",
 		"loot_configuration": "new"
 	},
 	"run": {
@@ -13,7 +13,7 @@
 		"use_scrolls": false,
 		"sort_items": false,
 		"collect_data": false,
-		"go_offline": true,
+		"go_offline": false,
 		"flash_whisper": false,
 		"donate_faction_points": true,
 		"buy_faction_resources": false,
