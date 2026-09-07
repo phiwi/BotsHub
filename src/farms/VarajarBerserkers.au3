@@ -23,7 +23,6 @@
 #include '../../lib/Utils-Console.au3'
 #include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
-#include '../utilities/SupportTeam.au3'
 
 
 ; ==== Constants ====
@@ -191,13 +190,22 @@ Func VarajarLoadHeroTemplate($heroIndex, $templateCode, $heroName)
 EndFunc
 
 
+;~ Send a panel key to the GW window (inlined from SupportTeam.au3 so this farm is self-contained)
+Func VarajarSendPanelKey($key)
+	Local $hWnd = GetWindowHandle()
+	If $hWnd <> 0 Then WinActivate($hWnd)
+	Sleep(80 + GetPing())
+	ControlSend($hWnd, '', '', $key)
+EndFunc
+
+
 ;~ Open only Margrid (hero 1) and Morgahn (hero 2) hero panels
 Func VarajarOpenHeroPanels()
 	CloseAllPanels()
 	Sleep(150 + GetPing())
 	ToggleHeroPanel(1)
 	Sleep(130 + GetPing())
-	SupportTeamSendPanelKey('9')
+	VarajarSendPanelKey('9')
 	Sleep(130 + GetPing())
 EndFunc
 
