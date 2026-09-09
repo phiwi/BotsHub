@@ -26,16 +26,16 @@
 
 
 ; ==== Constants ====
-Global Const $VARAJAR_BERSERKERS_SKILLBAR = 'OwFTQ5K/HimUlZULXsvYHMC6ACA'
+Global Const $VARAJAR_BERSERKERS_SKILLBAR = 'OwFTQ56+NimUlZULXsvYHMC6ACA'
 Global Const $VARAJAR_MARGRID_SKILLBAR = 'OgkjYxYjJPQHe8O+5AAAAAAAAA'
-Global Const $VARAJAR_MORGAHN_SKILLBAR = 'OQijEamLKPm4bMAAAwj3xDbAAA'
+Global Const $VARAJAR_MORGAHN_SKILLBAR = 'OQijEamLKPm4bMLGAwj3xDbAAA'
 Global Const $VARAJAR_KOSS_SKILLBAR = 'OQkiUxm8wj3xAAAAAAAAAAAA'
 Global Const $VARAJAR_MOX_SKILLBAR = 'OgmiYynywjBAAAAAAAAAAAAA'
 Global Const $VARAJAR_JORA_SKILLBAR = 'OQkiUxm8wj3xAAAAAAAAAAAA'
 
 Global Const $VARAJAR_BERSERKERS_FARM_INFORMATIONS = 'A/W Whirlwind Sin farming Norn Berserkers in Varajar Fells for Berserker Horns.' & @CRLF _
 	& '- Start in Olafstead, exit toward Varajar Fells' & @CRLF _
-	& '- Margrid (EoE + Winnowing, disabled) + Morgahn (Enduring Harmony/Make Haste, disabled) provide speed and damage' & @CRLF _
+	& '- Margrid (EoE + Winnowing, disabled) + Morgahn (Enduring Harmony/Make Haste/Bladeturn Refrain/Incoming, disabled) provide speed and damage' & @CRLF _
 	& '- 5 extra heroes act as meat shields to survive the run' & @CRLF _
 	& '- Midway, meat shields 4-7 are flagged onto the dangerous troop; Margrid/Morgahn/Koss are flagged away at the split spot' & @CRLF _
 	& '- Sin casts I Am Unstoppable, runs an aggro circle, then spikes with Hundred Blades + Whirlwind Attack'
@@ -61,6 +61,8 @@ Global Const $VB_MARGRID_WINNOWING = 4
 Global Const $VB_MORGAHN_VOCAL_WAS_SOGOLON = 7
 Global Const $VB_MORGAHN_ENDURING_HARMONY = 1
 Global Const $VB_MORGAHN_MAKE_HASTE = 2
+Global Const $VB_MORGAHN_BLADETURN_REFRAIN = 3
+Global Const $VB_MORGAHN_INCOMING = 5
 
 ; Key coordinates
 Global Const $VB_SPLIT_X = -13000
@@ -128,6 +130,9 @@ Func SetupPlayerVarajarBerserkers()
 		LoadSkillTemplate($VARAJAR_BERSERKERS_SKILLBAR)
 		RandomSleep(250)
 	EndIf
+	; Activate weapon set 1 for the Hundred Blades + Whirlwind spike
+	ChangeWeaponSet(1)
+	RandomSleep(150)
 	Return $SUCCESS
 EndFunc
 
@@ -166,6 +171,8 @@ Func SetupTeamVarajarBerserkers()
 	DisableHeroSkillSlot($VB_MARGRID, $VB_MARGRID_WINNOWING)
 	DisableHeroSkillSlot($VB_MORGAHN, $VB_MORGAHN_ENDURING_HARMONY)
 	DisableHeroSkillSlot($VB_MORGAHN, $VB_MORGAHN_MAKE_HASTE)
+	DisableHeroSkillSlot($VB_MORGAHN, $VB_MORGAHN_BLADETURN_REFRAIN)
+	DisableHeroSkillSlot($VB_MORGAHN, $VB_MORGAHN_INCOMING)
 
 	; Margrid + Morgahn (the important casters) avoid combat; the five meat shields
 	; guard the player so they tank enemy aggro on the approach instead of fleeing.
@@ -519,16 +526,20 @@ Func VarajarBerserkersSplit()
 	UseHeroSkillEx($VB_MARGRID, $VB_MARGRID_WINNOWING)
 	RandomSleep(500)
 
-	; Morgahn casts Vocal Was Sogolon, then Enduring Harmony, then Make Haste on the player.
-	; Enduring Harmony MUST land before Make Haste (MH gets +50% duration from EH). Use UseHeroSkillEx
-	; (waits for the cast to actually start recharging) so the order is deterministic instead of racy.
+	; Morgahn casts Vocal Was Sogolon, then Enduring Harmony, then Make Haste, then Bladeturn
+	; Refrain, then Incoming on the player. Enduring Harmony MUST land before Make Haste (MH gets
+	; +50% duration from EH). Use UseHeroSkillEx (waits for the cast to actually start recharging)
+	; so the order is deterministic instead of racy.
 	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_VOCAL_WAS_SOGOLON)
 	PingSleep(200)
 	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_ENDURING_HARMONY, GetMyAgent())
 	; Shroud of Distress (8) cast later, alongside Enduring Harmony, so it lasts into the aggro + spike
 	UseSkillEx($VB_SHROUD_OF_DISTRESS)
-	RandomSleep(2000)
+	RandomSleep(1000)
 	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_MAKE_HASTE, GetMyAgent())
+	; Incoming then Bladeturn Refrain right after Make Haste — the Sin starts running at the same time
+	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_INCOMING, GetMyAgent())
+	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_BLADETURN_REFRAIN, GetMyAgent())
 	RandomSleep(500)
 
 	; Flag Margrid (1), Morgahn (2) and Koss (3) far away (back toward the run start) so they
@@ -730,28 +741,30 @@ Func VarajarBerserkersAggroAndSpike()
 	; Final approach to the kill spot
 	MoveTo($aggroPath[UBound($aggroPath) - 1][0], $aggroPath[UBound($aggroPath) - 1][1])
 	If IsPlayerDead() Then Return False
-	Local $foesKilledBefore = GetFoesKilled()
 	VarajarLogWrite('spike_stop')
 
-	; Standing still now. Spike order: Protector's Defense (2) -> Unseen Fury (7, blinds
-	; adjacent foes) -> Soldier's Defense (3, overwrites the stance, foes stay blinded)
-	; -> Ebon Battle Standard (4) -> Hundred Blades (5) -> Whirlwind (6)
+	; Standing still now. Spike order: Protector's Defense (2) -> Soldier's Defense (3)
+	; -> Ebon Battle Standard (4) -> 3s ball-up -> Unseen Fury (7, blinds)
+	; -> Hundred Blades (5) -> Whirlwind (6)
 	UseSkillEx($VB_PROTECTORS_DEFENSE)
 	VarajarLogWrite('cast_2', '', $VB_PROTECTORS_DEFENSE)
-	; Pause ~1s under Protector's Defense so the foes ball up before blinding them all
-	RandomSleep(1000)
-	UseSkillEx($VB_UNSEEN_FURY)
-	VarajarLogWrite('cast_7', '', $VB_UNSEEN_FURY)
 	UseSkillEx($VB_SOLDIERS_DEFENSE)
 	VarajarLogWrite('cast_3', '', $VB_SOLDIERS_DEFENSE)
 	UseSkillEx($VB_EBON_BATTLE_STANDARD)
 	VarajarLogWrite('cast_4', '', $VB_EBON_BATTLE_STANDARD)
-	; Give the ball an extra moment to tighten before the Hundred Blades spike
-	RandomSleep(1500)
+	; Wait 2s so the foes ball up before blinding them all
+	RandomSleep(2000)
+	; I Am Unstoppable (1) recast — its 30s recharge is up around now
+	UseSkillEx($VB_I_AM_UNSTOPPABLE)
+	VarajarLogWrite('cast_1', '', $VB_I_AM_UNSTOPPABLE)
+	UseSkillEx($VB_UNSEEN_FURY)
+	VarajarLogWrite('cast_7', '', $VB_UNSEEN_FURY)
+	; 2s ball-up after the blind, then spike immediately
+	RandomSleep(2000)
+	; Count the balled foes right before the kill so we can report the spike's kill count
+	Local $foesBefore = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY)
 	UseSkillEx($VB_HUNDRED_BLADES)
 	VarajarLogWrite('cast_5', '', $VB_HUNDRED_BLADES)
-	; Delay Whirlwind so the ball fully tightens before the finisher
-	RandomSleep(1000)
 
 	; Auto-attack to top up adrenaline for Whirlwind Attack (6), then fire it
 	Local $target = GetNearestEnemyToAgent(GetMyAgent())
@@ -771,9 +784,11 @@ Func VarajarBerserkersAggroAndSpike()
 		EndIf
 	EndIf
 
-	; Log how many foes this spike killed (CSV + console)
-	Local $foesKilled = GetFoesKilled() - $foesKilledBefore
-	VarajarLogWrite('spike_kills', 'killed=' & $foesKilled)
+	; Let the spike's damage resolve, then count survivors to report how many foes it killed
+	RandomSleep(500)
+	Local $foesAfter = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY)
+	Local $foesKilled = $foesBefore - $foesAfter
+	VarajarLogWrite('spike_kills', 'killed=' & $foesKilled & ';before=' & $foesBefore & ';after=' & $foesAfter)
 	Info('Spike killed ' & $foesKilled & ' foes')
 
 	; Loot immediately after the spike - do not wait for stragglers, they can kill us
