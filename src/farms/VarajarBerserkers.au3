@@ -28,14 +28,14 @@
 ; ==== Constants ====
 Global Const $VARAJAR_BERSERKERS_SKILLBAR = 'OwFTQ56+NimUlZULXsvYHMC6ACA'
 Global Const $VARAJAR_MARGRID_SKILLBAR = 'OgkjYxYjJPQHe8O+5AAAAAAAAA'
-Global Const $VARAJAR_MORGAHN_SKILLBAR = 'OQijEamLKPm4bMLGAwj3xDbAAA'
+Global Const $VARAJAR_MORGAHN_SKILLBAR = 'OQijEamLKPm4bMLuCzj3xDbAAA'
 Global Const $VARAJAR_KOSS_SKILLBAR = 'OQkiUxm8wj3xAAAAAAAAAAAA'
 Global Const $VARAJAR_MOX_SKILLBAR = 'OgmiYynywjBAAAAAAAAAAAAA'
 Global Const $VARAJAR_JORA_SKILLBAR = 'OQkiUxm8wj3xAAAAAAAAAAAA'
 
 Global Const $VARAJAR_BERSERKERS_FARM_INFORMATIONS = 'A/W Whirlwind Sin farming Norn Berserkers in Varajar Fells for Berserker Horns.' & @CRLF _
 	& '- Start in Olafstead, exit toward Varajar Fells' & @CRLF _
-	& '- Margrid (EoE + Winnowing, disabled) + Morgahn (Enduring Harmony/Make Haste/Bladeturn Refrain/Incoming, disabled) provide speed and damage' & @CRLF _
+	& '- Margrid (EoE + Winnowing, disabled) + Morgahn (Enduring Harmony/Make Haste/Anthem of Flame/Bladeturn Refrain, disabled) provide speed and damage' & @CRLF _
 	& '- 5 extra heroes act as meat shields to survive the run' & @CRLF _
 	& '- Midway, meat shields 4-7 are flagged onto the dangerous troop; Margrid/Morgahn/Koss are flagged away at the split spot' & @CRLF _
 	& '- Sin casts I Am Unstoppable, runs an aggro circle, then spikes with Hundred Blades + Whirlwind Attack'
@@ -62,7 +62,7 @@ Global Const $VB_MORGAHN_VOCAL_WAS_SOGOLON = 7
 Global Const $VB_MORGAHN_ENDURING_HARMONY = 1
 Global Const $VB_MORGAHN_MAKE_HASTE = 2
 Global Const $VB_MORGAHN_BLADETURN_REFRAIN = 3
-Global Const $VB_MORGAHN_INCOMING = 5
+Global Const $VB_MORGAHN_ANTHEM_OF_FLAME = 4
 
 ; Key coordinates
 Global Const $VB_SPLIT_X = -13000
@@ -71,6 +71,11 @@ Global Const $VB_FLAG_AWAY_X = -2300
 Global Const $VB_FLAG_AWAY_Y = 550
 Global Const $VB_KILL_X = -15653
 Global Const $VB_KILL_Y = -7067
+
+;~ Minimum foes the spike must kill for a run to count as a success. Below this the
+;~ ball never formed (or the spike whiffed) — surviving a run without killing must
+;~ not inflate the success ratio.
+Global Const $VB_MIN_KILLS_FOR_SUCCESS = 15
 
 ; Meat shields (4-7) are flagged onto this dangerous troop midway through the approach so
 ; they tank it instead of it killing Margrid (1) / Morgahn (2).
@@ -172,7 +177,7 @@ Func SetupTeamVarajarBerserkers()
 	DisableHeroSkillSlot($VB_MORGAHN, $VB_MORGAHN_ENDURING_HARMONY)
 	DisableHeroSkillSlot($VB_MORGAHN, $VB_MORGAHN_MAKE_HASTE)
 	DisableHeroSkillSlot($VB_MORGAHN, $VB_MORGAHN_BLADETURN_REFRAIN)
-	DisableHeroSkillSlot($VB_MORGAHN, $VB_MORGAHN_INCOMING)
+	DisableHeroSkillSlot($VB_MORGAHN, $VB_MORGAHN_ANTHEM_OF_FLAME)
 
 	; Margrid + Morgahn (the important casters) avoid combat; the five meat shields
 	; guard the player so they tank enemy aggro on the approach instead of fleeing.
@@ -508,8 +513,9 @@ Func VarajarBerserkersRunToSplit()
 			Next
 			$meatShieldsFlagged = True
 			VarajarLogWrite('flag_meatshields', $VB_MEATSHIELD_FLAG_X & ',' & $VB_MEATSHIELD_FLAG_Y)
-			; Wait so the meat shields pull aggro before we continue to the split spot
-			RandomSleep(2000)
+			; Wait so the meat shields pull aggro before we continue to the split spot.
+			; Give the blockers extra time (+3s) to get the troop focused on them.
+			RandomSleep(5000)
 		EndIf
 	Next
 	Return True
@@ -518,6 +524,13 @@ EndFunc
 
 ;~ Split spot choreography : wait, EoE, Enduring Harmony + Make Haste, flag heroes away
 Func VarajarBerserkersSplit()
+	; Disable "Incoming" + "Fall Back" on Margrid/Morgahn/Koss before the pull so
+	; no hero auto-casts a second movement-speed increase on top of Make Haste — the
+	; pull must run with a single IMS (Make Haste only).
+	VarajarDisableSpeedSkillsOnHero($VB_MARGRID)
+	VarajarDisableSpeedSkillsOnHero($VB_MORGAHN)
+	VarajarDisableSpeedSkillsOnHero(3) ; Koss
+
 	; Wait for all heroes to catch up
 	RandomSleep(3000)
 
@@ -526,10 +539,12 @@ Func VarajarBerserkersSplit()
 	UseHeroSkillEx($VB_MARGRID, $VB_MARGRID_WINNOWING)
 	RandomSleep(500)
 
-	; Morgahn casts Vocal Was Sogolon, then Enduring Harmony, then Make Haste, then Bladeturn
-	; Refrain, then Incoming on the player. Enduring Harmony MUST land before Make Haste (MH gets
-	; +50% duration from EH). Use UseHeroSkillEx (waits for the cast to actually start recharging)
-	; so the order is deterministic instead of racy.
+	; Morgahn casts Vocal Was Sogolon, then Enduring Harmony, then Make Haste, then Anthem of
+	; Flame, then Bladeturn Refrain. Enduring Harmony MUST land before Make Haste (MH gets +50%
+	; duration from EH). Use UseHeroSkillEx (waits for the cast to actually start recharging) so
+	; the order is deterministic instead of racy. Anthem of Flame (a chant, NOT a speed boost)
+	; replaces the old Incoming shout — a second IMS was breaking aggro, but a chant still
+	; refreshes Bladeturn Refrain without adding movement speed.
 	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_VOCAL_WAS_SOGOLON)
 	PingSleep(200)
 	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_ENDURING_HARMONY, GetMyAgent())
@@ -537,8 +552,7 @@ Func VarajarBerserkersSplit()
 	UseSkillEx($VB_SHROUD_OF_DISTRESS)
 	RandomSleep(1000)
 	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_MAKE_HASTE, GetMyAgent())
-	; Incoming then Bladeturn Refrain right after Make Haste — the Sin starts running at the same time
-	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_INCOMING, GetMyAgent())
+	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_ANTHEM_OF_FLAME, GetMyAgent())
 	UseHeroSkillEx($VB_MORGAHN, $VB_MORGAHN_BLADETURN_REFRAIN, GetMyAgent())
 	RandomSleep(500)
 
@@ -548,6 +562,33 @@ Func VarajarBerserkersSplit()
 	CommandHero($VB_MORGAHN, $VB_FLAG_AWAY_X, $VB_FLAG_AWAY_Y)
 	CommandHero(3, $VB_FLAG_AWAY_X, $VB_FLAG_AWAY_Y)
 	RandomSleep(500)
+EndFunc
+
+
+;~ Disable "Incoming" and "Fall Back" on a hero so it never auto-casts a second
+;~ movement-speed increase on top of the manual Make Haste. Scans the skillbar by
+;~ skill ID so it works regardless of the exact slot.
+Func VarajarDisableSpeedSkillsOnHero($heroIndex)
+	For $slot = 1 To 8
+		Local $skillID = GetSkillbarSkillID($slot, $heroIndex)
+		If $skillID == $ID_INCOMING Or $skillID == $ID_INCOMING_PVP _
+			Or $skillID == $ID_FALL_BACK Or $skillID == $ID_FALL_BACK_PVP Then
+			DisableHeroSkillSlot($heroIndex, $slot)
+		EndIf
+	Next
+EndFunc
+
+
+;~ Re-enable "Incoming" and "Fall Back" on a hero (undoes the split-spot lock) so
+;~ it can auto-cast them during the next approach. Scans the skillbar by skill ID.
+Func VarajarEnableSpeedSkillsOnHero($heroIndex)
+	For $slot = 1 To 8
+		Local $skillID = GetSkillbarSkillID($slot, $heroIndex)
+		If $skillID == $ID_INCOMING Or $skillID == $ID_INCOMING_PVP _
+			Or $skillID == $ID_FALL_BACK Or $skillID == $ID_FALL_BACK_PVP Then
+			EnableHeroSkillSlot($heroIndex, $slot)
+		EndIf
+	Next
 EndFunc
 
 
@@ -777,6 +818,10 @@ Func VarajarBerserkersAggroAndSpike()
 			RandomSleep(150)
 		WEnd
 		If IsPlayerAlive() And GetSkillbarSkillAdrenaline($VB_WHIRLWIND_ATTACK) >= 130 Then
+			; Re-count the ball right before the kill — the berserkers have fully
+			; balled up by now, so this is the true spike target (the earlier
+			; $foesBefore reading was taken before the adrenaline build-up).
+			$foesBefore = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY)
 			UseSkillEx($VB_WHIRLWIND_ATTACK, $target)
 			VarajarLogWrite('cast_6', 'adrenaline=' & GetSkillbarSkillAdrenaline($VB_WHIRLWIND_ATTACK))
 		Else
@@ -787,14 +832,19 @@ Func VarajarBerserkersAggroAndSpike()
 	; Let the spike's damage resolve, then count survivors to report how many foes it killed
 	RandomSleep(500)
 	Local $foesAfter = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY)
+	; Clamp at 0: a late-arriving straggler must never make the kill count negative.
 	Local $foesKilled = $foesBefore - $foesAfter
+	If $foesKilled < 0 Then $foesKilled = 0
 	VarajarLogWrite('spike_kills', 'killed=' & $foesKilled & ';before=' & $foesBefore & ';after=' & $foesAfter)
 	Info('Spike killed ' & $foesKilled & ' foes')
 
 	; Loot immediately after the spike - do not wait for stragglers, they can kill us
 	PickUpItems(Null, VarajarBerserkersShouldPickItem)
 
-	Return IsPlayerAlive()
+	; Success = survived AND the spike actually cleared the ball. A run where the
+	; ball never formed (0 kills) must not inflate the success ratio.
+	If Not IsPlayerAlive() Then Return False
+	Return $foesKilled >= $VB_MIN_KILLS_FOR_SUCCESS
 EndFunc
 
 
@@ -810,6 +860,14 @@ EndFunc
 Func VarajarBerserkersFarmLoop()
 	VarajarBerserkersGoToZone()
 	If GetMapID() <> $ID_VARAJAR_FELLS Then Return $FAIL
+
+	; Re-enable "Incoming" + "Fall Back" on Margrid/Morgahn/Koss at the start of the
+	; run so they can auto-cast them during the approach to the split spot. They are
+	; locked again at the split spot (see VarajarBerserkersSplit) so the pull runs on
+	; a single IMS (Make Haste only).
+	VarajarEnableSpeedSkillsOnHero($VB_MARGRID)
+	VarajarEnableSpeedSkillsOnHero($VB_MORGAHN)
+	VarajarEnableSpeedSkillsOnHero(3) ; Koss
 
 	If Not VarajarBerserkersRunToSplit() Then
 		If $varajar_margrid_dead Then Info('Margrid died during the run - resigning and restarting')
