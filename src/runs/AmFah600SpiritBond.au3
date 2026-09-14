@@ -97,18 +97,44 @@ Global Const $AMFAH600_PULL_MIN_PROGRESS_DIST = 500
 ; GW's client auto-approaches toward an out-of-range target, so we only target
 ; Necromancers inside EVAS' real cast range (~1200). This lets the monk hit the
 ; Necros that hover just outside the aggro bubble (~1000-1200) and still keep
-; her standing at the anchor — she never chases far ones across the compass.
+; her standing at the anchor — she never chases far ones across longbow range.
 Global Const $AMFAH600_EVAS_CAST_RANGE = 1200
 ; EVAS costs 15 energy and has a ~2s cast. Only summon when the survival core
-; (PS + SB) is actually up. Energy floor is aligned with Snow Storm (20) so
-; EVAS is always attempted first — it kills faster than Snow Storm.
+; (PS + SB) is actually up AND there is a small buffer left (15 EVAS + 5 = 20).
+; The 22:08 Spot-1 death was EVAS + Snow Storm firing at their OLD collapsed
+; floors (15/10) right as the fight started at 15e — they drained all energy and
+; PS/SB lapsed. The collapsed floor must NOT drop below the normal floor (that
+; was the bug). NOTE: raising EVAS to 25 (the 18:08 run) over-corrected — EVAS
+; fired exactly once at fight start and then never again (energy rarely reaches
+; 25e), so the Necros lived, Snow Storm (20e) took over, the fight stalled and
+; timed out. 20e keeps EVAS AHEAD of Snow Storm (both at 20, EVAS checked first)
+; while still preventing the 15e energy drain.
 Global Const $AMFAH600_EVAS_MIN_ENERGY = 20
-; In the energy-collapsed state (few-foe / healer linchpin) drop the energy
-; buffer: EVAS (15e cost) and Snow Storm (10e cost) may fire at their raw cost
-; so the Healer-kill is not starved while income collapses.
-Global Const $AMFAH600_EVAS_MIN_ENERGY_COLLAPSED = 15
+; Same floor in the collapsed state — do NOT lower it (the 22:08 death) and do
+; NOT raise it (the 18:08 timeout).
+Global Const $AMFAH600_EVAS_MIN_ENERGY_COLLAPSED = 20
+; Snow Storm costs 10e + 10e SB headroom = 20. Same floor in both states.
 Global Const $AMFAH600_SNOW_STORM_MIN_ENERGY = 20
-Global Const $AMFAH600_SNOW_STORM_MIN_ENERGY_COLLAPSED = 10
+Global Const $AMFAH600_SNOW_STORM_MIN_ENERGY_COLLAPSED = 20
+; Pre-emptive recast thresholds for PS/SB (timer-based — GetEffectTimeRemaining's
+; magnitude is unreliable, so we time the recast instead). PS lasts ~17s, SB ~8s
+; at rank 12 Protection Prayers. The thresholds are deliberately AGGRESSIVE (PS
+; ~10s, SB ~4s) so there are several recast attempts before expiry: a Marksman
+; knockdown can interrupt one cast, but the next attempt lands before the gap
+; opens. The 18:25 run proved a single ~6s SB recast left a lethal gap during the
+; 9-foe pull — SB expired, the recast was knocked down, and the monk died in ~1s.
+Global Const $AMFAH600_PS_RECAST_MS = 10000
+Global Const $AMFAH600_SB_RECAST_MS = 4000
+; Energy floor for the PRE-EMPTIVE recast (the aggressive PS/SB timers above).
+; At or above this energy the monk can afford the "early" recasts that buffer
+; against Marksman knockdown. Below it she only recasts on REAL expiry (the
+; minimal necessary). The aggressive timers burn ~3.5 e/s; a low-pressure fight
+; (ranged Marksmen at the new half-way Spot 3 anchor, or a short pull) brings in
+; far less Essence-Bond energy than that, so the timers starve the monk and let
+; PS/SB/VWK lapse. The 20:40 Spot 3 death was exactly this: VWK lapsed (no
+; life-steal/reflect) and the second group arrived while SB was also down — the
+; monk died instantly despite "low pressure".
+Global Const $AMFAH600_PREEMPTIVE_MIN_ENERGY = 20
 Global Const $AMFAH600_HEALER_MODEL_ID = 4258
 Global Const $AMFAH600_NECROMANCER_MODEL_ID = 4257
 ; Marksmen (bow, knockdown) — in the endgame they are the ones that stay alive
@@ -116,6 +142,13 @@ Global Const $AMFAH600_NECROMANCER_MODEL_ID = 4257
 ; them (which kills her). We recognise them by model ID so EVAS assassins can be
 ; sent onto them to trigger the traps from a safe distance instead.
 Global Const $AMFAH600_MARKSMAN_MODEL_ID = 4256
+; Marksmen/archers on higher ground shoot beyond the nominal longbow range —
+; their effective reach extends up to ~200 units (GW's max height advantage).
+; Detection (few-foe / only-healers / fight-over) must use longbow + 200, else an
+; elevated archer past 1250 is invisible and the monk drops her enchants and
+; stops casting while it is still shooting her (the 21:03 Spot 3 death: the last
+; Healer sat at 1222 while elevated Marksmen kept firing from beyond 1250).
+Global Const $AMFAH600_DETECT_RANGE = $RANGE_LONGBOW + 200
 
 Global Const $AMFAH600_TOSAI_APPROACH_TIMEOUT_MS = 90000
 Global Const $AMFAH600_FIRST_PULL_TIMEOUT_MS = 120000
@@ -128,7 +161,7 @@ Global Const $AMFAH600_NECRO_CLEANUP_TIMEOUT_MS = 45000
 ; SB/VWK reflect cannot finish them), wait this long for them to re-engage and
 ; then move on to Spot 2 instead of idling the whole phase into a run-fail.
 Global Const $AMFAH600_STRAY_MAX_FOES = 3
-; Few-foe threshold: at or below this many living compass foes, the fight has
+; Few-foe threshold: at or below this many living longbow foes, the fight has
 ; collapsed into the energy-saving mode (drop PS, prioritize VWK/EVAS/Snow Storm).
 Global Const $AMFAH600_FEW_FOES_MAX = 4
 Global Const $AMFAH600_STRAY_CLEANUP_TIMEOUT_MS = 25000
@@ -152,23 +185,24 @@ Global $amfah600_sb_morgahn_last_speed_skill = 0 ; 0=none, 1=Incoming, 2=Fall Ba
 Global $amfah600_sb_last_evas_target_id = 0
 
 ; Death counter. The FIRST death of a run is tolerated (single -15% malus):
-; a trap death (after Spot 1 cleared) recovers shrine -> Spot 2, a combat death
-; (foes in earshot) re-zones via the Undercity tunnels and restarts the farm.
-; The SECOND death is not recoverable (past -15%) - the run pauses at the rez
-; shrine. Reset per fresh external farm start (monk alive at the outpost).
+; the monk re-zones via the Undercity tunnels and restarts the farm. The SECOND
+; death is past -15% - resign and restart from Nahpui Quarter. Reset per fresh
+; external farm start (monk alive at the outpost).
 Global $amfah600_sb_deaths_this_run = 0
-; Bounded tunnel-resets for a Spot-1 fight that times out while alive (poisoned
-; instance: quest active / foes hostile / stuck stragglers). Avoids endless loops.
-Global $amfah600_sb_fight_retries = 0
+; Last PS/SB cast timers for the pre-emptive recast (see MaintainCoreUpkeep).
+Global $amfah600_sb_last_ps_cast = 0
+Global $amfah600_sb_last_sb_cast = 0
+; Set once per cycle when the maintained enchants (6/7/8) are dropped in the
+; few-foe tail so the monk regains energy regen to pay for the EVAS that kills
+; the last Healer. Reset each run-loop iteration.
+Global $amfah600_sb_dropped_enchants = False
 
 
 Func AmFah600SpiritBondRun()
 	; A fresh external farm start begins a new attempt from the outpost, so the
-	; death counter and tunnel-reset counter reset here (before the internal loop
-	; may recover one death / reset one poisoned fight).
+	; death counter resets here (before the internal loop may recover one death).
 	If IsPlayerAlive() Then
 		$amfah600_sb_deaths_this_run = 0
-		$amfah600_sb_fight_retries = 0
 	EndIf
 	If Not $amfah600_sb_setup_done And SetupAmFah600SpiritBondRun() == $FAIL Then Return $PAUSE
 	If GetMapID() <> $ID_WAJJUN_BAZAAR Then
@@ -184,12 +218,7 @@ Func AmFah600SpiritBondRun()
 		EndSwitch
 	EndIf
 
-	Local $result = AmFah600SpiritBondRunLoop()
-	If IsPlayerDead() And $amfah600_sb_deaths_this_run >= 2 Then
-		Warn('Am Fah 600 SB debug mode: died ' & $amfah600_sb_deaths_this_run & ' times, pausing at rez shrine for recording')
-		Return $PAUSE
-	EndIf
-	Return $result
+	Return AmFah600SpiritBondRunLoop()
 EndFunc
 
 
@@ -319,6 +348,7 @@ Func AmFah600SpiritBondRunLoop()
 		$amfah600_sb_morgahn_flagged_this_cycle = False
 		$amfah600_sb_morgahn_last_speed_timer = 0
 		$amfah600_sb_morgahn_last_speed_skill = 0
+		$amfah600_sb_dropped_enchants = False
 		If AmFah600SpiritBondCastMaintainedPrebuffs() == $FAIL Then Return $FAIL
 		If AmFah600SpiritBondGoToBrotherTosai() == $FAIL Then Return $FAIL
 		AmFah600SpiritBondSendMorgahnToDesert()
@@ -327,57 +357,45 @@ Func AmFah600SpiritBondRunLoop()
 		; Walk from Tosai to the recorded pull point to lure the second group
 		; into aggro range (maintenance keeps the 600hp build alive on the way).
 		If AmFah600SpiritBondPullSecondGroup() == $FAIL Then
-			; Died during the pull = combat death (foes hostile). Reset via the
-			; tunnels and restart the farm cycle (recover the first death instead
-			; of returning $FAIL, which made the outer loop spam "Starting run N"
-			; with 0s failures while the monk was still dead at the shrine).
 			If IsPlayerDead() Then
-				If AmFah600SpiritBondRecoverFromCombatDeath() == $SUCCESS Then ContinueLoop
+				If AmFah600SpiritBondRecoverFromDeath() == $SUCCESS Then ContinueLoop
+			Else
+				AmFah600SpiritBondRecoverFromStalemate()
 			EndIf
 			Return $FAIL
 		EndIf
 
-		; Spot 1: Brother Tosai — fight first two groups. FightWindow already
-		; returns only when all foes are dead or only Necromancers remain, so
-		; there is nothing left to re-engage here (ContinueLoop would re-approach
-		; Tosai and kill us).
+		; Spot 1: Brother Tosai — fight first two groups.
 		If AmFah600SpiritBondFightFirstTwoGroups() == $FAIL Then
-			; Combat death (foes still in earshot) -> tunnels re-zone + restart.
 			If IsPlayerDead() Then
-				If AmFah600SpiritBondRecoverFromCombatDeath() == $SUCCESS Then ContinueLoop
-				Return $FAIL
+				If AmFah600SpiritBondRecoverFromDeath() == $SUCCESS Then ContinueLoop
+			Else
+				AmFah600SpiritBondRecoverFromStalemate()
 			EndIf
-			; Timed out while alive: the Tosai instance is unclean (quest active /
-			; foes hostile / stuck stragglers). Reset via the tunnels and retry.
-			If AmFah600SpiritBondResetAfterFailedFight() == $SUCCESS Then ContinueLoop
 			Return $FAIL
 		EndIf
-		$amfah600_sb_fight_retries = 0
 
 		; Spot 2 leg: loot Spot 1, walk to Spot 2 (3 Marksmen), fight and loot.
-		; A spike-trap death after Spot 1's foes are dead (still healthy at
-		; -15%) is recovered from the shrine DIRECTLY into the Spot 2 fight (see
-		; RecoverForSpot2), with 6/7/8 + full energy first.
 		If AmFah600SpiritBondDoSpot2Leg() == $FAIL Then
-			; A failure here is a combat death in the Spot-2 fight (or an
-			; unrecoverable 2nd death). First-death combat -> tunnels + restart.
 			If IsPlayerDead() Then
-				If AmFah600SpiritBondRecoverFromCombatDeath() == $SUCCESS Then ContinueLoop
+				If AmFah600SpiritBondRecoverFromDeath() == $SUCCESS Then ContinueLoop
+			Else
+				AmFah600SpiritBondRecoverFromStalemate()
 			EndIf
 			Return $FAIL
 		EndIf
 
 		; Spot 3 leg: the final Am Fah cluster (many Assassins + Healers, no
-		; Necromancers). Walk past the 3-Marksman greeting (pre-cast PS/SB/VWK,
-		; then cross under fire with SB maintenance), fight and loot. A death
-		; here is a combat death (foes hostile once the Marksmen aggro).
+		; Necromancers). Walk past the 3-Marksman greeting, fight and loot.
 		If AmFah600SpiritBondDoSpot3Leg() == $FAIL Then
 			If IsPlayerDead() Then
-				If AmFah600SpiritBondRecoverFromCombatDeath() == $SUCCESS Then ContinueLoop
+				If AmFah600SpiritBondRecoverFromDeath() == $SUCCESS Then ContinueLoop
+			Else
+				AmFah600SpiritBondRecoverFromStalemate()
 			EndIf
 			Return $FAIL
 		EndIf
-		If AmFah600SpiritBondRezoneViaUndercity() == $FAIL Then Return $FAIL
+		If AmFah600SpiritBondRezoneFromSpot3() == $FAIL Then Return $FAIL
 	WEnd
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
@@ -637,15 +655,15 @@ Func AmFah600SpiritBondActivateQuest()
 
 	Info('Refuse to Drink is active - entering high-pressure guard')
 	; Survival first: the next ~8s are the deadliest of the run. Both Ambush
-	; groups are hostile; keep 1/2/4 tight here and ALWAYS cast EVAS / Snow Storm
-	; on a reachable Necro — they engage the second group's vanguard and drag its
-	; healers into range.
+	; groups are hostile; keep 1/2/4 tight here. Do NOT cast EVAS / Snow Storm —
+	; their 2s + 1s casts block the SB recast while the monk is under the opening
+	; volley (the 17:18 run died exactly this way: SB never landed during the
+	; guard and bled from 100% to 83%). The Necromancers are pressured later,
+	; during the fight.
 	Local $timerGuard = TimerInit()
 	Local $guardLoops = 0
-	While IsPlayerAlive() And TimerDiff($timerGuard) < 3000
+	While IsPlayerAlive() And TimerDiff($timerGuard) < 5000
 		AmFah600SpiritBondMaintainCoreUpkeep()
-		AmFah600SpiritBondTryCastEvasOnNecromancer()
-		AmFah600SpiritBondTryCastSnowStormOnNecromancer()
 		RandomSleep(50)
 		$guardLoops += 1
 	WEnd
@@ -695,12 +713,12 @@ Func AmFah600SpiritBondPullSecondGroup()
 	AmFah600SpiritBondMaintainCoreUpkeep()
 	Local $me = GetMyAgent()
 	AmFah600SpiritBondCsvLog('PullSecondGroup_stop', 'distToSpot=' & Round(GetDistanceToPoint($me, $AMFAH600_SECOND_GROUP_PULL_X, $AMFAH600_SECOND_GROUP_PULL_Y)) & ' x=' & Round(DllStructGetData($me, 'X')) & ' y=' & Round(DllStructGetData($me, 'Y')))
-	Local $healer = AmFah600SpiritBondGetNearestHealerInRange($RANGE_COMPASS)
+	Local $healer = AmFah600SpiritBondGetNearestHealerInRange($RANGE_LONGBOW)
 	If $healer <> Null Then
 		Info('Second group pulled: healer model=' & DllStructGetData($healer, 'ModelID') & ', dist=' & Round(GetDistance($me, $healer)))
 		ChangeTarget($healer)
 	Else
-		Info('No Am Fah Healer in compass yet; holding at stop point for aggro')
+		Info('No Am Fah Healer in longbow range yet; holding at stop point for aggro')
 	EndIf
 	Return $SUCCESS
 EndFunc
@@ -753,12 +771,22 @@ Func AmFah600SpiritBondPullShouldStop($me, $startDistToSpot = 0)
 EndFunc
 
 
-;~ Tick used during the second-group pull: keeps the 600hp build alive (PS/SB)
-;~ while the monk walks from Tosai to the pull point. Deliberately does NOT cast
-;~ EVAS/Snow Storm here — their 2s + 1s casts stall the northward walk AND block
-;~ the SB recast while the monk is between the two groups (the 15:48 run died
-;~ exactly this way: SB lapsed mid-pull and HP bled from 89% to 38% before the
-;~ fight even began). The Necromancers are pressured later, during the fight.
+;~ Tick used during the second-group pull: keeps the 600hp build alive (PS/SB/
+;~ VWK) while the monk walks from Tosai to the pull point. Deliberately does NOT
+;~ cast EVAS/Snow Storm here — their 2s + 1s casts stall the northward walk AND
+;~ block the SB recast while the monk is between the two groups (the 15:48 run
+;~ died exactly this way: SB lapsed mid-pull and HP bled from 89% to 38% before
+;~ the fight even began). The Necromancers are pressured later, during the fight.
+;
+;~ The pull uses the FULL upkeep (PS pre-emptive + SB + chained VWK), NOT the
+;~ minimal moving-upkeep. The 21:22 death proved the moving-upkeep is too weak
+;~ here: with 9 foes beating on the monk the SB-on-expiry gap + missing VWK
+;~ (no reflect/life-steal) let HP swing 80→57→84→35→1.3% and both PS and SB
+;~ lapsed at death. The earlier energy-collapse worry (20:21) is handled by the
+;~ PREEMPTIVE_MIN_ENERGY gate inside MaintainCoreUpkeep itself: when the pull
+;~ has FEW foes (low Essence-Bond income, energy < 20) the pre-emptive SB recast
+;~ backs off to on-expiry, and when it has MANY foes (energy >= 20) the full
+;~ pre-emptive SB + VWK keeps the monk alive.
 Func AmFah600SpiritBondPullTick()
 	AmFah600SpiritBondMaintainCoreUpkeep()
 EndFunc
@@ -810,8 +838,8 @@ Func AmFah600SpiritBondFightWindow($label, $timeoutMs)
 
 		$me = GetMyAgent()
 
-		; Only end the fight once EVERY foe in compass is dead. We never walk to
-		; Spot 2 early — either we kill everything or we die here.
+		; Only end the fight once EVERY foe within longbow range is dead. We never
+		; walk to Spot 2 early — either we kill everything or we die here.
 		If TimerDiff($timer) > 8000 And AmFah600SpiritBondShouldEndFirstFight() Then
 			Info('All foes dead - moving on to Spot 2')
 			AmFah600SpiritBondCsvLog('FightWindow_cleared', $label & ' x=' & Round(DllStructGetData($me, 'X')) & ' y=' & Round(DllStructGetData($me, 'Y')))
@@ -846,25 +874,46 @@ EndFunc
 
 
 Func AmFah600SpiritBondShouldEndFirstFight()
-	; Return True only when EVERY foe in compass is dead. The fight must never
-	; end early — either we kill everything or we die; there is no escape.
-	Local $foes = GetFoesInRangeOfAgent(GetMyAgent(), $RANGE_COMPASS)
+	; Return True only when EVERY foe within longbow range is dead. The fight
+	; must never end early — either we kill everything or we die; there is no
+	; escape. Longbow (1250) is the longest any foe can attack from on level
+	; ground; elevated archers reach ~200 further, hence the +200 detect range.
+	Local $foes = GetFoesInRangeOfAgent(GetMyAgent(), $AMFAH600_DETECT_RANGE)
 	For $foe In $foes
 		If $foe == Null Then ContinueLoop
 		If GetIsDead($foe) Then ContinueLoop
 		; Any living foe (Necromancer, Marksman, Healer, Assassin) keeps us fighting.
 		Return False
 	Next
+	; Diagnostic: log the nearest living foe beyond the detect range (its distance
+	; and model) so we can confirm whether elevated Marksmen are escaping the
+	; fight-end check and still shooting during the post-fight wait.
+	Local $me = GetMyAgent()
+	Local $far = GetFoesInRangeOfAgent($me, $RANGE_COMPASS)
+	Local $minDist = -1
+	Local $minModel = 0
+	For $foe In $far
+		If $foe == Null Then ContinueLoop
+		If GetIsDead($foe) Then ContinueLoop
+		Local $d = GetDistance($me, $foe)
+		If $minDist < 0 Or $d < $minDist Then
+			$minDist = $d
+			$minModel = DllStructGetData($foe, 'ModelID')
+		EndIf
+	Next
+	If $minDist > 0 Then
+		AmFah600SpiritBondCsvLog('FightEnd_straggler', 'dist=' & Round($minDist) & ' model=' & $minModel)
+	EndIf
 	Return True
 EndFunc
 
 
-;~ Number of alive non-Necromancer foes in compass (Marksmen/Healers/Assassins
-;~ are killable by SB/VWK reflect; Necromancers are excluded here because they
-;~ are finished separately by EVAS assassins via their own cleanup window).
+;~ Number of alive non-Necromancer foes within longbow range (Marksmen/Healers/
+;~ Assassins are killable by SB/VWK reflect; Necromancers are excluded here
+;~ because they are finished separately by EVAS assassins via their own cleanup).
 Func AmFah600SpiritBondCountKillableFoes()
 	Local $count = 0
-	Local $foes = GetFoesInRangeOfAgent(GetMyAgent(), $RANGE_COMPASS)
+	Local $foes = GetFoesInRangeOfAgent(GetMyAgent(), $RANGE_LONGBOW)
 	For $foe In $foes
 		If $foe == Null Then ContinueLoop
 		If GetIsDead($foe) Then ContinueLoop
@@ -884,11 +933,11 @@ Func AmFah600SpiritBondMaintainCoreUpkeep()
 	Local $foeCount = CountFoesInRangeOfAgent($me, $RANGE_EARSHOT)
 	Local $inCombat = $foeCount > 0
 	; Few-foe tail: once only a handful of foes remain ANYWHERE relevant
-	; (compass-wide — e.g. the last 2 Marksmen that hover just at/past earshot),
+	; (longbow-wide — e.g. the last 2 Marksmen that hover just at/past earshot),
 	; Essence-Bond energy income collapses. Drop PS entirely and switch to the
 	; energy-saving SB (2) + VWK (4) mode — the saved energy must go to EVAS on
 	; those last stragglers (assassins trigger the spike-traps), NOT into a
-	; wasted PS refresh. Keyed on the COMPASS living-foe count (not earshot) so
+	; wasted PS refresh. Keyed on the LONGBOW living-foe count (not earshot) so
 	; a lone Marksman at ~1000-1200 still counts as 'few' — otherwise full mode
 	; keeps recasting PS while 2 Marksmen are left. Also triggers on the
 	; "healer linchpin" (a Healer + only ranged Marksmen left) — see
@@ -902,6 +951,18 @@ Func AmFah600SpiritBondMaintainCoreUpkeep()
 
 	; ---------------- Energy-saving mode: few foes / healer linchpin ----------------
 	If $fewFoes Then
+		; When ONLY Healers remain (the 1-Healer stalemate): a lone Healer deals
+		; negligible damage, so PS/SB/VWK are all pointless. Drop the maintained
+		; enchants (6/7/8) once to regain 3 pips of energy regen, then spend
+		; NOTHING here — the saved energy pays for the single EVAS cast that
+		; kills the Healer (see TryCastEvasOnNecromancer).
+		If AmFah600SpiritBondOnlyHealersRemain() Then
+			If Not $amfah600_sb_dropped_enchants Then
+				AmFah600SpiritBondDropMaintainedEnchants()
+				$amfah600_sb_dropped_enchants = True
+			EndIf
+			Return
+		EndIf
 		; SB (the heal engine) always has top priority with scarce energy.
 		If $sbRemaining == 0 And IsRecharged($AMFAH600_SPIRIT_BOND) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND] Then
 			UseSkillEx($AMFAH600_SPIRIT_BOND)
@@ -913,17 +974,20 @@ Func AmFah600SpiritBondMaintainCoreUpkeep()
 		; earshot but still shoot us, so VWK reflect is exactly what kills them.
 		If GetEffectTimeRemaining(GetEffect($ID_VENGEFUL_WAS_KHANHEI)) == 0 _
 			And IsRecharged($AMFAH600_VWK) _
-			And $energy >= 12 Then
+			And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_VWK] Then
 			UseSkillEx($AMFAH600_VWK)
 			RandomSleep(25)
 			Return
 		EndIf
-		; With a healthy energy buffer (>25), PS is safe to maintain even in the
-		; few-foe tail — it prevents a stray spike from one-shotting the monk.
-		; Otherwise (scarce energy) keep the old energy-saving mode: SB + VWK
-		; alone, no PS. Skip the pre-emptive SB recast — it starves the energy
-		; that VWK / Snow Storm need.
-		If $psRemaining == 0 And IsRecharged($AMFAH600_PROTECTIVE_SPIRIT) And $energy > 25 Then
+		; PS in the few-foe tail: the 2-Healer Spot 3 stalemate (18:25 run) showed
+		; that DROPPING PS while still under fire is lethal — the healers' sustained
+		; damage kills the monk before the fight timeout. So PS is maintained
+		; whenever foes are still in earshot ($inCombat), funded at its raw cost;
+		; it is only dropped (to save energy for EVAS/Snow Storm) when nothing is
+		; in earshot any more — distant stragglers that can't actually hit us.
+		If $psRemaining == 0 And IsRecharged($AMFAH600_PROTECTIVE_SPIRIT) And _
+			$energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT] And _
+			($inCombat Or $energy > 25) Then
 			UseSkillEx($AMFAH600_PROTECTIVE_SPIRIT)
 			RandomSleep(25)
 		EndIf
@@ -933,42 +997,36 @@ Func AmFah600SpiritBondMaintainCoreUpkeep()
 	; ---------------- Full mode: many foes, energy income is high ----------------
 	Local $castAnything = False
 
-	; Priority #1: Protective Spirit COMPLETELY expired — cast immediately or die.
-	If $psRemaining == 0 And IsRecharged($AMFAH600_PROTECTIVE_SPIRIT) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT] Then
-		UseSkillEx($AMFAH600_PROTECTIVE_SPIRIT)
-		$castAnything = True
-		$energy -= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT]
-		RandomSleep(25)
+	; Priority #1: Protective Spirit. Cast when COMPLETELY expired, OR pre-emptively
+	; before it lapses. The pre-emptive trigger is a TIMER (not GetEffectTimeRemaining,
+	; whose magnitude is garbage) — recast ~7s before the ~17s expiry so a Marksman
+	; knockdown can interrupt one attempt and still leave time to retry before a PS gap opens.
+	If IsRecharged($AMFAH600_PROTECTIVE_SPIRIT) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT] Then
+		If $psRemaining == 0 Or (TimerDiff($amfah600_sb_last_ps_cast) > $AMFAH600_PS_RECAST_MS And $energy >= $AMFAH600_PREEMPTIVE_MIN_ENERGY) Then
+			UseSkillEx($AMFAH600_PROTECTIVE_SPIRIT)
+			$amfah600_sb_last_ps_cast = TimerInit()
+			$energy -= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT]
+			$castAnything = True
+			RandomSleep(25)
+		EndIf
 	EndIf
 
-	; Priority #2: Spirit Bond COMPLETELY expired — cast immediately, this is the
-	; active healing engine; without it the 600hp char has zero sustain.
-	; ALSO cast if PS was just cast above (both were critical).
-	; Gate on $inCombat: SB is only ever cast once the Am Fah are HOSTILE. They
-	; aggro with a delay at Tosai, so pre-casting SB before the dialog wastes it
-	; and forces a redundant second cast right after — SB must land "in time".
-	If $inCombat And $sbRemaining == 0 And IsRecharged($AMFAH600_SPIRIT_BOND) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND] Then
-		UseSkillEx($AMFAH600_SPIRIT_BOND)
-		$energy -= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND]
-		; High-pressure rule: VWK is only ever cast DIRECTLY after SB, so its cast
-		; time never delays a needed SB recast (SB was just re-applied).
-		AmFah600SpiritBondChainVwkAfterSb($energy)
-		$castAnything = True
-		RandomSleep(25)
-	EndIf
-
-	If $castAnything Then Return
-
-	; Priority #3: Pre-emptive Spirit Bond recast. SB has ~4s recharge and ~8s
-	; duration, so recasting whenever recharged (energy permitting) keeps the
-	; healing engine running without expiry gaps. Reserve 3 energy.
-	If $inCombat And $sbRemaining > 0 And IsRecharged($AMFAH600_SPIRIT_BOND) And $energy >= ($AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND] + 3) Then
-		UseSkillEx($AMFAH600_SPIRIT_BOND)
-		$energy -= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND]
-		; Same high-pressure rule: chain VWK right after the SB refresh.
-		AmFah600SpiritBondChainVwkAfterSb($energy)
-		$castAnything = True
-		RandomSleep(25)
+	; Priority #2: Spirit Bond (the active heal engine). Cast when COMPLETELY
+	; expired, OR pre-emptively before it lapses (timer-based, ~4s before the ~8s
+	; expiry, so a knockdown-interrupted recast has time to retry before the gap).
+	; Gated on $inCombat: SB is only ever cast once the Am Fah are HOSTILE
+	; (they aggro with a delay at Tosai).
+	If $inCombat And IsRecharged($AMFAH600_SPIRIT_BOND) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND] Then
+		If $sbRemaining == 0 Or (TimerDiff($amfah600_sb_last_sb_cast) > $AMFAH600_SB_RECAST_MS And $energy >= $AMFAH600_PREEMPTIVE_MIN_ENERGY) Then
+			UseSkillEx($AMFAH600_SPIRIT_BOND)
+			$amfah600_sb_last_sb_cast = TimerInit()
+			$energy -= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND]
+			; High-pressure rule: VWK is only ever cast DIRECTLY after SB, so its cast
+			; time never delays a needed SB recast (SB was just re-applied).
+			AmFah600SpiritBondChainVwkAfterSb($energy)
+			$castAnything = True
+			RandomSleep(25)
+		EndIf
 	EndIf
 
 	If $castAnything Then Return
@@ -984,7 +1042,7 @@ EndFunc
 Func AmFah600SpiritBondChainVwkAfterSb(ByRef $energy)
 	If GetEffectTimeRemaining(GetEffect($ID_VENGEFUL_WAS_KHANHEI)) > 0 Then Return
 	If Not IsRecharged($AMFAH600_VWK) Then Return
-	If $energy < 12 Then Return
+	If $energy < $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_VWK] Then Return
 	UseSkillEx($AMFAH600_VWK)
 	$energy -= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_VWK]
 	RandomSleep(25)
@@ -1000,11 +1058,17 @@ Func AmFah600SpiritBondTryCastEvasOnNecromancer()
 	; heal engine: it costs 15 and its ~2s cast can outlive the current SB/PS
 	; tick. So only summon while the survival core is up and energy matches
 	; Snow Storm's floor (20). PS is required ONLY while many foes are beating
-	; on us — in the few-foe tail (<= 3 compass-living foes) the upkeep DROPS PS
+	; on us — in the few-foe tail (<= 3 longbow-living foes) the upkeep DROPS PS
 	; to save energy for EVAS, and the assassin is exactly what finishes the
 	; last Necro, so a missing PS must NOT block the summon there.
-	If Not $collapsed And GetEffect($ID_PROTECTIVE_SPIRIT) == Null Then Return False
-	If GetEffect($ID_SPIRIT_BOND) == Null Then Return False
+	; When only Healers remain (the 1-Healer stalemate), a lone Healer deals
+	; negligible damage — the PS/SB survival gate is pointless there. Skip it so
+	; EVAS can still fire after SB/PS lapse, and the single assassin kills the
+	; Healer. (MaintainCoreUpkeep already dropped the enchants to fund this.)
+	If Not AmFah600SpiritBondOnlyHealersRemain() Then
+		If Not $collapsed And GetEffect($ID_PROTECTIVE_SPIRIT) == Null Then Return False
+		If GetEffect($ID_SPIRIT_BOND) == Null Then Return False
+	EndIf
 	If GetEnergy() < ($collapsed ? $AMFAH600_EVAS_MIN_ENERGY_COLLAPSED : $AMFAH600_EVAS_MIN_ENERGY) Then Return False
 	; Don't summon during an HP emergency while many foes are beating on us —
 	; EVAS has a cast time. With only a few foes left (e.g. the last Necro) the
@@ -1024,10 +1088,10 @@ Func AmFah600SpiritBondTryCastEvasOnNecromancer()
 	; far one makes the GW client auto-approach (walk toward it, into walls).
 	Local $target = AmFah600SpiritBondGetNearestNecromancerInRange($AMFAH600_EVAS_CAST_RANGE, $amfah600_sb_last_evas_target_id)
 	If $target == Null Then $target = AmFah600SpiritBondGetNearestNecromancerInRange($AMFAH600_EVAS_CAST_RANGE, 0)
-	If $target == Null Then $target = AmFah600SpiritBondGetNearestHealerInRange($AMFAH600_EVAS_CAST_RANGE)
+	If $target == Null Then $target = AmFah600SpiritBondGetLowestHpHealerInRange($AMFAH600_EVAS_CAST_RANGE)
 	If $target == Null Then
-		Local $livingCompass = AmFah600SpiritBondCountLivingFoes($RANGE_COMPASS)
-		If $livingCompass > 0 And $livingCompass <= $AMFAH600_STRAY_MAX_FOES Then
+		Local $livingLongbow = AmFah600SpiritBondCountLivingFoes($AMFAH600_DETECT_RANGE)
+		If $livingLongbow > 0 And $livingLongbow <= $AMFAH600_STRAY_MAX_FOES Then
 			$target = AmFah600SpiritBondGetNearestMarksmanInRange($AMFAH600_EVAS_CAST_RANGE)
 		EndIf
 	EndIf
@@ -1064,7 +1128,7 @@ Func AmFah600SpiritBondTryCastSnowStormOnNecromancer()
 	; once the Necros are dead, fall back to a Healer.
 	Local $necro = AmFah600SpiritBondGetNearestNecromancerInRange($AMFAH600_EVAS_CAST_RANGE, $amfah600_sb_last_evas_target_id)
 	If $necro == Null Then $necro = AmFah600SpiritBondGetNearestNecromancerInRange($AMFAH600_EVAS_CAST_RANGE, 0)
-	If $necro == Null Then $necro = AmFah600SpiritBondGetNearestHealerInRange($AMFAH600_EVAS_CAST_RANGE)
+	If $necro == Null Then $necro = AmFah600SpiritBondGetLowestHpHealerInRange($AMFAH600_EVAS_CAST_RANGE)
 	If $necro == Null Then Return False
 	Info('Am Fah 600: casting Snow Storm on ' & (AmFah600SpiritBondIsHealerAgent($necro) ? 'healer' : 'necromancer') & ' (dist=' & Round(GetDistance(GetMyAgent(), $necro)) & ', id=' & DllStructGetData($necro, 'ID') & ')')
 	UseSkillEx($AMFAH600_SNOW_STORM, $necro)
@@ -1214,6 +1278,30 @@ Func AmFah600SpiritBondGetNearestHealerInRange($range)
 EndFunc
 
 
+;~ Focus-fire helper: pick the LOWEST-HP living Healer in range instead of the
+;~ nearest. At Spot 3 the last two Am Fah Healers heal each other indefinitely
+;~ (18:25 run), so spreading EVAS/Snow Storm across them lets both survive. Both
+;~ skills target the same weakest Healer here so the combined burst drops one
+;~ before it can be healed back, breaking the heal-loop.
+Func AmFah600SpiritBondGetLowestHpHealerInRange($range)
+	Local $me = GetMyAgent()
+	Local $foes = GetFoesInRangeOfAgent($me, $range)
+	Local $weakest = Null
+	Local $weakestHp = 100000000
+	For $foe In $foes
+		If $foe == Null Then ContinueLoop
+		If GetIsDead($foe) Then ContinueLoop
+		If Not AmFah600SpiritBondIsHealerAgent($foe) Then ContinueLoop
+		Local $hp = DllStructGetData($foe, 'HealthPercent')
+		If $hp < $weakestHp Then
+			$weakestHp = $hp
+			$weakest = $foe
+		EndIf
+	Next
+	Return $weakest
+EndFunc
+
+
 Func AmFah600SpiritBondTryMorgahnSpeedBoost()
 	Local $slot = GetHeroNumberByHeroID($ID_GENERAL_MORGAHN)
 	If $slot == Null Then Return
@@ -1260,7 +1348,7 @@ EndFunc
 ;~ Count of ALIVE foes within range (GetFoesInRangeOfAgent may include corpses,
 ;~ so we filter GetIsDead — mirrors ShouldEndFirstFight's counting). Used to
 ;~ decide the "few-foe tail" where PS is dropped and energy goes to EVAS.
-Func AmFah600SpiritBondCountLivingFoes($range = $RANGE_COMPASS)
+Func AmFah600SpiritBondCountLivingFoes($range = $AMFAH600_DETECT_RANGE)
 	Local $foes = GetFoesInRangeOfAgent(GetMyAgent(), $range)
 	Local $count = 0
 	For $foe In $foes
@@ -1281,10 +1369,10 @@ EndFunc
 ;~      reflect and the ranged Marksmen don't reliably hit the monk, so
 ;~      Essence-Bond income collapses and the reflect can never finish them —
 ;~      we must drop PS and kill the Healer directly with EVAS/Snow Storm.
-;~      Scoped to EARSHOT (not compass) so a retreated Necro/Assassin that is
+;~      Scoped to EARSHOT (not longbow) so a retreated Necro/Assassin that is
 ;~      still alive but far away does NOT keep us stuck in full mode.
 Func AmFah600SpiritBondIsEnergyCollapsed()
-	Local $compassLiving = AmFah600SpiritBondCountLivingFoes($RANGE_COMPASS)
+	Local $longbowLiving = AmFah600SpiritBondCountLivingFoes($AMFAH600_DETECT_RANGE)
 
 	Local $foes = GetFoesInRangeOfAgent(GetMyAgent(), $RANGE_EARSHOT)
 	Local $earshotLiving = 0
@@ -1308,14 +1396,14 @@ Func AmFah600SpiritBondIsEnergyCollapsed()
 	; 'healer_linchpin' (Healer + only ranged Marksmen). 'none' = full mode.
 	Local Static $lastCollapse = ''
 	Local $reason = ''
-	If $compassLiving > 0 And $compassLiving <= $AMFAH600_FEW_FOES_MAX Then
+	If $longbowLiving > 0 And $longbowLiving <= $AMFAH600_FEW_FOES_MAX Then
 		$reason = 'few'
 	ElseIf $hasHealer And $onlyHealerAndMarksmen Then
 		$reason = 'healer_linchpin'
 	EndIf
 
 	If $reason <> $lastCollapse Then
-		AmFah600SpiritBondCsvLog('EnergyCollapse', 'reason=' & ($reason == '' ? 'none' : $reason) & ' compass=' & $compassLiving & ' earshot=' & $earshotLiving)
+		AmFah600SpiritBondCsvLog('EnergyCollapse', 'reason=' & ($reason == '' ? 'none' : $reason) & ' longbow=' & $longbowLiving & ' earshot=' & $earshotLiving)
 		$lastCollapse = $reason
 	EndIf
 
@@ -1355,6 +1443,37 @@ Func AmFah600SpiritBondCountLivingHealers()
 EndFunc
 
 
+;~ True when ONLY Am Fah Healers remain alive within longbow range (no
+;~ Necromancers, Marksmen or Assassins). This is the "last Healer" endgame — a
+;~ lone Healer deals negligible damage, so the survival core (PS/SB/VWK) is
+;~ pointless and the monk should drop the maintained enchants and finish it
+;~ with one EVAS.
+Func AmFah600SpiritBondOnlyHealersRemain()
+	Local $foes = GetFoesInRangeOfAgent(GetMyAgent(), $AMFAH600_DETECT_RANGE)
+	Local $found = False
+	For $foe In $foes
+		If $foe == Null Then ContinueLoop
+		If GetIsDead($foe) Then ContinueLoop
+		$found = True
+		If Not AmFah600SpiritBondIsHealerAgent($foe) Then Return False
+	Next
+	Return $found
+EndFunc
+
+
+;~ Drop the three maintained enchants (Retribution 6, Essence Bond 7, Balthazar's
+;~ Spirit 8). Each maintained enchant costs 1 pip of energy regen, so dropping
+;~ all three in the few-foe tail restores 3 pips (back to ~4 pips) — enough
+;~ passive regen to pay for the single EVAS that finishes the last Healer.
+Func AmFah600SpiritBondDropMaintainedEnchants()
+	Local $me = GetMyAgent()
+	If GetEffect($ID_RETRIBUTION) <> Null Then DropBuff($ID_RETRIBUTION, $me)
+	If GetEffect($ID_ESSENCE_BOND) <> Null Then DropBuff($ID_ESSENCE_BOND, $me)
+	If GetEffect($ID_BALTHAZARS_SPIRIT) <> Null Then DropBuff($ID_BALTHAZARS_SPIRIT, $me)
+	Info('Am Fah 600: dropped maintained enchants (6/7/8) to restore energy regen')
+EndFunc
+
+
 Func AmFah600SpiritBondGetNearestNecromancerInRange($range, $excludeId = 0)
 	Local $me = GetMyAgent()
 	Local $foes = GetFoesInRangeOfAgent($me, $range)
@@ -1377,21 +1496,36 @@ Func AmFah600SpiritBondGetNearestNecromancerInRange($range, $excludeId = 0)
 EndFunc
 
 
-Func AmFah600SpiritBondRezoneViaUndercity()
-	Info('Rezoning loop: Tosai -> Undercity -> Wajjun Bazaar')
-
-	; Reverse of recorded Wajjun -> Tosai segment to return to portal side.
-	Local $toPortal[][2] = [[15732, -14770], [15645, -14477], [15485, -13729], [15213, -12930], [14983, -12371], [14765, -11976], [14468, -11228], [14639, -10557], [15016, -9361], [15556, -9894], [16147, -9862], [16510, -9978]]
+;~ Walk from Spot 3's greeting/loot point directly east to the Undercity portal
+;~ — no detour back through Tosai (that route is for the Spot 1 reset, which
+;~ starts at Tosai; after Spot 3 the monk is on the far side of the map). Route
+;~ recorded 2026-09-11 16:32 (path_action_20260911_163258): start at the
+;~ north-leg top (right at the greeting point where we now loot), then east
+;~ along the road, around the hook wall, then east to the portal. The old
+;~ kill-anchor detour (9967,-14183) was removed — we no longer walk down to it.
+Func AmFah600SpiritBondRezoneFromSpot3()
+	Info('Am Fah 600: rezoning Spot 3 -> Undercity -> Wajjun Bazaar')
+	Local $toPortal[][2] = [ _
+		[11214, -11907], _  ; north leg top, turn east (at the greeting/loot point)
+		[12375, -11825], _
+		[13421, -11771], _
+		[14476, -11754], _  ; east leg end
+		[14701, -11804], _  ; hook north
+		[14958, -12027], _  ; hook apex
+		[15218, -11906], _  ; hook east
+		[15560, -11366], _
+		[15878, -10673], _
+		[16228, -10209], _
+		[16603, -10067], _
+		[17064, -10016], _
+		[17181, -10006] _   ; portal approach
+	]
 	For $i = 0 To UBound($toPortal) - 1
 		If IsPlayerDead() Then
-			; Hostile stragglers left over from a poisoned fight can kill the
-			; monk mid-walk. Fall through to the combat-death recovery (rez at
-			; the shrine right by the portal, then travel through) so the
-			; rezone still completes instead of silently failing the run.
-			Return AmFah600SpiritBondRecoverFromCombatDeath()
+			Return AmFah600SpiritBondRecoverFromDeath()
 		EndIf
 		MoveTo($toPortal[$i][0], $toPortal[$i][1])
-		RandomSleep(100)
+		RandomSleep(120)
 	Next
 
 	Return AmFah600SpiritBondTravelThroughUndercity()
@@ -1479,26 +1613,27 @@ Func AmFah600SpiritBondWalkShrineToPortal()
 EndFunc
 
 
-;~ After a combat death the monk respawns at the shrine close to the portal.
-;~ Walk to the portal, then travel through The Undercity and back into Wajjun
-;~ Bazaar — a fresh spawn clears the hostile quest/aggro state.
-Func AmFah600SpiritBondRezoneAfterCombatDeath()
+;~ After a death the monk respawns at the shrine close to the portal. Walk to
+;~ the portal, then travel through The Undercity and back into Wajjun Bazaar — a
+;~ fresh spawn clears the hostile quest/aggro state.
+Func AmFah600SpiritBondRezoneAfterDeath()
 	Info('Am Fah 600: rezoning via Undercity tunnels to restart the farm')
 	If AmFah600SpiritBondWalkShrineToPortal() == $FAIL Then Return $FAIL
 	Return AmFah600SpiritBondTravelThroughUndercity()
 EndFunc
 
 
-;~ Death happened while fighting (foes were still in earshot / the quest is
-;~ active). Wait for the shrine resurrection, then re-zone through the Undercity
-;~ tunnels to clear the hostile state and restart the farm cycle from a fresh
-;~ Wajjun spawn. Only allowed for the first death of the run.
-Func AmFah600SpiritBondRecoverFromCombatDeath()
-	If Not AmFah600SpiritBondRecordDeath('combat') Then
-		Warn('Am Fah 600: second death in this run - pausing at rez shrine (resign/restart needed)')
+;~ Unified death recovery. First death (-15% DP): wait for the shrine
+;~ resurrection, then re-zone through the Undercity tunnels and restart the farm
+;~ cycle from a fresh Wajjun spawn. Second death (DP > 15%): resign and return to
+;~ Nahpui Quarter so the outer loop restarts the run from the outpost.
+Func AmFah600SpiritBondRecoverFromDeath()
+	If Not AmFah600SpiritBondRecordDeath('death') Then
+		Warn('Am Fah 600: second death (DP > 15%) - resigning and restarting from Nahpui Quarter')
+		ResignAndReturnToOutpost($ID_NAHPUI_QUARTER, true)
 		Return $FAIL
 	EndIf
-	Info('Am Fah 600: combat death - waiting to resurrect, then rezoning via tunnels')
+	Info('Am Fah 600: death - waiting to resurrect, then rezoning via tunnels')
 	Local $rezTimer = TimerInit()
 	While IsPlayerDead() And TimerDiff($rezTimer) < 60000
 		RandomSleep(1000)
@@ -1507,27 +1642,23 @@ Func AmFah600SpiritBondRecoverFromCombatDeath()
 		Warn('Am Fah 600: did not resurrect in time')
 		Return $FAIL
 	EndIf
-	If AmFah600SpiritBondRezoneAfterCombatDeath() == $FAIL Then Return $FAIL
+	If AmFah600SpiritBondRezoneAfterDeath() == $FAIL Then Return $FAIL
 	Return $SUCCESS
 EndFunc
 
 
-;~ The Spot-1 fight ended without the monk dying (timeout / poisoned instance:
-;~ quest active, foes hostile or stuck stragglers). Reset via the Undercity
-;~ tunnels for a fresh instance, bounded so a persistently-unwinnable fight does
-;~ not loop forever.
-Func AmFah600SpiritBondResetAfterFailedFight()
-	$amfah600_sb_fight_retries += 1
-	AmFah600SpiritBondCsvLog('FightReset', 'retry=' & $amfah600_sb_fight_retries)
-	If $amfah600_sb_fight_retries > 3 Then
-		Warn('Am Fah 600: Spot 1 fight failed repeatedly - aborting run')
-		; Leave the map clean anyway so the outer restart does not begin inside a
-		; poisoned instance (quest active / foes hostile).
-		AmFah600SpiritBondRezoneViaUndercity()
-		Return $FAIL
-	EndIf
-	Info('Am Fah 600: Spot 1 fight unclean - rezoning via tunnels to retry (' & $amfah600_sb_fight_retries & '/3)')
-	Return AmFah600SpiritBondRezoneViaUndercity()
+;~ A fight timed out while the monk was still ALIVE — a stalemate (a lone
+;~ self-healing Healer, or a Healer+Necromancer anchor, out-heals the monk's
+;~ damage). RecoverFromDeath does NOT fire because the monk never died, and
+;~ leaving her standing at the pull point breaks the NEXT run's approach: the
+;~ approach side-detection then thinks she is at the wrong spawn and walks her
+;~ back and forth until the approach times out (the "standing at Tosai" loop).
+;~ Resigning cleanly returns her to Nahpui Quarter so the outer loop restarts
+;~ from the outpost.
+Func AmFah600SpiritBondRecoverFromStalemate()
+	Warn('Am Fah 600: fight stalemate (alive timeout) - resigning to reset')
+	ResignAndReturnToOutpost($ID_NAHPUI_QUARTER, true)
+	Return $FAIL
 EndFunc
 
 
@@ -1576,152 +1707,76 @@ Func AmFah600SpiritBondGoToSpot2()
 EndFunc
 
 
-;~ Walk / approach from the rez shrine (15479,-8865) DIRECTLY to the Spot 2
-;~ anchor (14337,-7157). The shrine sits only a short hop from the 3-Marksman
-;~ group, so a direct MoveTo is enough — we do NOT go back toward Tosai (that
-;~ route crosses the spike-trap field that killed the monk). True safety comes
-;~ from the caller ensuring 6/7/8 + full energy BEFORE calling this: the monk
-;~ must never enter the Marksman aggro without her maintained enchants.
-Func AmFah600SpiritBondGoFromShrineToSpot2()
-	Info('Am Fah 600: walking from rez shrine to Spot 2 Marksman anchor')
-	If IsPlayerDead() Then Return $FAIL
-	MoveTo($AMFAH600_SPOT2_X, $AMFAH600_SPOT2_Y)
-	Return IsPlayerDead() ? $FAIL : $SUCCESS
-EndFunc
-
-
-;~ Guarantee all 3 maintained enchants (6 Retribution, 7 Essence Bond,
-;~ 8 Balthazar's Spirit) are active AND energy is near full before the monk
-;~ steps into Spot 2's Marksman aggro. Runs while standing safe at the shrine.
-Func AmFah600SpiritBondEnsurePrebuffsBeforeSpot2()
-	Local $timer = TimerInit()
-	While IsPlayerAlive() And TimerDiff($timer) < $AMFAH600_ENERGY_WAIT_TIMEOUT_MS
-		If AmFah600SpiritBondAllPrebuffsActive() Then
-			Local $me = GetMyAgent()
-			Local $maxEnergy = DllStructGetData($me, 'MaxEnergy')
-			; Enough energy to cast SB/VWK once in combat AND afford EVAS headroom.
-			If GetEnergy($me) >= ($maxEnergy - 0.2) Then Return $SUCCESS
-		EndIf
-		AmFah600SpiritBondTryMovementPrebuffCast()
-		RandomSleep(150)
-	WEnd
-	If Not AmFah600SpiritBondAllPrebuffsActive() Then
-		Warn('Could not ensure prebuffs 6/7/8 before Spot 2')
-		Return $FAIL
-	EndIf
-	Return $SUCCESS
-EndFunc
-
-
-;~ Wait for Morgahn to be alive again (he respawns at the shrine too), then send
-;~ him back to his death/flag spot so he stays clear of the Spot 2 fight.
-Func AmFah600SpiritBondReflagMorgahnForSpot2()
-	Local $slot = GetHeroNumberByHeroID($ID_GENERAL_MORGAHN)
-	If $slot == Null Then
-		Warn('Morgahn not present - skipping re-flag for Spot 2')
-		Return
-	EndIf
-	Local $t = TimerInit()
-	While TimerDiff($t) < 30000
-		Local $heroAgent = GetAgentByID(GetHeroID($slot))
-		If $heroAgent <> Null And Not GetIsDead($heroAgent) Then ExitLoop
-		RandomSleep(1000)
-	WEnd
-	Info('Morgahn alive again - flagging him to his death spot for Spot 2')
-	AmFah600SpiritBondFlagMorgahnAtRecordedSpotVerified('recover-spot2')
-EndFunc
-
-
-;~ Recover after ONE trap death once Spot 1's foes are all dead (while looting or
-;~ walking toward Spot 2). The run is still healthy at a single -15% death, so
-;~ the monk respawns at the shrine, re-buffs 6/7/8, refills energy, re-flags
-;~ Morgahn, then walks DIRECTLY into the Spot 2 Marksman fight. A second death
-;~ (past -15%) is not recoverable within a Spot-2 leg — the caller returns $FAIL
-;~ so the outer debug-pause (>= 2 deaths) applies.
-Func AmFah600SpiritBondRecoverForSpot2()
-	Info('Am Fah 600: trap death after Spot 1 - recovering at shrine to continue to Spot 2')
-	If Not AmFah600SpiritBondRecordDeath('trap') Then
-		Warn('Am Fah 600: second death in this run - pausing at rez shrine (resign/restart needed)')
-		Return $FAIL
-	EndIf
-	AmFah600SpiritBondCsvLog('Recover_spot2_start', 'death=' & $amfah600_sb_deaths_this_run & ' morale=' & Round(GetMorale()))
-
-	; Wait to be resurrected at the shrine.
-	Local $rezTimer = TimerInit()
-	While IsPlayerDead() And TimerDiff($rezTimer) < 60000
-		RandomSleep(1000)
-	WEnd
-	If IsPlayerDead() Then
-		Warn('Am Fah 600: did not resurrect in time - aborting run')
-		AmFah600SpiritBondCsvLog('Recover_spot2_abort', 'death=' & $amfah600_sb_deaths_this_run)
-		Return $FAIL
-	EndIf
-	AmFah600SpiritBondCsvLog('Recover_spot2_alive', 'death=' & $amfah600_sb_deaths_this_run & ' morale=' & Round(GetMorale()))
-
-	; Fresh per-segment bookkeeping after the shrine respawn.
-	$amfah600_sb_morgahn_flagged_this_cycle = False
-	$amfah600_sb_morgahn_last_speed_timer = 0
-	$amfah600_sb_morgahn_last_speed_skill = 0
-	$amfah600_sb_maintained_precast_done = False
-	$amfah600_sb_precast4_done = False
-	$amfah600_sb_precast7_done = False
-	$amfah600_sb_precast8_done = False
-
-	; Morgahn also died - wait until he is alive, then send him to his death spot.
-	AmFah600SpiritBondReflagMorgahnForSpot2()
-
-	; Stand safe at the shrine, cast 6/7/8 and wait for full energy BEFORE ever
-	; stepping toward the 3-Marksman aggro.
-	If AmFah600SpiritBondEnsurePrebuffsBeforeSpot2() == $FAIL Then Return $FAIL
-	If AmFah600SpiritBondGoFromShrineToSpot2() == $FAIL Then Return $FAIL
-	Return $SUCCESS
-EndFunc
-
-
 ;~ Loot after the Am Fah spike traps have expired (method 2: "wait 90s"). The
 ;~ traps expire ~90s after the Assassins that laid them die, so we wait out that
-;~ window and then sweep the field once. All foes are already dead (the fight
-;~ only ends when the compass is clear) and the monk is stationary, so nothing
-;~ attacks us during the wait — PS/SB/VWK upkeep is NOT needed (in particular
-;~ PS must not be maintained; it would only waste energy). The 90s wait also
-;~ lets any hero/EVAS drop ownership expire, so a single pass catches
-;~ everything without stepping onto a live trap.
+;~ window and then sweep the field once. The 90s wait also lets any hero/EVAS
+;~ drop ownership expire, so a single pass catches everything without stepping
+;~ onto a live trap.
+;~
+;~ NOTE (21:51 death): the fight "ends" when every foe within DETECT_RANGE is
+;~ dead, but elevated Marksmen sit just beyond that range while their elevation
+;~ lets them still shoot the monk. So the monk must keep PS/SB/VWK up during
+;~ the wait — otherwise PS/SB lapse and the surviving Marksmen kill her. VWK
+;~ reflect in turn kills the stragglers.
 Func AmFah600SpiritBondWaitForTrapsAndLoot()
 	Info('Am Fah 600: waiting 90s for spike traps to expire before looting')
 	Local $waitTimer = TimerInit()
 	While IsPlayerAlive() And TimerDiff($waitTimer) < $AMFAH600_TRAP_EXPIRE_MS
+		AmFah600SpiritBondMaintainWhileWaiting()
 		RandomSleep(250)
 	WEnd
 	PickUpItems()
 EndFunc
 
 
+;~ Defensive PS/SB/VWK upkeep used ONLY during the post-fight trap wait / loot.
+;~ The fight loop's MaintainCoreUpkeep can't be reused here: it gates SB on
+;~ earshot ($inCombat) and drops PS when no foe is in earshot, which is exactly
+;~ wrong for elevated Marksmen that hover beyond earshot (1000) yet still shoot
+;~ the monk. So we maintain all three while ANY living foe is within the threat
+;~ range (longbow + elevation bonus): PS caps incoming damage, SB heals each
+;~ hit, VWK reflects the arrows back to the stragglers (killing them) and
+;~ life-steals. With the Marksmen still shooting, Essence Bond funds the upkeep.
+Func AmFah600SpiritBondMaintainWhileWaiting()
+	If IsPlayerDead() Then Return
+	; No living foe within threat range -> nothing can hit us; stay idle.
+	If AmFah600SpiritBondCountLivingFoes($RANGE_LONGBOW + 400) == 0 Then Return
+
+	Local $energy = GetEnergy()
+	Local $psRemaining = GetEffectTimeRemaining(GetEffect($ID_PROTECTIVE_SPIRIT))
+	Local $sbRemaining = GetEffectTimeRemaining(GetEffect($ID_SPIRIT_BOND))
+	Local $vwkRemaining = GetEffectTimeRemaining(GetEffect($ID_VENGEFUL_WAS_KHANHEI))
+
+	; PS first — the damage cap that keeps every hit survivable.
+	If $psRemaining == 0 And IsRecharged($AMFAH600_PROTECTIVE_SPIRIT) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT] Then
+		UseSkillEx($AMFAH600_PROTECTIVE_SPIRIT)
+		RandomSleep(25)
+		Return
+	EndIf
+	; SB next — the heal engine.
+	If $sbRemaining == 0 And IsRecharged($AMFAH600_SPIRIT_BOND) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND] Then
+		UseSkillEx($AMFAH600_SPIRIT_BOND)
+		RandomSleep(25)
+		Return
+	EndIf
+	; VWK last — reflect + life-steal finishes the stragglers. Gated at its real
+	; cost (5e), not 12: a low-energy straggler cleanup (or group 2 arriving
+	; during the wait) must still be able to put the reflect/life-steal engine up.
+	If $vwkRemaining == 0 And IsRecharged($AMFAH600_VWK) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_VWK] Then
+		UseSkillEx($AMFAH600_VWK)
+		RandomSleep(25)
+	EndIf
+EndFunc
+
+
 ;~ The Spot 2 leg: wait for Spot 1's spike traps to expire, then loot, walk from
-;~ Tosai to Spot 2, fight the 3 Marksmen, loot. If the monk dies once *after*
-;~ Spot 1's foes are all dead (a trap on the crossing), we recover from the
-;~ shrine DIRECTLY into the Spot 2 fight (still healthy at -15%).
+;~ Tosai to Spot 2, fight the 3 Marksmen, loot. A death here is handled by the
+;~ caller (first death -> re-zone via Undercity; second death -> resign).
 Func AmFah600SpiritBondDoSpot2Leg()
 	; Wait for Spot 1's spike traps to expire, then loot, then head to Spot 2.
 	AmFah600SpiritBondWaitForTrapsAndLoot()
-	If IsPlayerDead() Then
-		If AmFah600SpiritBondRecoverForSpot2() == $FAIL Then Return $FAIL
-		; Recovered + walked into Spot 2 - fight it.
-		If AmFah600SpiritBondFightSpot2() == $FAIL Then Return $FAIL
-		AmFah600SpiritBondWaitForTrapsAndLoot()
-		Return $SUCCESS
-	EndIf
-
-	; Normal path: walk from Tosai to Spot 2.
-	If AmFah600SpiritBondGoToSpot2() == $FAIL Then
-		; GoToSpot2 only fails on death (a spike trap on the crossing). Recover
-		; from the shrine into Spot 2 — this is a trap death, NOT a combat death,
-		; so we must not re-zone via the Undercity tunnels.
-		If AmFah600SpiritBondRecoverForSpot2() == $FAIL Then Return $FAIL
-		If AmFah600SpiritBondFightSpot2() == $FAIL Then Return $FAIL
-		AmFah600SpiritBondWaitForTrapsAndLoot()
-		Return $SUCCESS
-	EndIf
-
+	If IsPlayerDead() Then Return $FAIL
+	If AmFah600SpiritBondGoToSpot2() == $FAIL Then Return $FAIL
 	If AmFah600SpiritBondFightSpot2() == $FAIL Then Return $FAIL
 	AmFah600SpiritBondWaitForTrapsAndLoot()
 	Return $SUCCESS
@@ -1796,8 +1851,8 @@ Func AmFah600SpiritBondFightSpot2()
 
 		$me = GetMyAgent()
 
-		; End only when EVERY foe in compass is dead. The 3 Marksmen stay at bow
-		; range (just outside earshot) and shoot the monk — an earshot-clear
+		; End only when EVERY foe within longbow range is dead. The 3 Marksmen stay
+		; at bow range (just outside earshot) and shoot the monk — an earshot-clear
 		; check bails to Spot 3 while they are still alive. EVAS assassins chase
 		; and kill them from the anchor.
 		If TimerDiff($timer) > 8000 And AmFah600SpiritBondShouldEndFirstFight() Then
@@ -1812,8 +1867,8 @@ Func AmFah600SpiritBondFightSpot2()
 		EndIf
 
 		; Target: healer > necromancer > nearest enemy.
-		Local $target = AmFah600SpiritBondGetNearestHealerInRange($RANGE_COMPASS)
-		If $target == Null Then $target = AmFah600SpiritBondGetNearestNecromancerInRange($RANGE_COMPASS)
+		Local $target = AmFah600SpiritBondGetNearestHealerInRange($RANGE_LONGBOW)
+		If $target == Null Then $target = AmFah600SpiritBondGetNearestNecromancerInRange($RANGE_LONGBOW)
 		If $target == Null Then $target = GetNearestEnemyToAgent($me, $RANGE_EARSHOT)
 		If $target <> Null Then ChangeTarget($target)
 
@@ -1838,13 +1893,51 @@ Func AmFah600SpiritBondDoSpot3Leg()
 EndFunc
 
 
-;~ Walk to a point while keeping the survival core (PS/SB/VWK) alive. Unlike
-;~ MoveTo (blocking), this ticks MaintainCoreUpkeep every ~100 ms so SB is
-;~ recast the instant it lapses while the monk is under fire.
+;~ Lightweight survival upkeep used ONLY while the monk is MOVING between
+;~ waypoints (the Spot 3 crossing). Casting stops the monk for the cast's
+;~ duration, so every unnecessary cast both slows the walk (more time under
+;~ fire) and drains energy. The 19:04 run died mid-crossing because the FULL
+;~ upkeep kept re-casting SB/PS/VWK on a pre-emptive timer — VWK is pure
+;~ reflect (useless while running) and the pre-emptive recasts starved energy.
+;~
+;~ The monk is NOT left unprotected: PS is still pre-emptively maintained (it
+;~ is the damage cap that makes the brief SB recast gap survivable), SB is
+;~ recast on real expiry, and only VWK (reflect — no survival value while
+;~ running) is skipped. Energy stays positive, so PS/SB are ALWAYS castable.
+Func AmFah600SpiritBondMaintainCoreUpkeepMoving()
+	If IsPlayerDead() Then Return
+	Local $energy = GetEnergy()
+	; PS FIRST and pre-emptively: it caps incoming damage at 60/hit, which is
+	; what makes the brief SB recast gap survivable. Recast on the pre-emptive
+	; timer so PS never lapses (a lapsed PS is instant death once the cluster
+	; aggroes).
+	If IsRecharged($AMFAH600_PROTECTIVE_SPIRIT) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_PROTECTIVE_SPIRIT] Then
+		If GetEffectTimeRemaining(GetEffect($ID_PROTECTIVE_SPIRIT)) == 0 Or TimerDiff($amfah600_sb_last_ps_cast) > $AMFAH600_PS_RECAST_MS Then
+			UseSkillEx($AMFAH600_PROTECTIVE_SPIRIT)
+			$amfah600_sb_last_ps_cast = TimerInit()
+			RandomSleep(25)
+			Return
+		EndIf
+	EndIf
+	; SB on real expiry only (the heal engine). PS above keeps this ~1s gap
+	; capped at 60/hit, so it is survivable. VWK is deliberately skipped.
+	If GetEffectTimeRemaining(GetEffect($ID_SPIRIT_BOND)) == 0 And IsRecharged($AMFAH600_SPIRIT_BOND) And $energy >= $AMFAH600_SKILL_COSTS_MAP[$AMFAH600_SPIRIT_BOND] Then
+		UseSkillEx($AMFAH600_SPIRIT_BOND)
+		$amfah600_sb_last_sb_cast = TimerInit()
+		RandomSleep(25)
+	EndIf
+EndFunc
+
+
+;~ Walk to a point while keeping the survival core alive with the MINIMAL
+;~ moving-upkeep (SB/PS on expiry only, no VWK, no pre-emptive timer). Unlike
+;~ MoveTo (blocking), this ticks the upkeep every ~100 ms so SB is recast the
+;~ instant it actually lapses — but without the casting churn that slowed the
+;~ Spot 3 crossing to a crawl and drained energy.
 Func AmFah600SpiritBondMoveMaintaining($x, $y, $arriveRadius = 220, $timeoutMs = 25000)
 	Local $timer = TimerInit()
 	While IsPlayerAlive() And TimerDiff($timer) < $timeoutMs
-		AmFah600SpiritBondMaintainCoreUpkeep()
+		AmFah600SpiritBondMaintainCoreUpkeepMoving()
 		Local $me = GetMyAgent()
 		If GetDistanceToPoint($me, $x, $y) < $arriveRadius Then Return $SUCCESS
 		Move($x, $y)
@@ -1863,15 +1956,21 @@ Func AmFah600SpiritBondPrecastForSpot3()
 	If AmFah600SpiritBondCastSkillChecked($AMFAH600_PROTECTIVE_SPIRIT) == $FAIL Then Return $FAIL
 	If AmFah600SpiritBondCastSkillChecked($AMFAH600_SPIRIT_BOND) == $FAIL Then Return $FAIL
 	If AmFah600SpiritBondCastSkillChecked($AMFAH600_VWK) == $FAIL Then Return $FAIL
+	; Reset the pre-emptive recast timers so the crossing does not immediately
+	; (redundantly) recast PS/SB right after the pre-cast — that wastes energy
+	; and stops the monk mid-crossing.
+	$amfah600_sb_last_ps_cast = TimerInit()
+	$amfah600_sb_last_sb_cast = TimerInit()
 	Return $SUCCESS
 EndFunc
 
 
 ;~ Walk from Spot 2 to Spot 3 (the final Am Fah cluster). Phase 1 runs quiet to
 ;~ the greeting point (energy saved for the pre-cast). Phase 2 pre-casts
-;~ PS/SB/VWK just outside the 3-Marksman aggro. Phase 3 crosses PAST the
-;~ Marksmen to the kill anchor while maintaining SB/PS under fire (they aggro
-;~ the moment we step past the greeting, so SB must be recast on the move).
+;~ PS/SB/VWK just outside the 3-Marksman aggro. Phase 3 steps JUST inside the
+;~ Marksman aggro and anchors there — we do NOT cross deep into the cluster.
+;~ The 3 Marksmen are fought exactly like Spot 2; group 2 arrives later, by
+;~ which time the 3 Marksmen are already dead.
 Func AmFah600SpiritBondGoToSpot3()
 	Info('Am Fah 600: walking from Spot 2 to Spot 3 (final Am Fah cluster)')
 	; Wall-avoiding route recorded 2026-09-09 18:46 — north from Spot 2, curve
@@ -1902,25 +2001,31 @@ Func AmFah600SpiritBondGoToSpot3()
 		RandomSleep(120)
 	Next
 
-	; Pre-cast the survival/reflect core BEFORE the 3 Marksmen aggro.
+	; Pre-cast the survival/reflect core BEFORE the 3 Marksmen aggro. Top up to
+	; full energy first so the pre-cast + the crossing-maintenance still leave
+	; enough for EVAS/Snow Storm on the Spot 3 cluster.
+	If AmFah600SpiritBondWaitForFullEnergy('Spot 3 pre-cast') == $FAIL Then Return $FAIL
 	If AmFah600SpiritBondPrecastForSpot3() == $FAIL Then Return $FAIL
 
-	; Cross past the Marksmen to the kill anchor, maintaining SB/PS under fire.
-	Local $toAnchor[][2] = [ _
-		[10940, -11899], _  ; VWK cast point in the recording
+	; Step JUST inside the 3-Marksman aggro and anchor there — do NOT cross deep
+	; into the cluster. The old half-way hold-point crossing (~1300 units, 7
+	; waypoints) put the monk inside the spike-trap field (a Viper's Nest
+	; knockdown interrupted a cast) AND drained energy (she arrived at ~16e), so
+	; she died when group 2 joined. Stopping at the greeting keeps her outside
+	; the traps and at ~25e; the 3 Marksmen are fought like Spot 2, and group 2
+	; arrives later — by then the 3 Marksmen are already dead.
+	Local $aggroStep[][2] = [ _
+		[10940, -11899], _  ; VWK cast point in the recording (Marksmen aggroed here)
 		[10872, -11902], _
-		[10640, -11918], _
-		[10455, -12040], _
-		[10345, -12177], _
-		[10188, -12340], _
-		[10067, -12531], _
-		[9979, -12650], _
-		[9982, -12933], _
-		[$AMFAH600_SPOT3_X, $AMFAH600_SPOT3_Y] _
+		[10640, -11918] _
 	]
-	For $i = 0 To UBound($toAnchor) - 1
+	For $i = 0 To UBound($aggroStep) - 1
 		If IsPlayerDead() Then Return $FAIL
-		If AmFah600SpiritBondMoveMaintaining($toAnchor[$i][0], $toAnchor[$i][1]) == $FAIL Then Return $FAIL
+		If AmFah600SpiritBondMoveMaintaining($aggroStep[$i][0], $aggroStep[$i][1]) == $FAIL Then Return $FAIL
+		If IsPlayerDead() Then Return $FAIL
+		; Stop as soon as a foe is in longbow range (the 3 Marksmen have aggroed).
+		If CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_LONGBOW) > 0 Then ExitLoop
+		RandomSleep(120)
 	Next
 	AmFah600SpiritBondCsvLog('Spot3_arrived', 'x=' & Round(DllStructGetData(GetMyAgent(), 'X')) & ' y=' & Round(DllStructGetData(GetMyAgent(), 'Y')))
 	Return IsPlayerDead() ? $FAIL : $SUCCESS
@@ -1960,9 +2065,9 @@ Func AmFah600SpiritBondFightSpot3()
 
 		$me = GetMyAgent()
 
-		; End only when EVERY foe in compass is dead (same reason as Spot 2:
-		; bow-range Marksmen / stragglers stay just outside earshot and must not
-		; be left behind).
+		; End only when EVERY foe within longbow range is dead (same reason as
+		; Spot 2: bow-range Marksmen / stragglers stay just outside earshot and
+		; must not be left behind).
 		If TimerDiff($timer) > 8000 And AmFah600SpiritBondShouldEndFirstFight() Then
 			$foesCleared = True
 			ExitLoop
@@ -1974,7 +2079,7 @@ Func AmFah600SpiritBondFightSpot3()
 		EndIf
 
 		; Target: healer > nearest enemy (no Necromancers here).
-		Local $target = AmFah600SpiritBondGetNearestHealerInRange($RANGE_COMPASS)
+		Local $target = AmFah600SpiritBondGetNearestHealerInRange($RANGE_LONGBOW)
 		If $target == Null Then $target = GetNearestEnemyToAgent($me, $RANGE_EARSHOT)
 		If $target <> Null Then ChangeTarget($target)
 
@@ -1989,7 +2094,7 @@ Func AmFah600SpiritBondCsvLog($event, $detail = '')
 	Local Static $csvHandle = Null
 	If $csvHandle == Null Then
 		Local $csvPath = @ScriptDir & '/logs/amfah600_sb_debug-' & GetCharacterName() & '.csv'
-		$csvHandle = FileOpen($csvPath, $FO_APPEND + $FO_CREATEPATH + $FO_UTF8)
+		$csvHandle = FileOpen($csvPath, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
 		If $csvHandle == -1 Then Return ; silently skip if file can't be opened
 		FileWriteLine($csvHandle, 'timestamp,elapsed_ms,event,detail,map_id,player_hp%,quest_active,foes_earshot,ps_ms,sb_ms,energy')
 	EndIf
