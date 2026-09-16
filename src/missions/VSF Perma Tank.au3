@@ -1354,8 +1354,7 @@ Func VSFDebugLogInit()
 
 	Local $character = GetCharacterName()
 	If $character == '' Then $character = 'unknown'
-	Local $timestamp = @YEAR & @MON & @MDAY & '_' & @HOUR & @MIN & @SEC
-	Local $path = @ScriptDir & '/logs/vsf_perma_debug-' & $character & '-run' & $vsf_run_number & '-' & $timestamp & '.csv'
+	Local $path = @ScriptDir & '/logs/vsf_perma_debug-' & $character & '.csv'
 
 	$vsf_debug_log_handle = FileOpen($path, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
 	$vsf_debug_log_timer = TimerInit()

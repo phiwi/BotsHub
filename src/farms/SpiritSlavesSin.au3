@@ -690,8 +690,7 @@ EndFunc
 ; ------------------------------------------------------------
 Func SSSLogInit()
 	If Not $SSS_DEBUG_LOG Then Return
-	Local $timestamp = @YEAR & @MON & @MDAY & '_' & @HOUR & @MIN & @SEC
-	Local $path = @ScriptDir & '/logs/sssin_debug-' & GetCharacterName() & '-run' & $sss_log_run & '-' & $timestamp & '.csv'
+	Local $path = @ScriptDir & '/logs/sssin_debug-' & GetCharacterName() & '.csv'
 	$sss_log_handle = FileOpen($path, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
 	$sss_log_timer = TimerInit()
 	If $sss_log_handle == -1 Then Return

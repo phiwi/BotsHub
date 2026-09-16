@@ -891,8 +891,7 @@ EndFunc
 ;~ are visible per run. Columns include the Whirlwind Attack (6) adrenaline so
 ;~ we can see exactly when it is ready to fire.
 Func VarajarLogInit()
-	Local $timestamp = @YEAR & @MON & @MDAY & '_' & @HOUR & @MIN & @SEC
-	$varajar_log_file = @ScriptDir & '/logs/varajar_berserkers_debug-' & GetCharacterName() & '-run' & $varajar_log_run_number & '-' & $timestamp & '.csv'
+	$varajar_log_file = @ScriptDir & '/logs/varajar_berserkers_debug-' & GetCharacterName() & '.csv'
 	$varajar_log_handle = FileOpen($varajar_log_file, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
 	$varajar_log_timer = TimerInit()
 	Info('Varajar Berserkers CSV: ' & $varajar_log_file)

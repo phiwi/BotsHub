@@ -781,8 +781,7 @@ Func WardenDebugLogInit()
 
 	Local $character = GetCharacterName()
 	If $character == '' Then $character = 'unknown'
-	Local $timestamp = @YEAR & @MON & @MDAY & '_' & @HOUR & @MIN & @SEC
-	Local $path = @ScriptDir & '/logs/warden_loop_debug-' & $character & '-run' & $warden_debug_run_number & '-' & $timestamp & '.csv'
+	Local $path = @ScriptDir & '/logs/warden_loop_debug-' & $character & '.csv'
 
 	$warden_debug_log_handle = FileOpen($path, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
 	$warden_debug_log_timer = TimerInit()

@@ -395,8 +395,7 @@ EndFunc
 ; ------------------------------------------------------------
 Func CoFSinLogInit()
 	If Not $COF_SIN_DEBUG_LOG Then Return
-	Local $timestamp = @YEAR & @MON & @MDAY & '_' & @HOUR & @MIN & @SEC
-	Local $path = @ScriptDir & '/logs/cofsin_debug-' & GetCharacterName() & '-run' & $cof_sin_log_run & '-' & $timestamp & '.csv'
+	Local $path = @ScriptDir & '/logs/cofsin_debug-' & GetCharacterName() & '.csv'
 	$cof_sin_log_handle = FileOpen($path, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
 	$cof_sin_log_timer = TimerInit()
 	If $cof_sin_log_handle == -1 Then Return

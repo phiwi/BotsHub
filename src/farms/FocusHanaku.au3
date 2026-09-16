@@ -1208,8 +1208,7 @@ EndFunc
 
 
 Func HanakuFightLogInit()
-	Local $timestamp = @YEAR & @MON & @MDAY & '_' & @HOUR & @MIN & @SEC
-	$hanaku_log_file = @ScriptDir & '/logs/hanaku_fight_debug-' & GetCharacterName() & '-run' & $hanaku_log_run_number & '-' & $timestamp & '.csv'
+	$hanaku_log_file = @ScriptDir & '/logs/hanaku_fight_debug-' & GetCharacterName() & '.csv'
 	$hanaku_log_handle = FileOpen($hanaku_log_file, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
 	$hanaku_log_timer = TimerInit()
 	$hanaku_log_heartbeat_timer = TimerInit()

@@ -839,8 +839,7 @@ EndFunc
 
 
 Func MDFightLogInit()
-	Local $timestamp = @YEAR & @MON & @MDAY & '_' & @HOUR & @MIN & @SEC
-	$missing_daughter_log_file = @ScriptDir & '/logs/missing_daughter_debug-' & GetCharacterName() & '-run' & $missing_daughter_log_run_number & '-' & $timestamp & '.csv'
+	$missing_daughter_log_file = @ScriptDir & '/logs/missing_daughter_debug-' & GetCharacterName() & '.csv'
 	$missing_daughter_log_handle = FileOpen($missing_daughter_log_file, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
 	$missing_daughter_log_timer = TimerInit()
 	Info('Missing Daughter CSV: ' & $missing_daughter_log_file)
