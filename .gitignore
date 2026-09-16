@@ -6,6 +6,7 @@ tests/**
 conf/farm/*
 conf/loot/*
 conf/last_farm.txt
+conf/recent_farms.txt
 !conf/farm/Default Farm Configuration.json
 !conf/loot/Default Loot Configuration.json
 .*/

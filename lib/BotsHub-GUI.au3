@@ -107,6 +107,11 @@ Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore 
 	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|Omni Farm|Outcast Halcyon|Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|SoO Celerity + Armor no builds|SoO Celerity no builds|Spirit Slaves|Spirit Slaves Sin|' & _
 	'Storage|Sunspear Armor|Tasca|Test Suite|Tests|Tonic Spammer|Tunnels Forsaken Custom|Tunnels Forsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|UnderworldPantheon|Vaettirs|Varajar Berserkers|Varajar Berserkers Path Record|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|Voltaic no builds|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazaar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
 
+; Recent-farms convenience entries shown at the top of the farm dropdown.
+Global Const $RECENT_FARMS_LIMIT = 5
+Global Const $RECENT_FARMS_PATH = @ScriptDir & '/conf/recent_farms.txt'
+Global Const $RECENT_FARMS_SEPARATOR = '----------------'
+
 #Region GUI
 
 Global $gui_botshub, $gui_tabs_parent, $gui_tab_main, $gui_tab_runoptions, $gui_tab_lootoptions, $gui_tab_farminfos, $gui_tab_lootoptions, $gui_tab_teamoptions
@@ -132,7 +137,8 @@ Global $gui_group_itemslooted, _
 		$gui_label_goldeneggs_text, $gui_label_goldeneggs_value, $gui_label_pumpkinpieslices_text, $gui_label_pumpkinpieslices_value, _
 		$gui_label_honeycombs_text, $gui_label_honeycombs_value, $gui_label_fruitcakes_text, $gui_label_fruitcakes_value, _
 		$gui_label_sugarybluedrinks_text, $gui_label_sugarybluedrinks_value, $gui_label_chocolatebunnies_text, $gui_label_chocolatebunnies_value, _
-		$gui_label_amberchunks_text, $gui_label_amberchunks_value, $gui_label_jadeiteshards_text, $gui_label_jadeiteshards_value
+		$gui_label_amberchunks_text, $gui_label_amberchunks_value, $gui_label_jadeiteshards_text, $gui_label_jadeiteshards_value, _
+		$gui_label_lockpicksbroken_text, $gui_label_lockpicksbroken_value, $gui_label_greenitems_text, $gui_label_greenitems_value
 Global $gui_group_titles, _
 		$gui_label_asuratitle_text, $gui_label_asuratitle_value, $gui_label_deldrimortitle_text, $gui_label_deldrimortitle_value, $gui_label_norntitle_text, $gui_label_norntitle_value, _
 		$gui_label_vanguardtitle_text, $gui_label_vanguardtitle_value, $gui_label_kurzicktitle_text, $gui_label_kurzicktitle_value, $gui_label_luxontitle_text, $gui_label_luxontitle_value, _
@@ -160,17 +166,17 @@ Global $gui_treeview_lootoptions, $gui_label_lootoptionswarning, $gui_expandloot
 ;------------------------------------------------------
 Func CreateBotsHubGUI()
 	; -1, -1 automatically positions GUI in the middle of the screen, alternatively can do calculations with inbuilt @DesktopWidth and @DesktopHeight
-	$gui_botshub = GUICreate('GW Bot Hub', 650, 500, -1, -1)
+	$gui_botshub = GUICreate('GW Bot Hub', 650, 530, -1, -1)
 	GUISetBkColor($COLOR_SILVER, $gui_botshub)
 
 	; === Buttons common to all tabs ===
-	$gui_combo_characterchoice = GUICtrlCreateCombo('No character selected', 10, 470, 150, 20)
-	$gui_combo_farmchoice = GUICtrlCreateCombo('Choose a farm', 170, 470, 150, 20, BitOR($CBS_DROPDOWN, $WS_VSCROLL))
-	$gui_startbutton = GUICtrlCreateButton('Start', 330, 470, 150, 21)
-	$gui_farmprogress = GUICtrlCreateProgress(490, 470, 150, 21)
+	$gui_combo_characterchoice = GUICtrlCreateCombo('No character selected', 10, 500, 150, 20)
+	$gui_combo_farmchoice = GUICtrlCreateCombo('Choose a farm', 170, 500, 150, 20, BitOR($CBS_DROPDOWN, $WS_VSCROLL))
+	$gui_startbutton = GUICtrlCreateButton('Start', 330, 500, 150, 21)
+	$gui_farmprogress = GUICtrlCreateProgress(490, 500, 150, 21)
 	$gui_combo_configchoice = GUICtrlCreateCombo('Default Farm Configuration', 400, 10, 210, 22, BitOR($CBS_DROPDOWNLIST, $WS_VSCROLL))
 	$gui_icon_saveconfig = GUICtrlCreatePic(@ScriptDir & '/doc/save.jpg', 615, 12, 20, 20)
-	GUICtrlSetData($gui_combo_farmchoice, $AVAILABLE_FARMS, 'Choose a farm')
+	GUICtrlSetData($gui_combo_farmchoice, BuildFarmComboData(), 'Choose a farm')
 	GUICtrlSetBkColor($gui_startbutton, $COLOR_LIGHTBLUE)
 
 	GUISetOnEvent($GUI_EVENT_CLOSE, 'GuiMainButtonHandler')
@@ -180,7 +186,7 @@ Func CreateBotsHubGUI()
 	GUICtrlSetOnEvent($gui_icon_saveconfig, 'GuiMainButtonHandler')
 
 	; === Main tab ===
-	$gui_tabs_parent = GUICtrlCreateTab(10, 10, 630, 450)
+	$gui_tabs_parent = GUICtrlCreateTab(10, 10, 630, 480)
 	$gui_tab_main = GUICtrlCreateTabItem('Main')
 	_GUICtrlTab_SetBkColor($gui_botshub, $gui_tabs_parent, $COLOR_SILVER)
 	GUICtrlSetOnEvent($gui_tabs_parent, 'GuiTabHandler')
@@ -220,7 +226,7 @@ Func CreateBotsHubGUI()
 	GUICtrlCreateGroup('', -99, -99, 1, 1)
 
 	; === Items Looted ===
-	$gui_group_itemslooted = GUICtrlCreateGroup('Items collected', 330, 39, 295, 290)
+	$gui_group_itemslooted = GUICtrlCreateGroup('Items collected', 330, 39, 295, 310)
 	$gui_label_lockpicks_text = GUICtrlCreateLabel('Lockpicks:', 341, 64, 140, 16)
 	$gui_label_lockpicks_value = GUICtrlCreateLabel('0', 425, 64, 60, 16, $SS_RIGHT)
 	$gui_label_margonitegemstone_text = GUICtrlCreateLabel('Margonite Gemstones:', 341, 84, 140, 16)
@@ -247,6 +253,8 @@ Func CreateBotsHubGUI()
 	$gui_label_jadebracelets_value = GUICtrlCreateLabel('0', 425, 284, 60, 16, $SS_RIGHT)
 	$gui_label_jadeiteshards_text = GUICtrlCreateLabel('Jadeite Shards:', 341, 304, 140, 16)
 	$gui_label_jadeiteshards_value = GUICtrlCreateLabel('0', 425, 304, 60, 16, $SS_RIGHT)
+	$gui_label_lockpicksbroken_text = GUICtrlCreateLabel('Lockpicks broken:', 341, 324, 140, 16)
+	$gui_label_lockpicksbroken_value = GUICtrlCreateLabel('0', 425, 324, 60, 16, $SS_RIGHT)
 
 	$gui_label_chunksofdrakeflesh_text = GUICtrlCreateLabel('Drake Flesh Chunks:', 495, 64, 140, 16)
 	$gui_label_chunksofdrakeflesh_value = GUICtrlCreateLabel('0', 558, 64, 60, 16, $SS_RIGHT)
@@ -274,27 +282,29 @@ Func CreateBotsHubGUI()
 	$gui_label_deliciouscakes_value = GUICtrlCreateLabel('0', 558, 284, 60, 16, $SS_RIGHT)
 	$gui_label_amberchunks_text = GUICtrlCreateLabel('Amber Chunks:', 495, 304, 140, 16)
 	$gui_label_amberchunks_value = GUICtrlCreateLabel('0', 558, 304, 60, 16, $SS_RIGHT)
+	$gui_label_greenitems_text = GUICtrlCreateLabel('Green items:', 495, 324, 140, 16)
+	$gui_label_greenitems_value = GUICtrlCreateLabel('0', 558, 324, 60, 16, $SS_RIGHT)
 	GUICtrlCreateGroup('', -99, -99, 1, 1)
 
 	; === Titles ===
-	$gui_group_titles = GUICtrlCreateGroup('Titles', 330, 335, 295, 111)
-	$gui_label_asuratitle_text = GUICtrlCreateLabel('Asura:', 341, 360, 60, 16)
-	$gui_label_asuratitle_value = GUICtrlCreateLabel('0', 425, 360, 60, 16, $SS_RIGHT)
-	$gui_label_deldrimortitle_text = GUICtrlCreateLabel('Deldrimor:', 341, 380, 60, 16)
-	$gui_label_deldrimortitle_value = GUICtrlCreateLabel('0', 425, 380, 60, 16, $SS_RIGHT)
-	$gui_label_norntitle_text = GUICtrlCreateLabel('Norn:', 341, 400, 60, 16)
-	$gui_label_norntitle_value = GUICtrlCreateLabel('0', 425, 400, 60, 16, $SS_RIGHT)
-	$gui_label_vanguardtitle_text = GUICtrlCreateLabel('Vanguard:', 341, 420, 60, 16)
-	$gui_label_vanguardtitle_value = GUICtrlCreateLabel('0', 425, 420, 60, 16, $SS_RIGHT)
+	$gui_group_titles = GUICtrlCreateGroup('Titles', 330, 355, 295, 111)
+	$gui_label_asuratitle_text = GUICtrlCreateLabel('Asura:', 341, 380, 60, 16)
+	$gui_label_asuratitle_value = GUICtrlCreateLabel('0', 425, 380, 60, 16, $SS_RIGHT)
+	$gui_label_deldrimortitle_text = GUICtrlCreateLabel('Deldrimor:', 341, 400, 60, 16)
+	$gui_label_deldrimortitle_value = GUICtrlCreateLabel('0', 425, 400, 60, 16, $SS_RIGHT)
+	$gui_label_norntitle_text = GUICtrlCreateLabel('Norn:', 341, 420, 60, 16)
+	$gui_label_norntitle_value = GUICtrlCreateLabel('0', 425, 420, 60, 16, $SS_RIGHT)
+	$gui_label_vanguardtitle_text = GUICtrlCreateLabel('Vanguard:', 341, 440, 60, 16)
+	$gui_label_vanguardtitle_value = GUICtrlCreateLabel('0', 425, 440, 60, 16, $SS_RIGHT)
 
-	$gui_label_kurzicktitle_text = GUICtrlCreateLabel('Kurzick:', 495, 360, 60, 16)
-	$gui_label_kurzicktitle_value = GUICtrlCreateLabel('0', 558, 360, 60, 16, $SS_RIGHT)
-	$gui_label_luxontitle_text = GUICtrlCreateLabel('Luxon:', 495, 380, 60, 16)
-	$gui_label_luxontitle_value = GUICtrlCreateLabel('0', 558, 380, 60, 16, $SS_RIGHT)
-	$gui_label_lightbringertitle_text = GUICtrlCreateLabel('Lightbringer:', 495, 400, 60, 16)
-	$gui_label_lightbringertitle_value = GUICtrlCreateLabel('0', 558, 400, 60, 16, $SS_RIGHT)
-	$gui_label_sunspeartitle_text = GUICtrlCreateLabel('Sunspear:', 495, 420, 60, 16)
-	$gui_label_sunspeartitle_value = GUICtrlCreateLabel('0', 558, 420, 60, 16, $SS_RIGHT)
+	$gui_label_kurzicktitle_text = GUICtrlCreateLabel('Kurzick:', 495, 380, 60, 16)
+	$gui_label_kurzicktitle_value = GUICtrlCreateLabel('0', 558, 380, 60, 16, $SS_RIGHT)
+	$gui_label_luxontitle_text = GUICtrlCreateLabel('Luxon:', 495, 400, 60, 16)
+	$gui_label_luxontitle_value = GUICtrlCreateLabel('0', 558, 400, 60, 16, $SS_RIGHT)
+	$gui_label_lightbringertitle_text = GUICtrlCreateLabel('Lightbringer:', 495, 420, 60, 16)
+	$gui_label_lightbringertitle_value = GUICtrlCreateLabel('0', 558, 420, 60, 16, $SS_RIGHT)
+	$gui_label_sunspeartitle_text = GUICtrlCreateLabel('Sunspear:', 495, 440, 60, 16)
+	$gui_label_sunspeartitle_value = GUICtrlCreateLabel('0', 558, 440, 60, 16, $SS_RIGHT)
 	GUICtrlCreateGroup('', -99, -99, 1, 1)
 	GUICtrlCreateTabItem('')
 
@@ -661,7 +671,9 @@ Func GuiMainButtonHandler()
 		Case $gui_combo_characterchoice
 			$character_name = GUICtrlRead($gui_combo_characterchoice)
 		Case $gui_combo_farmchoice
-			$farm_name = GUICtrlRead($gui_combo_farmchoice)
+			Local $selectedFarm = GUICtrlRead($gui_combo_farmchoice)
+			If $selectedFarm == $RECENT_FARMS_SEPARATOR Then Return
+			$farm_name = $selectedFarm
 			UpdateFarmDescription($farm_name)
 		Case $gui_combo_configchoice
 			Local $filePath = @ScriptDir & '/conf/farm/' & GUICtrlRead($gui_combo_configchoice) & '.json'
@@ -1008,15 +1020,18 @@ Func UpdateFarmDescription($farm)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
 			GUICtrlSetData($gui_label_farminformations, $FROGGY_FARM_INFORMATIONS)
 		Case 'Gemstones'
-			GUICtrlSetData($gui_edit_characterbuilds, $GEMSTONES_MESMER_SKILLBAR)
+			GUICtrlSetData($gui_edit_characterbuilds, _ 
+				'E:'	& @TAB & $GEMSTONES_ELEMENTALIST_SKILLBAR & @CRLF & _
+				'Me:'	& @TAB & $GEMSTONES_MESMER_SKILLBAR _
+			)
 			GUICtrlSetData($gui_edit_heroesbuilds, _
-				$GEMSTONES_HERO_1_SKILLBAR & @CRLF & _
-				$GEMSTONES_HERO_2_SKILLBAR & @CRLF & _
-				$GEMSTONES_HERO_3_SKILLBAR & @CRLF & _
-				$GEMSTONES_HERO_4_SKILLBAR & @CRLF & _
-				$GEMSTONES_HERO_5_SKILLBAR & @CRLF & _
-				$GEMSTONES_HERO_6_SKILLBAR & @CRLF & _
-				$GEMSTONES_HERO_7_SKILLBAR _
+				$GEMSTONES_HERO_OLIAS_TEMPLATE & @CRLF & _
+				$GEMSTONES_HERO_NORGU_TEMPLATE & @CRLF & _
+				$GEMSTONES_HERO_RAZAH_TEMPLATE & @CRLF & _
+				$GEMSTONES_HERO_GWEN_TEMPLATE & @CRLF & _
+				$GEMSTONES_HERO_XANDRA_TEMPLATE & @CRLF & _
+				$GEMSTONES_HERO_MOW_TEMPLATE & @CRLF & _
+				$GEMSTONES_HERO_LIVIA_TEMPLATE _
 			)
 			GUICtrlSetData($gui_label_farminformations, $GEMSTONES_FARM_INFORMATIONS)
 		Case 'Gemstone Margonite'
@@ -1315,11 +1330,14 @@ Func UpdateItemStats()
 		$ID_AMBER_CHUNK, $ID_JADEITE_SHARD]
 	Local $itemCounts = CountTheseItems($itemsToCount)
 	Local $goldItemsCount = CountGoldItems()
+	Local $greenItemsCount = CountGreenItems()
 
 	Local Static $preRunGold = GetGoldCharacter()
 	Local Static $preRunGoldItems = $goldItemsCount
+	Local Static $preRunGreenItems = $greenItemsCount
 	Local Static $totalGold = 0
 	Local Static $totalGoldItems = 0
+	Local Static $totalGreenItems = 0
 
 	Local Static $preRunEctos = $itemCounts[0]
 	Local Static $preRunObsidianShards = $itemCounts[1]
@@ -1353,6 +1371,7 @@ Func UpdateItemStats()
 	Local Static $totalEctos = 0
 	Local Static $totalObsidianShards = 0
 	Local Static $totalLockpicks = 0
+	Local Static $totalLockpicksBroken = 0
 	Local Static $totalMargoniteGemstones = 0
 	Local Static $totalStygianGemstones = 0
 	Local Static $totalTitanGemstones = 0
@@ -1383,6 +1402,7 @@ Func UpdateItemStats()
 	; Counting income surplus of every item group after each finished run
 	Local $runIncomeGold = GetGoldCharacter() - $preRunGold
 	Local $runIncomeGoldItems = $goldItemsCount - $preRunGoldItems
+	Local $runIncomeGreenItems = $greenItemsCount - $preRunGreenItems
 	Local $runIncomeEctos = $itemCounts[0] - $preRunEctos
 	Local $runIncomeObsidianShards = $itemCounts[1] - $preRunObsidianShards
 	Local $runIncomeLockpicks = $itemCounts[2] - $preRunLockpicks
@@ -1415,9 +1435,12 @@ Func UpdateItemStats()
 	; If income is positive then updating cumulative item stats. Income is negative when selling or storing items in chest
 	If $runIncomeGold > 0 Then $totalGold += $runIncomeGold
 	If $runIncomeGoldItems > 0 Then $totalGoldItems += $runIncomeGoldItems
+	If $runIncomeGreenItems > 0 Then $totalGreenItems += $runIncomeGreenItems
 	If $runIncomeEctos > 0 Then $totalEctos += $runIncomeEctos
 	If $runIncomeObsidianShards > 0 Then $totalObsidianShards += $runIncomeObsidianShards
 	If $runIncomeLockpicks > 0 Then $totalLockpicks += $runIncomeLockpicks
+	; Lockpicks broken = net decrease in lockpick inventory during the run
+	If $runIncomeLockpicks < 0 Then $totalLockpicksBroken += (-$runIncomeLockpicks)
 	If $runIncomeMargoniteGemstones > 0 Then $totalMargoniteGemstones += $runIncomeMargoniteGemstones
 	If $runIncomeStygianGemstones > 0 Then $totalStygianGemstones += $runIncomeStygianGemstones
 	If $runIncomeTitanGemstones > 0 Then $totalTitanGemstones += $runIncomeTitanGemstones
@@ -1447,9 +1470,11 @@ Func UpdateItemStats()
 	; updating GUI labels with cumulative items counters
 	GUICtrlSetData($gui_label_gold_value, Floor($totalGold/1000) & 'k' & Mod($totalGold, 1000) & 'g')
 	GUICtrlSetData($gui_label_golditems_value, $totalGoldItems)
+	GUICtrlSetData($gui_label_greenitems_value, $totalGreenItems)
 	GUICtrlSetData($gui_label_ectos_value, $totalEctos)
 	GUICtrlSetData($gui_label_obsidianshards_value, $totalObsidianShards)
 	GUICtrlSetData($gui_label_lockpicks_value, $totalLockpicks)
+	GUICtrlSetData($gui_label_lockpicksbroken_value, $totalLockpicksBroken)
 	GUICtrlSetData($gui_label_margonitegemstone_value, $totalMargoniteGemstones)
 	GUICtrlSetData($gui_label_stygiangemstone_value, $totalStygianGemstones)
 	GUICtrlSetData($gui_label_titangemstone_value, $totalTitanGemstones)
@@ -1479,6 +1504,7 @@ Func UpdateItemStats()
 	; resetting items counters to count income surplus for the next run
 	$preRunGold = GetGoldCharacter()
 	$preRunGoldItems = $goldItemsCount
+	$preRunGreenItems = $greenItemsCount
 	$preRunEctos = $itemCounts[0]
 	$preRunObsidianShards = $itemCounts[1]
 	$preRunLockpicks = $itemCounts[2]
@@ -1675,7 +1701,7 @@ EndFunc
 ;~ Read given config from JSON
 Func ApplyConfigToGUI()
 	GUICtrlSetData($gui_combo_characterchoice, $character_name)
-	GUICtrlSetData($gui_combo_farmchoice, $AVAILABLE_FARMS, $farm_name)
+	GUICtrlSetData($gui_combo_farmchoice, BuildFarmComboData(), $farm_name)
 	UpdateFarmDescription($farm_name)
 
 	GUICtrlSetData($gui_combo_weaponslot, $run_options_cache['run.weapon_slot'])
@@ -2021,13 +2047,64 @@ Func IsAnyLootOptionInBranchChecked($startNodePath, $treeViewHandle = $gui_treev
 EndFunc
 
 
-;~ Save the currently selected farm to a file so it can be restored next session
+;~ Save the currently selected farm to a file so it can be restored next session,
+;~ and record it in the recent-farms history (shown at the top of the dropdown).
 Func SaveLastFarmSelection()
 	Local $path = @ScriptDir & '/conf/last_farm.txt'
 	Local $handle = FileOpen($path, $FO_OVERWRITE + $FO_CREATEPATH)
 	If $handle == -1 Then Return
 	FileWrite($handle, $farm_name)
 	FileClose($handle)
+	AddFarmToRecentHistory($farm_name)
+EndFunc
+
+
+;~ Load the recent-farms history, most recent first
+Func LoadRecentFarms()
+	Local $recent[0]
+	Local $content = FileRead($RECENT_FARMS_PATH)
+	If @error Or $content == '' Then Return $recent
+	Local $lines = StringSplit($content, @CRLF, $STR_ENTIRESPLIT)
+	If @error Or Not IsArray($lines) Then Return $recent
+	For $i = 1 To $lines[0]
+		Local $line = StringStripWS($lines[$i], $STR_STRIPLEADING + $STR_STRIPTRAILING)
+		If $line <> '' Then _ArrayAdd($recent, $line)
+	Next
+	Return $recent
+EndFunc
+
+
+;~ Record a farm into the recent-farms history (dedupe, most recent first, capped)
+Func AddFarmToRecentHistory($farm)
+	If $farm == Null Or $farm == '' Then Return
+	Local $recent[0]
+	_ArrayAdd($recent, $farm)
+	Local $existing = LoadRecentFarms()
+	For $i = 0 To UBound($existing) - 1
+		If UBound($recent) >= $RECENT_FARMS_LIMIT Then ExitLoop
+		If $existing[$i] == $farm Then ContinueLoop
+		_ArrayAdd($recent, $existing[$i])
+	Next
+	Local $handle = FileOpen($RECENT_FARMS_PATH, $FO_OVERWRITE + $FO_CREATEPATH)
+	If $handle == -1 Then Return
+	For $i = 0 To UBound($recent) - 1
+		FileWrite($handle, $recent[$i] & @CRLF)
+	Next
+	FileClose($handle)
+EndFunc
+
+
+;~ Build the farm dropdown data: recent farms first (chronological), then all farms
+Func BuildFarmComboData()
+	Local $recent = LoadRecentFarms()
+	Local $data = ''
+	For $i = 0 To UBound($recent) - 1
+		If $recent[$i] <> '' Then $data &= '|' & $recent[$i]
+	Next
+	If $data <> '' Then
+		Return $data & '|' & $RECENT_FARMS_SEPARATOR & $AVAILABLE_FARMS
+	EndIf
+	Return $AVAILABLE_FARMS
 EndFunc
 
 
@@ -2037,7 +2114,7 @@ Func RestoreLastFarmSelection()
 	Local $lastFarm = FileRead($path)
 	If @error Or $lastFarm == '' Then Return
 	$lastFarm = StringStripWS($lastFarm, $STR_STRIPLEADING + $STR_STRIPTRAILING)
-	GUICtrlSetData($gui_combo_farmchoice, $lastFarm)
+	GUICtrlSetData($gui_combo_farmchoice, BuildFarmComboData(), $lastFarm)
 	$farm_name = $lastFarm
 	UpdateFarmDescription($lastFarm)
 EndFunc
