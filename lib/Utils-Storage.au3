@@ -66,6 +66,11 @@ EndFunc
 
 ;~ Store unidentified gold items except armor salvageables, so gold armor can be identified separately
 Func ShouldStoreUnidentifiedGoldItem($item)
+	; Never store items that are equipped (in any weapon slot) or customized to a character.
+	; This also protects unique boss-drop weapons (e.g. Dhuum's Soul Reaper) that are
+	; gold-colored, cannot be identified, and so look like unidentified gold items.
+	If DllStructGetData($item, 'Equipped') > 0 Then Return False
+	If DllStructGetData($item, 'Customized') <> 0 Then Return False
 	Return IsUnidentifiedGoldItem($item) And Not IsArmorSalvageItem($item)
 EndFunc
 
@@ -727,6 +732,9 @@ EndFunc
 
 
 Func CheckStoreWeapon($weaponItem)
+	; Never store weapons that are equipped (in any weapon slot) or customized to a character
+	If DllStructGetData($weaponItem, 'Equipped') > 0 Then Return False
+	If DllStructGetData($weaponItem, 'Customized') <> 0 Then Return False
 	Local $weaponRarity = GetRarity($weaponItem)
 	If $weaponRarity == $RARITY_GRAY Or $weaponRarity == $RARITY_RED Then Return False
 	Local $weaponRarityName = $RARITY_NAMES_FROM_IDS[$weaponRarity]
@@ -1858,6 +1866,22 @@ Func CountGoldItems()
 EndFunc
 
 
+;~ Counts green items in inventory
+Func CountGreenItems()
+	Local $greenItemsCount = 0
+	Local $item
+	For $bagIndex = 1 To $bags_count
+		Local $bag = GetBag($bagIndex)
+		For $i = 1 To DllStructGetData($bag, 'slots')
+			$item = GetItemBySlot($bagIndex, $i)
+			If DllStructGetData($item, 'ID') = 0 Then ContinueLoop
+			If ((IsWeapon($item) Or IsArmorSalvageItem($item)) And GetRarity($item) == $RARITY_GREEN) Then $greenItemsCount += 1
+		Next
+	Next
+	Return $greenItemsCount
+EndFunc
+
+
 ;~ Destroy all items that fit the provided modelIDs
 Func DestroyFromInventory($mapItemIDs)
 	For $bagIndex = 1 To $bags_count
@@ -2065,7 +2089,14 @@ Func UseSummoningStone($forceUse = False, $preferredSummon = Null)
 	If (Not $forceUse And Not $run_options_cache['run.consume_consumables']) Then Return False
 	If GetEffectTimeRemaining(GetEffect($ID_SUMMONING_SICKNESS)) > 0 Then Return False
 	If $preferredSummon <> Null Then
-		If UseConsumable($preferredSummon) Then Return True
+		; Propagate $forceUse so a forced summon (e.g. "prefer the Legionnaire
+		; crystal") actually bypasses the consume_consumables gate inside
+		; UseConsumable too — otherwise forcing here is silently ignored.
+		; NOTE: compare with == $SUCCESS, NOT a truthy check — $SUCCESS is 0
+		; (falsy in AutoIt), so `If UseConsumable(...) Then` was always false and
+		; fell through to the fallback loop, using the same (infinite) crystal a
+		; second time.
+		If UseConsumable($preferredSummon, $forceUse) == $SUCCESS Then Return True
 	EndIf
 
 	Local $itemCounts = CountTheseItems($SUMMONING_STONES_ARRAY)
@@ -2073,7 +2104,7 @@ Func UseSummoningStone($forceUse = False, $preferredSummon = Null)
 		; Skipping merchant
 		If $SUMMONING_STONES_ARRAY[$i] == $ID_MERCHANT_SUMMON Then ContinueLoop
 		If $itemCounts[$i] > 0 Then
-			If UseConsumable($SUMMONING_STONES_ARRAY[$i]) == $SUCCESS Then Return True
+			If UseConsumable($SUMMONING_STONES_ARRAY[$i], $forceUse) == $SUCCESS Then Return True
 		EndIf
 	Next
 	Return False
