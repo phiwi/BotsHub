@@ -24,19 +24,29 @@
 #include '../../lib/Utils-Console.au3'
 #include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SupportTeam.au3'
 
 
 ; ==== Constants ====
 ; TODO: rework builds following 26.06.24 nerfs
 ;Global Const $GEMSTONES_MESMER_SKILLBAR = 'OQBCAswDPVP/DMd5Zu2Nd6B'
 Global Const $GEMSTONES_MESMER_SKILLBAR = 'OQBDAcMCT7iTPNB/AmO5ZcNyiA'
-Global Const $GEMSTONES_HERO_1_SKILLBAR = 'OQNUAUBPwmMnAcqpb6lDyAXA0I'
-Global Const $GEMSTONES_HERO_2_SKILLBAR = 'OQNUAUBPwmMnAcqpb6lDyAXA0I'
-Global Const $GEMSTONES_HERO_3_SKILLBAR = 'OQNUAUBPwmMnAcqpb6lDyAXA0I'
-Global Const $GEMSTONES_HERO_4_SKILLBAR = 'OAljUwGopSUBHVyBoBVVbh4B1YA'
-Global Const $GEMSTONES_HERO_5_SKILLBAR = 'OAhjUwGYoSUBHVoBbhVVWbTODTA'
-Global Const $GEMSTONES_HERO_6_SKILLBAR = 'OAhjQoGYIP3hhWVVaO5EeDzxJ'
-Global Const $GEMSTONES_HERO_7_SKILLBAR = 'OACiAyk8gNtePuwJ00ZOPLYA'
+Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaX0mcBKmEZ4UgppVAA'
+; Fixed 7-hero team. Hero index 1..7 = the AddHero order in SetupTeamGemstonesFarm.
+Global Const $GEMSTONES_HERO_OLIAS_ID = $ID_OLIAS
+Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhWVVaO5EeDzxJA'
+Global Const $GEMSTONES_HERO_NORGU_ID = $ID_NORGU
+Global Const $GEMSTONES_HERO_NORGU_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDwBQjA'
+Global Const $GEMSTONES_HERO_RAZAH_ID = $ID_RAZAH
+Global Const $GEMSTONES_HERO_RAZAH_TEMPLATE = 'OQNEAsoD2yECxpmupXOIDoBQjA'
+Global Const $GEMSTONES_HERO_GWEN_ID = $ID_GWEN
+Global Const $GEMSTONES_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArATAEBA'
+Global Const $GEMSTONES_HERO_XANDRA_ID = $ID_XANDRA
+Global Const $GEMSTONES_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00Ze2QuA'
+Global Const $GEMSTONES_HERO_MOW_ID = $ID_MASTER_OF_WHISPERS
+Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OAhjUsGqoSANTBVVKgHVYMbhoBA'
+Global Const $GEMSTONES_HERO_LIVIA_ID = $ID_LIVIA
+Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABEQTtGeLB0QFYHUGYJUVtF2JA'
 Global Const $GEMSTONES_FARM_INFORMATIONS = 'Requirements:' & @CRLF _
 	& '- Access to mallyx (finished all 4 doa parts)' & @CRLF _
 	& '- Recommended to have maxed out Lightbringer title' & @CRLF _
@@ -110,11 +120,13 @@ Func SetupGemstonesFarm()
 	SwitchMode($ID_NORMAL_MODE)
 	SetDisplayedTitle($ID_LIGHTBRINGER_TITLE)
 	SetupPlayerGemstonesFarm()
+	SetupTeamGemstonesFarm()
 	; Zhellix agent ID will be lower if team size is lower than 8, therefore checking for fail
 	If GetPartySize() <> $ID_TEAM_SIZE_LARGE Then
 		Error('Party not set up correctly. Team size different than ' & $ID_TEAM_SIZE_LARGE)
 		Return $FAIL
 	EndIf
+	SupportTeamOpenHeroPanels('Gemstones')
 	SetupGemstonesFightOptions()
 	$gemstones_farm_setup = True
 	Info('Preparations complete')
@@ -137,13 +149,73 @@ EndFunc
 Func SetupPlayerGemstonesFarm()
 	If IsTeamAutoSetup() Then Return $SUCCESS
 
-	If DllStructGetData(GetMyAgent(), 'Primary') == $ID_MESMER Then
-		Info('Players profession is mesmer. Loading up recommended mesmer build automatically')
-		LoadSkillTemplate($GEMSTONES_MESMER_SKILLBAR)
-		RandomSleep(250)
+	Local $primary = DllStructGetData(GetMyAgent(), 'Primary')
+	If $primary == $ID_ELEMENTALIST Then
+		If HeroHasTemplate(0, $GEMSTONES_ELEMENTALIST_SKILLBAR) Then
+			Info('Gemstones player: elementalist template already loaded, skipping')
+		Else
+			Info('Players profession is elementalist. Loading recommended elementalist build automatically')
+			LoadSkillTemplate($GEMSTONES_ELEMENTALIST_SKILLBAR)
+			RandomSleep(250)
+		EndIf
+	ElseIf $primary == $ID_MESMER Then
+		If HeroHasTemplate(0, $GEMSTONES_MESMER_SKILLBAR) Then
+			Info('Gemstones player: mesmer template already loaded, skipping')
+		Else
+			Info('Players profession is mesmer. Loading up recommended mesmer build automatically')
+			LoadSkillTemplate($GEMSTONES_MESMER_SKILLBAR)
+			RandomSleep(250)
+		EndIf
 	Else
 		Info('Automatic player build setup is disabled. Assuming that player build is set up manually')
 	EndIf
+EndFunc
+
+
+;~ Set up the fixed 7-hero team (order matters: hero index 1..7 = add order).
+Func SetupTeamGemstonesFarm()
+	If IsTeamAutoSetup() Then Return $SUCCESS
+
+	Info('Setting up team: Olias, Norgu, Razah, Gwen, Xandra, Master of Whispers, Livia')
+	LeaveParty()
+	AddHero($GEMSTONES_HERO_OLIAS_ID)
+	AddHero($GEMSTONES_HERO_NORGU_ID)
+	AddHero($GEMSTONES_HERO_RAZAH_ID)
+	AddHero($GEMSTONES_HERO_GWEN_ID)
+	AddHero($GEMSTONES_HERO_XANDRA_ID)
+	AddHero($GEMSTONES_HERO_MOW_ID)
+	AddHero($GEMSTONES_HERO_LIVIA_ID)
+	RandomSleep(500)
+	If GetPartySize() <> $ID_TEAM_SIZE_LARGE Then
+		Warn('Party not set up correctly. Team size different than ' & $ID_TEAM_SIZE_LARGE)
+		Return $FAIL
+	EndIf
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_OLIAS_ID, 'Olias', $GEMSTONES_HERO_OLIAS_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_NORGU_ID, 'Norgu', $GEMSTONES_HERO_NORGU_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_RAZAH_ID, 'Razah', $GEMSTONES_HERO_RAZAH_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_GWEN_ID, 'Gwen', $GEMSTONES_HERO_GWEN_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_XANDRA_ID, 'Xandra', $GEMSTONES_HERO_XANDRA_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_MOW_ID, 'Master of Whispers', $GEMSTONES_HERO_MOW_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_LIVIA_ID, 'Livia', $GEMSTONES_HERO_LIVIA_TEMPLATE) == $FAIL Then Return $FAIL
+	RandomSleep(250)
+	Return $SUCCESS
+EndFunc
+
+
+;~ Load a hero template, skipping if the hero already has it (saves setup time).
+Func GemstonesLoadHeroTemplate($heroID, $heroName, $templateCode)
+	Local $heroIndex = GetHeroNumberByHeroID($heroID)
+	If $heroIndex == Null Then
+		Warn('Gemstones team: hero index not found for ' & $heroName)
+		Return $FAIL
+	EndIf
+	If HeroHasTemplate($heroIndex, $templateCode) Then
+		Info('Gemstones ' & $heroName & ': template already loaded, skipping')
+		Return $SUCCESS
+	EndIf
+	LoadSkillTemplate($templateCode, $heroIndex)
+	RandomSleep(220)
+	Return $SUCCESS
 EndFunc
 
 
@@ -151,7 +223,10 @@ EndFunc
 Func GemstonesFarmLoop()
 	If TalkToZhellix() == $FAIL Then Return $FAIL
 	WalkToSpotGemstonesFarm()
-	UseSummoningStone()
+	; Spawn a summoning-stone ally before the waves start. Prefer the Legionnaire
+	; Summoning Crystal (spawns the Legionnaire NPC) if it is in the inventory;
+	; otherwise fall back to any other summoning stone (the default behaviour).
+	UseSummoningStone(True, $ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
 	Sleep(2000)
 	If GemstonesDefendPosition() == $FAIL Then Return $FAIL
 	Return $SUCCESS
