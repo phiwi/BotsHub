@@ -46,7 +46,7 @@ Global Const $GEMSTONES_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00Ze2QuA'
 Global Const $GEMSTONES_HERO_MOW_ID = $ID_MASTER_OF_WHISPERS
 Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OAhjUsGqoSANTBVVKgHVYMbhoBA'
 Global Const $GEMSTONES_HERO_LIVIA_ID = $ID_LIVIA
-Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABEQTtGeLB0QFYHUGYJUVtF2JA'
+Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABEQTtGeLB0QFYHUGYJUVtF+JA'
 Global Const $GEMSTONES_FARM_INFORMATIONS = 'Requirements:' & @CRLF _
 	& '- Access to mallyx (finished all 4 doa parts)' & @CRLF _
 	& '- Recommended to have maxed out Lightbringer title' & @CRLF _
@@ -262,6 +262,7 @@ Func GemstonesDefendPosition()
 	While IsZhellixPerformingRitual()
 		If CheckStuck('Gemstones fight', $MAX_GEMSTONES_FARM_DURATION) == $FAIL Then Return $FAIL
 		If IsDoARunFailed() Then Return $FAIL
+		GemstonesMaintainSummon()
 		Sleep(1000)
 		KillFoesInArea($gemstones_fight_options)
 		If IsPlayerAlive() Then PickUpItems(Null, DefaultShouldPickItem, $RANGE_SPIRIT)
@@ -269,6 +270,28 @@ Func GemstonesDefendPosition()
 	WEnd
 	; if ritual completed then successful run
 	Return IsDoARunFailed()? $FAIL : $SUCCESS
+EndFunc
+
+
+;~ Returns True if a summoned ally is currently alive near the player. The
+;~ summoned NPC is any allied NPC that is not Zhellix (the ritual NPC). Dead
+;~ summons are already filtered out by GetNPCsInRangeOfAgent.
+Func GemstonesIsSummonActive()
+	Local $npcs = GetNPCsInRangeOfAgent(GetMyAgent(), $ID_ALLEGIANCE_NPC, $RANGE_SPIRIT)
+	For $npc In $npcs
+		If DllStructGetData($npc, 'ModelID') <> $MODELID_ZHELLIX Then Return True
+	Next
+	Return False
+EndFunc
+
+
+;~ Keep the Legionnaire summon alive through the 19-wave fight: re-trigger the
+;~ crystal only once the previous summon has died AND Summoning Sickness has
+;~ expired (UseSummoningStone itself refuses while sickness is still active).
+Func GemstonesMaintainSummon()
+	If GemstonesIsSummonActive() Then Return
+	If GetEffectTimeRemaining(GetEffect($ID_SUMMONING_SICKNESS)) > 0 Then Return
+	UseSummoningStone(True, $ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
 EndFunc
 
 
