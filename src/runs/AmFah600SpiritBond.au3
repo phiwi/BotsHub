@@ -165,6 +165,10 @@ Global Const $AMFAH600_STRAY_MAX_FOES = 3
 ; collapsed into the energy-saving mode (drop PS, prioritize VWK/EVAS/Snow Storm).
 Global Const $AMFAH600_FEW_FOES_MAX = 4
 Global Const $AMFAH600_STRAY_CLEANUP_TIMEOUT_MS = 25000
+; Stalemate detection: when only a couple of foes remain but the monk takes no
+; damage for this long (a Marksman behind a fence shoots but the arrows hit the
+; fence, so SB/VWK reflect never triggers), force EVAS/Snow Storm onto them.
+Global Const $AMFAH600_STALEMATE_MS = 12000
 Global Const $AMFAH600_RAMP_PULL_TIMEOUT_MS = 150000
 Global Const $AMFAH600_ENERGY_WAIT_TIMEOUT_MS = 90000
 Global Const $AMFAH600_MORGAHN_SEND_VERIFY_MS = 9000
@@ -196,6 +200,11 @@ Global $amfah600_sb_last_sb_cast = 0
 ; few-foe tail so the monk regains energy regen to pay for the EVAS that kills
 ; the last Healer. Reset each run-loop iteration.
 Global $amfah600_sb_dropped_enchants = False
+; Stalemate detection: track the monk's HP to see if she is taking any damage.
+; A Marksman behind a fence hits the fence (not her), so her HP never drops and
+; the reflect can never finish it — we detect that and force EVAS/Snow Storm.
+Global $amfah600_sb_hp_prev = -1
+Global $amfah600_sb_last_damage_t = 0
 
 
 Func AmFah600SpiritBondRun()
@@ -926,6 +935,7 @@ EndFunc
 
 Func AmFah600SpiritBondMaintainCoreUpkeep()
 	If IsPlayerDead() Then Return
+	AmFah600SpiritBondTrackHp()
 	Local $energy = GetEnergy()
 	Local $me = GetMyAgent()
 	; Cast Snow Storm/VWK and pre-emptive PS/SB only once the Am Fah are hostile -
@@ -1095,6 +1105,11 @@ Func AmFah600SpiritBondTryCastEvasOnNecromancer()
 			$target = AmFah600SpiritBondGetNearestMarksmanInRange($AMFAH600_EVAS_CAST_RANGE)
 		EndIf
 	EndIf
+	; Stalemate: a Marksman behind a fence can't be reflect-killed (its arrows
+	; hit the fence), so force EVAS onto it even if it sits just past 1200.
+	If $target == Null And AmFah600SpiritBondIsStalemate() Then
+		$target = AmFah600SpiritBondGetNearestMarksmanInRange($RANGE_LONGBOW)
+	EndIf
 	If $target == Null Then Return False
 
 	$amfah600_sb_last_evas_target_id = DllStructGetData($target, 'ID')
@@ -1129,8 +1144,13 @@ Func AmFah600SpiritBondTryCastSnowStormOnNecromancer()
 	Local $necro = AmFah600SpiritBondGetNearestNecromancerInRange($AMFAH600_EVAS_CAST_RANGE, $amfah600_sb_last_evas_target_id)
 	If $necro == Null Then $necro = AmFah600SpiritBondGetNearestNecromancerInRange($AMFAH600_EVAS_CAST_RANGE, 0)
 	If $necro == Null Then $necro = AmFah600SpiritBondGetLowestHpHealerInRange($AMFAH600_EVAS_CAST_RANGE)
+	; Stalemate: force Snow Storm onto a Marksman behind a fence (its arrows hit
+	; the fence, so it is never reflect-killed) — extend to longbow range.
+	If $necro == Null And AmFah600SpiritBondIsStalemate() Then
+		$necro = AmFah600SpiritBondGetNearestMarksmanInRange($RANGE_LONGBOW)
+	EndIf
 	If $necro == Null Then Return False
-	Info('Am Fah 600: casting Snow Storm on ' & (AmFah600SpiritBondIsHealerAgent($necro) ? 'healer' : 'necromancer') & ' (dist=' & Round(GetDistance(GetMyAgent(), $necro)) & ', id=' & DllStructGetData($necro, 'ID') & ')')
+	Info('Am Fah 600: casting Snow Storm on ' & (AmFah600SpiritBondIsMarksmanAgent($necro) ? 'marksman' : (AmFah600SpiritBondIsHealerAgent($necro) ? 'healer' : 'necromancer')) & ' (dist=' & Round(GetDistance(GetMyAgent(), $necro)) & ', id=' & DllStructGetData($necro, 'ID') & ')')
 	UseSkillEx($AMFAH600_SNOW_STORM, $necro)
 	Return True
 EndFunc
@@ -1357,6 +1377,42 @@ Func AmFah600SpiritBondCountLivingFoes($range = $AMFAH600_DETECT_RANGE)
 		$count += 1
 	Next
 	Return $count
+EndFunc
+
+
+;~ Track the monk's HP every fight pass to detect a stalemate. A Marksman behind
+;~ a fence shoots but the arrows hit the fence, so the monk takes no damage and
+;~ SB/VWK reflect never triggers — the fight stalls forever. "No HP drop" is the
+;~ reliable signal for "nobody is hitting me" (under fire SB heals each hit, so
+;~ HP dips constantly; behind a fence it stays flat).
+Func AmFah600SpiritBondTrackHp()
+	If IsPlayerDead() Then Return
+	Local $hp = DllStructGetData(GetMyAgent(), 'HealthPercent')
+	If $amfah600_sb_hp_prev < 0 Then
+		$amfah600_sb_hp_prev = $hp
+		$amfah600_sb_last_damage_t = TimerInit()
+		Return
+	EndIf
+	If $hp < $amfah600_sb_hp_prev Then
+		$amfah600_sb_last_damage_t = TimerInit() ; took a hit
+	EndIf
+	$amfah600_sb_hp_prev = $hp
+EndFunc
+
+
+;~ True when the fight has stalled: only a couple of foes remain AND the monk has
+;~ taken no damage for a while. That means the stragglers can't be finished by
+;~ reflect (e.g. a Marksman behind a fence), so EVAS/Snow Storm must be forced.
+Func AmFah600SpiritBondIsStalemate()
+	Local $living = AmFah600SpiritBondCountLivingFoes($AMFAH600_DETECT_RANGE)
+	If $living < 1 Or $living > $AMFAH600_STRAY_MAX_FOES Then Return False
+	Local $isStale = TimerDiff($amfah600_sb_last_damage_t) > $AMFAH600_STALEMATE_MS
+	Static $lastStale = False
+	If $isStale <> $lastStale Then
+		AmFah600SpiritBondCsvLog('Stalemate', $isStale ? 'yes living=' & $living : 'no')
+		$lastStale = $isStale
+	EndIf
+	Return $isStale
 EndFunc
 
 
