@@ -44,21 +44,22 @@ Global Const $FROGGY_TEAM_ASSEMBLY_PASSES = 4
 Global Const $FROGGY_TEAM_MISSING_FALLBACK_PASSES = 3
 Global Const $FROGGY_TEAM_OUTPOST_RETRIES = 4
 Global Const $FROGGY_TEMPLATE_LOAD_RETRIES = 5
-Global Const $FROGGY_ASSASSIN_SKILLBAR = 'OwhiAyiMVNNAeNd28N5DWOxMBA' ; SoS
+Global Const $FROGGY_ASSASSIN_SKILLBAR = 'OwFkQxVlHNuEuDPxVBNpqYfxO4UD'
 Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgBDg6ucSqDkDtl7irDylJRHOA'
 ;~ Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdDgYysS7ilCQf2kuZIDpOZDA' ; Earth Magic
 Global Const $FROGGY_ASSASSIN_WEAPON_SET = 3
 Global Const $FROGGY_ELEMENTALIST_WEAPON_SET = 3
-Global Const $FROGGY_ASSASSIN_HERO_MOW_TEMPLATE = 'OABEQTtGeLB0QFYHUGYJUVtF2JA'
-Global Const $FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE = 'OABDUrpnSANUBKVVVfClBJCbhA'
-Global Const $FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE = 'OAhjUoGYITANUBVVVPSTTOKVbhA'
-Global Const $FROGGY_ASSASSIN_HERO_MORGAHN_TEMPLATE = 'OQCjUqmLqO84d8C+BbhrxoY5NA'
-Global Const $FROGGY_ASSASSIN_HERO_MOX_TEMPLATE = 'OgSiUwsM9eNfhgpehuRuNFoACA'
-Global Const $FROGGY_ASSASSIN_HERO_KAHMU_TEMPLATE = 'OgSiUwsM9eNfhgpehuRuNFoACA'
-Global Const $FROGGY_ASSASSIN_HERO_MERCENARY_TEMPLATE = 'OAhjUsGqoSANUBVVKgKVYMbhXMA'
+Global Const $FROGGY_ASSASSIN_HERO_MOW_TEMPLATE = 'OANDQrh+OmMXCUtqOJME7r5B'
+Global Const $FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE = 'OAhlQQG6hGKi68UtEQ1qqdoTgxuY'
+Global Const $FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE = 'OAhkQMG5RGyzT1SAVrqSzJ3w8iB'
+Global Const $FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE = 'OQhkAgBqAHK0JQOw0jpzQQeGC4FD'
+Global Const $FROGGY_ASSASSIN_HERO_NORGU_TEMPLATE = 'OQhkAgBqAHK0JQOw0jpzQQeGC4FA'
+Global Const $FROGGY_ASSASSIN_HERO_MERCENARY_TEMPLATE = 'OANEQjtH+7UzsEQ1qqW8uWPEIA' ; A R U Catalyst
+Global Const $FROGGY_ASSASSIN_HERO_MERCENARY1_TEMPLATE = 'OACjEyiM5MXzyp3ccKNncDTMGA' ; A R U Atmosphere
 ; Mercenary heroes are addressed by roster SLOT (1-8), not by character name.
-; "A R U Catalyst" is mercenary slot 2.
+; "A R U Catalyst" is mercenary slot 2, "A R U Atmosphere" is mercenary slot 1.
 Global Const $FROGGY_ASSASSIN_MERCENARY_HERO_ID = $ID_MERCENARY_HERO_2
+Global Const $FROGGY_ASSASSIN_MERCENARY1_HERO_ID = $ID_MERCENARY_HERO_1
 
 Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArATAEBA' ; Inep + Frust (SoO)
 ;~ Global Const $FROGGY_ELEMENTALIST_HERO_GWEN_TEMPLATE = 'OQlkAkB8wYm0LACIHUeGJQPVGwOG' ; Esurge + Command
@@ -318,33 +319,33 @@ EndFunc
 
 
 Func SetupFroggySinTeamFromWingstorm()
-	Info('Froggy Assassin team: Master of Whispers, Olias, Livia, General Morgahn, M.O.X, Kahmu, A R U Catalyst')
+	Info('Froggy Assassin team: Master of Whispers, Olias, Livia, A R U Catalyst, A R U Atmosphere, Razah, Norgu')
 	Local $heroIDs[7] = [ _
 		$ID_MASTER_OF_WHISPERS, _
 		$ID_OLIAS, _
 		$ID_LIVIA, _
-		$ID_GENERAL_MORGAHN, _
-		$ID_MOX, _
-		$ID_KAHMU, _
-		$FROGGY_ASSASSIN_MERCENARY_HERO_ID _
+		$FROGGY_ASSASSIN_MERCENARY_HERO_ID, _
+		$FROGGY_ASSASSIN_MERCENARY1_HERO_ID, _
+		$ID_RAZAH, _
+		$ID_NORGU _
 	]
 	Local $heroNames[7] = [ _
 		'Master of Whispers', _
 		'Olias', _
 		'Livia', _
-		'General Morgahn', _
-		'M.O.X', _
-		'Kahmu', _
-		'A R U Catalyst' _
+		'A R U Catalyst', _
+		'A R U Atmosphere', _
+		'Razah', _
+		'Norgu' _
 	]
 	Local $heroTemplates[7] = [ _
 		$FROGGY_ASSASSIN_HERO_MOW_TEMPLATE, _
 		$FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE, _
 		$FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE, _
-		$FROGGY_ASSASSIN_HERO_MORGAHN_TEMPLATE, _
-		$FROGGY_ASSASSIN_HERO_MOX_TEMPLATE, _
-		$FROGGY_ASSASSIN_HERO_KAHMU_TEMPLATE, _
-		$FROGGY_ASSASSIN_HERO_MERCENARY_TEMPLATE _
+		$FROGGY_ASSASSIN_HERO_MERCENARY_TEMPLATE, _
+		$FROGGY_ASSASSIN_HERO_MERCENARY1_TEMPLATE, _
+		$FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE, _
+		$FROGGY_ASSASSIN_HERO_NORGU_TEMPLATE _
 	]
 
 	If FroggyAssembleFixedTeamWithRecovery($heroIDs, $heroNames, 'Froggy Assassin') == $FAIL Then Return $FAIL
@@ -358,10 +359,10 @@ Func SetupFroggySinTeamFromWingstorm()
 	If FroggyLoadHeroTemplateByID($ID_MASTER_OF_WHISPERS, 'Master of Whispers', $FROGGY_ASSASSIN_HERO_MOW_TEMPLATE) == $FAIL Then Return $FAIL
 	If FroggyLoadHeroTemplateByID($ID_OLIAS, 'Olias', $FROGGY_ASSASSIN_HERO_OLIAS_TEMPLATE) == $FAIL Then Return $FAIL
 	If FroggyLoadHeroTemplateByID($ID_LIVIA, 'Livia', $FROGGY_ASSASSIN_HERO_LIVIA_TEMPLATE) == $FAIL Then Return $FAIL
-	If FroggyLoadHeroTemplateByID($ID_GENERAL_MORGAHN, 'General Morgahn', $FROGGY_ASSASSIN_HERO_MORGAHN_TEMPLATE) == $FAIL Then Return $FAIL
-	If FroggyLoadHeroTemplateByID($ID_MOX, 'M.O.X', $FROGGY_ASSASSIN_HERO_MOX_TEMPLATE) == $FAIL Then Return $FAIL
-	If FroggyLoadHeroTemplateByID($ID_KAHMU, 'Kahmu', $FROGGY_ASSASSIN_HERO_KAHMU_TEMPLATE) == $FAIL Then Return $FAIL
 	If FroggyLoadHeroTemplateByID($FROGGY_ASSASSIN_MERCENARY_HERO_ID, 'A R U Catalyst', $FROGGY_ASSASSIN_HERO_MERCENARY_TEMPLATE) == $FAIL Then Return $FAIL
+	If FroggyLoadHeroTemplateByID($FROGGY_ASSASSIN_MERCENARY1_HERO_ID, 'A R U Atmosphere', $FROGGY_ASSASSIN_HERO_MERCENARY1_TEMPLATE) == $FAIL Then Return $FAIL
+	If FroggyLoadHeroTemplateByID($ID_RAZAH, 'Razah', $FROGGY_ASSASSIN_HERO_RAZAH_TEMPLATE) == $FAIL Then Return $FAIL
+	If FroggyLoadHeroTemplateByID($ID_NORGU, 'Norgu', $FROGGY_ASSASSIN_HERO_NORGU_TEMPLATE) == $FAIL Then Return $FAIL
 	RandomSleep(250)
 
 	ClearPartyCommands()
