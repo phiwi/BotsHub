@@ -2085,18 +2085,17 @@ EndFunc
 
 
 ;~ Use a summoning stone
-Func UseSummoningStone($forceUse = False, $preferredSummon = Null)
-	If (Not $forceUse And Not $run_options_cache['run.consume_consumables']) Then Return False
+Func UseSummoningStone($forceUse = False, $preferredSummon = $ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
+	If (Not $forceUse And Not $run_options_cache['run.use_legionnaire']) Then Return False
 	If GetEffectTimeRemaining(GetEffect($ID_SUMMONING_SICKNESS)) > 0 Then Return False
 	If $preferredSummon <> Null Then
-		; Propagate $forceUse so a forced summon (e.g. "prefer the Legionnaire
-		; crystal") actually bypasses the consume_consumables gate inside
-		; UseConsumable too — otherwise forcing here is silently ignored.
+		; Force UseConsumable so it bypasses the generic consume_consumables
+		; gate — summoning stones are gated by the use_legionnaire option above.
 		; NOTE: compare with == $SUCCESS, NOT a truthy check — $SUCCESS is 0
 		; (falsy in AutoIt), so `If UseConsumable(...) Then` was always false and
 		; fell through to the fallback loop, using the same (infinite) crystal a
 		; second time.
-		If UseConsumable($preferredSummon, $forceUse) == $SUCCESS Then Return True
+		If UseConsumable($preferredSummon, True) == $SUCCESS Then Return True
 	EndIf
 
 	Local $itemCounts = CountTheseItems($SUMMONING_STONES_ARRAY)
@@ -2104,7 +2103,7 @@ Func UseSummoningStone($forceUse = False, $preferredSummon = Null)
 		; Skipping merchant
 		If $SUMMONING_STONES_ARRAY[$i] == $ID_MERCHANT_SUMMON Then ContinueLoop
 		If $itemCounts[$i] > 0 Then
-			If UseConsumable($SUMMONING_STONES_ARRAY[$i], $forceUse) == $SUCCESS Then Return True
+			If UseConsumable($SUMMONING_STONES_ARRAY[$i], True) == $SUCCESS Then Return True
 		EndIf
 	Next
 	Return False

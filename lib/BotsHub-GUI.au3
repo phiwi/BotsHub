@@ -103,7 +103,7 @@ Global Const $AVAILABLE_BAG_COUNTS = '|1|2|3|4|5'
 Global Const $AVAILABLE_WEAPON_SLOTS = '|0|1|2|3|4'
 Global Const $KIT_AMOUNT_CHOICE = '|0|1|2|3|4|5|6|7|8|9|10|11|12'
 Global Const $AVAILABLE_FARMS = '|Am Fah 600 Spirit Bond|Asuran|Barbarous Shore Sin|NF Q8 Chest Run|Boreal|Brightclaw|Buying Bones|Buying Dust|Buying All|Buying Consets|Buying Feathers|Buying Iron|CoF|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Dynamic execution|Eden Iris|Feathers|Feathers Sin|Feathers Sin Fast|Focus Hanaku|Follower|FoW|FoW Tower of Courage|Froggy|Froggy no builds|' & _
-	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Glint Challenge|Jade Brotherhood|Kappa|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Sin|' & _
+	'Froggy Hero Panels Test|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|Gemstones|Gemstones no builds|Glint Challenge|Jade Brotherhood|Kappa|Kilroy|Kournans|Kurzick Drazach|Kurzick Ferndale|LDOA|Lightbringer|Lightbringer & Sunspear|LuxonMQ|LuxonSS|Mantids|Manual Mode|Ministerial Com. Sin|' & _
 	'Ministerial Commendations|Minotaurs|Missing Daughter|Nexus Challenge|Norn|Omni Farm|Outcast Halcyon|Rhea''s Crater|Path Recorder|Pongmei|Pongmei Sin|Raptors|Sell, Salvage, Stash|Skale Fins|Skrees|SoO|SoO Celerity|SoO Celerity + Armor|SoO Celerity + Armor no builds|SoO Celerity no builds|Spirit Slaves|Spirit Slaves Sin|' & _
 	'Storage|Sunspear Armor|Tasca|Test Suite|Tests|Tonic Spammer|Tunnels Forsaken Custom|Tunnels Forsaken|UW Chamber Traps|Underworld|Underworld Plains Trainer|UnderworldPantheon|Vaettirs|Varajar Berserkers|Varajar Berserkers Path Record|Vanguard|Vanquish Blacktide Lahtenda|Vanquish Jokanur Zehlon|Voltaic|Voltaic no builds|VSF Perma Tank|VSF Perma Tank Thommis|Wajjun Bazaar|War Supply Keiran|Warden Farm|Wingstorm|Zodiac'
 
@@ -144,7 +144,7 @@ Global $gui_group_titles, _
 		$gui_label_vanguardtitle_text, $gui_label_vanguardtitle_value, $gui_label_kurzicktitle_text, $gui_label_kurzicktitle_value, $gui_label_luxontitle_text, $gui_label_luxontitle_value, _
 		$gui_label_lightbringertitle_text, $gui_label_lightbringertitle_value, $gui_label_sunspeartitle_text, $gui_label_sunspeartitle_value
 Global $gui_group_runoptions, _
-		$gui_checkbox_loopruns, $gui_checkbox_hardmode, $gui_checkbox_emergencytravel, $gui_checkbox_automaticteamsetup, $gui_checkbox_useconsumables, $gui_checkbox_useconsets, $gui_checkbox_usescrolls
+		$gui_checkbox_loopruns, $gui_checkbox_hardmode, $gui_checkbox_emergencytravel, $gui_checkbox_automaticteamsetup, $gui_checkbox_useconsumables, $gui_checkbox_useconsets, $gui_checkbox_usescrolls, $gui_checkbox_uselegionnaire
 Global $gui_group_itemoptions, $gui_checkbox_sortitems, $gui_checkbox_collectdata, $gui_checkbox_salvageintocomponents, $gui_checkbox_farmmaterialsmidrun, _
 		$gui_label_salvagekits, $gui_combo_salvagekits, $gui_label_identificationkits, $gui_combo_identificationkits
 Global $gui_group_factionoptions, $gui_label_faction, $gui_radiobutton_donatepoints, $gui_radiobutton_buyfactionresources, $gui_radiobutton_buyfactionscrolls
@@ -357,16 +357,18 @@ Func CreateBotsHubGUI()
 	$gui_group_otheroptions = GUICtrlCreateGroup('Other options', 330, 205, 295, 260)
 	$gui_checkbox_useconsumables = GUICtrlCreateCheckbox('Use optional consumables', 355, 228)
 	$gui_checkbox_useconsets = GUICtrlCreateCheckbox('Use consets', 355, 258)
-	$gui_button_openstorage = GUICtrlCreateButton('Open Storage', 351, 290, 252, 25)
+	$gui_checkbox_uselegionnaire = GUICtrlCreateCheckbox('Use Legionnaire summon', 355, 288)
+	$gui_button_openstorage = GUICtrlCreateButton('Open Storage', 351, 310, 252, 25)
 	GUICtrlSetBkColor($gui_button_openstorage, $COLOR_LIGHTBLUE)
-	$gui_checkbox_gooffline = GUICtrlCreateCheckbox('Go offline when bot starts', 355, 325)
-	$gui_checkbox_flashwhisper = GUICtrlCreateCheckbox('Flash taskbar on whisper', 355, 355)
-	$gui_renderbutton = GUICtrlCreateButton('Rendering enabled', 351, 385, 252, 25)
+	$gui_checkbox_gooffline = GUICtrlCreateCheckbox('Go offline when bot starts', 355, 345)
+	$gui_checkbox_flashwhisper = GUICtrlCreateCheckbox('Flash taskbar on whisper', 355, 375)
+	$gui_renderbutton = GUICtrlCreateButton('Rendering enabled', 351, 405, 252, 25)
 	GUICtrlSetBkColor($gui_renderbutton, $COLOR_YELLOW)
 
 	GUICtrlSetTip($gui_checkbox_farmmaterialsmidrun, 'Salvage items during runs to save space. Bot will take some salvage kits in inventory for that.')
 	GUICtrlSetTip($gui_checkbox_useconsumables, 'If bot uses consumables (cake, pie, speed boosts, etc), it will do it automatically.')
 	GUICtrlSetTip($gui_checkbox_useconsets, 'If bot can use consets, it will do it automatically.')
+	GUICtrlSetTip($gui_checkbox_uselegionnaire, 'If enabled, farms that support summoning stones will summon the Legionnaire via the Legionnaire Summoning Crystal.')
 	GUICtrlSetTip($gui_button_openstorage, 'Open Xunlai storage window. Works remotely - view only from explorable areas.')
 	GUICtrlSetTip($gui_checkbox_gooffline, 'Set your status to offline in the friends list when the bot starts.')
 	GUICtrlSetTip($gui_checkbox_flashwhisper, 'Flash the GW taskbar button when an incoming whisper is received while the window is not focused.')
@@ -388,6 +390,7 @@ Func CreateBotsHubGUI()
 	GUICtrlSetOnEvent($gui_checkbox_useconsumables, 'GuiOptionsHandler')
 	GUICtrlSetOnEvent($gui_checkbox_useconsets, 'GuiOptionsHandler')
 	GUICtrlSetOnEvent($gui_checkbox_usescrolls, 'GuiOptionsHandler')
+	GUICtrlSetOnEvent($gui_checkbox_uselegionnaire, 'GuiOptionsHandler')
 	GUICtrlSetOnEvent($gui_checkbox_gooffline, 'GuiOptionsHandler')
 	GUICtrlSetOnEvent($gui_checkbox_flashwhisper, 'GuiOptionsHandler')
 	GUICtrlSetOnEvent($gui_checkbox_sortitems, 'GuiOptionsHandler')
@@ -404,8 +407,8 @@ Func CreateBotsHubGUI()
 	Local $manualModeTooltip = 'Manual Mode. Allows running a command with' & @CRLF _
 							& 'any arguments on the fly by writing it in below field.' & @CRLF _
 							& 'Syntax: fun(arg1, arg2, arg3, [...])'
-	$gui_input_manualmode = GUICtrlCreateInput('', 355, 425, 156, 20)
-	$gui_button_manualmode = GUICtrlCreateButton('Run', 530, 425, 75, 20)
+	$gui_input_manualmode = GUICtrlCreateInput('', 355, 445, 156, 20)
+	$gui_button_manualmode = GUICtrlCreateButton('Run', 530, 445, 75, 20)
 	GUICtrlSetTip($gui_label_manualmode, $manualModeTooltip)
 	GUICtrlSetTip($gui_input_manualmode, $manualModeTooltip)
 	GUICtrlSetTip($gui_button_manualmode, $manualModeTooltip)
@@ -747,6 +750,8 @@ Func GuiOptionsHandler()
 			$run_options_cache['run.use_consets'] = GUICtrlRead($gui_checkbox_useconsets) == $GUI_CHECKED
 		Case $gui_checkbox_usescrolls
 			$run_options_cache['run.use_scrolls'] = GUICtrlRead($gui_checkbox_usescrolls) == $GUI_CHECKED
+		Case $gui_checkbox_uselegionnaire
+			$run_options_cache['run.use_legionnaire'] = GUICtrlRead($gui_checkbox_uselegionnaire) == $GUI_CHECKED
 		Case $gui_checkbox_gooffline
 			$run_options_cache['run.go_offline'] = GUICtrlRead($gui_checkbox_gooffline) == $GUI_CHECKED
 		Case $gui_checkbox_flashwhisper
@@ -1714,6 +1719,7 @@ Func ApplyConfigToGUI()
 	GUICtrlSetState($gui_checkbox_useconsumables, $run_options_cache['run.consume_consumables'] ? $GUI_CHECKED : $GUI_UNCHECKED)
 	GUICtrlSetState($gui_checkbox_useconsets, $run_options_cache['run.use_consets'] ? $GUI_CHECKED : $GUI_UNCHECKED)
 	GUICtrlSetState($gui_checkbox_usescrolls, $run_options_cache['run.use_scrolls'] ? $GUI_CHECKED : $GUI_UNCHECKED)
+	GUICtrlSetState($gui_checkbox_uselegionnaire, $run_options_cache['run.use_legionnaire'] ? $GUI_CHECKED : $GUI_UNCHECKED)
 	GUICtrlSetState($gui_checkbox_gooffline, $run_options_cache['run.go_offline'] ? $GUI_CHECKED : $GUI_UNCHECKED)
 	GUICtrlSetState($gui_checkbox_flashwhisper, $run_options_cache['run.flash_whisper'] ? $GUI_CHECKED : $GUI_UNCHECKED)
 	GUICtrlSetState($gui_checkbox_sortitems, $run_options_cache['run.sort_items'] ? $GUI_CHECKED : $GUI_UNCHECKED)

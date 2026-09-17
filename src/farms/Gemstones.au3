@@ -31,7 +31,7 @@
 ; TODO: rework builds following 26.06.24 nerfs
 ;Global Const $GEMSTONES_MESMER_SKILLBAR = 'OQBCAswDPVP/DMd5Zu2Nd6B'
 Global Const $GEMSTONES_MESMER_SKILLBAR = 'OQBDAcMCT7iTPNB/AmO5ZcNyiA'
-Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaX0mcBKmEZ4UgppVAA'
+Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaX0mcBKmEZ4V4UA6DA'
 ; Fixed 7-hero team. Hero index 1..7 = the AddHero order in SetupTeamGemstonesFarm.
 Global Const $GEMSTONES_HERO_OLIAS_ID = $ID_OLIAS
 Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhWVVaO5EeDzxJA'
@@ -44,9 +44,9 @@ Global Const $GEMSTONES_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArATAEBA'
 Global Const $GEMSTONES_HERO_XANDRA_ID = $ID_XANDRA
 Global Const $GEMSTONES_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00Ze2QuA'
 Global Const $GEMSTONES_HERO_MOW_ID = $ID_MASTER_OF_WHISPERS
-Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OAhjUsGqoSANTBVVKgHVYMbhoBA'
+Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OAhjUsGqoSyBVBVVOOeTYMbhoBA'
 Global Const $GEMSTONES_HERO_LIVIA_ID = $ID_LIVIA
-Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABEQTtGeLB0QFYHUGYJUVtF+JA'
+Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABEQTtGeLB0cUZHUGYJUVtF+JA'
 Global Const $GEMSTONES_FARM_INFORMATIONS = 'Requirements:' & @CRLF _
 	& '- Access to mallyx (finished all 4 doa parts)' & @CRLF _
 	& '- Recommended to have maxed out Lightbringer title' & @CRLF _
@@ -69,6 +69,11 @@ Global Const $GEMSTONES_FARM_INFORMATIONS = 'Requirements:' & @CRLF _
 ; Average duration ~ 12m30sec
 Global Const $GEMSTONES_FARM_DURATION = (12 * 60 + 30) * 1000
 Global Const $MAX_GEMSTONES_FARM_DURATION = 18 * 60 * 1000
+; Re-summon cadence for the Legionnaire crystal: slightly longer than the 60s
+; Summoning Sickness. Summoned allies are not reliably visible in the agent
+; array (skill summons like the Ebon Vanguard Assassin live outside it), so we
+; re-trigger on a fixed interval instead of detecting the ally's death.
+Global Const $GEMSTONES_SUMMON_RESUMMON_MS = 65000
 
 ;=== Configuration / Globals ===
 Global Const $GEMSTONES_DEFEND_POSITION_X = -3432
@@ -95,6 +100,7 @@ Global Const $AGENTID_ZHELLIX = 15
 Global Const $MODELID_ZHELLIX = 5272
 
 Global $gemstones_farm_setup = False
+Global $gemstones_no_builds_mode = False
 
 ;~ Main Gemstones farm entry function
 Func GemstonesFarm()
@@ -104,6 +110,15 @@ Func GemstonesFarm()
 	If $result == $SUCCESS Then Info('Successfully cleared all 19 waves')
 	If $result == $FAIL Then Info('Could not clear all 19 waves')
 	TravelToOutpost($ID_GATE_OF_ANGUISH, $district_name)
+	Return $result
+EndFunc
+
+
+;~ Main method to farm Gemstones (no builds variant — preserves custom party and skill bars)
+Func GemstonesNoBuildsFarm()
+	$gemstones_no_builds_mode = True
+	Local $result = GemstonesFarm()
+	$gemstones_no_builds_mode = False
 	Return $result
 EndFunc
 
@@ -119,8 +134,13 @@ Func SetupGemstonesFarm()
 	EndIf
 	SwitchMode($ID_NORMAL_MODE)
 	SetDisplayedTitle($ID_LIGHTBRINGER_TITLE)
-	SetupPlayerGemstonesFarm()
-	SetupTeamGemstonesFarm()
+	If Not $gemstones_no_builds_mode Then
+		SetupPlayerGemstonesFarm()
+		SetupTeamGemstonesFarm()
+	Else
+		Info('Gemstones no-builds: skipping player and hero template loading')
+		Info('Gemstones no-builds: preserving custom party (' & GetPartySize() & ' members, ' & GetHeroCount() & ' heroes)')
+	EndIf
 	; Zhellix agent ID will be lower if team size is lower than 8, therefore checking for fail
 	If GetPartySize() <> $ID_TEAM_SIZE_LARGE Then
 		Error('Party not set up correctly. Team size different than ' & $ID_TEAM_SIZE_LARGE)
@@ -223,10 +243,9 @@ EndFunc
 Func GemstonesFarmLoop()
 	If TalkToZhellix() == $FAIL Then Return $FAIL
 	WalkToSpotGemstonesFarm()
-	; Spawn a summoning-stone ally before the waves start. Prefer the Legionnaire
-	; Summoning Crystal (spawns the Legionnaire NPC) if it is in the inventory;
-	; otherwise fall back to any other summoning stone (the default behaviour).
-	UseSummoningStone(True, $ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
+	; Spawn the Legionnaire ally before the waves start (gated by the
+	; "Use Legionnaire summon" GUI option inside UseSummoningStone).
+	UseSummoningStone()
 	Sleep(2000)
 	If GemstonesDefendPosition() == $FAIL Then Return $FAIL
 	Return $SUCCESS
@@ -273,25 +292,17 @@ Func GemstonesDefendPosition()
 EndFunc
 
 
-;~ Returns True if a summoned ally is currently alive near the player. The
-;~ summoned NPC is any allied NPC that is not Zhellix (the ritual NPC). Dead
-;~ summons are already filtered out by GetNPCsInRangeOfAgent.
-Func GemstonesIsSummonActive()
-	Local $npcs = GetNPCsInRangeOfAgent(GetMyAgent(), $ID_ALLEGIANCE_NPC, $RANGE_SPIRIT)
-	For $npc In $npcs
-		If DllStructGetData($npc, 'ModelID') <> $MODELID_ZHELLIX Then Return True
-	Next
-	Return False
-EndFunc
-
-
-;~ Keep the Legionnaire summon alive through the 19-wave fight: re-trigger the
-;~ crystal only once the previous summon has died AND Summoning Sickness has
-;~ expired (UseSummoningStone itself refuses while sickness is still active).
+;~ Keep the Legionnaire alive across all 19 waves. Summoned allies are not
+;~ reliably visible in the agent array (skill summons like the Ebon Vanguard
+;~ Assassin live outside it), so instead of detecting the ally's death we
+;~ re-trigger the crystal on a fixed interval once Summoning Sickness (60s) has
+;~ expired. For an infinite summon this is a harmless no-op while the ally is
+;~ still alive, and brings it straight back once it has died.
 Func GemstonesMaintainSummon()
-	If GemstonesIsSummonActive() Then Return
+	Local Static $lastSummon = 0
 	If GetEffectTimeRemaining(GetEffect($ID_SUMMONING_SICKNESS)) > 0 Then Return
-	UseSummoningStone(True, $ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
+	If $lastSummon <> 0 And TimerDiff($lastSummon) < $GEMSTONES_SUMMON_RESUMMON_MS Then Return
+	If UseSummoningStone() Then $lastSummon = TimerInit()
 EndFunc
 
 

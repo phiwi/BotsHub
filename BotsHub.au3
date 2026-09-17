@@ -177,6 +177,7 @@ $run_options_cache['run.district'] = 'Default'
 $run_options_cache['run.consume_consumables'] = True
 $run_options_cache['run.use_consets'] = False
 $run_options_cache['run.use_scrolls'] = False
+$run_options_cache['run.use_legionnaire'] = False
 $run_options_cache['run.sort_items'] = False
 $run_options_cache['run.farm_materials_mid_run'] = False
 $run_options_cache['run.bags_count'] = 5
@@ -485,6 +486,7 @@ Func ReadConfigFromJson($jsonString)
 	$run_options_cache['run.consume_consumables'] = _JSON_Get($jsonObject, 'run.consume_consumables')
 	$run_options_cache['run.use_consets'] = _JSON_Get($jsonObject, 'run.use_consets')
 	$run_options_cache['run.use_scrolls'] = _JSON_Get($jsonObject, 'run.use_scrolls')
+	$run_options_cache['run.use_legionnaire'] = _JSON_Get($jsonObject, 'run.use_legionnaire')
 	$run_options_cache['run.sort_items'] = _JSON_Get($jsonObject, 'run.sort_items')
 	$run_options_cache['run.sort_items'] = _JSON_Get($jsonObject, 'run.sort_items')
 	$run_options_cache['run.collect_data'] = _JSON_Get($jsonObject, 'run.collect_data')
@@ -535,6 +537,7 @@ Func WriteConfigToJson()
 	_JSON_addChangeDelete($jsonObject, 'run.consume_consumables', $run_options_cache['run.consume_consumables'])
 	_JSON_addChangeDelete($jsonObject, 'run.use_consets', $run_options_cache['run.use_consets'])
 	_JSON_addChangeDelete($jsonObject, 'run.use_scrolls', $run_options_cache['run.use_scrolls'])
+	_JSON_addChangeDelete($jsonObject, 'run.use_legionnaire', $run_options_cache['run.use_legionnaire'])
 	_JSON_addChangeDelete($jsonObject, 'run.sort_items', $run_options_cache['run.sort_items'])
 	_JSON_addChangeDelete($jsonObject, 'run.collect_data', $run_options_cache['run.collect_data'])
 	_JSON_addChangeDelete($jsonObject, 'run.go_offline', $run_options_cache['run.go_offline'])
@@ -601,6 +604,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Froggy no builds',				FroggyNoBuildsFarm,				10,					$FROGGY_FARM_DURATION)
 	AddFarmToFarmMap(	'Froggy Hero Panels Test',		FroggyHeroPanelsPseudoFarm,		0,					$FROGGY_HERO_PANELS_TEST_DURATION)
 	AddFarmToFarmMap(	'Gemstones',					GemstonesFarm,					10,					$GEMSTONES_FARM_DURATION)
+	AddFarmToFarmMap(	'Gemstones no builds',			GemstonesNoBuildsFarm,			10,					$GEMSTONES_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Margonite',			GemstoneMargoniteFarm,			10,					$GEMSTONE_MARGONITE_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Stygian',				GemstoneStygianFarm,			10,					$GEMSTONE_STYGIAN_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Torment',				GemstoneTormentFarm,			10,					$GEMSTONE_TORMENT_FARM_DURATION)
