@@ -62,6 +62,7 @@ Opt('GUICloseOnESC', False)
 #include '../src/farms/Raptors.au3'
 #include '../src/farms/SpiritSlaves.au3'
 #include '../src/farms/Vaettirs.au3'
+#include '../src/farms/VarajarBerserkers.au3'
 #include '../src/missions/Deldrimor.au3'
 #include '../src/missions/FoW.au3'
 #include '../src/missions/Froggy.au3'
@@ -101,7 +102,7 @@ Global Const $AVAILABLE_WEAPON_SLOTS = '|0|1|2|3|4'
 Global Const $KIT_AMOUNT_CHOICE = '|0|1|2|3|4|5|6|7|8|9|10|11|12'
 Global Const $AVAILABLE_FARMS = '|Asuran|Boreal|CoF|Corsairs|Deldrimor|Drake Flesh|Dragon Moss|Eden Iris|Feathers|Follower|FoW|FoW Tower of Courage|Froggy|Gemstones|Gemstone Margonite|Gemstone Stygian|Gemstone Torment|' & _
 	'Glint Challenge|Jade Brotherhood|Kappa|Kilroy|Kournans|Kurzick Ferndale|Kurzick Drazach|LDOA|Lightbringer & Sunspear|Lightbringer|LuxonMQ|LuxonSS|Mantids|Ministerial Commendations|Minotaurs|Nexus Challenge|Norn|OmniFarm|Pongmei|' & _
-	'Raptors|Skale Fins|Skrees|SoO|SpiritSlaves|Sunspear Armor|Tasca|TunnelsOfTheForsaken|Underworld|UnderworldPantheon|Vaettirs|Vanguard|Voltaic|War Supply Keiran|Zodiac|Manual Mode|Storage|Tests|Tonic Spammer|TestSuite'
+	'Raptors|Skale Fins|Skrees|SoO|SpiritSlaves|Sunspear Armor|Tasca|TunnelsOfTheForsaken|Underworld|UnderworldPantheon|Vaettirs|Varajar Berserkers|Vanguard|Voltaic|War Supply Keiran|Zodiac|Manual Mode|Storage|Tests|Tonic Spammer|TestSuite'
 
 #Region GUI
 
@@ -1197,6 +1198,10 @@ Func UpdateFarmDescription($farm)
 				'E:'	& @TAB & $EME_VAETTIRS_FARMER_SKILLBAR _
 			)
 			GUICtrlSetData($gui_label_farminformations, $VAETTIRS_FARM_INFORMATIONS)
+		Case 'Varajar Berserkers'
+			GUICtrlSetData($gui_edit_characterbuilds, $VARAJAR_BERSERKERS_SKILLBAR)
+			GUICtrlSetData($gui_edit_heroesbuilds, $VARAJAR_MARGRID_SKILLBAR & @CRLF & $VARAJAR_MORGAHN_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $VARAJAR_BERSERKERS_FARM_INFORMATIONS)
 		Case 'Vanguard'
 			GUICtrlSetData($gui_edit_characterbuilds, $generalCharacterSetup)
 			GUICtrlSetData($gui_edit_heroesbuilds, $generalHeroesSetup)
