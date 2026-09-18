@@ -39,8 +39,8 @@ Global Const $MARGONITE_MONK_HERO_SKILLBAR = 'OwITAnHb5Qe/zhxLkpE6+G'
 ; You can select which monk hero to use in the farm here, among 3 heroes available. Uncomment below line for hero to use
 ; party hero ID that is used to add hero to the party team
 ;Global Const $MARGONITE_HERO_PARTY_ID = $ID_DUNKORO
-;Global Const $MARGONITE_HERO_PARTY_ID = $ID_TAHLKORA
-Global Const $MARGONITE_HERO_PARTY_ID = $ID_OGDEN
+Global Const $MARGONITE_HERO_PARTY_ID = $ID_TAHLKORA
+;Global Const $MARGONITE_HERO_PARTY_ID = $ID_OGDEN
 
 Global Const $MARGONITE_DEADLY_PARADOX		= 1
 Global Const $MARGONITE_SHADOWFORM			= 2
@@ -121,6 +121,9 @@ Global $margonite_aura_of_restoration_timer	= TimerInit()
 Global $margonite_player_profession = $ID_MESMER
 Global $gemstone_margonite_farm_setup = False
 
+; Set to True to write a CSV debug log (logs/margonite_debug-<char>.csv)
+Global Const $MARGONITE_DEBUG_LOG = True
+
 ;~ Main loop function for farming margonite gemstones
 Func GemstoneMargoniteFarm()
 	If Not $gemstone_margonite_farm_setup And SetupGemstoneMargoniteFarm() == $FAIL Then Return $PAUSE
@@ -129,10 +132,12 @@ Func GemstoneMargoniteFarm()
 	Local $result = GemstoneMargoniteFarmLoop()
 	If $result == $SUCCESS Then
 		Info('Successfully cleared margonite mobs')
+		MargoniteCsvLog('farm_success')
 	ElseIf $result == $FAIL Then
 		If IsPlayerDead() Then Warn('Player died')
 		If IsHeroDead(1) Then Warn('monk hero died')
 		Info('Could not clear margonite mobs')
+		MargoniteCsvLog('farm_death')
 	EndIf
 	Info('Returning back to the outpost')
 	ResignAndReturnToOutpost($ID_GATE_OF_ANGUISH, true)
@@ -166,13 +171,29 @@ Func SetupPlayerMargoniteFarm()
 	$margonite_player_profession = DllStructGetData(GetMyAgent(), 'Primary')
 	Switch $margonite_player_profession
 		Case $ID_ASSASSIN
-			LoadSkillTemplate($AME_MARGONITE_SKILLBAR)
+			If HeroHasTemplate(0, $AME_MARGONITE_SKILLBAR) Then
+				Info('Margonite Assassin: template already loaded, skipping')
+			Else
+				LoadSkillTemplate($AME_MARGONITE_SKILLBAR)
+			EndIf
 		Case $ID_MESMER
-			LoadSkillTemplate($MEA_MARGONITE_SKILLBAR)
+			If HeroHasTemplate(0, $MEA_MARGONITE_SKILLBAR) Then
+				Info('Margonite Mesmer: template already loaded, skipping')
+			Else
+				LoadSkillTemplate($MEA_MARGONITE_SKILLBAR)
+			EndIf
 		Case $ID_ELEMENTALIST
-			LoadSkillTemplate($EME_MARGONITE_SKILLBAR)
+			If HeroHasTemplate(0, $EME_MARGONITE_SKILLBAR) Then
+				Info('Margonite Elementalist: template already loaded, skipping')
+			Else
+				LoadSkillTemplate($EME_MARGONITE_SKILLBAR)
+			EndIf
 		Case $ID_RANGER
-			LoadSkillTemplate($RA_MARGONITE_SKILLBAR)
+			If HeroHasTemplate(0, $RA_MARGONITE_SKILLBAR) Then
+				Info('Margonite Ranger: template already loaded, skipping')
+			Else
+				LoadSkillTemplate($RA_MARGONITE_SKILLBAR)
+			EndIf
 		Case Else
 			Warn('You need to run this farm bot as Assassin or Mesmer or Elementalist or Ranger')
 			Return $FAIL
@@ -195,7 +216,11 @@ Func SetupTeamMargoniteFarm()
 	EndIf
 	RandomSleep(250)
 	Info('Setting up hero build skill bar')
-	LoadSkillTemplate($MARGONITE_MONK_HERO_SKILLBAR, 1)
+	If HeroHasTemplate(1, $MARGONITE_MONK_HERO_SKILLBAR) Then
+		Info('Margonite monk hero: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($MARGONITE_MONK_HERO_SKILLBAR, 1)
+	EndIf
 	RandomSleep(250)
 	SetHeroBehaviour(1, $ID_HERO_AVOIDING)
 	RandomSleep(250)
@@ -272,11 +297,13 @@ EndFunc
 Func GemstoneMargoniteFarmLoop()
 	Local $me = Null, $target = Null
 	Info('Starting Farm')
+	MargoniteCsvLog('farm_start')
 
 	CommandAll(-18571, -9328)
 	RandomSleep(2000)
 	CastBondsMargoniteFarm()
 	EnableMargoniteHeroSkills()
+	MargoniteCsvLog('bonds_done')
 	If GetLightbringerTitle() < 50000 Then
 		Info('Taking Blessing')
 		GoNearestNPCToCoords(-17623, -9670)
@@ -298,7 +325,10 @@ Func GemstoneMargoniteFarmLoop()
 	WaitAggroMargonites(7000)
 	; below is the furthest location player goes to pull front Margonite mobs but also not let rear margonite mobs leave player and kill monk hero
 	If MargoniteMoveAndSurvive(-10277, -10778) == $FAIL Then Return $FAIL
-	CommandAll(-12861, -12620)
+	; Keep the monk hero further from the ball so rear/front mobs can't reach it (guide: flag along the wall).
+	; Pushed further south so rear Margonites (~-14300,-11800) that leash back when the Ele loses
+	; aggro stay outside the monk's aggro range (was ~1037 units away, now ~1700).
+	CommandAll(-14000, -13500)
 	; waiting for far margonite group to come into range of player
 	WaitAggroMargonites(50000)
 	If MargoniteMoveAndSurvive(-12065, -10905) == $FAIL Then Return $FAIL
@@ -378,8 +408,13 @@ EndFunc
 
 
 Func MargoniteSurvive()
+	Local Static $surviveLogTimer = TimerInit()
 	MargoniteCheckBuffs()
 	MargoniteMonkHeroHeal()
+	If TimerDiff($surviveLogTimer) > 5000 Then
+		MargoniteCsvLog('survive_state')
+		$surviveLogTimer = TimerInit()
+	EndIf
 EndFunc
 
 
@@ -400,7 +435,11 @@ Func MargoniteCheckBuffs()
 	; famine spirit which deals damage when energy is 0, therefore Shadow Form and buffs skills usage is adjusted accordingly below
 	If $margonite_player_profession <> $ID_ELEMENTALIST Then
 		If IsRecharged($MARGONITE_SHADOWFORM) Then
-			If GetEffect($ID_QUICKENING_ZEPHYR) == Null Then UseSkillEx($MARGONITE_DEADLY_PARADOX)
+			; Always cast Deadly Paradox before Shadow Form so SF's recharge is halved (15s < 19-21s
+			; duration) independent of Quickening Zephyr. Relying on QZ alone caused SF to drop when the
+			; Margonites die mid-kill (their QZ spirit disappears): SF recharge jumps 15s -> 30s > duration,
+			; leaving a ~10s gap where the Sin can be hexed and killed.
+			UseSkillEx($MARGONITE_DEADLY_PARADOX)
 			UseSkillEx($MARGONITE_SHADOWFORM)
 		EndIf
 		If IsRecharged($MARGONITE_SHROUD_OF_DISTRESS) And Not IsRecharged($MARGONITE_SHADOWFORM) And GetEnergy() > 14 Then UseSkillEx($MARGONITE_SHROUD_OF_DISTRESS)
@@ -414,6 +453,9 @@ Func MargoniteCheckBuffs()
 		Case $ID_ELEMENTALIST
 			MargoniteCheckBuffsElementalist()
 		Case $ID_RANGER
+			; Keep Whirling Defense up while aggroing so Paragons don't build adrenaline (guide).
+			If IsRecharged($MARGONITE_RANGER_WHIRLING_DEFENSE) And Not IsRecharged($MARGONITE_SHADOWFORM) And GetEnergy() > 8 Then UseSkillEx($MARGONITE_RANGER_WHIRLING_DEFENSE)
+			If IsRecharged($MARGONITE_RANGER_DWARVEN_STABILITY) And Not IsRecharged($MARGONITE_SHADOWFORM) And GetEnergy() > 8 Then UseSkillEx($MARGONITE_RANGER_DWARVEN_STABILITY)
 			If IsRecharged($MARGONITE_RANGER_UNSEEN_FURY) And Not IsRecharged($MARGONITE_SHADOWFORM) And GetEffect($ID_WHIRLING_DEFENSE) == Null Then UseSkillEx($MARGONITE_RANGER_UNSEEN_FURY)
 	EndSwitch
 
@@ -436,23 +478,24 @@ Func MargoniteCheckBuffsElementalist()
 		UseSkillEx($MARGONITE_ELEMENTALIST_ELEMENTAL_LORD)
 		$margonite_elemental_lord_timer = TimerInit()
 	EndIf
-	If TimerDiff($MARGONITE_ELEMENTALIST_AURA_OF_RESTORATION) > 50000 And GetEnergy() > 8 Then
+	If TimerDiff($margonite_aura_of_restoration_timer) > 50000 And GetEnergy() > 8 Then
 		UseSkillEx($MARGONITE_ELEMENTALIST_AURA_OF_RESTORATION)
 		$margonite_aura_of_restoration_timer = TimerInit()
 	EndIf
-	If IsRecharged($MARGONITE_ELEMENTALIST_OBSIDIAN_FLESH) And TimerDiff($margonite_obsidian_flesh_timer) > 14 Then
-		While GetEnergy() < 8
+	If IsRecharged($MARGONITE_ELEMENTALIST_OBSIDIAN_FLESH) And TimerDiff($margonite_obsidian_flesh_timer) > 14000 Then
+		While GetEnergy() < 8 And IsPlayerAlive()
 			Sleep(100)
 		WEnd
 		UseSkillEx($MARGONITE_ELEMENTALIST_GLYPH_OF_SWIFTNESS)
-		While GetEnergy() < 32
+		While GetEnergy() < 32 And IsPlayerAlive()
 			Sleep(100)
 		WEnd
-		UseSkillEx($MARGONITE_ELEMENTALIST_OBSIDIAN_FLESH)
+		Local $ofOk = UseSkillEx($MARGONITE_ELEMENTALIST_OBSIDIAN_FLESH)
+		MargoniteCsvLog('of_cast', 'ok=' & $ofOk)
 		$margonite_obsidian_flesh_timer = TimerInit()
 	EndIf
 	If IsRecharged($MARGONITE_ELEMENTALIST_STONEFLESH_AURA) And TimerDiff($margonite_stoneflesh_aura_timer) > 10000 And Not IsRecharged($MARGONITE_ELEMENTALIST_OBSIDIAN_FLESH) Then
-		While GetEnergy() < 12
+		While GetEnergy() < 12 And IsPlayerAlive()
 			Sleep(100)
 		WEnd
 		UseSkillEx($MARGONITE_ELEMENTALIST_STONEFLESH_AURA)
@@ -463,6 +506,8 @@ EndFunc
 
 Func KillMargonites()
 	Info('Fighting margonites')
+	; Count foes in the kill ball before the fight so we can report how many were killed (Berserker-style).
+	Local $foesBefore = CountFoesInRangeOfAgent(GetMyAgent(), $MARGONITES_RANGE)
 	UseHeroSkill(1, $MARGONITE_HERO_EDGE_OF_EXTINCTION)
 	Switch $margonite_player_profession
 		Case $ID_ASSASSIN, $ID_MESMER, $ID_ELEMENTALIST
@@ -470,33 +515,49 @@ Func KillMargonites()
 		Case $ID_RANGER
 			KillMargonitesUsingWhirlingDefense()
 	EndSwitch
+	; Count survivors after the kill and report the kill count (clamped at 0 so a
+	; late straggler can never make the count negative).
+	Local $foesAfter = CountFoesInRangeOfAgent(GetMyAgent(), $MARGONITES_RANGE)
+	Local $foesKilled = $foesBefore - $foesAfter
+	If $foesKilled < 0 Then $foesKilled = 0
+	MargoniteCsvLog('kill_count', 'killed=' & $foesKilled & ';before=' & $foesBefore & ';after=' & $foesAfter)
+	Info('Killed ' & $foesKilled & ' margonites')
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
 
 
 Func KillMargonitesUsingVisageSkills()
 	If IsPlayerDead() Then Return $FAIL
+	MargoniteCsvLog('kill_start')
 	Local $timerKill = TimerInit()
+	Local $logTimer = TimerInit()
 	Local Static $maxFightTime = 100000
 
 	While CountFoesInRangeOfAgent(GetMyAgent(), $MARGONITES_RANGE) > 0 And TimerDiff($timerKill) < $maxFightTime And Not IsHeroDead(1)
 		RandomSleep(100)
 		MargoniteSurvive()
+		If TimerDiff($logTimer) > 5000 Then
+			MargoniteCsvLog('fight_state')
+			$logTimer = TimerInit()
+		EndIf
 
-		If IsRecharged($MARGONITE_ANCESTORS_VISAGE) And GetEffect($ID_ANCESTORS_VISAGE) == Null And GetEffect($ID_SYMPATHETIC_VISAGE) == Null And GetEnergy() > 14 And _
-				(($margonite_player_profession <> $ID_ELEMENTALIST And Not IsRecharged($MARGONITE_SHADOWFORM)) Or ($margonite_player_profession == $ID_ELEMENTALIST And Not IsRecharged($MARGONITE_ELEMENTALIST_OBSIDIAN_FLESH))) Then
-			UseSkillEx($MARGONITE_ANCESTORS_VISAGE)
+		; Ancestor's Visage drains enemy energy to 0 so the Famine spirit kills them.
+		; QZ raises its energy cost by +30% (~20), so require > 20 energy and don't
+		; gate on the tank skill recharge (that alignment never matched, see issue #235).
+		If IsRecharged($MARGONITE_ANCESTORS_VISAGE) And GetEffect($ID_ANCESTORS_VISAGE) == Null And GetEffect($ID_SYMPATHETIC_VISAGE) == Null And GetEnergy() > 20 Then
+			Local $avOk = UseSkillEx($MARGONITE_ANCESTORS_VISAGE)
+			MargoniteCsvLog('visage_av', 'ok=' & $avOk)
 		EndIf
 
 		Switch $margonite_player_profession
 			Case $ID_ELEMENTALIST
-				If IsRecharged($MARGONITE_ELEMENTALIST_SYMPATHETICVISAGE) And GetEffect($ID_ANCESTORS_VISAGE) == Null And GetEffect($ID_SYMPATHETIC_VISAGE) == Null And _
-						Not IsRecharged($MARGONITE_ELEMENTALIST_OBSIDIAN_FLESH) And GetEnergy() > 14 Then
-					UseSkillEx($MARGONITE_ELEMENTALIST_SYMPATHETICVISAGE)
+				If IsRecharged($MARGONITE_ELEMENTALIST_SYMPATHETICVISAGE) And GetEffect($ID_ANCESTORS_VISAGE) == Null And GetEffect($ID_SYMPATHETIC_VISAGE) == Null And GetEnergy() > 20 Then
+					Local $svOk = UseSkillEx($MARGONITE_ELEMENTALIST_SYMPATHETICVISAGE)
+					MargoniteCsvLog('visage_sv', 'ok=' & $svOk)
 				EndIf
 			Case $ID_ASSASSIN, $ID_MESMER
 				; Use lightbringers gaze or other skill for optimization, because quickening zephyr makes Ancestors Visage duration basically equal to recharge time
-				If IsRecharged($MARGONITE_LIGHTBRINGERS_GAZE) And Not IsRecharged($MARGONITE_SHADOWFORM) And GetEnergy() > 8 Then
+				If IsRecharged($MARGONITE_LIGHTBRINGERS_GAZE) And GetEnergy() > 8 Then
 					Local $target = GetNearestEnemyToAgent(GetMyAgent())
 					If $target <> Null Then
 						ChangeTarget($target)
@@ -507,18 +568,25 @@ Func KillMargonitesUsingVisageSkills()
 		EndSwitch
 		If IsPlayerDead() Then Return $FAIL
 	WEnd
+	MargoniteCsvLog('kill_end')
 	Return $SUCCESS
 EndFunc
 
 
 Func KillMargonitesUsingWhirlingDefense()
 	If IsPlayerDead() Then Return $FAIL
+	MargoniteCsvLog('kill_start')
 	Local $timerKill = TimerInit()
+	Local $logTimer = TimerInit()
 	Local Static $maxFightTime = 100000
 
 	While CountFoesInRangeOfAgent(GetMyAgent(), $MARGONITES_RANGE) > 0 And TimerDiff($timerKill) < $maxFightTime And Not IsHeroDead(1)
 		RandomSleep(100)
 		MargoniteSurvive()
+		If TimerDiff($logTimer) > 5000 Then
+			MargoniteCsvLog('fight_state')
+			$logTimer = TimerInit()
+		EndIf
 
 		If IsRecharged($MARGONITE_RANGER_DWARVEN_STABILITY) And Not IsRecharged($MARGONITE_SHADOWFORM) And GetEnergy() > 8 Then
 			UseSkillEx($MARGONITE_RANGER_DWARVEN_STABILITY)
@@ -530,5 +598,68 @@ Func KillMargonitesUsingWhirlingDefense()
 		EndIf
 		If IsPlayerDead() Then Return $FAIL
 	WEnd
+	MargoniteCsvLog('kill_end')
 	Return $SUCCESS
+EndFunc
+
+
+;~ Write a CSV debug row (AmFah600-style) to debug the Margonite farm.
+;~ Set $MARGONITE_DEBUG_LOG to True to enable. Output: logs/margonite_debug-<char>.csv
+Func MargoniteCsvLog($event, $detail = '')
+	If Not $MARGONITE_DEBUG_LOG Then Return
+	Local Static $csvHandle = Null
+	If $csvHandle == Null Then
+		Local $csvPath = @ScriptDir & '/logs/margonite_debug-' & GetCharacterName() & '.csv'
+		$csvHandle = FileOpen($csvPath, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
+		If $csvHandle == -1 Then Return ; silently skip if file can't be opened
+		Info('Margonite CSV: ' & $csvPath)
+		FileWriteLine($csvHandle, 'timestamp,elapsed_ms,event,detail,profession,energy,max_energy,hp%,hero_hp%,hero_x,hero_y,hero_foe_dist,hero_foe_x,hero_foe_y,sf_ms,of_ms,sa_ms,av_ms,sv_ms,wd_ms,foes_earshot')
+	EndIf
+
+	Local $alive = IsPlayerAlive()
+	Local $elapsed = TimerDiff($run_timer)
+	Local $prof = '?'
+	Switch $margonite_player_profession
+		Case $ID_ASSASSIN
+			$prof = 'A'
+		Case $ID_MESMER
+			$prof = 'Me'
+		Case $ID_ELEMENTALIST
+			$prof = 'E'
+		Case $ID_RANGER
+			$prof = 'R'
+	EndSwitch
+
+	Local $energy = 0, $maxEnergy = 0, $hp = 0, $sfMs = 0, $ofMs = 0, $saMs = 0, $avMs = 0, $svMs = 0, $wdMs = 0, $foes = 0
+	If $alive Then
+		$energy = Round(GetEnergy())
+		$maxEnergy = DllStructGetData(GetMyAgent(), 'MaxEnergy')
+		$hp = Round(DllStructGetData(GetMyAgent(), 'HealthPercent') * 100, 1)
+		$sfMs = Round(GetEffectTimeRemaining($ID_SHADOW_FORM))
+		$ofMs = Round(GetEffectTimeRemaining($ID_OBSIDIAN_FLESH))
+		$saMs = Round(GetEffectTimeRemaining($ID_STONEFLESH_AURA))
+		$avMs = Round(GetEffectTimeRemaining($ID_ANCESTORS_VISAGE))
+		$svMs = Round(GetEffectTimeRemaining($ID_SYMPATHETIC_VISAGE))
+		$wdMs = Round(GetEffectTimeRemaining($ID_WHIRLING_DEFENSE))
+		$foes = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_EARSHOT)
+	EndIf
+
+	Local $heroHp = 0
+	Local $heroX = 0, $heroY = 0, $heroFoeDist = 0, $heroFoeX = 0, $heroFoeY = 0
+	Local $hero = GetAgentByID(GetHeroID(1))
+	If $hero <> Null Then
+		$heroHp = Round(DllStructGetData($hero, 'HealthPercent') * 100, 1)
+		$heroX = Round(DllStructGetData($hero, 'X'))
+		$heroY = Round(DllStructGetData($hero, 'Y'))
+		Local $heroFoe = GetNearestEnemyToAgent($hero)
+		If $heroFoe <> Null Then
+			$heroFoeDist = Round(GetDistance($hero, $heroFoe))
+			$heroFoeX = Round(DllStructGetData($heroFoe, 'X'))
+			$heroFoeY = Round(DllStructGetData($heroFoe, 'Y'))
+		EndIf
+	EndIf
+
+	Local $detailSafe = StringReplace($detail, ',', ' ')
+	Local $ts = @YEAR & '-' & @MON & '-' & @MDAY & ' ' & @HOUR & ':' & @MIN & ':' & @SEC
+	FileWriteLine($csvHandle, $ts & ',' & Round($elapsed, 0) & ',' & $event & ',' & $detailSafe & ',' & $prof & ',' & $energy & ',' & $maxEnergy & ',' & $hp & ',' & $heroHp & ',' & $heroX & ',' & $heroY & ',' & $heroFoeDist & ',' & $heroFoeX & ',' & $heroFoeY & ',' & $sfMs & ',' & $ofMs & ',' & $saMs & ',' & $avMs & ',' & $svMs & ',' & $wdMs & ',' & $foes)
 EndFunc
