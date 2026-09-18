@@ -136,7 +136,7 @@ Func SetupPlayerVarajarBerserkers()
 		RandomSleep(250)
 	EndIf
 	; Activate weapon set 1 for the Hundred Blades + Whirlwind spike
-	ChangeWeaponSet(1)
+	ChangeWeaponSet(2)
 	RandomSleep(150)
 	Return $SUCCESS
 EndFunc
