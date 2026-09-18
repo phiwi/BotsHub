@@ -57,8 +57,11 @@ Global Const $MAX_GEMSTONE_TORMENT_FARM_DURATION = 20 * 60 * 1000
 
 ; Staff of enchanting 20% for the run and faster energy regeneration
 Global Const $TORMENT_WEAPON_SLOT_STAFF = 2
-; Weapon of enchanting 20% and +5 Energy and a focus +15Energy/-1Regeneration for more energy
-Global Const $TORMENT_WEAPON_SLOT_FOCUS = 3
+; Weapon set used for the fire spike
+Global Const $TORMENT_WEAPON_SLOT_FOCUS = 1
+
+; Set to True to write a CSV debug log (logs/torment_debug-<char>.csv)
+Global Const $TORMENT_DEBUG_LOG = False
 
 Global $torment_run_options						= CloneMap($default_move_options)
 $torment_run_options['movementRoutine']			= SurviveTormentFarm
@@ -76,8 +79,14 @@ Func GemstoneTormentFarm()
 
 	If GoToRavenHeartGloom() == $FAIL Then Return $FAIL
 	Local $result = GemstoneTormentFarmLoop()
-	If $result == $SUCCESS Then Info('Successfully cleared torment mobs')
-	If $result == $FAIL Then Info('Player died. Could not clear torment mobs')
+	If $result == $SUCCESS Then
+		Info('Successfully cleared torment mobs')
+		TormentCsvLog('farm_success')
+	EndIf
+	If $result == $FAIL Then
+		Info('Player died. Could not clear torment mobs')
+		TormentCsvLog('farm_death')
+	EndIf
 	Info('Returning back to the outpost')
 	ResignAndReturnToOutpost($ID_GATE_OF_ANGUISH, true)
 	Return $result
@@ -105,8 +114,12 @@ EndFunc
 Func SetupPlayerTormentFarm()
 	Info('Setting up player build skill bar')
 	If DllStructGetData(GetMyAgent(), 'Primary') == $ID_ELEMENTALIST Then
-		LoadSkillTemplate($EA_TORMENT_SKILLBAR)
-		RandomSleep(250)
+		If HeroHasTemplate(0, $EA_TORMENT_SKILLBAR) Then
+			Info('Torment player: template already loaded, skipping')
+		Else
+			LoadSkillTemplate($EA_TORMENT_SKILLBAR)
+			RandomSleep(250)
+		EndIf
 	Else
 		Warn('You need to run this farm bot as Elementalist')
 		Return $FAIL
@@ -140,11 +153,14 @@ EndFunc
 
 Func GemstoneTormentFarmLoop()
 	Info('Starting Farm')
+	TormentCsvLog('farm_start')
 	Local $timerWait
+	Local $maxEnergy = DllStructGetData(GetMyAgent(), 'MaxEnergy')
 
 	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_STAFF & ' - Staff')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_STAFF)
 	RandomSleep(250)
+	TormentCsvLog('weapon_staff')
 	If GetLightbringerTitle() < 50000 Then
 		Info('Taking Blessing')
 		GoNearestNPCToCoords(16457, 1801)
@@ -160,7 +176,9 @@ Func GemstoneTormentFarmLoop()
 		RandomSleep(100)
 	WEnd
 	$timerWait = TimerInit()
-	UseSkillTimed($TORMENT_OBSIDIAN_FLESH)
+	TormentCsvLog('initial_of_before')
+	Local $initialOfOk = UseSkillTimed($TORMENT_OBSIDIAN_FLESH)
+	TormentCsvLog('initial_of_after', 'ok=' & $initialOfOk)
 	While TimerDiff($timerWait) < 2000 And IsPlayerAlive()
 		RandomSleep(100)
 	WEnd
@@ -169,16 +187,18 @@ Func GemstoneTormentFarmLoop()
 	If RunTormentFarm(11444, 9370) == $FAIL Then Return $FAIL
 	If RunTormentFarm(10828, 10583) == $FAIL Then Return $FAIL
 	$timerWait = TimerInit()
-	While IsPlayerAlive() And (TimerDiff($timerWait) < 15000 Or Not IsRecharged($TORMENT_OBSIDIAN_FLESH) Or GetEnergy() < 80)
+	While IsPlayerAlive() And (TimerDiff($timerWait) < 15000 Or Not IsRecharged($TORMENT_OBSIDIAN_FLESH) Or GetEnergy() < ($maxEnergy - 0.5))
 		RandomSleep(100)
 	WEnd
 	Info('First group')
+	TormentCsvLog('first_group')
 	CastBuffsTormentFarm()
 	If RunTormentFarm(10779, 9898) == $FAIL Then Return $FAIL
 	;If RunTormentFarm(11125, 9198) == $FAIL Then Return $FAIL
 	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_FOCUS & ' - Focus')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_FOCUS)
 	RandomSleep(500)
+	TormentCsvLog('weapon_focus')
 	If KillTormentMobs() == $FAIL Then Return $FAIL
 	Info('Picking up loot')
 	PickUpItems()
@@ -192,15 +212,17 @@ Func GemstoneTormentFarmLoop()
 	If RunTormentFarm(16250, 14073) == $FAIL Then Return $FAIL
 	$timerWait = TimerInit()
 	While IsPlayerAlive() And (TimerDiff($timerWait) < 42000 Or Not IsRecharged($TORMENT_ELEMENTAL_LORD) Or _
-			Not IsRecharged($TORMENT_OBSIDIAN_FLESH) Or Not IsRecharged($TORMENT_METEOR_SHOWER) Or GetEnergy() < 80)
+			Not IsRecharged($TORMENT_OBSIDIAN_FLESH) Or Not IsRecharged($TORMENT_METEOR_SHOWER) Or GetEnergy() < ($maxEnergy - 0.5))
 		RandomSleep(100)
 	WEnd
 	Info('Second group')
+	TormentCsvLog('second_group')
 	CastBuffsTormentFarm()
 	RandomSleep(250)
 	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_FOCUS & ' - Focus')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_FOCUS)
 	RandomSleep(500)
+	TormentCsvLog('weapon_focus')
 	If KillTormentMobs() == $FAIL Then Return $FAIL
 
 	Info('Picking up loot')
@@ -217,9 +239,13 @@ EndFunc
 Func CastBuffsTormentFarm()
 	If IsPlayerDead() Then Return $FAIL
 	RandomSleep(150)
-	UseSkillTimed($TORMENT_ELEMENTAL_LORD)
-	UseSkillTimed($TORMENT_GLYPH_OF_ELEMENTAL_POWER)
-	UseSkillTimed($TORMENT_OBSIDIAN_FLESH)
+	TormentCsvLog('buffs_before')
+	Local $elOk = UseSkillTimed($TORMENT_ELEMENTAL_LORD)
+	TormentCsvLog('buffs_el', 'ok=' & $elOk)
+	Local $glyphOk = UseSkillTimed($TORMENT_GLYPH_OF_ELEMENTAL_POWER)
+	TormentCsvLog('buffs_glyph', 'ok=' & $glyphOk)
+	Local $ofOk = UseSkillTimed($TORMENT_OBSIDIAN_FLESH)
+	TormentCsvLog('buffs_of', 'ok=' & $ofOk)
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
 
@@ -239,18 +265,57 @@ EndFunc
 
 Func KillTormentMobs()
 	If IsPlayerDead() Then Return $FAIL
+	TormentCsvLog('kill_start')
 	Local $target = Null
 
-	$target = GetNearestEnemyToAgent(GetMyAgent())
-	UseSkillTimed($TORMENT_METEOR_SHOWER, $target)
-	$target = GetNearestEnemyToAgent(GetMyAgent())
+	; Death's Charge first, onto the centroid enemy in the middle of the ball.
+	Local $nearest = GetNearestEnemyToAgent(GetMyAgent())
+	Local $center = FindMiddleOfFoes(DllStructGetData($nearest, 'X'), DllStructGetData($nearest, 'Y'), $RANGE_SPELLCAST)
+	$target = GetNearestEnemyToCoords($center[0], $center[1])
 	ChangeTarget($target)
 	UseSkillTimed($TORMENT_DEATHS_CHARGE, $target)
+	; Then Meteor Shower, Lava Font, Flame Burst and Rodgort's Invocation (5-6-7-8).
+	$target = GetNearestEnemyToAgent(GetMyAgent())
+	UseSkillTimed($TORMENT_METEOR_SHOWER, $target)
 	UseSkillTimed($TORMENT_LAVA_FONT)
 	UseSkillTimed($TORMENT_FLAME_BURST)
 	UseSkillTimed($TORMENT_RODGORTS_INVOCATION, $target)
 	; waiting for mobs to be cleaned by meteor shower
 	RandomSleep(1500)
 
+	TormentCsvLog('kill_end')
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
+EndFunc
+
+
+;~ Write a CSV debug row (AmFah600-style) to help debug why Obsidian Flesh is not cast.
+;~ Set $TORMENT_DEBUG_LOG to True to enable. Output: logs/torment_debug-<char>.csv
+Func TormentCsvLog($event, $detail = '')
+	If Not $TORMENT_DEBUG_LOG Then Return
+	Local Static $csvHandle = Null
+	If $csvHandle == Null Then
+		Local $csvPath = @ScriptDir & '/logs/torment_debug-' & GetCharacterName() & '.csv'
+		$csvHandle = FileOpen($csvPath, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
+		If $csvHandle == -1 Then Return ; silently skip if file can't be opened
+		Info('Torment CSV: ' & $csvPath)
+		FileWriteLine($csvHandle, 'timestamp,elapsed_ms,event,detail,energy,max_energy,hp%,of_ms,of_ready,el_ms,foes_earshot')
+	EndIf
+
+	Local $alive = IsPlayerAlive()
+	Local $elapsed = TimerDiff($run_timer)
+	Local $energy = 0, $maxEnergy = 0, $hp = 0, $ofMs = 0, $ofReady = 0, $elMs = 0, $foes = 0
+	If $alive Then
+		$energy = Round(GetEnergy())
+		$maxEnergy = DllStructGetData(GetMyAgent(), 'MaxEnergy')
+		$hp = Round(DllStructGetData(GetMyAgent(), 'HealthPercent') * 100, 1)
+		$ofMs = Round(GetEffectTimeRemaining($ID_OBSIDIAN_FLESH))
+		$ofReady = IsRecharged($TORMENT_OBSIDIAN_FLESH) ? 1 : 0
+		$elMs = Round(GetEffectTimeRemaining($ID_ELEMENTAL_LORD_LUXON))
+		If $elMs == 0 Then $elMs = Round(GetEffectTimeRemaining($ID_ELEMENTAL_LORD_KURZICK))
+		$foes = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_EARSHOT)
+	EndIf
+
+	Local $detailSafe = StringReplace($detail, ',', ' ')
+	Local $ts = @YEAR & '-' & @MON & '-' & @MDAY & ' ' & @HOUR & ':' & @MIN & ':' & @SEC
+	FileWriteLine($csvHandle, $ts & ',' & Round($elapsed, 0) & ',' & $event & ',' & $detailSafe & ',' & $energy & ',' & $maxEnergy & ',' & $hp & ',' & $ofMs & ',' & $ofReady & ',' & $elMs & ',' & $foes)
 EndFunc
