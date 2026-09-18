@@ -31,7 +31,7 @@
 ; TODO: rework builds following 26.06.24 nerfs
 ;Global Const $GEMSTONES_MESMER_SKILLBAR = 'OQBCAswDPVP/DMd5Zu2Nd6B'
 Global Const $GEMSTONES_MESMER_SKILLBAR = 'OQBDAcMCT7iTPNB/AmO5ZcNyiA'
-Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdTkY24ZaX0mcBKmEZ4V4UA6DA'
+Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgljgwMopS7ihD0CkD+Y1YfDeDA'
 ; Fixed 7-hero team. Hero index 1..7 = the AddHero order in SetupTeamGemstonesFarm.
 Global Const $GEMSTONES_HERO_OLIAS_ID = $ID_OLIAS
 Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhWVVaO5EeDzxJA'
@@ -43,10 +43,10 @@ Global Const $GEMSTONES_HERO_GWEN_ID = $ID_GWEN
 Global Const $GEMSTONES_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArATAEBA'
 Global Const $GEMSTONES_HERO_XANDRA_ID = $ID_XANDRA
 Global Const $GEMSTONES_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00Ze2QuA'
-Global Const $GEMSTONES_HERO_MOW_ID = $ID_MASTER_OF_WHISPERS
-Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OAhjUsGqoSyBVBVVOOeTYMbhoBA'
+Global Const $GEMSTONES_HERO_MERCENARY1_ID = $ID_MERCENARY_HERO_1
+Global Const $GEMSTONES_HERO_MERCENARY1_TEMPLATE = 'OACjEuiMpNXzqJGrcyMncSzhJA'
 Global Const $GEMSTONES_HERO_LIVIA_ID = $ID_LIVIA
-Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABEQTtGeLB0cUZHUGYJUVtF+JA'
+Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABEQTtGeLB0cUhHUGYJgGsFSFA'
 Global Const $GEMSTONES_FARM_INFORMATIONS = 'Requirements:' & @CRLF _
 	& '- Access to mallyx (finished all 4 doa parts)' & @CRLF _
 	& '- Recommended to have maxed out Lightbringer title' & @CRLF _
@@ -196,14 +196,14 @@ EndFunc
 Func SetupTeamGemstonesFarm()
 	If IsTeamAutoSetup() Then Return $SUCCESS
 
-	Info('Setting up team: Olias, Norgu, Razah, Gwen, Xandra, Master of Whispers, Livia')
+	Info('Setting up team: Olias, Norgu, Razah, Gwen, Xandra, A R U Atmosphere, Livia')
 	LeaveParty()
 	AddHero($GEMSTONES_HERO_OLIAS_ID)
 	AddHero($GEMSTONES_HERO_NORGU_ID)
 	AddHero($GEMSTONES_HERO_RAZAH_ID)
 	AddHero($GEMSTONES_HERO_GWEN_ID)
 	AddHero($GEMSTONES_HERO_XANDRA_ID)
-	AddHero($GEMSTONES_HERO_MOW_ID)
+	AddHero($GEMSTONES_HERO_MERCENARY1_ID)
 	AddHero($GEMSTONES_HERO_LIVIA_ID)
 	RandomSleep(500)
 	If GetPartySize() <> $ID_TEAM_SIZE_LARGE Then
@@ -215,7 +215,7 @@ Func SetupTeamGemstonesFarm()
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_RAZAH_ID, 'Razah', $GEMSTONES_HERO_RAZAH_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_GWEN_ID, 'Gwen', $GEMSTONES_HERO_GWEN_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_XANDRA_ID, 'Xandra', $GEMSTONES_HERO_XANDRA_TEMPLATE) == $FAIL Then Return $FAIL
-	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_MOW_ID, 'Master of Whispers', $GEMSTONES_HERO_MOW_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_MERCENARY1_ID, 'A R U Atmosphere', $GEMSTONES_HERO_MERCENARY1_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_LIVIA_ID, 'Livia', $GEMSTONES_HERO_LIVIA_TEMPLATE) == $FAIL Then Return $FAIL
 	RandomSleep(250)
 	Return $SUCCESS
