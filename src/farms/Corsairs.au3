@@ -99,8 +99,12 @@ EndFunc
 Func SetupPlayerCorsairsFarm()
 	Info('Setting up player build skill bar')
 	If DllStructGetData(GetMyAgent(), 'Primary') == $ID_RANGER Then
-		LoadSkillTemplate($RA_CORSAIRS_FARMER_SKILLBAR)
-		RandomSleep(250)
+		If HeroHasTemplate(0, $RA_CORSAIRS_FARMER_SKILLBAR) Then
+			Info('Corsairs player: template already loaded, skipping')
+		Else
+			LoadSkillTemplate($RA_CORSAIRS_FARMER_SKILLBAR)
+			RandomSleep(250)
+		EndIf
 	Else
 		Warn('Should run this farm as ranger')
 		Return $FAIL
@@ -116,8 +120,16 @@ Func SetupTeamCorsairsFarm()
 	LeaveParty()
 	If AddRequiredHero($ID_DUNKORO) == $FAIL Then Return $FAIL
 	If AddHeroByProfession($ID_DERVISH, $ID_MELONNI) == $FAIL Then Return $FAIL
-	LoadSkillTemplate($MOP_CORSAIRS_HERO_SKILLBAR, 1)
-	LoadSkillTemplate($DR_CORSAIRS_HERO_SKILLBAR, 2)
+	If HeroHasTemplate(1, $MOP_CORSAIRS_HERO_SKILLBAR) Then
+		Info('Corsairs Dunkoro: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($MOP_CORSAIRS_HERO_SKILLBAR, 1)
+	EndIf
+	If HeroHasTemplate(2, $DR_CORSAIRS_HERO_SKILLBAR) Then
+		Info('Corsairs Melonni: template already loaded, skipping')
+	Else
+		LoadSkillTemplate($DR_CORSAIRS_HERO_SKILLBAR, 2)
+	EndIf
 	RandomSleep(250)
 	DisableHeroSkillSlot(1, $CORSAIRS_MAKE_HASTE)
 	DisableHeroSkillSlot(2, $CORSAIRS_WINNOWING)
