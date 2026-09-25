@@ -116,6 +116,7 @@ Opt('MustDeclareVars', True)
 #include 'src/runs/Tasca.au3'
 #include 'src/runs/WajjunBazar.au3'
 #include 'src/runs/AmFah600SpiritBond.au3'
+#include 'src/runs/BukdekByway.au3'
 #include 'src/titles/LDOA.au3'
 #include 'src/utilities/Follower.au3'
 #include 'src/utilities/BoneBuyer.au3'
@@ -587,6 +588,7 @@ Func FillFarmMap()
 	;					Farm Name						Farm function					Inventory space		Farm duration
 	AddFarmToFarmMap(	'Asuran',						AsuranTitleFarm,				5,					$ASURAN_FARM_DURATION)
 	AddFarmToFarmMap(	'Boreal',						BorealChestFarm,				5,					$BOREAL_FARM_DURATION)
+	AddFarmToFarmMap(	'Bukdek Byway',					BukdekBywayFarm,				5,					$BUKDEK_FARM_DURATION)
 	AddFarmToFarmMap(	'CoF',							CoFFarm,						5,					$COF_FARM_DURATION)
 	AddFarmToFarmMap(	'Corsairs',						CorsairsFarm,					5,					$CORSAIRS_FARM_DURATION)
 	AddFarmToFarmMap(	'Deldrimor',					DeldrimorFarm,					10,					$DELDRIMOR_FARM_DURATION)
@@ -605,6 +607,13 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Froggy Hero Panels Test',		FroggyHeroPanelsPseudoFarm,		0,					$FROGGY_HERO_PANELS_TEST_DURATION)
 	AddFarmToFarmMap(	'Gemstones',					GemstonesFarm,					10,					$GEMSTONES_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstones no builds',			GemstonesNoBuildsFarm,			10,					$GEMSTONES_FARM_DURATION)
+	AddFarmToFarmMap(	'Gemstones HM',			GemstonesHardModeFarm,			10,					$GEMSTONES_FARM_DURATION)
+	AddFarmToFarmMap(	'Gemstones HM Grail',	GemstonesHardModeGrailFarm,		10,					$GEMSTONES_FARM_DURATION)
+	AddFarmToFarmMap(	'Gemstones HM Armor',	GemstonesHardModeArmorFarm,		10,					$GEMSTONES_FARM_DURATION)
+	AddFarmToFarmMap(	'Gemstones HM Essence',	GemstonesHardModeEssenceFarm,	10,					$GEMSTONES_FARM_DURATION)
+	AddFarmToFarmMap(	'Gemstones HM Grail nb',	GemstonesHardModeGrailNoBuildsFarm,	10,					$GEMSTONES_FARM_DURATION)
+	AddFarmToFarmMap(	'Gemstones HM Armor nb',	GemstonesHardModeArmorNoBuildsFarm,	10,					$GEMSTONES_FARM_DURATION)
+	AddFarmToFarmMap(	'Gemstones HM Essence nb',	GemstonesHardModeEssenceNoBuildsFarm,	10,					$GEMSTONES_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Margonite',			GemstoneMargoniteFarm,			10,					$GEMSTONE_MARGONITE_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Stygian',				GemstoneStygianFarm,			10,					$GEMSTONE_STYGIAN_FARM_DURATION)
 	AddFarmToFarmMap(	'Gemstone Torment',				GemstoneTormentFarm,			10,					$GEMSTONE_TORMENT_FARM_DURATION)
