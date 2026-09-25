@@ -564,17 +564,19 @@ EndFunc
 
 Func AmFah600SpiritBondActivateQuest()
 	Info('Starting Refuse to Drink at Brother Tosai')
-	If IsQuestActive($ID_QUEST_REFUSE_TO_DRINK) Then
-		Info('Refuse to Drink already active')
+	If IsQuestActive($ID_QUEST_REFUSE_TO_DRINK) And CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_EARSHOT) > 0 Then
+		Info('Refuse to Drink already active and Am Fah hostile')
 		Return $SUCCESS
 	EndIf
 
-	; Abandon any stale quest state from previous failed attempts.
-	; Partial activation (Dialog+AcceptQuest may make enemies hostile without
-	; the quest registering as 'active') poisons the next run — the approach
-	; waypoints don't maintain PS/SB and the player dies during movement.
+	; Abandon any stale quest state before (re-)triggering. This covers BOTH:
+	;  - a "partial" activation (Dialog+AcceptQuest made enemies hostile without
+	;    the quest registering as 'active'), and
+	;  - a fully "active" quest whose Am Fah are NOT hostile yet (the "refuse"
+	;    step never ran — e.g. leftover state from a previous session).
+	; Either way the stale state poisons the next run, so reset it.
 	If Not IsQuestNotFound($ID_QUEST_REFUSE_TO_DRINK) Then
-		Warn('Refuse to Drink quest in non-active state — abandoning to reset')
+		Warn('Refuse to Drink quest in stale state — abandoning to reset')
 		AbandonQuest($ID_QUEST_REFUSE_TO_DRINK)
 		PingSleep(500)
 	EndIf
