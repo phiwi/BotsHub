@@ -29,24 +29,38 @@
 
 ; ==== Constants ====
 ; TODO: rework builds following 26.06.24 nerfs
-;Global Const $GEMSTONES_MESMER_SKILLBAR = 'OQBCAswDPVP/DMd5Zu2Nd6B'
-Global Const $GEMSTONES_MESMER_SKILLBAR = 'OQBDAcMCT7iTPNB/AmO5ZcNyiA'
-Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgljgwMopS7ihD0CkD+Y1YfDeDA'
+Global Const $GEMSTONES_MESMER_SKILLBAR = 'OghkkgKKjIyEz0rA0XR0t41U1kPI'
+;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBCsMz0uI0w7w6whT6gcZuI' ; Water
+;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdUkSFySvSpCMNnC3iwCRfFRLQA' ; Promise Wards 
+;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBDgcqMS7ihD0CkDvCwCfDeDA' ; Air + Wards
+;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgljgwMopS7ihD0CkD+Y1YfDeDA' ; Air + Commmand
+Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OghkkwKBjIyEz0u4rw1U1U5kPYrI' ; Spirits + Wards
+;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgVDIMusRkD7i3imOCO3U4UTPA' ; Dom
+
 ; Fixed 7-hero team. Hero index 1..7 = the AddHero order in SetupTeamGemstonesFarm.
 Global Const $GEMSTONES_HERO_OLIAS_ID = $ID_OLIAS
-Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhWVVaO5EeDzxJA'
+Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhWVV4JNncDzxJA'
 Global Const $GEMSTONES_HERO_NORGU_ID = $ID_NORGU
-Global Const $GEMSTONES_HERO_NORGU_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDwBQjA'
+Global Const $GEMSTONES_HERO_NORGU_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDQ6QjA'
 Global Const $GEMSTONES_HERO_RAZAH_ID = $ID_RAZAH
-Global Const $GEMSTONES_HERO_RAZAH_TEMPLATE = 'OQNEAsoD2yECxpmupXOIDoBQjA'
+Global Const $GEMSTONES_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDQ6QjA'
 Global Const $GEMSTONES_HERO_GWEN_ID = $ID_GWEN
 Global Const $GEMSTONES_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArATAEBA'
+;~ Global Const $GEMSTONES_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArATAEBA'
 Global Const $GEMSTONES_HERO_XANDRA_ID = $ID_XANDRA
 Global Const $GEMSTONES_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00Ze2QuA'
 Global Const $GEMSTONES_HERO_MERCENARY1_ID = $ID_MERCENARY_HERO_1
 Global Const $GEMSTONES_HERO_MERCENARY1_TEMPLATE = 'OACjEuiMpNXzqJGrcyMncSzhJA'
+Global Const $GEMSTONES_HERO_MERCENARY2_ID = $ID_MERCENARY_HERO_2
+Global Const $GEMSTONES_HERO_MERCENARY2_TEMPLATE = 'OANDYazPSxVNgeErEfEaRVVGNA'
 Global Const $GEMSTONES_HERO_LIVIA_ID = $ID_LIVIA
-Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABEQTtGeLB0cUhHUGYJgGsFSFA'
+Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OAhkUoG3xFu0SVVgdAawWolwkzwE'
+;~ Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABEQTtGeLB0QFAHgHsFqAaJYHA'
+
+;~ Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABEQTtGeLB0cURFgHsFWGYJYHA'
+Global Const $GEMSTONES_HERO_MOW_ID = $ID_MASTER_OF_WHISPERS
+Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OAhkUoG3xFuEQDVwnAewWYZg00wE'
+
 Global Const $GEMSTONES_FARM_INFORMATIONS = 'Requirements:' & @CRLF _
 	& '- Access to mallyx (finished all 4 doa parts)' & @CRLF _
 	& '- Recommended to have maxed out Lightbringer title' & @CRLF _
@@ -101,6 +115,9 @@ Global Const $MODELID_ZHELLIX = 5272
 
 Global $gemstones_farm_setup = False
 Global $gemstones_no_builds_mode = False
+Global $gemstones_hard_mode = False
+; Optional single-consumable override for Hard Mode: '' (all), 'grail', 'armor' or 'essence'.
+Global $gemstones_consets_override = ''
 
 ;~ Main Gemstones farm entry function
 Func GemstonesFarm()
@@ -123,6 +140,63 @@ Func GemstonesNoBuildsFarm()
 EndFunc
 
 
+;~ Main method to farm Gemstones in Hard Mode (overrides the default Normal Mode).
+Func GemstonesHardModeFarm()
+	Return GemstonesRunHardMode('')
+EndFunc
+
+
+;~ Hard Mode using only Grail of Might (when the "consets" checkbox is enabled).
+Func GemstonesHardModeGrailFarm()
+	Return GemstonesRunHardMode('grail')
+EndFunc
+
+
+;~ Hard Mode using only Armor of Salvation (when the "consets" checkbox is enabled).
+Func GemstonesHardModeArmorFarm()
+	Return GemstonesRunHardMode('armor')
+EndFunc
+
+
+;~ Hard Mode using only Essence of Celerity (when the "consets" checkbox is enabled).
+Func GemstonesHardModeEssenceFarm()
+	Return GemstonesRunHardMode('essence')
+EndFunc
+
+
+;~ Hard Mode using only Grail of Might, no builds (preserves custom party/bars).
+Func GemstonesHardModeGrailNoBuildsFarm()
+	Return GemstonesRunHardMode('grail', True)
+EndFunc
+
+
+;~ Hard Mode using only Armor of Salvation, no builds (preserves custom party/bars).
+Func GemstonesHardModeArmorNoBuildsFarm()
+	Return GemstonesRunHardMode('armor', True)
+EndFunc
+
+
+;~ Hard Mode using only Essence of Celerity, no builds (preserves custom party/bars).
+Func GemstonesHardModeEssenceNoBuildsFarm()
+	Return GemstonesRunHardMode('essence', True)
+EndFunc
+
+
+;~ Shared Hard Mode runner: sets the mode, (optional) single-consumable override
+;~ and (optional) no-builds flag, runs the farm, then restores defaults for the
+;~ next run.
+Func GemstonesRunHardMode($consetsOverride, $noBuilds = False)
+	$gemstones_hard_mode = True
+	$gemstones_consets_override = $consetsOverride
+	$gemstones_no_builds_mode = $noBuilds
+	Local $result = GemstonesFarm()
+	$gemstones_hard_mode = False
+	$gemstones_consets_override = ''
+	$gemstones_no_builds_mode = False
+	Return $result
+EndFunc
+
+
 ;~ Gemstones farm setup
 Func SetupGemstonesFarm()
 	Info('Setting up farm')
@@ -132,7 +206,14 @@ Func SetupGemstonesFarm()
 	Else
 		ResignAndReturnToOutpost($ID_GATE_OF_ANGUISH, true)
 	EndIf
-	SwitchMode($ID_NORMAL_MODE)
+	If Not SupportTeamStabilizeAfterTravel($ID_GATE_OF_ANGUISH, 10000, 250) Then
+		Warn('Gemstones setup: outpost stabilization timed out before team setup')
+	EndIf
+	If $gemstones_hard_mode Then
+		SwitchMode($ID_HARD_MODE)
+	Else
+		SwitchMode($ID_NORMAL_MODE)
+	EndIf
 	SetDisplayedTitle($ID_LIGHTBRINGER_TITLE)
 	If Not $gemstones_no_builds_mode Then
 		SetupPlayerGemstonesFarm()
@@ -158,8 +239,15 @@ EndFunc
 Func SetupGemstonesFightOptions()
 	; heroes will be flagged before fight to defend the start location
 	$gemstones_fight_options						= CloneMap($default_move_aggro_kill_options)
+	; 2000u (statt default 1500u) damit Fernkämpfer wie der Tortureweb Dryder
+	; auch auf Distanz erkannt, priorisiert und angegriffen werden.
+	$gemstones_fight_options['fightRange']			= 2000
 	$gemstones_fight_options['fightTimeout']		= $GEMSTONES_FARM_DURATION
 	$gemstones_fight_options['priorityTargeting']	= True
+	; Sehr grosse Prioritaets-Reichweite: die Tortureweb Dryder ist ein Fernkaempfer,
+	; der weit weg bleibt/kitet (teils >5000u). Nur so wird sie zuverlaessig gefunden
+	; und der Bot faellt nicht auf den Dream Rider zurueck.
+	$gemstones_fight_options['priorityRange']		= 20000
 	$gemstones_fight_options['skillsCostMap']		= $GEM_SKILLS_COSTS_MAP
 	; there are no chests in Ebony Citadel of Mallyx location
 	$gemstones_fight_options['openChests']			= False
@@ -203,7 +291,9 @@ Func SetupTeamGemstonesFarm()
 	AddHero($GEMSTONES_HERO_RAZAH_ID)
 	AddHero($GEMSTONES_HERO_GWEN_ID)
 	AddHero($GEMSTONES_HERO_XANDRA_ID)
-	AddHero($GEMSTONES_HERO_MERCENARY1_ID)
+	AddHero($GEMSTONES_HERO_MOW_ID)
+	;~ AddHero($GEMSTONES_HERO_MERCENARY2_ID)
+	;~ AddHero($GEMSTONES_HERO_MERCENARY1_ID)
 	AddHero($GEMSTONES_HERO_LIVIA_ID)
 	RandomSleep(500)
 	If GetPartySize() <> $ID_TEAM_SIZE_LARGE Then
@@ -215,7 +305,8 @@ Func SetupTeamGemstonesFarm()
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_RAZAH_ID, 'Razah', $GEMSTONES_HERO_RAZAH_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_GWEN_ID, 'Gwen', $GEMSTONES_HERO_GWEN_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_XANDRA_ID, 'Xandra', $GEMSTONES_HERO_XANDRA_TEMPLATE) == $FAIL Then Return $FAIL
-	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_MERCENARY1_ID, 'A R U Atmosphere', $GEMSTONES_HERO_MERCENARY1_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_MOW_ID, 'MoW', $GEMSTONES_HERO_MOW_TEMPLATE) == $FAIL Then Return $FAIL
+	;~ If GemstonesLoadHeroTemplate($GEMSTONES_HERO_MERCENARY1_ID, 'A R U Atmosphere', $GEMSTONES_HERO_MERCENARY1_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_LIVIA_ID, 'Livia', $GEMSTONES_HERO_LIVIA_TEMPLATE) == $FAIL Then Return $FAIL
 	RandomSleep(250)
 	Return $SUCCESS
@@ -270,23 +361,98 @@ Func WalkToSpotGemstonesFarm()
 	; go close to Zhellix to let him start erforming the ritual, Null for no interaction
 	GoToAgent(GetAgentByID($AGENTID_ZHELLIX), Null)
 	MoveTo($GEMSTONES_DEFEND_POSITION_X, $GEMSTONES_DEFEND_POSITION_Y)
-	FanFlagHeroes()
+	; Arrange heroes in a tight ring around the player (Ele in the center) so the
+	; player's Wards cover everyone. Radius keeps the 25%-tighter spacing (250 * 0.75 = 188).
+	GemstonesArrangeHeroesAroundPlayer(188)
+EndFunc
+
+
+;~ Place the 7 heroes in a ring around the player (Elementalist in the center) so the
+;~ player's Wards benefit every hero. The ring is oriented with one hero facing the
+;~ nearest foe (incoming waves). $range is the ring radius (188 = 25% tighter than the
+;~ default fan spacing of 250).
+Func GemstonesArrangeHeroesAroundPlayer($range = 188)
+	Local $heroCount = GetHeroCount()
+	If $heroCount < 1 Then Return
+	Local $me = GetMyAgent()
+	Local $x = DllStructGetData($me, 'X')
+	Local $y = DllStructGetData($me, 'Y')
+
+	; Forward direction: toward the nearest foe, else the player's facing.
+	Local $fx = DllStructGetData($me, 'RotationCos')
+	Local $fy = DllStructGetData($me, 'RotationSin')
+	Local $foe = GetNearestEnemyToAgent($me)
+	If $foe <> Null Then
+		Local $dx = DllStructGetData($foe, 'X') - $x
+		Local $dy = DllStructGetData($foe, 'Y') - $y
+		Local $len = Sqrt($dx * $dx + $dy * $dy)
+		If $len > 0 Then
+			$fx = $dx / $len
+			$fy = $dy / $len
+		EndIf
+	EndIf
+	; Right direction (perpendicular to forward, matches FanFlagHeroes convention).
+	Local $rx = $fy
+	Local $ry = -$fx
+
+	Local $angleStep = (2 * 3.14159265358979) / $heroCount
+	For $i = 1 To $heroCount
+		Local $a = ($i - 1) * $angleStep
+		Local $cosA = Cos($a)
+		Local $sinA = Sin($a)
+		CommandHero($i, $x + ($fx * $cosA + $rx * $sinA) * $range, $y + ($fy * $cosA + $ry * $sinA) * $range)
+	Next
 EndFunc
 
 
 ;~ Defending function
 Func GemstonesDefendPosition()
 	Info('Defending...')
+	; The 19 waves are not defined in code — they are handled implicitly by
+	; IsZhellixPerformingRitual(). Track a heuristic wave number for logging.
+	; Detection counts foes around the FIXED defend point (not the player, who
+	; moves while looting/chasing) so the signal is stable. Because ranged
+	; stragglers (Tortureweb Dryders etc.) often linger, a wave is only
+	; considered "over" once foes drop to a straggler-only count (<= 2) and
+	; stay there for a few seconds; a new wave starts when foes rise back above
+	; that threshold.
+	Local $waveNumber = 0
+	Local $waveActive = False
+	Local $lullSince = 0
 
 	While IsZhellixPerformingRitual()
 		If CheckStuck('Gemstones fight', $MAX_GEMSTONES_FARM_DURATION) == $FAIL Then Return $FAIL
 		If IsDoARunFailed() Then Return $FAIL
+		; Hard Mode: maintain consets throughout the waves (gated by the GUI
+		; "use consets" checkbox). If a single-consumable override is set,
+		; only that consumable is used.
+		If $gemstones_hard_mode Then GemstonesMaintainConsets()
 		GemstonesMaintainSummon()
 		Sleep(1000)
+
+		Local $foesNow = CountFoesInRangeOfCoords($GEMSTONES_DEFEND_POSITION_X, $GEMSTONES_DEFEND_POSITION_Y, $gemstones_fight_options['fightRange'])
+		If $foesNow >= 3 And Not $waveActive Then
+			$waveNumber += 1
+			Info('Wave ' & $waveNumber & '/19 started (' & $foesNow & ' foes in range)')
+			$waveActive = True
+			$lullSince = 0
+		ElseIf $foesNow <= 2 Then
+			; Only stragglers left. Require a sustained lull so a brief dip
+			; while a wave is still dying doesn't miscount as the wave ending.
+			If $lullSince == 0 Then $lullSince = TimerInit()
+			If $waveActive And TimerDiff($lullSince) >= 6000 Then
+				Info('Wave ' & $waveNumber & ' cleared (' & $foesNow & ' stragglers left)')
+				$waveActive = False
+			EndIf
+		Else
+			$lullSince = 0
+		EndIf
+
 		KillFoesInArea($gemstones_fight_options)
 		If IsPlayerAlive() Then PickUpItems(Null, DefaultShouldPickItem, $RANGE_SPIRIT)
 		MoveTo($GEMSTONES_DEFEND_POSITION_X, $GEMSTONES_DEFEND_POSITION_Y)
 	WEnd
+	Info('Defend loop ended after wave ' & $waveNumber & '.')
 	; if ritual completed then successful run
 	Return IsDoARunFailed()? $FAIL : $SUCCESS
 EndFunc
@@ -303,6 +469,24 @@ Func GemstonesMaintainSummon()
 	If GetEffectTimeRemaining(GetEffect($ID_SUMMONING_SICKNESS)) > 0 Then Return
 	If $lastSummon <> 0 And TimerDiff($lastSummon) < $GEMSTONES_SUMMON_RESUMMON_MS Then Return
 	If UseSummoningStone() Then $lastSummon = TimerInit()
+EndFunc
+
+
+;~ Maintain consets during Hard Mode. When $gemstones_consets_override is set to
+;~ 'grail', 'armor' or 'essence', only that single consumable is used (still
+;~ gated by the GUI "use consets" checkbox). Otherwise all three are used.
+Func GemstonesMaintainConsets()
+	If Not $run_options_cache['run.use_consets'] Then Return
+	Switch $gemstones_consets_override
+		Case 'grail'
+			If GetEffectTimeRemaining(GetEffect($ID_GRAIL_OF_MIGHT_EFFECT)) <= 0 Then UseConsumable($ID_GRAIL_OF_MIGHT, True)
+		Case 'armor'
+			If GetEffectTimeRemaining(GetEffect($ID_ARMOR_OF_SALVATION_EFFECT)) <= 0 Then UseConsumable($ID_ARMOR_OF_SALVATION, True)
+		Case 'essence'
+			If GetEffectTimeRemaining(GetEffect($ID_ESSENCE_OF_CELERITY_EFFECT)) <= 0 Then UseConsumable($ID_ESSENCE_OF_CELERITY, True)
+		Case Else
+			UseConset()
+	EndSwitch
 EndFunc
 
 

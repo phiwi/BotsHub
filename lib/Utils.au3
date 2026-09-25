@@ -803,12 +803,14 @@ Func MoveAvoidingBodyBlock($destinationX, $destinationY, $options = $default_mov
 					; If Heart of Shadow skill is available then use it to get unstuck
 					If $skillSlotHoS > 0 And IsRecharged($skillSlotHoS) And GetEnergy() > 5 Then
 						UseSkillEx($skillSlotHoS)
+						Info('Bodyblock: Heart of Shadow zum Entblocken')
 						PingSleep(50)
 						MoveRadial($destinationX, $destinationY, $moveVariance)
 					; If Death's Charge skill is available then use it to get unstuck
 					ElseIf $skillSlotDeathsCharge > 0 And CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_SPELLCAST) > 0 And IsRecharged($skillSlotDeathsCharge) And GetEnergy() > 5 Then
 						$target = GetFurthestNPCInRangeOfCoords($ID_ALLEGIANCE_FOE, DllStructGetData($me, 'X'), DllStructGetData($me, 'Y'), $RANGE_SPELLCAST)
 						UseSkillEx($skillSlotDeathsCharge, $target)
+						Info("Bodyblock: Death's Charge zum Entblocken")
 						PingSleep(50)
 						MoveRadial($destinationX, $destinationY, $moveVariance)
 					EndIf
@@ -1109,6 +1111,7 @@ $default_move_aggro_kill_options['flagHeroesOnFight']	= False
 $default_move_aggro_kill_options['unstuckHandler']		= TryToGetUnstuck
 $default_move_aggro_kill_options['callTarget']			= True
 $default_move_aggro_kill_options['priorityTargeting']	= False
+$default_move_aggro_kill_options['priorityRange']		= $RANGE_COMPASS
 $default_move_aggro_kill_options['skillsCostMap']		= Null
 ;$default_move_aggro_kill_options['skillsCastTimeMap']	= Null
 $default_move_aggro_kill_options['lootInCombat']		= False
@@ -1343,6 +1346,7 @@ Func KillFoesInArea($options = $default_move_aggro_kill_options)
 	Local $ignoreDroppedLoot	= $options['ignoreDroppedLoot'] <> Null ?	$options['ignoreDroppedLoot'] : False
 	Local $killMethod			= $options['killMethod'] <> Null ?			$options['killMethod'] : UseSkillSequentially
 	Local $abortCondition		= $options['abortCondition'] <> Null ?		$options['abortCondition'] : Null
+	Local $priorityRange		= $options['priorityRange'] <> Null ?			$options['priorityRange'] : $RANGE_COMPASS
 
 	Local $me = GetMyAgent()
 	Local $foesCount = CountFoesInRangeOfAgent($me, $fightRange)
@@ -1350,13 +1354,31 @@ Func KillFoesInArea($options = $default_move_aggro_kill_options)
 	If $flagHeroes Then FanFlagHeroes(260)
 
 	Local $killTimer = TimerInit()
+	Local $callTimer = 0
 	While $foesCount > 0
 		If TimerDiff($killTimer) > $fightTimeout Then ExitLoop
-		If $priorityTargeting Then $target = GetHighestPriorityFoe($me, $fightRange)
+		; Priority targeting scans the whole compass so ranged priority foes
+		; (e.g. Tortureweb Dryders) stay targeted even when they kite out past
+		; the fight range — otherwise the bot drops them for a random nearer foe.
+		If $priorityTargeting Then $target = GetHighestPriorityFoe($me, $priorityRange)
 		If Not $priorityTargeting Or $target == Null Then $target = GetNearestEnemyToAgent($me)
+
+		; Persistently re-call + hero-lock the priority foe every second until it
+		; dies, instead of calling it only once (CallTargetOnce) and letting the
+		; heroes wander off onto a random target.
+		If $priorityTargeting And $target <> Null And DllStructGetData($target, 'ID') <> 0 And Not GetIsDead($target) Then
+			If $callTimer == 0 Or TimerDiff($callTimer) >= 1000 Then
+				If $callTarget Then CallTarget($target)
+				For $heroIndex = 1 To GetHeroCount()
+					LockHeroTarget($heroIndex, DllStructGetData($target, 'ID'))
+				Next
+				$callTimer = TimerInit()
+			EndIf
+		EndIf
+
 		If IsPlayerAlive() And $target <> Null And DllStructGetData($target, 'ID') <> 0 And Not GetIsDead($target) And GetDistance($me, $target) < $fightRange Then
 			ChangeTarget($target)
-			If $callTarget Then CallTargetOnce($target)
+			If $callTarget And Not $priorityTargeting Then CallTargetOnce($target)
 			PingSleep(100)
 			$killMethod($target, $options)
 		EndIf
@@ -2854,7 +2876,9 @@ EndFunc
 
 
 ;~ Add additional key-value mappings to the given map, keys and values taken from the given arrays
-Func AddToMapFromArrays($map, $keys, $values)
+;~ NOTE: $map MUST be ByRef — AutoIt passes Maps by value by default, so without
+;~ ByRef the assignments below only modify a copy and the caller's map stays empty.
+Func AddToMapFromArrays(ByRef $map, $keys, $values)
 	For $i = 0 To UBound($keys) - 1
 		$map[$keys[$i]] = $values[$i]
 	Next
