@@ -59,9 +59,11 @@ Global Const $MAX_GEMSTONE_TORMENT_FARM_DURATION = 20 * 60 * 1000
 Global Const $TORMENT_WEAPON_SLOT_STAFF = 2
 ; Weapon set used for the fire spike
 Global Const $TORMENT_WEAPON_SLOT_FOCUS = 1
+; Curse of Darkness (Shadow Army necromancer) — the second group in Ravenheart Gloom.
+Global Const $TORMENT_MODELID_CURSE_OF_DARKNESS = 5244
 
 ; Set to True to write a CSV debug log (logs/torment_debug-<char>.csv)
-Global Const $TORMENT_DEBUG_LOG = False
+Global Const $TORMENT_DEBUG_LOG = True
 
 Global $torment_run_options						= CloneMap($default_move_options)
 $torment_run_options['movementRoutine']			= SurviveTormentFarm
@@ -206,24 +208,41 @@ Func GemstoneTormentFarmLoop()
 	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_STAFF & ' - Staff')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_STAFF)
 	RandomSleep(250)
-	If RunTormentFarm(11130, 10910) == $FAIL Then Return $FAIL
-	If RunTormentFarm(12140, 12103) == $FAIL Then Return $FAIL
-	If RunTormentFarm(13915, 13415) == $FAIL Then Return $FAIL
-	If RunTormentFarm(16250, 14073) == $FAIL Then Return $FAIL
+	; Route around the Tormentor "pillar of eyes" group toward the second group
+	; (six Curse of Darkness, model 5244). Path recorded manually 2026-09-21.
+	If RunTormentFarm(11035, 11944) == $FAIL Then Return $FAIL
+	If RunTormentFarm(11170, 14185) == $FAIL Then Return $FAIL
+	If RunTormentFarm(11335, 14928) == $FAIL Then Return $FAIL
+	If RunTormentFarm(11735, 15908) == $FAIL Then Return $FAIL
+	If RunTormentFarm(12170, 17079) == $FAIL Then Return $FAIL
+	If RunTormentFarm(13566, 16981) == $FAIL Then Return $FAIL
+	If RunTormentFarm(14938, 17129) == $FAIL Then Return $FAIL
+	; Staging spot — hold here (safely outside the group's aggro) while energy recovers.
+	If RunTormentFarm(15248, 16661) == $FAIL Then Return $FAIL
+	TormentLogNearbyFoes('second_group_at_staging')
 	$timerWait = TimerInit()
+	Local $waitLogTimer = TimerInit()
 	While IsPlayerAlive() And (TimerDiff($timerWait) < 42000 Or Not IsRecharged($TORMENT_ELEMENTAL_LORD) Or _
 			Not IsRecharged($TORMENT_OBSIDIAN_FLESH) Or Not IsRecharged($TORMENT_METEOR_SHOWER) Or GetEnergy() < ($maxEnergy - 0.5))
+		SurviveTormentFarm()
+		If TimerDiff($waitLogTimer) > 5000 Then
+			TormentCsvLog('wait_tick')
+			$waitLogTimer = TimerInit()
+		EndIf
 		RandomSleep(100)
 	WEnd
 	Info('Second group')
 	TormentCsvLog('second_group')
 	CastBuffsTormentFarm()
 	RandomSleep(250)
+	TormentLogNearbyFoes('second_group_before_approach')
+	; Move into Death's Charge range of the Curse of Darkness ball.
+	If RunTormentFarm(15613, 16283) == $FAIL Then Return $FAIL
 	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_FOCUS & ' - Focus')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_FOCUS)
 	RandomSleep(500)
 	TormentCsvLog('weapon_focus')
-	If KillTormentMobs() == $FAIL Then Return $FAIL
+	If KillTormentMobs($TORMENT_MODELID_CURSE_OF_DARKNESS) == $FAIL Then Return $FAIL
 
 	Info('Picking up loot')
 	PickUpItems()
@@ -263,13 +282,75 @@ Func SurviveTormentFarm()
 EndFunc
 
 
-Func KillTormentMobs()
+;~ Walk toward a destination but stop as soon as a foe is within its aggro bubble
+;~ (plus a small safety margin). This keeps the Ele from pulling a group before her
+;~ Obsidian Flesh buff is up — the second group's old DPS spot sat inside aggro range.
+Func TormentMoveToAggroEdge($destinationX, $destinationY, $safetyDistance = 150)
+	Local $stopDistance = $MOB_AGGRO_RANGE + $safetyDistance
+	Local $me = GetMyAgent()
+	Local $foe = GetNearestEnemyToAgent($me)
+	While IsPlayerAlive() And GetDistanceToPoint($me, $destinationX, $destinationY) > $RANGE_NEARBY
+		SurviveTormentFarm()
+		$me = GetMyAgent()
+		$foe = GetNearestEnemyToAgent($me)
+		If $foe <> Null And GetDistance($me, $foe) < $stopDistance Then
+			CancelAction()
+			Return $SUCCESS
+		EndIf
+		Move($destinationX, $destinationY)
+		RandomSleep(200)
+		$me = GetMyAgent()
+	WEnd
+	; The in-flight Move is still active here — cancel it so she actually HOLDS at the
+	; aggro edge instead of walking the rest of the way into the group / a straggler.
+	CancelAction()
+	Return IsPlayerAlive() ? $SUCCESS : $FAIL
+EndFunc
+
+
+;~ Log the ModelIDs of all foes in earshot so we can identify which enemy group is
+;~ actually being targeted (Tormentors vs. Shadow Army "Curse of Darkness").
+Func TormentLogNearbyFoes($label)
+	Local $foes = GetFoesInRangeOfAgent(GetMyAgent(), $RANGE_EARSHOT)
+	Local $ids = ''
+	For $foe In $foes
+		$ids &= DllStructGetData($foe, 'ModelID') & ';'
+	Next
+	Info('Torment [' & $label & '] player=' & Round(DllStructGetData(GetMyAgent(), 'X')) & '/' & Round(DllStructGetData(GetMyAgent(), 'Y')) & ' foes=' & $ids)
+EndFunc
+
+
+;~ Get nearest foe matching a specific ModelID (e.g. Curse of Darkness) within range.
+Func GetNearestFoeByModelID($modelID, $range = $RANGE_COMPASS)
+	Local $foes = GetFoesInRangeOfAgent(GetMyAgent(), $range)
+	Local $nearest = Null
+	Local $bestDist = 99999
+	Local $me = GetMyAgent()
+	For $foe In $foes
+		If DllStructGetData($foe, 'ModelID') == $modelID Then
+			Local $d = GetDistance($me, $foe)
+			If $d < $bestDist Then
+				$bestDist = $d
+				$nearest = $foe
+			EndIf
+		EndIf
+	Next
+	Return $nearest
+EndFunc
+
+
+Func KillTormentMobs($modelID = Null)
 	If IsPlayerDead() Then Return $FAIL
 	TormentCsvLog('kill_start')
+	TormentLogNearbyFoes('kill_start')
 	Local $target = Null
 
 	; Death's Charge first, onto the centroid enemy in the middle of the ball.
 	Local $nearest = GetNearestEnemyToAgent(GetMyAgent())
+	If $modelID <> Null Then
+		Local $preferred = GetNearestFoeByModelID($modelID)
+		If $preferred <> Null Then $nearest = $preferred
+	EndIf
 	Local $center = FindMiddleOfFoes(DllStructGetData($nearest, 'X'), DllStructGetData($nearest, 'Y'), $RANGE_SPELLCAST)
 	$target = GetNearestEnemyToCoords($center[0], $center[1])
 	ChangeTarget($target)
