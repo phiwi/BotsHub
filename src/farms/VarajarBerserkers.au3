@@ -852,6 +852,9 @@ EndFunc
 Func VarajarBerserkersShouldPickItem($item)
 	Local $itemID = DllStructGetData($item, 'ModelID')
 	If IsMapPiece($itemID) Then Return True
+	; TEMP hardcode: never pick up green weapons (e.g. Asterius' Scythe) — worthless,
+	; they only waste inventory space.
+	If IsWeapon($item) And GetRarity($item) == $RARITY_GREEN Then Return False
 	Return DefaultShouldPickItem($item)
 EndFunc
 
