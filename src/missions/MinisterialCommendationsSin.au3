@@ -55,8 +55,8 @@ Global Const $COMMENDATIONS_SIN_XANDRA_DISPLACEMENT = 4
 Global Const $COMMENDATIONS_SIN_XANDRA_ARMOR_OF_UNFEELING = 5
 Global Const $COMMENDATIONS_SIN_ZHED_WARD_AGAINST_MELEE = 7
 
-Global Const $COMMENDATIONS_SIN_HERO_NORGU_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDQ6QjA'
-Global Const $COMMENDATIONS_SIN_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDQ6QjA'
+Global Const $COMMENDATIONS_SIN_HERO_NORGU_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDMEQjA'
+Global Const $COMMENDATIONS_SIN_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDMEQjA'
 Global Const $COMMENDATIONS_SIN_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArATAEBA'
 Global Const $COMMENDATIONS_SIN_HERO_ZHED_TEMPLATE = 'OgBCkMnTqYHy06znCVBsAZA'
 Global Const $COMMENDATIONS_SIN_HERO_OGDEN_TEMPLATE = 'OwAS4YIP+s7B13lgX7iXkqP'
@@ -74,6 +74,7 @@ Global Const $COMMENDATIONS_SIN_HERO_XANDRA_SLOT = 7
 
 Global $ministerial_commendations_sin_farm_setup = False
 Global $logging_file_commendations_sin
+Global $commendations_sin_no_builds_mode = False
 
 Global Const $COMMENDATIONS_SIN_DEBUG_SKIP_SETUP_TRAVEL_TO_KAINENG = False
 Global Const $COMMENDATIONS_SIN_DEBUG_SKIP_PLAYER_BUILD_SETUP = False
@@ -115,6 +116,16 @@ Func MinisterialCommendationsSinFarm()
 EndFunc
 
 
+;~ Main method to farm Ministerial Commendations Sin (no builds variant — preserves the
+;~ custom hero party and skill bars, but still loads the assassin player build)
+Func MinisterialCommendationsSinNoBuildsFarm()
+    $commendations_sin_no_builds_mode = True
+    Local $result = MinisterialCommendationsSinFarm()
+    $commendations_sin_no_builds_mode = False
+    Return $result
+EndFunc
+
+
 Func ReturnToKainengAfterCustomRun()
     If Not $COMMENDATIONS_SIN_FAST_RESET_ENABLED Then
         Return ResignAndReturnToOutpost($ID_Kaineng_Center, True)
@@ -144,7 +155,12 @@ Func SetupMinisterialCommendationsSinFarm()
     EndIf
 
     SetupPlayerMinisterialCommendationsSinFarm()
-    SetupTeamMinisterialCommendationsSinFarm()
+    If Not $commendations_sin_no_builds_mode Then
+        SetupTeamMinisterialCommendationsSinFarm()
+    Else
+        Info('MinisterialCommendationsSin no-builds: skipping hero team and build setup')
+        Info('MinisterialCommendationsSin no-builds: preserving custom party (' & GetPartySize() & ' members, ' & GetHeroCount() & ' heroes)')
+    EndIf
 
     SwitchMode($ID_HARD_MODE)
     $ministerial_commendations_sin_farm_setup = True
