@@ -61,6 +61,19 @@ Global Const $BUKDEK_EXIT_Y = -4840
 Global Const $BUKDEK_KAINENG_EXIT_X = -6595
 Global Const $BUKDEK_KAINENG_EXIT_Y = 20254
 
+; Recorded street route from the "further back" Kaineng spawn (after EotN trade/stash)
+; to the Bukdek Byway exit portal. The straight-line walk gets body-blocked by an NPC;
+; this route follows the streets with a small left hook around it.
+Global Const $BUKDEK_KAINENG_ROUTE[][2] = [ _
+	[2877, -1478], [2949, -1476], [3007, -1475], [3057, -1498], [3065, -1557], _
+	[3057, -1752], [3055, -1868], [3050, -2104], [3043, -2222], [2991, -2568], _
+	[2942, -2916], [2905, -3261], [2869, -3610], [2833, -3955], [2803, -4247], _
+	[2855, -4409], [2928, -4500], [3005, -4586], [3082, -4674], [3161, -4762], _
+	[3150, -4840] _
+]
+; Distance to sidestep left (west) around the NPC when body-blocked in Kaineng.
+Global Const $BUKDEK_LEFT_HOOK_OFFSET = $RANGE_NEARBY
+
 ; Heroes (same composition as Varajar Berserkers: Margrid + Morgahn + 5 meat shields)
 Global Const $BUKDEK_HERO_MARGRID = $ID_MARGRID_THE_SLY
 Global Const $BUKDEK_HERO_MORGAHN = $ID_GENERAL_MORGAHN
@@ -184,27 +197,84 @@ Func BukdekBywayFarmLoop()
 
 	Info('Starting chest farm run')
 
+	; Re-travel to Kaineng Center every run — inventory management may have moved us
+	; to the trade town (Eye of the North) between runs, and we must be in Kaineng
+	; for the Bukdek Byway exit portal.
+	If TravelToOutpost($ID_KAINENG_CENTER, $district_name) == $FAIL Then Return $FAIL
+
 	; Enter Bukdek Byway (the one-time re-zone in setup already fixed the chest spawn).
 	If BukdekEnterBukdek() == $FAIL Then Return $FAIL
+	ClearChestsMap()
 
 	; Run to the chest area (defensive skills keep the assassin alive).
 	If BukdekRunToChest() == $FAIL Then Return $FAIL
 
-	; The chest spawns within aggro range of the recorded spot, not exactly on it.
-	; FindAndOpenChests scans the whole compass range and walks straight to it.
+	; Open the chest and pick up loot — the standard proven pattern used by
+	; Boreal/PongmeiSin/Tasca. The survival callback keeps Shadow Form + I am
+	; Unstoppable up, and the blocked callback breaks body-blocks with Heart of Shadow.
 	Local $openedChest = FindAndOpenChests($RANGE_COMPASS, BukdekDefendWhileOpening, BukdekUnblock)
 	Info('Opened ' & ($openedChest ? 1 : 0) & ' chest.')
+
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
 
 
-;~ Walk directly to the Bukdek Byway exit portal. After resign/travel the player
-;~ spawns close to the portal, so a straight-line walk to the last waypoint is enough.
+;~ Walk to the Bukdek Byway exit portal. The recorded street route avoids the NPC that
+;~ body-blocks the straight-line walk from the "further back" spawn (after EotN trade/stash).
 Func BukdekEnterBukdek()
 	Info('Moving to Bukdek Byway exit')
+	BukdekWalkToKainengExit()
 	MoveTo($BUKDEK_EXIT_X, $BUKDEK_EXIT_Y)
 	If Not WaitMapLoading($ID_BUKDEK_BYWAY, 10000, 2000) Then Return $FAIL
 	Return $SUCCESS
+EndFunc
+
+
+;~ Walk the recorded street route to the Bukdek exit. Starts at the waypoint closest to
+;~ the player, so it works from both the normal spawn and the "further back" spawn.
+Func BukdekWalkToKainengExit()
+	Local $me = GetMyAgent()
+	; Find the route waypoint closest to where we spawned.
+	Local $start = 0
+	Local $best = GetDistanceToPoint($me, $BUKDEK_KAINENG_ROUTE[0][0], $BUKDEK_KAINENG_ROUTE[0][1])
+	For $i = 1 To UBound($BUKDEK_KAINENG_ROUTE) - 1
+		Local $d = GetDistanceToPoint($me, $BUKDEK_KAINENG_ROUTE[$i][0], $BUKDEK_KAINENG_ROUTE[$i][1])
+		If $d < $best Then
+			$best = $d
+			$start = $i
+		EndIf
+	Next
+
+	For $i = $start To UBound($BUKDEK_KAINENG_ROUTE) - 1
+		BukdekMoveToWithLeftHook($BUKDEK_KAINENG_ROUTE[$i][0], $BUKDEK_KAINENG_ROUTE[$i][1])
+		If IsPlayerDead() Then Return
+	Next
+EndFunc
+
+
+;~ Move to ($x,$y). If body-blocked (stuck on the NPC in Kaineng), sidestep left (west)
+;~ to hook around it, then keep going.
+Func BukdekMoveToWithLeftHook($x, $y)
+	Local $me = GetMyAgent()
+	Local $blocked = 0
+	Local $hooks = 0
+	While GetDistanceToPoint($me, $x, $y) > 150 And IsPlayerAlive() And $hooks < 3
+		Move($x, $y)
+		PingSleep(100)
+		If Not IsPlayerMoving() Then
+			$blocked += 1
+			If $blocked > 3 Then
+				Info('Bodyblock in Kaineng: linker Haken um den NPC')
+				Local $myX = DllStructGetData($me, 'X')
+				Local $myY = DllStructGetData($me, 'Y')
+				MoveTo($myX - $BUKDEK_LEFT_HOOK_OFFSET, $myY, 60)
+				PingSleep(100)
+				$blocked = 0
+				$hooks += 1
+			EndIf
+		EndIf
+		$me = GetMyAgent()
+	WEnd
 EndFunc
 
 
@@ -262,8 +332,8 @@ Func BukdekCastDefensiveSkills()
 EndFunc
 
 
-;~ Survival callback used while FindAndOpenChests walks to and opens the chest:
-;~ re-cast I am Unstoppable and Shadow Form when foes are close.
+;~ Survival callback used while walking to the chest: re-cast I am Unstoppable and
+;~ Shadow Form when foes are close.
 Func BukdekDefendWhileOpening()
 	Local $nearestFoe = GetNearestEnemyToAgent(GetMyAgent())
 
@@ -272,9 +342,9 @@ Func BukdekDefendWhileOpening()
 EndFunc
 
 
-;~ Blocked callback used while FindAndOpenChests walks to the chest: if body-blocked
-;~ by Plagueborn, Heart of Shadow (5) shadow steps to a nearby foe (or self, which
-;~ teleports in a random direction) to break free.
+;~ Blocked callback used while walking to the chest: if body-blocked by Plagueborn,
+;~ Heart of Shadow (5) shadow steps to a nearby foe (or self, which teleports in a
+;~ random direction) to break free.
 Func BukdekUnblock()
 	If IsRecharged($BUKDEK_HEART_OF_SHADOW) Then
 		Local $target = GetNearestEnemyToAgent(GetMyAgent())
