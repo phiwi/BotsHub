@@ -53,10 +53,10 @@ Global Const $BUKDEK_PRECAST_Y = 15481
 ; Cast Shadow Form + I am Unstoppable this far before the precast point (~3-4s at IMS speed).
 Global Const $BUKDEK_PRECAST_RANGE = 1400
 
-; Bukdek Byway exit portal (from Kaineng Center). Reached from two different
-; Kaineng spawns, so we just walk to this single point and let the portal trigger.
-Global Const $BUKDEK_EXIT_X = 3150
-Global Const $BUKDEK_EXIT_Y = -4840
+; Bukdek Byway exit portal (from Kaineng Center). Position taken from the recorded
+; path — walking onto this point triggers the map load. The street route below ends here.
+Global Const $BUKDEK_EXIT_X = 3200
+Global Const $BUKDEK_EXIT_Y = -4805
 ; Kaineng Center exit back from Bukdek Byway (north of the Bukdek spawn).
 Global Const $BUKDEK_KAINENG_EXIT_X = -6595
 Global Const $BUKDEK_KAINENG_EXIT_Y = 20254
@@ -69,7 +69,7 @@ Global Const $BUKDEK_KAINENG_ROUTE[][2] = [ _
 	[3057, -1752], [3055, -1868], [3050, -2104], [3043, -2222], [2991, -2568], _
 	[2942, -2916], [2905, -3261], [2869, -3610], [2833, -3955], [2803, -4247], _
 	[2855, -4409], [2928, -4500], [3005, -4586], [3082, -4674], [3161, -4762], _
-	[3150, -4840] _
+	[3200, -4805] _
 ]
 ; Distance to sidestep left (west) around the NPC when body-blocked in Kaineng.
 Global Const $BUKDEK_LEFT_HOOK_OFFSET = $RANGE_NEARBY
@@ -224,7 +224,9 @@ EndFunc
 Func BukdekEnterBukdek()
 	Info('Moving to Bukdek Byway exit')
 	BukdekWalkToKainengExit()
-	MoveTo($BUKDEK_EXIT_X, $BUKDEK_EXIT_Y)
+	; Walk right onto the portal with a tight precision so the map load triggers —
+	; the default MoveTo precision stopped the player just short of the portal.
+	MoveTo($BUKDEK_EXIT_X, $BUKDEK_EXIT_Y, 25)
 	If Not WaitMapLoading($ID_BUKDEK_BYWAY, 10000, 2000) Then Return $FAIL
 	Return $SUCCESS
 EndFunc
