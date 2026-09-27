@@ -316,7 +316,7 @@ Func MinisterialCommendationsSinFarmLoop()
     ; Multiple passes with delays so ownership expires on hero-assigned drops
     ; (event consumables, summoning stones etc. are initially assigned to heroes).
     For $pass = 1 To 8
-        PickUpItems(HealWhilePickingItemsCustom, DefaultShouldPickItem, $RANGE_SPIRIT)
+        PickUpItems(HealWhilePickingItemsCustom, MinisterialCommendationsSinShouldPickItem, $RANGE_SPIRIT)
         RandomSleep(3000)
     Next
     Info('Loot sweep done: 6 passes')
@@ -513,7 +513,7 @@ Func InitialFightCustom()
     WEnd
     If TimerDiff($deadlock) > 80000 Then Info('Timed out waiting for most mobs to be dead')
 
-    PickUpItems(Null, PickOnlyImportantItem)
+    PickUpItems(Null, MinisterialCommendationsSinPickOnlyImportantItem)
 
     CancelAllHeroes()
     Local $mikuPressure = CountFoesInRangeOfAgent($COMMENDATIONS_SIN_MIKU_AGENT_ID, $RANGE_SPELLCAST)
@@ -769,6 +769,20 @@ Func HealWhilePickingItemsCustom()
             Sleep(20 + GetPing())
         EndIf
     EndIf
+EndFunc
+
+
+;~ Never pick up green items (worthless, they only waste inventory space).
+Func MinisterialCommendationsSinShouldPickItem($item)
+    If GetRarity($item) == $RARITY_GREEN Then Return False
+    Return DefaultShouldPickItem($item)
+EndFunc
+
+
+;~ Same green-item skip for the "important items only" pass during the initial fight.
+Func MinisterialCommendationsSinPickOnlyImportantItem($item)
+    If GetRarity($item) == $RARITY_GREEN Then Return False
+    Return PickOnlyImportantItem($item)
 EndFunc
 
 
