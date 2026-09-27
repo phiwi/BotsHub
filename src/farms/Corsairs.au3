@@ -235,7 +235,12 @@ Func CorsairsFarmLoop()
 	Info('Looting')
 	$foesCount = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_SPIRIT)
 	If $foesCount == 0 Then
-		PickUpItems(OnlyCastTogetherAsOne)
+		; Multiple passes so hero-assigned drops (e.g. Melonni's kills) become unclaimed
+		; after their ownership expires, and can then be picked up.
+		For $pass = 1 To 4
+			PickUpItems(OnlyCastTogetherAsOne)
+			RandomSleep(2000)
+		Next
 	Else
 		PickUpItems(DefendAgainstCorsairs)
 	EndIf
