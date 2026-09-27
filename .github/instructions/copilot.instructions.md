@@ -186,3 +186,25 @@ Avoid suggesting:
 - rewrites without measurable benefit
 
 Code suggestions should align with the existing BotsHub architecture and conventions rather than generic enterprise patterns.
+
+
+# Git & Repository Workflow
+
+This repository is a dedicated fork. Push access is limited to the fork only.
+
+- `origin`   = `https://github.com/phiwi/BotsHub` — the fork (push target)
+- `upstream` = `https://github.com/caustic-kronos/BotsHub` — the original (read-only)
+
+Rules:
+- Never push to `upstream` — there is no write permission there.
+- Pull/fetch from `upstream` to stay in sync; push only to `origin`.
+- Changes are committed locally and pushed to `origin` (the fork).
+- Occasional changes are contributed back to `upstream` via pull requests (using
+  `pr/<name>` branches), never by direct push.
+
+Git is already configured accordingly (`git config`):
+- `remote.pushdefault = origin`
+- `branch.master.pushremote = origin`
+- `branch.master.remote = upstream` (pull/fetch target)
+
+Use `git push origin <branch>` (or plain `git push`, which already targets `origin`).
