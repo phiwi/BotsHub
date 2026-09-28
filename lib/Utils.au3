@@ -803,14 +803,14 @@ Func MoveAvoidingBodyBlock($destinationX, $destinationY, $options = $default_mov
 					; If Heart of Shadow skill is available then use it to get unstuck
 					If $skillSlotHoS > 0 And IsRecharged($skillSlotHoS) And GetEnergy() > 5 Then
 						UseSkillEx($skillSlotHoS)
-						Info('Bodyblock: Heart of Shadow zum Entblocken')
+						Debug('Bodyblock: Heart of Shadow zum Entblocken')
 						PingSleep(50)
 						MoveRadial($destinationX, $destinationY, $moveVariance)
 					; If Death's Charge skill is available then use it to get unstuck
 					ElseIf $skillSlotDeathsCharge > 0 And CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_SPELLCAST) > 0 And IsRecharged($skillSlotDeathsCharge) And GetEnergy() > 5 Then
 						$target = GetFurthestNPCInRangeOfCoords($ID_ALLEGIANCE_FOE, DllStructGetData($me, 'X'), DllStructGetData($me, 'Y'), $RANGE_SPELLCAST)
 						UseSkillEx($skillSlotDeathsCharge, $target)
-						Info("Bodyblock: Death's Charge zum Entblocken")
+						Debug("Bodyblock: Death's Charge zum Entblocken")
 						PingSleep(50)
 						MoveRadial($destinationX, $destinationY, $moveVariance)
 					EndIf
