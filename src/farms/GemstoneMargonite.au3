@@ -422,17 +422,14 @@ Func GemstoneMargoniteFarmLoop()
 		; No caster in range — the Sin may already be balled (walked in during the SW
 		; leg). Fall back to the nearest enemy and skip the centroid Death's Charge.
 		MargoniteCsvLog('step', 'dc_fallback_no_caster')
-		Info('Margonite: kein Caster gefunden - DC auf naechsten Gegner')
 		$target = GetNearestEnemyToAgent($me)
 	Else
 		$margoniteCasterCenter = MargoniteCasterCentroid($margoniteCaster)
 		$target = GetNearestEnemyToCoords($margoniteCasterCenter[0], $margoniteCasterCenter[1])
-		Info('Margonite: Hinein-DC in den Caster mob')
 		MargoniteCsvLog('step', 'dc_into_casters')
 	EndIf
 	If $target == Null Then
 		MargoniteCsvLog('step', 'dc_aborted_no_target')
-		Info('Margonite: kein Ziel gefunden - Abbruch')
 		Return $FAIL
 	EndIf
 	; Diagnostic: log player / caster-seed / centroid / target coordinates so we can
@@ -445,10 +442,6 @@ Func GemstoneMargoniteFarmLoop()
 		' caster=' & $margoniteCasterStr & _
 		' centroid=' & Round($margoniteCasterCenter[0]) & '/' & Round($margoniteCasterCenter[1]) & _
 		' target=' & Round(DllStructGetData($target, 'X')) & '/' & Round(DllStructGetData($target, 'Y')))
-	Info('Margonite DC target: player=' & Round(DllStructGetData($me, 'X')) & ',' & Round(DllStructGetData($me, 'Y')) & _
-		' caster=' & $margoniteCasterStr & _
-		' centroid=' & Round($margoniteCasterCenter[0]) & ',' & Round($margoniteCasterCenter[1]) & _
-		' target=' & Round(DllStructGetData($target, 'X')) & ',' & Round(DllStructGetData($target, 'Y')))
 	; Ensure a healthy energy buffer BEFORE teleporting into the caster ball. The
 	; Visages that kill the margonites are gated on >20 energy, and Anur Ki/Su
 	; (Energy Surge mesmers) drain energy once we are in their range. Entering the
@@ -467,11 +460,9 @@ Func GemstoneMargoniteFarmLoop()
 		If IsRecharged(MargoniteDeathChargeSlot()) Then
 			Local $dcOk = UseSkillEx(MargoniteDeathChargeSlot(), $target)
 			MargoniteCsvLog('step', 'dc_cast ok=' & $dcOk)
-			Info('Margonite: Death Charge cast, ok=' & $dcOk)
 			RandomSleep(50)
 		Else
 			MargoniteCsvLog('step', 'dc_skipped_not_recharged')
-			Info('Margonite: Death Charge NICHT gecastet (nicht bereit)')
 		EndIf
 	EndIf
 	; Keep Shadow Form (and the other buffs) up while closing the final distance into the
@@ -561,14 +552,11 @@ EndFunc
 
 ;~ Log a planned move leg, execute it, then log whether the Sin reached the spot.
 Func MargoniteMoveLeg($label, $destinationX, $destinationY)
-	Info('Margonite plan: ' & $label & ' -> (' & $destinationX & ', ' & $destinationY & ')')
 	MargoniteCsvLog('plan', $label & ' target=' & $destinationX & '/' & $destinationY)
 	Local $result = MargoniteMoveAndSurvive($destinationX, $destinationY)
 	If $result == $SUCCESS Then
-		Info('Margonite erreicht: ' & $label)
 		MargoniteCsvLog('reached', $label)
 	Else
-		Info('Margonite FEHLER: ' & $label & ' nicht erreicht')
 		MargoniteCsvLog('move_failed', $label)
 	EndIf
 	Return $result
@@ -577,7 +565,6 @@ EndFunc
 
 ;~ Log what the Sin is waiting for, then wait for margonite aggro.
 Func MargoniteWait($label, $timeToWait)
-	Info('Margonite warte: ' & $label & ' (' & $timeToWait & 'ms)')
 	MargoniteCsvLog('wait', $label)
 	Return WaitAggroMargonites($timeToWait)
 EndFunc
@@ -790,7 +777,6 @@ Func KillMargonitesUsingVisageSkills()
 			$adjacentTimer = TimerInit()
 		ElseIf TimerDiff($adjacentTimer) > 10000 Then
 			MargoniteCsvLog('kill_abort_no_adjacent')
-			Info('Margonite: keine Gegner mehr in Adjacent-Range (10s) - Kill-Loop beendet')
 			Return $FAIL
 		EndIf
 
