@@ -34,30 +34,32 @@ Global Const $GEMSTONES_MESMER_SKILLBAR = 'OghkkgKKjIyEz0rA0XR0t41U1kPI'
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdUkSFySvSpCMNnC3iwCRfFRLQA' ; Promise Wards 
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBDgcqMS7ihD0CkDvCwCfDeDA' ; Air + Wards
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgljgwMopS7ihD0CkD+Y1YfDeDA' ; Air + Commmand
-Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OghkkwKBjIyEz0u4rw1U1U5kPYrI' ; Spirits + Wards
+Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OghkkwKBjIyEz0u4rw1U1U5kjTrI' ; Spirits + Wards
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgVDIMusRkD7i3imOCO3U4UTPA' ; Dom
 
 ; Fixed 7-hero team. Hero index 1..7 = the AddHero order in SetupTeamGemstonesFarm.
 Global Const $GEMSTONES_HERO_OLIAS_ID = $ID_OLIAS
-Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3hhWVV4JNncDzxJA'
+Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhkQoG4hEyzdYoVVtDSzJ3wccC'
 Global Const $GEMSTONES_HERO_NORGU_ID = $ID_NORGU
 Global Const $GEMSTONES_HERO_NORGU_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDQ6QjA'
 Global Const $GEMSTONES_HERO_RAZAH_ID = $ID_RAZAH
-Global Const $GEMSTONES_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDQ6QjA'
+Global Const $GEMSTONES_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDwBQjA'
 Global Const $GEMSTONES_HERO_GWEN_ID = $ID_GWEN
-Global Const $GEMSTONES_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkAOBTAEBA'
+Global Const $GEMSTONES_HERO_GWEN_TEMPLATE = 'OQNEAawD2C9CgAyBlnRCMBQEgGB'
 Global Const $GEMSTONES_HERO_XANDRA_ID = $ID_XANDRA
 Global Const $GEMSTONES_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00Ze2QuA'
-Global Const $GEMSTONES_HERO_MERCENARY1_ID = $ID_MERCENARY_HERO_1
-Global Const $GEMSTONES_HERO_MERCENARY1_TEMPLATE = 'OACjEuiMpNXzqJGrcyMncSzhJA'
+Global Const $GEMSTONES_HERO_ATMO_ID = $ID_MERCENARY_HERO_1
+Global Const $GEMSTONES_HERO_ATMO_TEMPLATE = 'OAWjEyiM5M6OMm3kZKNncDziK' ; Splinter Weapon Healer
 Global Const $GEMSTONES_HERO_MERCENARY2_ID = $ID_MERCENARY_HERO_2
 Global Const $GEMSTONES_HERO_MERCENARY2_TEMPLATE = 'OANDYazPSxVNgeErEfEaRVVGNA'
 Global Const $GEMSTONES_HERO_LIVIA_ID = $ID_LIVIA
-Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OAhkUoG3xFu0SVVgdAawWolwkzwE'
+Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OAhjUwGYoSxMVBoBbhKgTOSTDTA'
 Global Const $GEMSTONES_HERO_BLACKOUT_ID = $ID_MERCENARY_HERO_4
-Global Const $GEMSTONES_HERO_BLACKOUT_TEMPLATE = 'OQREAsIjU88D4aI/ewUlnWFQDA'
+Global Const $GEMSTONES_HERO_BLACKOUT_TEMPLATE = 'OQRDAbwjNC1pXOYIYJyAlByA' ; Illusion Curses
+Global Const $GEMSTONES_HERO_INNO_ID = $ID_MERCENARY_HERO_3
+Global Const $GEMSTONES_HERO_INNO_TEMPLATE = 'OQhjAoDYIThQZAEBSTTODTXMciA'
 Global Const $GEMSTONES_HERO_MOW_ID = $ID_MASTER_OF_WHISPERS
-Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OAhkUoG3xFuEQDVwnAewWYZg00wE'
+Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OAhjUwGYoSxMUB4BbhqBTOSTDTA'
 
 Global Const $GEMSTONES_FARM_INFORMATIONS = 'Requirements:' & @CRLF _
 	& '- Access to mallyx (finished all 4 doa parts)' & @CRLF _
@@ -282,29 +284,35 @@ EndFunc
 Func SetupTeamGemstonesFarm()
 	If IsTeamAutoSetup() Then Return $SUCCESS
 
-	Info('Setting up team: Olias, Norgu, Razah, Gwen, Xandra, A R U Atmosphere, Livia')
+	Info('Setting up team: Olias, Razah, Gwen, Xandra, MoW, Blackout, + Livia/Atmosphere')
 	LeaveParty()
 	AddHero($GEMSTONES_HERO_OLIAS_ID)
-	AddHero($GEMSTONES_HERO_NORGU_ID)
+	;~ AddHero($GEMSTONES_HERO_NORGU_ID)
+	;~ AddHero($GEMSTONES_HERO_INNO_ID)
 	AddHero($GEMSTONES_HERO_RAZAH_ID)
 	AddHero($GEMSTONES_HERO_GWEN_ID)
 	AddHero($GEMSTONES_HERO_XANDRA_ID)
 	AddHero($GEMSTONES_HERO_MOW_ID)
 	AddHero($GEMSTONES_HERO_BLACKOUT_ID)
-	;~ AddHero($GEMSTONES_HERO_LIVIA_ID)
+	; 7th slot: Livia OR Atmosphere — swap by commenting/uncommenting this pair.
+	AddHero($GEMSTONES_HERO_LIVIA_ID)
+	;~ AddHero($GEMSTONES_HERO_ATMO_ID)
 	RandomSleep(500)
 	If GetPartySize() <> $ID_TEAM_SIZE_LARGE Then
 		Warn('Party not set up correctly. Team size different than ' & $ID_TEAM_SIZE_LARGE)
 		Return $FAIL
 	EndIf
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_OLIAS_ID, 'Olias', $GEMSTONES_HERO_OLIAS_TEMPLATE) == $FAIL Then Return $FAIL
-	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_NORGU_ID, 'Norgu', $GEMSTONES_HERO_NORGU_TEMPLATE) == $FAIL Then Return $FAIL
+	;~ If GemstonesLoadHeroTemplate($GEMSTONES_HERO_NORGU_ID, 'Norgu', $GEMSTONES_HERO_NORGU_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_RAZAH_ID, 'Razah', $GEMSTONES_HERO_RAZAH_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_GWEN_ID, 'Gwen', $GEMSTONES_HERO_GWEN_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_XANDRA_ID, 'Xandra', $GEMSTONES_HERO_XANDRA_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_MOW_ID, 'MoW', $GEMSTONES_HERO_MOW_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_BLACKOUT_ID, 'A R U Blackout', $GEMSTONES_HERO_BLACKOUT_TEMPLATE) == $FAIL Then Return $FAIL
-	;~ If GemstonesLoadHeroTemplate($GEMSTONES_HERO_LIVIA_ID, 'Livia', $GEMSTONES_HERO_LIVIA_TEMPLATE) == $FAIL Then Return $FAIL
+	; 7th slot: Livia OR Atmosphere — swap by commenting/uncommenting this pair.
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_LIVIA_ID, 'Livia', $GEMSTONES_HERO_LIVIA_TEMPLATE) == $FAIL Then Return $FAIL
+	;~ If GemstonesLoadHeroTemplate($GEMSTONES_HERO_ATMO_ID, 'A R U Atmosphere', $GEMSTONES_HERO_ATMO_TEMPLATE) == $FAIL Then Return $FAIL
+	;~ If GemstonesLoadHeroTemplate($GEMSTONES_HERO_INNO_ID, 'A R U Innocence', $GEMSTONES_HERO_INNO_TEMPLATE) == $FAIL Then Return $FAIL
 	RandomSleep(250)
 	Return $SUCCESS
 EndFunc

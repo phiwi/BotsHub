@@ -221,6 +221,7 @@ Func SetupPlayerMargoniteFarm()
 		Case Else
 			$margonite_move_options['skillSlotDeathsCharge'] = 0
 	EndSwitch
+	ChangeWeaponSet(3)
 	RandomSleep(250)
 	Return $SUCCESS
 EndFunc
@@ -390,7 +391,26 @@ Func GemstoneMargoniteFarmLoop()
 	; Furthest east spot: pull the front mobs but stay close enough that the rear
 	; mobs don't peel off and kill the monk hero.
 	If MargoniteMoveLeg('east_far', -10277, -10778) == $FAIL Then Return $FAIL
-	CommandAll(-12861, -12620)
+	; Route the monk hero around the margonite ball instead of a straight line that
+	; cuts through the mobs (safer, from manual recording path_action_20260929_180216.csv).
+	; Flags walk her west, then south along the ledge, then east into the final spot.
+	CommandAll(-15169, -11725)
+	If MargoniteWait('hero route 1', 1500) == $FAIL Then Return $FAIL
+	CommandAll(-15129, -12073)
+	If MargoniteWait('hero route 2', 1500) == $FAIL Then Return $FAIL
+	CommandAll(-14899, -12458)
+	If MargoniteWait('hero route 3', 1500) == $FAIL Then Return $FAIL
+	CommandAll(-14728, -12619)
+	If MargoniteWait('hero route 4', 1500) == $FAIL Then Return $FAIL
+	CommandAll(-14351, -12864)
+	If MargoniteWait('hero route 5', 1500) == $FAIL Then Return $FAIL
+	CommandAll(-14119, -12864)
+	If MargoniteWait('hero route 6', 1500) == $FAIL Then Return $FAIL
+	CommandAll(-13554, -12977)
+	If MargoniteWait('hero route 7', 1500) == $FAIL Then Return $FAIL
+	CommandAll(-13327, -12933)
+	If MargoniteWait('hero route 8', 1500) == $FAIL Then Return $FAIL
+	CommandAll(-13181, -12750)
 	; Wait (~50s) for the far margonite group to come into range.
 	If MargoniteWait('ferne Gruppe am East Spot', 50000) == $FAIL Then Return $FAIL
 
@@ -402,9 +422,12 @@ Func GemstoneMargoniteFarmLoop()
 	If MargoniteMoveLeg('sw_2', -12246, -10149) == $FAIL Then Return $FAIL
 	If MargoniteWait('kurz sw_2', 7000) == $FAIL Then Return $FAIL
 	If MargoniteMoveLeg('sw_3', -12303, -10349) == $FAIL Then Return $FAIL
-	If MargoniteMoveLeg('sw_4', -11410, -11359) == $FAIL Then Return $FAIL
-	If MargoniteWait('kurz sw_4', 3000) == $FAIL Then Return $FAIL
-	If MargoniteMoveLeg('sw_5', -11484, -11034) == $FAIL Then Return $FAIL
+	; TEST (revert by uncommenting): DC directly from sw_3 into the caster ball,
+	; skipping the east re-run (sw_4) and the ball walk-in (sw_5). The DC+MoveTo
+	; below closes any remaining distance automatically.
+	;~ If MargoniteMoveLeg('sw_4', -11410, -11359) == $FAIL Then Return $FAIL
+	;~ If MargoniteWait('kurz sw_4', 3000) == $FAIL Then Return $FAIL
+	;~ If MargoniteMoveLeg('sw_5', -11484, -11034) == $FAIL Then Return $FAIL
 	If IsPlayerDead() Or IsHeroDead(1) Then Return $FAIL
 
 	; if margonites group is somehow not in the spot then try to get closer to them
