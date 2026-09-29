@@ -157,11 +157,16 @@ Func GemstoneTormentFarmLoop()
 	Info('Starting Farm')
 	TormentCsvLog('farm_start')
 	Local $timerWait
-	Local $maxEnergy = DllStructGetData(GetMyAgent(), 'MaxEnergy')
+	Local $maxEnergy
 
 	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_STAFF & ' - Staff')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_STAFF)
 	RandomSleep(250)
+	; Read max energy AFTER the staff switch. The staff has a lower energy cap than the
+	; high-energy set (82 vs 114), and the wait loops below use $maxEnergy to detect
+	; "energy is full". Reading it before the switch made the loops wait for an
+	; unreachable cap.
+	$maxEnergy = DllStructGetData(GetMyAgent(), 'MaxEnergy')
 	TormentCsvLog('weapon_staff')
 	If GetLightbringerTitle() < 50000 Then
 		Info('Taking Blessing')
@@ -194,9 +199,9 @@ Func GemstoneTormentFarmLoop()
 	WEnd
 	Info('First group')
 	TormentCsvLog('first_group')
+	TormentLogNearbyFoes('first_group_coded_spot')
 	CastBuffsTormentFarm()
-	If RunTormentFarm(10779, 9898) == $FAIL Then Return $FAIL
-	;If RunTormentFarm(11125, 9198) == $FAIL Then Return $FAIL
+	If TormentApproachAndCastObsidianFlesh(Null, 10779, 9898) == $FAIL Then Return $FAIL
 	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_FOCUS & ' - Focus')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_FOCUS)
 	RandomSleep(500)
@@ -236,8 +241,7 @@ Func GemstoneTormentFarmLoop()
 	CastBuffsTormentFarm()
 	RandomSleep(250)
 	TormentLogNearbyFoes('second_group_before_approach')
-	; Move into Death's Charge range of the Curse of Darkness ball.
-	If RunTormentFarm(15613, 16283) == $FAIL Then Return $FAIL
+	If TormentApproachAndCastObsidianFlesh($TORMENT_MODELID_CURSE_OF_DARKNESS) == $FAIL Then Return $FAIL
 	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_FOCUS & ' - Focus')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_FOCUS)
 	RandomSleep(500)
@@ -263,8 +267,8 @@ Func CastBuffsTormentFarm()
 	TormentCsvLog('buffs_el', 'ok=' & $elOk)
 	Local $glyphOk = UseSkillTimed($TORMENT_GLYPH_OF_ELEMENTAL_POWER)
 	TormentCsvLog('buffs_glyph', 'ok=' & $glyphOk)
-	Local $ofOk = UseSkillTimed($TORMENT_OBSIDIAN_FLESH)
-	TormentCsvLog('buffs_of', 'ok=' & $ofOk)
+	; Obsidian Flesh is no longer cast here — it is cast at the aggro edge (right before
+	; Death's Charge + spike) so the buff is fresh during the kill.
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
 
@@ -304,6 +308,31 @@ Func TormentMoveToAggroEdge($destinationX, $destinationY, $safetyDistance = 150)
 	; The in-flight Move is still active here — cancel it so she actually HOLDS at the
 	; aggro edge instead of walking the rest of the way into the group / a straggler.
 	CancelAction()
+	Return IsPlayerAlive() ? $SUCCESS : $FAIL
+EndFunc
+
+
+;~ Run toward the enemy ball, stop at the edge of the aggro bubble, then cast Obsidian
+;~ Flesh there (fresh buff for the Death's Charge + spike). Replaces the old behaviour
+;~ of casting OF far away at the coded spot. If $preferModelID is given (e.g. Curse of
+;~ Darkness for the second group), prefer that foe as the approach target.
+Func TormentApproachAndCastObsidianFlesh($preferModelID = Null, $anchorX = Null, $anchorY = Null)
+	Local $ball = Null
+	If $preferModelID <> Null Then
+		$ball = GetNearestFoeByModelID($preferModelID)
+	ElseIf $anchorX <> Null Then
+		; Anchor to a known group location (e.g. the first group's South ball) so we do
+		; NOT drift to whichever enemy happens to be closest (the West group).
+		$ball = GetNearestEnemyToCoords($anchorX, $anchorY)
+	Else
+		$ball = GetNearestEnemyToAgent(GetMyAgent())
+	EndIf
+	If $ball <> Null Then
+		If TormentMoveToAggroEdge(DllStructGetData($ball, 'X'), DllStructGetData($ball, 'Y')) == $FAIL Then Return $FAIL
+	EndIf
+	TormentCsvLog('of_at_aggro_edge_before')
+	Local $ofOk = UseSkillTimed($TORMENT_OBSIDIAN_FLESH)
+	TormentCsvLog('of_at_aggro_edge_after', 'ok=' & $ofOk)
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
 
@@ -379,12 +408,12 @@ Func TormentCsvLog($event, $detail = '')
 		$csvHandle = FileOpen($csvPath, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
 		If $csvHandle == -1 Then Return ; silently skip if file can't be opened
 		Info('Torment CSV: ' & $csvPath)
-		FileWriteLine($csvHandle, 'timestamp,elapsed_ms,event,detail,energy,max_energy,hp%,of_ms,of_ready,el_ms,foes_earshot')
+		FileWriteLine($csvHandle, 'timestamp,elapsed_ms,event,detail,energy,max_energy,hp%,of_ms,of_ready,el_ms,foes_earshot,foes_models')
 	EndIf
 
 	Local $alive = IsPlayerAlive()
 	Local $elapsed = TimerDiff($run_timer)
-	Local $energy = 0, $maxEnergy = 0, $hp = 0, $ofMs = 0, $ofReady = 0, $elMs = 0, $foes = 0
+	Local $energy = 0, $maxEnergy = 0, $hp = 0, $ofMs = 0, $ofReady = 0, $elMs = 0, $foes = 0, $foesModels = ''
 	If $alive Then
 		$energy = Round(GetEnergy())
 		$maxEnergy = DllStructGetData(GetMyAgent(), 'MaxEnergy')
@@ -394,9 +423,14 @@ Func TormentCsvLog($event, $detail = '')
 		$elMs = Round(GetEffectTimeRemaining($ID_ELEMENTAL_LORD_LUXON))
 		If $elMs == 0 Then $elMs = Round(GetEffectTimeRemaining($ID_ELEMENTAL_LORD_KURZICK))
 		$foes = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_EARSHOT)
+		; ModelIDs of all foes in compass range so we can see which groups are near.
+		Local $nearFoes = GetFoesInRangeOfAgent(GetMyAgent(), $RANGE_COMPASS)
+		For $f In $nearFoes
+			$foesModels &= DllStructGetData($f, 'ModelID') & '@' & Round(DllStructGetData($f, 'X')) & '_' & Round(DllStructGetData($f, 'Y')) & ';'
+		Next
 	EndIf
 
 	Local $detailSafe = StringReplace($detail, ',', ' ')
 	Local $ts = @YEAR & '-' & @MON & '-' & @MDAY & ' ' & @HOUR & ':' & @MIN & ':' & @SEC
-	FileWriteLine($csvHandle, $ts & ',' & Round($elapsed, 0) & ',' & $event & ',' & $detailSafe & ',' & $energy & ',' & $maxEnergy & ',' & $hp & ',' & $ofMs & ',' & $ofReady & ',' & $elMs & ',' & $foes)
+	FileWriteLine($csvHandle, $ts & ',' & Round($elapsed, 0) & ',' & $event & ',' & $detailSafe & ',' & $energy & ',' & $maxEnergy & ',' & $hp & ',' & $ofMs & ',' & $ofReady & ',' & $elMs & ',' & $foes & ',' & $foesModels)
 EndFunc

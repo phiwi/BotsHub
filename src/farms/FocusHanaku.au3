@@ -41,6 +41,7 @@ Global Const $HANAKU_FARM_DURATION = 3 * 60 * 1000
 Global Const $HANAKU_OUTPOST_ID = $ID_SEAFARERS_REST
 Global Const $HANAKU_EXPLO_ID = $ID_RHEAS_CRATER
 Global Const $HANAKU_BOSS_MODEL_ID = 4029
+Global Const $HANAKU_RANGER_MODEL_ID = 3912
 
 Global Const $HANAKU_HERO_INDEX = 1
 
@@ -412,6 +413,16 @@ Func MoveToHanakuHoldSpot()
 
 	Info('Reached first hold point - waiting 2 seconds')
 	If WaitAndMaintainPerma($HANAKU_HOLD_PREP_WAIT_MS, $HANAKU_HOLD_X, $HANAKU_HOLD_Y) == $FAIL Then Return $FAIL
+
+	; Early abort: check for a Ranger (model 3912) in Hanaku's group right at the hold
+	; spot, BEFORE the forward push + retreat. Detection reads Hanaku's position directly
+	; (no aggro needed), so it works as soon as we arrive. The $RANGE_EARSHOT radius around
+	; Hanaku ensures we only catch Rangers actually in his group, not from other groups.
+	If HanakuGroupHasRanger() Then
+		Warn('Ranger detected in Hanaku group - aborting run')
+		HanakuFightLogWrite('abort_ranger')
+		Return $FAIL
+	EndIf
 
 	If Not MoveToWithRetry($HANAKU_FORWARD_PUSH_X, $HANAKU_FORWARD_PUSH_Y, 4) Then
 		Warn('Forward push blocked - continuing without deep push this run')
@@ -1153,6 +1164,22 @@ Func HanakuIsBossAlive()
 		If GetIsDead($agent) Then ContinueLoop
 		If DllStructGetData($agent, 'HealthPercent') <= 0 Then ContinueLoop
 		Return True
+	Next
+	Return False
+EndFunc
+
+
+;~ Check whether Hanaku's group contains a Ranger (model 3912). A Ranger in the
+;~ group makes the fight notably slower/riskier, so we abort the run early.
+Func HanakuGroupHasRanger()
+	Local $hanaku = GetHanakuTarget()
+	If $hanaku == Null Then Return False
+	For $agent In GetAgentArray($ID_AGENT_TYPE_NPC)
+		If DllStructGetData($agent, 'ModelID') <> $HANAKU_RANGER_MODEL_ID Then ContinueLoop
+		If DllStructGetData($agent, 'Allegiance') <> $ID_ALLEGIANCE_FOE Then ContinueLoop
+		If GetIsDead($agent) Then ContinueLoop
+		If DllStructGetData($agent, 'HealthPercent') <= 0 Then ContinueLoop
+		If GetDistance($hanaku, $agent) <= $RANGE_EARSHOT Then Return True
 	Next
 	Return False
 EndFunc
