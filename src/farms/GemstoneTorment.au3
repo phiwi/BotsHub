@@ -191,8 +191,11 @@ Func GemstoneTormentFarmLoop()
 	WEnd
 
 	If RunTormentFarm(12304, 9022) == $FAIL Then Return $FAIL
-	If RunTormentFarm(11444, 9370) == $FAIL Then Return $FAIL
-	If RunTormentFarm(10828, 10583) == $FAIL Then Return $FAIL
+	; Walk toward the coded spot but stop BEFORE the South group's aggro bubble. The
+	; South group spawns at a varying Y each run and sometimes sits close to the old
+	; fixed coded spot (10828, 10583), which let the Ele walk straight into them (see
+	; the 21:39 run where the ball spawned at Y~9130 instead of the usual Y~8450).
+	If TormentMoveToAggroEdge(10828, 10583) == $FAIL Then Return $FAIL
 	$timerWait = TimerInit()
 	While IsPlayerAlive() And (TimerDiff($timerWait) < 15000 Or Not IsRecharged($TORMENT_OBSIDIAN_FLESH) Or GetEnergy() < ($maxEnergy - 0.5))
 		RandomSleep(100)
@@ -201,7 +204,7 @@ Func GemstoneTormentFarmLoop()
 	TormentCsvLog('first_group')
 	TormentLogNearbyFoes('first_group_coded_spot')
 	CastBuffsTormentFarm()
-	If TormentApproachAndCastObsidianFlesh(Null, 10779, 9898) == $FAIL Then Return $FAIL
+	If TormentApproachAndCastObsidianFlesh(Null, Null, Null, True) == $FAIL Then Return $FAIL
 	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_FOCUS & ' - Focus')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_FOCUS)
 	RandomSleep(500)
@@ -222,8 +225,10 @@ Func GemstoneTormentFarmLoop()
 	If RunTormentFarm(12170, 17079) == $FAIL Then Return $FAIL
 	If RunTormentFarm(13566, 16981) == $FAIL Then Return $FAIL
 	If RunTormentFarm(14938, 17129) == $FAIL Then Return $FAIL
-	; Staging spot — hold here (safely outside the group's aggro) while energy recovers.
-	If RunTormentFarm(15248, 16661) == $FAIL Then Return $FAIL
+	; Staging spot — hold here while energy recovers. Walk toward it but stop early if
+	; the Curse of Darkness group is already within aggro range (it sometimes spawns
+	; closer to the staging spot and would otherwise attack us directly).
+	If TormentMoveToAggroEdge(15248, 16661, 150, $TORMENT_MODELID_CURSE_OF_DARKNESS) == $FAIL Then Return $FAIL
 	TormentLogNearbyFoes('second_group_at_staging')
 	Local $waitLogTimer = TimerInit()
 	While IsPlayerAlive() And (Not IsRecharged($TORMENT_ELEMENTAL_LORD) Or _
@@ -292,14 +297,18 @@ EndFunc
 ;~ Walk toward a destination but stop as soon as a foe is within its aggro bubble
 ;~ (plus a small safety margin). This keeps the Ele from pulling a group before her
 ;~ Obsidian Flesh buff is up — the second group's old DPS spot sat inside aggro range.
-Func TormentMoveToAggroEdge($destinationX, $destinationY, $safetyDistance = 150)
+Func TormentMoveToAggroEdge($destinationX, $destinationY, $safetyDistance = 150, $modelID = Null)
 	Local $stopDistance = $MOB_AGGRO_RANGE + $safetyDistance
 	Local $me = GetMyAgent()
 	Local $foe = GetNearestEnemyToAgent($me)
 	While IsPlayerAlive() And GetDistanceToPoint($me, $destinationX, $destinationY) > $RANGE_NEARBY
 		SurviveTormentFarm()
 		$me = GetMyAgent()
-		$foe = GetNearestEnemyToAgent($me)
+		If $modelID <> Null Then
+			$foe = GetNearestFoeByModelID($modelID)
+		Else
+			$foe = GetNearestEnemyToAgent($me)
+		EndIf
 		If $foe <> Null And GetDistance($me, $foe) < $stopDistance Then
 			CancelAction()
 			Return $SUCCESS
@@ -319,10 +328,15 @@ EndFunc
 ;~ Flesh there (fresh buff for the Death's Charge + spike). Replaces the old behaviour
 ;~ of casting OF far away at the coded spot. If $preferModelID is given (e.g. Curse of
 ;~ Darkness for the second group), prefer that foe as the approach target.
-Func TormentApproachAndCastObsidianFlesh($preferModelID = Null, $anchorX = Null, $anchorY = Null)
+Func TormentApproachAndCastObsidianFlesh($preferModelID = Null, $anchorX = Null, $anchorY = Null, $southDirection = False)
 	Local $ball = Null
 	If $preferModelID <> Null Then
 		$ball = GetNearestFoeByModelID($preferModelID)
+	ElseIf $southDirection Then
+		; The first group's farmable ball sits due south of the coded spot, while the
+		; "pillar of eyes" group is west/north and a third group is east. Filter by
+		; cardinal direction so we reliably hit the South ball every run.
+		$ball = GetNearestFoeSouthOfPlayer()
 	ElseIf $anchorX <> Null Then
 		; Anchor to a known group location (e.g. the first group's South ball) so we do
 		; NOT drift to whichever enemy happens to be closest (the West group).
@@ -331,6 +345,7 @@ Func TormentApproachAndCastObsidianFlesh($preferModelID = Null, $anchorX = Null,
 		$ball = GetNearestEnemyToAgent(GetMyAgent())
 	EndIf
 	If $ball <> Null Then
+		TormentCsvLog('ball_selected', 'x=' & Round(DllStructGetData($ball, 'X')) & ';y=' & Round(DllStructGetData($ball, 'Y')) & ';model=' & DllStructGetData($ball, 'ModelID'))
 		If TormentMoveToAggroEdge(DllStructGetData($ball, 'X'), DllStructGetData($ball, 'Y')) == $FAIL Then Return $FAIL
 	EndIf
 	TormentCsvLog('of_at_aggro_edge_before')
@@ -365,6 +380,29 @@ Func GetNearestFoeByModelID($modelID, $range = $RANGE_COMPASS)
 				$bestDist = $d
 				$nearest = $foe
 			EndIf
+		EndIf
+	Next
+	Return $nearest
+EndFunc
+
+
+;~ Find the nearest foe SOUTH of the player (lower Y). The first group's farmable ball
+;~ sits due south of the coded spot, while the "pillar of eyes" group is west/north and
+;~ a third group is east. Filtering by cardinal direction is more robust than a fixed
+;~ coordinate anchor because the groups spawn at slightly varying positions each run.
+;~ The margin excludes foes that are only barely north (e.g. the east group).
+Func GetNearestFoeSouthOfPlayer($range = $RANGE_COMPASS, $margin = 300)
+	Local $me = GetMyAgent()
+	Local $refY = DllStructGetData($me, 'Y') - $margin
+	Local $foes = GetFoesInRangeOfAgent($me, $range)
+	Local $nearest = Null
+	Local $bestDist = 99999
+	For $foe In $foes
+		If DllStructGetData($foe, 'Y') >= $refY Then ContinueLoop
+		Local $d = GetDistance($me, $foe)
+		If $d < $bestDist Then
+			$bestDist = $d
+			$nearest = $foe
 		EndIf
 	Next
 	Return $nearest
