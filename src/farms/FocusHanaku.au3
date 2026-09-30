@@ -1056,7 +1056,10 @@ Func KillHanaku()
 			EndIf
 		EndIf
 
-		If $comboState == 0 And IsRecharged($HANAKU_GRENTHS_AURA) And GetEnergy() > 24 And DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.97 Then
+		; Spam Grenth's Aura for extra scythe damage as often as its recharge allows,
+		; gated only on having enough energy left for the Deadly Paradox + Shadow Form
+		; perma chain (20 = $HANAKU_SF_DP_MIN_ENERGY) plus Grenth's Aura's own cost.
+		If $comboState == 0 And IsRecharged($HANAKU_GRENTHS_AURA) And GetEnergy() > 24 Then
 			UseSkillEx($HANAKU_GRENTHS_AURA)
 			HanakuFightLogWrite('grenths_cast', 'hp=' & DllStructGetData(GetMyAgent(), 'HealthPercent'))
 			Sleep(80)

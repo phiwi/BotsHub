@@ -225,9 +225,8 @@ Func GemstoneTormentFarmLoop()
 	; Staging spot — hold here (safely outside the group's aggro) while energy recovers.
 	If RunTormentFarm(15248, 16661) == $FAIL Then Return $FAIL
 	TormentLogNearbyFoes('second_group_at_staging')
-	$timerWait = TimerInit()
 	Local $waitLogTimer = TimerInit()
-	While IsPlayerAlive() And (TimerDiff($timerWait) < 42000 Or Not IsRecharged($TORMENT_ELEMENTAL_LORD) Or _
+	While IsPlayerAlive() And (Not IsRecharged($TORMENT_ELEMENTAL_LORD) Or _
 			Not IsRecharged($TORMENT_OBSIDIAN_FLESH) Or Not IsRecharged($TORMENT_METEOR_SHOWER) Or GetEnergy() < ($maxEnergy - 0.5))
 		SurviveTormentFarm()
 		If TimerDiff($waitLogTimer) > 5000 Then
@@ -241,7 +240,11 @@ Func GemstoneTormentFarmLoop()
 	CastBuffsTormentFarm()
 	RandomSleep(250)
 	TormentLogNearbyFoes('second_group_before_approach')
-	If TormentApproachAndCastObsidianFlesh($TORMENT_MODELID_CURSE_OF_DARKNESS) == $FAIL Then Return $FAIL
+	; The staging spot is already close to the ball: cast Obsidian Flesh (4) right here,
+	; so 2, 3 and 4 land at the same spot, then DC straight in.
+	TormentCsvLog('of_at_staging_before')
+	UseSkillTimed($TORMENT_OBSIDIAN_FLESH)
+	TormentCsvLog('of_at_staging_after')
 	Info('Changing Weapons: Slot ' & $TORMENT_WEAPON_SLOT_FOCUS & ' - Focus')
 	ChangeWeaponSet($TORMENT_WEAPON_SLOT_FOCUS)
 	RandomSleep(500)

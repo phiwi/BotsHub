@@ -546,6 +546,7 @@ Func SetupAndKillWingstorm()
 
 	Local $fightTimer = TimerInit()
 	Local $lastBondTry = TimerInit()
+	Local $lastSanctuaryTry = TimerInit()
 	While IsPlayerAlive() And TimerDiff($fightTimer) < $WING_BOSS_FIGHT_TIMEOUT_MS
 		$boss = WingstormGetBossByModelID($WINGSTORM_BOSS_MODEL_ID)
 		If $boss == Null Then
@@ -567,6 +568,12 @@ Func SetupAndKillWingstorm()
 				WingstormTryManualLikeSkillCastStrict($WING_PAINFUL_BOND, $boss, 1)
 			EndIf
 			$lastBondTry = TimerInit()
+		EndIf
+
+		; Safety: recast Shadow Sanctuary whenever it recharges during the fight.
+		If IsRecharged($WING_SHADOW_SANCTUARY) And TimerDiff($lastSanctuaryTry) > 2000 Then
+			UseSkillEx($WING_SHADOW_SANCTUARY)
+			$lastSanctuaryTry = TimerInit()
 		EndIf
 		Sleep(300)
 	WEnd
