@@ -1214,6 +1214,9 @@ Func UpdateFarmDescription($farm)
 				'W:'	& @TAB & $UW_PANTHEON_W_SKILLBAR _
 			)
 			GUICtrlSetData($gui_label_farminformations, $UNDERWORLD_FARM_PANTHEON_INFORMATIONS)
+		Case 'UW Chamber Traps'
+			GUICtrlSetData($gui_edit_characterbuilds, 'Ra:' & @TAB & $UWCT_SKILLBAR)
+			GUICtrlSetData($gui_label_farminformations, $UWCT_FARM_INFORMATIONS)
 		Case 'Vaettirs'
 			GUICtrlSetData($gui_edit_characterbuilds, $AME_VAETTIRS_FARMER_SKILLBAR & @CRLF & _
 				$MEA_VAETTIRS_FARMER_SKILLBAR & @CRLF & $MOA_VAETTIRS_FARMER_SKILLBAR & @CRLF & $EME_VAETTIRS_FARMER_SKILLBAR)

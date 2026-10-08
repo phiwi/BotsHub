@@ -41,11 +41,21 @@ Global Const $UWCT_FARM_INFORMATIONS = _
     'Kills two groups of Aatxe using Dust Trap combos amplified by Arcane Echo + Echo.' & @CRLF & _
     'Build: OgUTMmLj5Z4uEUCJHlzyR4E3AA (Ranger, weapon set 4).' & @CRLF & _
     'No heroes needed. Run in Normal Mode.' & @CRLF & _
-    'Bind "Panel: Open Hero Commander 2-7" as noted in the GW Options if hero panels are used elsewhere.'
+    'Bind "Panel: Open Hero Commander 2-7" as noted in the GW Options if hero panels are used elsewhere.' & @CRLF & _
+    ' ' & @CRLF & _
+    'Skill Points:' & @CRLF & _
+    'Rune with +3 Wilderness Survival on Head Piece (results in 16 Wilderness Survival)' & @CRLF & _
+    'Rune with +3 Expertise on Leggins (results in 15 Expertise)' & @CRLF & _
+    ' ' & @CRLF & _
+    'Energy:' & @CRLF & _
+    'Full Radiant insignias (5x)' & @CRLF & _
+    'One additional Rune of Attunement' & @CRLF & _
+    'Staff (of Defense) with +20 Energy' & @CRLF & _
+    'such that all of the above results in exactly 55 Energy'
 
 Global Const $UWCT_FARM_DURATION     = 5 * 60 * 1000
 Global Const $MAX_UWCT_FARM_DURATION = 10 * 60 * 1000
-Global Const $UWCT_MAX_ENERGY        = 57   ; Ranger build max energy — update if gear changes
+Global Const $UWCT_MAX_ENERGY        = 55   ; Ranger build max energy — update if gear changes
 
 ; Aatxe model IDs visible in The Chamber
 Global Const $UWCT_AATXE_MODEL_ID         = 2389
@@ -116,10 +126,14 @@ Func SetupUWCTPlayer()
         Warn('UW Chamber Traps requires Ranger primary profession')
         Return $FAIL
     EndIf
-    ;LoadSkillTemplate($UWCT_SKILLBAR)
-    ;RandomSleep(250)
-    ;ChangeWeaponSet($UWCT_WEAPON_SET)
-    ;RandomSleep(150)
+    If HeroHasTemplate(0, $UWCT_SKILLBAR) Then
+        Info('UW Chamber Traps: build already loaded, skipping')
+    Else
+        LoadSkillTemplate($UWCT_SKILLBAR)
+        RandomSleep(250)
+    EndIf
+    ChangeWeaponSet($UWCT_WEAPON_SET)
+    RandomSleep(150)
     Return $SUCCESS
 EndFunc
 
@@ -186,15 +200,26 @@ Func UWChamberTrapsLoop()
     If Not IsPlayerAlive() Then Return $FAIL
 
     Info('UW CT: aggro run - walking into Aatxe aggro range')
-    MoveTo(-200, 6430)
+    UWCTLogPosition('spot2_pre_aggro')
+    MoveTo(-260, 6380)
     If Not IsPlayerAlive() Then Return $FAIL
+    UWCTLogPosition('spot2_stairs')
     UWCTStepIntoAggroRange()
     If Not IsPlayerAlive() Then Return $FAIL
+    UWCTLogPosition('spot2_aggro_done')
+    ; Whirling Defense before the run back: the Aatxe swarm her at the stairs choke
+    ; point and would kill her mid-return without the block stance.
+    UseSkillEx($UWCT_WHIRLING_DEFENSE)
     Info('UW CT: running back with second Aatxe group following')
+    MoveAvoidingBodyBlock(-432, 6536)
+    MoveTo(-258, 6556)
+    MoveTo(-28, 6547)
+    MoveTo(190, 6476)
+    MoveTo(278, 6329)
     MoveTo(400, 6150)
     If Not IsPlayerAlive() Then Return $FAIL
+    UWCTLogPosition('spot2_return')
 
-    UseSkillEx($UWCT_WHIRLING_DEFENSE)
     UWCTCastExtraTraps()
 
     Info('UW CT: waiting for second Aatxe group to die')
@@ -394,10 +419,9 @@ EndFunc
 
 ; Like UWCTWaitForEnergy but watches for Nightmare attacks (Spot 2).
 ; If health drops during the wait, auto-attack the nearest enemy 4× then return to spot.
-Func UWCTWaitForEnergySpot2($spotX, $spotY, $maxWaitMs = 70000)
-    Info('UW CT: waiting for full energy at Spot 2 (' & $maxWaitMs / 1000 & 's max)')
-    Local $t = TimerInit()
-    While GetEnergy() < $UWCT_MAX_ENERGY - 1 And TimerDiff($t) < $maxWaitMs
+Func UWCTWaitForEnergySpot2($spotX, $spotY)
+    Info('UW CT: waiting for full energy at Spot 2')
+    While GetEnergy() < $UWCT_MAX_ENERGY
         Local $hpBefore = GetHealth()
         Sleep(300)
         If Not IsPlayerAlive() Then Return $FAIL
@@ -423,30 +447,35 @@ Func UWCTWaitForEnergySpot2($spotX, $spotY, $maxWaitMs = 70000)
 EndFunc
 
 
-; Walk from current position to a point 150 units inside the nearest enemy's earshot bubble,
-; triggering natural aggro, then the caller returns to the trap area.
 Func UWCTStepIntoAggroRange()
-    Local $target = GetNearestEnemyToAgent(GetMyAgent())
-    If DllStructGetData($target, 'ID') = 0 Then Return
-
     Local $me = GetMyAgent()
-    Local $myX  = DllStructGetData($me, 'X')
-    Local $myY  = DllStructGetData($me, 'Y')
-    Local $tgtX = DllStructGetData($target, 'X')
-    Local $tgtY = DllStructGetData($target, 'Y')
-    Local $dx   = $tgtX - $myX
-    Local $dy   = $tgtY - $myY
+    Local $foe = GetNearestEnemyToAgent($me)
+    If DllStructGetData($foe, 'ID') = 0 Then Return
+
+    Local $myX = DllStructGetData($me, 'X')
+    Local $myY = DllStructGetData($me, 'Y')
+    Local $dx = DllStructGetData($foe, 'X') - $myX
+    Local $dy = DllStructGetData($foe, 'Y') - $myY
     Local $dist = Sqrt($dx * $dx + $dy * $dy)
-
     If $dist < 1 Then Return
+    Local $destX = $myX + ($dx / $dist) * 2000
+    Local $destY = $myY + ($dy / $dist) * 2000
 
-    ; How far to walk: enough to end up ($RANGE_EARSHOT - 150) units from the enemy
-    Local $walkDist = $dist - ($RANGE_EARSHOT - 150)
-    If $walkDist < 1 Then Return  ; already inside earshot
+    Local $t = TimerInit()
+    While CountFoesInRangeOfAgent(GetMyAgent(), $MOB_AGGRO_RANGE) == 0 And TimerDiff($t) < 6000
+        If Not IsPlayerAlive() Then Return
+        Move($destX, $destY)
+        RandomSleep(200)
+    WEnd
+    CancelAction()
+EndFunc
 
-    Local $aggroX = $myX + ($dx / $dist) * $walkDist
-    Local $aggroY = $myY + ($dy / $dist) * $walkDist
-    MoveTo(Int($aggroX), Int($aggroY))
+
+; Log the player's current position, used to see where the Ranger gets stuck during
+; the aggro run (e.g. against the stairs at Spot 2).
+Func UWCTLogPosition($label)
+    Local $me = GetMyAgent()
+    Info('UW CT [' & $label & '] pos=' & Round(DllStructGetData($me, 'X')) & '/' & Round(DllStructGetData($me, 'Y')))
 EndFunc
 
 
