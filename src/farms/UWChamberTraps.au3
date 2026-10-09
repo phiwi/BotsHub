@@ -450,7 +450,10 @@ EndFunc
 Func UWCTStepIntoAggroRange()
     Local $me = GetMyAgent()
     Local $foe = GetNearestEnemyToAgent($me)
-    If DllStructGetData($foe, 'ID') = 0 Then Return
+    If DllStructGetData($foe, 'ID') = 0 Then
+        Warn('UW CT: no enemy found to step into aggro range')
+        Return
+    EndIf
 
     Local $myX = DllStructGetData($me, 'X')
     Local $myY = DllStructGetData($me, 'Y')
@@ -458,11 +461,11 @@ Func UWCTStepIntoAggroRange()
     Local $dy = DllStructGetData($foe, 'Y') - $myY
     Local $dist = Sqrt($dx * $dx + $dy * $dy)
     If $dist < 1 Then Return
-    Local $destX = $myX + ($dx / $dist) * 2000
-    Local $destY = $myY + ($dy / $dist) * 2000
+    Local $destX = $myX + ($dx / $dist) * ($dist + 1500)
+    Local $destY = $myY + ($dy / $dist) * ($dist + 1500)
 
     Local $t = TimerInit()
-    While CountFoesInRangeOfAgent(GetMyAgent(), $MOB_AGGRO_RANGE) == 0 And TimerDiff($t) < 6000
+    While CountFoesInRangeOfAgent(GetMyAgent(), $MOB_AGGRO_RANGE) == 0 And TimerDiff($t) < 12000
         If Not IsPlayerAlive() Then Return
         Move($destX, $destY)
         RandomSleep(200)
