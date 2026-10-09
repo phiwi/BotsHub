@@ -1123,6 +1123,7 @@ $default_move_aggro_kill_options['approachBeforeFight']	= False
 ; default 60 seconds fight duration
 $default_move_aggro_kill_options['fightDuration']		= 60000
 $default_move_aggro_kill_options['killMethod']			= UseSkillSequentially
+$default_move_aggro_kill_options['movementRoutine']		= Null
 
 Global $flag_move_aggro_kill_options					= CloneMap($default_move_aggro_kill_options)
 $flag_move_aggro_kill_options['flagHeroesOnFight']		= True
@@ -1204,6 +1205,7 @@ Func MoveAggroAndKill($x, $y, $log = '', $options = $default_move_aggro_kill_opt
 	Local $ignoreDroppedLoot	= $options['ignoreDroppedLoot'] <> Null ?	$options['ignoreDroppedLoot'] : False
 	Local $unstuckHandler		= $options['unstuckHandler'] <> Null ?		$options['unstuckHandler'] : TryToGetUnstuck
 	Local $approachBeforeFight	= $options['approachBeforeFight'] <> Null ?	$options['approachBeforeFight'] : False
+	Local $movementRoutine		= $options['movementRoutine'] <> Null ?		$options['movementRoutine'] : Null
 
 	IsPlayerStuck(Default, Default, True) ; init internal state
 
@@ -1215,6 +1217,7 @@ Func MoveAggroAndKill($x, $y, $log = '', $options = $default_move_aggro_kill_opt
 	Local $fightTimer = TimerInit()
 	While GetDistanceToPoint($me, $x, $y) > $RANGE_NEARBY
 		If TimerDiff($fightTimer) > $fightTimeout Then ExitLoop
+		If $movementRoutine <> Null Then $movementRoutine()
 
 		; Trigger fight function if a foe comes close enough
 		$target = GetNearestEnemyToAgent($me)
@@ -1347,6 +1350,7 @@ Func KillFoesInArea($options = $default_move_aggro_kill_options)
 	Local $killMethod			= $options['killMethod'] <> Null ?			$options['killMethod'] : UseSkillSequentially
 	Local $abortCondition		= $options['abortCondition'] <> Null ?		$options['abortCondition'] : Null
 	Local $priorityRange		= $options['priorityRange'] <> Null ?			$options['priorityRange'] : $RANGE_COMPASS
+	Local $movementRoutine		= $options['movementRoutine'] <> Null ?		$options['movementRoutine'] : Null
 
 	Local $me = GetMyAgent()
 	Local $foesCount = CountFoesInRangeOfAgent($me, $fightRange)
@@ -1357,6 +1361,7 @@ Func KillFoesInArea($options = $default_move_aggro_kill_options)
 	Local $callTimer = 0
 	While $foesCount > 0
 		If TimerDiff($killTimer) > $fightTimeout Then ExitLoop
+		If $movementRoutine <> Null Then $movementRoutine()
 		; Priority targeting scans the whole compass so ranged priority foes
 		; (e.g. Tortureweb Dryders) stay targeted even when they kite out past
 		; the fight range — otherwise the bot drops them for a random nearer foe.

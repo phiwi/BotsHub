@@ -93,6 +93,7 @@ Func SetupUnderworldFarm()
 	TravelToUWOutpost($district_name)
 	SetupPlayerUnderworldFarm()
 	SwitchToHardModeIfEnabled()
+	$default_move_aggro_kill_options['movementRoutine'] = UnderworldMaintainConsets
 	$underworld_fight_options = CloneMap($default_move_aggro_kill_options)
 	$uw_farm_setup = True
 	Info('Preparations complete')
@@ -173,6 +174,15 @@ EndFunc
 ;~ Small wrapper to use both conset and legionnaire summoning crystal
 Func UseUWConsetsAndConsumables()
 	UseConsumable($ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
+	UseConset()
+EndFunc
+
+
+Func UnderworldMaintainConsets()
+	If Not $uw_farm_setup Then Return
+	Local Static $lastCheck = 0
+	If TimerDiff($lastCheck) < 1000 Then Return
+	$lastCheck = TimerInit()
 	UseConset()
 EndFunc
 
