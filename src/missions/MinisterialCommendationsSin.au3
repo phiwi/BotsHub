@@ -55,21 +55,19 @@ Global Const $COMMENDATIONS_SIN_XANDRA_DISPLACEMENT = 4
 Global Const $COMMENDATIONS_SIN_XANDRA_ARMOR_OF_UNFEELING = 5
 Global Const $COMMENDATIONS_SIN_ZHED_WARD_AGAINST_MELEE = 7
 
-Global Const $COMMENDATIONS_SIN_HERO_NORGU_TEMPLATE = 'OQNEAqwD2yQUxpmupXOIDMEQjA'
-Global Const $COMMENDATIONS_SIN_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDMEQjA'
-Global Const $COMMENDATIONS_SIN_HERO_GWEN_TEMPLATE = 'OQBDAawDSvAIgcQ5ZkArATAEBA'
+Global Const $COMMENDATIONS_SIN_HERO_NORGU_TEMPLATE = 'OQBDArsDOFAcqpb6lDyAeASH'
+Global Const $COMMENDATIONS_SIN_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDMEKqA'
+Global Const $COMMENDATIONS_SIN_HERO_GWEN_TEMPLATE = 'OQNEAawD2C9CgAyBlnRCMBMChGB'
 Global Const $COMMENDATIONS_SIN_HERO_ZHED_TEMPLATE = 'OgBCkMnTqYHy06znCVBsAZA'
-Global Const $COMMENDATIONS_SIN_HERO_OGDEN_TEMPLATE = 'OwAS4YIP+s7B13lgX7iXkqP'
-Global Const $COMMENDATIONS_SIN_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIT3BJgVVCPSTTODTjTA'
-Global Const $COMMENDATIONS_SIN_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00Ze2mnA'
-Global Const $COMMENDATIONS_SIN_HERO_BLACKOUT_TEMPLATE = 'OQNEAqwD2yECxpmupXOIDMEQjA'
+Global Const $COMMENDATIONS_SIN_HERO_OGDEN_TEMPLATE = 'Owkj4oQrpOMku4Fh67Swr1YfMA'
+Global Const $COMMENDATIONS_SIN_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhWVV4JNncDzxJA'
+Global Const $COMMENDATIONS_SIN_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00ZicnnA'
 
 Global Const $COMMENDATIONS_SIN_HERO_NORGU_SLOT = 1
 Global Const $COMMENDATIONS_SIN_HERO_RAZAH_SLOT = 2
 Global Const $COMMENDATIONS_SIN_HERO_GWEN_SLOT = 3
 Global Const $COMMENDATIONS_SIN_HERO_ZHED_SLOT = 4
 Global Const $COMMENDATIONS_SIN_HERO_OGDEN_SLOT = 5
-Global Const $COMMENDATIONS_SIN_HERO_BLACKOUT_SLOT = 5
 Global Const $COMMENDATIONS_SIN_HERO_OLIAS_SLOT = 6
 Global Const $COMMENDATIONS_SIN_HERO_XANDRA_SLOT = 7
 
@@ -215,8 +213,7 @@ Func SetupTeamMinisterialCommendationsSinFarm()
     If CommendationsCustomTryAddHero($ID_RAZAH, 'Razah', 3) == $FAIL Then Return $FAIL
     If CommendationsCustomTryAddHero($ID_GWEN, 'Gwen', 4) == $FAIL Then Return $FAIL
     If CommendationsCustomTryAddHero($ID_ZHED_SHADOWHOOF, 'Zhed Shadowhoof', 5) == $FAIL Then Return $FAIL
-    ;~ If CommendationsCustomTryAddHero($ID_OGDEN, 'Ogden', 6) == $FAIL Then Return $FAIL
-    If CommendationsCustomTryAddHero($ID_MERCENARY_HERO_4, 'A R U Blackout', 6) == $FAIL Then Return $FAIL
+    If CommendationsCustomTryAddHero($ID_OGDEN, 'Ogden', 6) == $FAIL Then Return $FAIL
     If CommendationsCustomTryAddHero($ID_OLIAS, 'Olias', 7) == $FAIL Then Return $FAIL
     If CommendationsCustomTryAddHero($ID_XANDRA, 'Xandra', 8) == $FAIL Then Return $FAIL
 
@@ -230,8 +227,7 @@ Func SetupTeamMinisterialCommendationsSinFarm()
     If GetHeroNumberByHeroID($ID_RAZAH) <> $COMMENDATIONS_SIN_HERO_RAZAH_SLOT Then Return $FAIL
     If GetHeroNumberByHeroID($ID_GWEN) <> $COMMENDATIONS_SIN_HERO_GWEN_SLOT Then Return $FAIL
     If GetHeroNumberByHeroID($ID_ZHED_SHADOWHOOF) <> $COMMENDATIONS_SIN_HERO_ZHED_SLOT Then Return $FAIL
-    If GetHeroNumberByHeroID($ID_MERCENARY_HERO_4) <> $COMMENDATIONS_SIN_HERO_BLACKOUT_SLOT Then Return $FAIL
-    ;~ If GetHeroNumberByHeroID($ID_OGDEN) <> $COMMENDATIONS_SIN_HERO_OGDEN_SLOT Then Return $FAIL
+    If GetHeroNumberByHeroID($ID_OGDEN) <> $COMMENDATIONS_SIN_HERO_OGDEN_SLOT Then Return $FAIL
     If GetHeroNumberByHeroID($ID_OLIAS) <> $COMMENDATIONS_SIN_HERO_OLIAS_SLOT Then Return $FAIL
     If GetHeroNumberByHeroID($ID_XANDRA) <> $COMMENDATIONS_SIN_HERO_XANDRA_SLOT Then Return $FAIL
 
@@ -239,8 +235,7 @@ Func SetupTeamMinisterialCommendationsSinFarm()
     ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_RAZAH_TEMPLATE, $COMMENDATIONS_SIN_HERO_RAZAH_SLOT, 'Razah')
     ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_GWEN_TEMPLATE, $COMMENDATIONS_SIN_HERO_GWEN_SLOT, 'Gwen')
     ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_ZHED_TEMPLATE, $COMMENDATIONS_SIN_HERO_ZHED_SLOT, 'Zhed')
-    ;~ ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_OGDEN_TEMPLATE, $COMMENDATIONS_SIN_HERO_OGDEN_SLOT, 'Ogden')
-    ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_BLACKOUT_TEMPLATE, $COMMENDATIONS_SIN_HERO_BLACKOUT_SLOT, 'A R U Blackout')
+    ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_OGDEN_TEMPLATE, $COMMENDATIONS_SIN_HERO_OGDEN_SLOT, 'Ogden')
     ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_OLIAS_TEMPLATE, $COMMENDATIONS_SIN_HERO_OLIAS_SLOT, 'Olias')
     ComCustomLoadIfNeeded($COMMENDATIONS_SIN_HERO_XANDRA_TEMPLATE, $COMMENDATIONS_SIN_HERO_XANDRA_SLOT, 'Xandra')
     RandomSleep(250)
@@ -311,18 +306,36 @@ Func MinisterialCommendationsSinFarmLoop()
     Info('Spiking the farm group (custom)')
     If KillMinistryOfPurityCustom() == $FAIL Then Return $FAIL
 
-    RandomSleep(1000)
-    Info('Picking up loot')
-    ; Multiple passes with delays so ownership expires on hero-assigned drops
-    ; (event consumables, summoning stones etc. are initially assigned to heroes).
-    For $pass = 1 To 8
-        PickUpItems(HealWhilePickingItemsCustom, MinisterialCommendationsSinShouldPickItem, $RANGE_SPIRIT)
-        RandomSleep(3000)
-    Next
-    Info('Loot sweep done: 6 passes')
+    Local $runResult = $SUCCESS
+    If Not IsPlayerAlive() Then
+        $runResult = $FAIL
+    Else
+        RandomSleep(1000)
+        Info('Picking up loot')
+        ; Multiple passes with delays so ownership expires on hero-assigned drops
+        ; (event consumables, summoning stones etc. are initially assigned to heroes).
+        For $pass = 1 To 8
+            If Not IsPlayerAlive() Then
+                $runResult = $FAIL
+                ExitLoop
+            EndIf
+            PickUpItems(HealWhilePickingItemsCustom, MinisterialCommendationsSinShouldPickItem, $RANGE_SPIRIT)
+            If Not IsPlayerAlive() Then
+                $runResult = $FAIL
+                ExitLoop
+            EndIf
+            RandomSleep(3000)
+        Next
+        If $runResult == $SUCCESS Then Info('Loot sweep done: 8 passes')
+    EndIf
+
+    If $runResult == $FAIL Then
+        Warn('Custom Ministerial: player died before loot sweep completed')
+        LogIntoFileCustom('Run failed: player died before loot sweep completed')
+    EndIf
 
     If $log_level == 0 Then FileClose($logging_file_commendations_sin)
-    Return $SUCCESS
+    Return $runResult
 EndFunc
 
 
