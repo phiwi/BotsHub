@@ -73,8 +73,6 @@ Global $outcast_rheas_hero_zhed_index = 4
 Global $outcast_rheas_hero_vekk_index = 5
 Global $outcast_rheas_hero_xandra_index = 6
 Global $outcast_rheas_hero_dunkoro_index = 7
-Global $outcast_rheas_last_chest_x = 0
-Global $outcast_rheas_last_chest_y = 0
 
 
 Func OutcastRheasCraterChestFarm()
@@ -153,7 +151,6 @@ Func OutcastRheasTravelToCrater()
 		RandomSleep(1200)
 		WaitMapLoading($ID_RHEAS_CRATER, 10000, 2000)
 	WEnd
-	OutcastRheasFlagHeroesAtEntry()
 	Return $SUCCESS
 EndFunc
 
@@ -259,7 +256,7 @@ Func OutcastRheasRunRightThenLeft()
 		$chestY = Int(DllStructGetData($seenChest, 'Y'))
 		Info('Shrine-discovery: chest visible from rez-shrine at x=' & $chestX & ', y=' & $chestY & '. Running to discovered chest first')
 		If OutcastRheasMoveWithUpkeep($chestX, $chestY, False) == $FAIL Then Return -1
-		If OutcastRheasTryOpenNearbyChest($RANGE_COMPASS, True) Then $openedChests += 1
+		If OutcastRheasTryOpenNearbyChest($RANGE_COMPASS) Then $openedChests += 1
 	Else
 		Info('Shrine-discovery: no chest visible from rez-shrine, skipping fixed right route and going left directly')
 	EndIf
@@ -497,16 +494,10 @@ Func OutcastRheasTryLeftMidpointDecision()
 EndFunc
 
 
-Func OutcastRheasTryOpenNearbyChest($range, $fastRecovery = False)
-	Local $chest = FindChest($range)
-	If $chest == Null Then Return False
-	$outcast_rheas_last_chest_x = Int(DllStructGetData($chest, 'X'))
-	$outcast_rheas_last_chest_y = Int(DllStructGetData($chest, 'Y'))
-	Info('Chest detected, moving to open')
+Func OutcastRheasTryOpenNearbyChest($range)
 	Local $opened = FindAndOpenChests($range, OutcastRheasDefendWhileOpeningChest, OutcastRheasRecoverWhileOpeningChest)
-	If Not $opened Then Return False
-	OutcastRheasPostChestLootRecovery($fastRecovery)
-	Return True
+	If $opened Then Info('Chest opened; continuing run')
+	Return $opened
 EndFunc
 
 
@@ -519,43 +510,6 @@ Func OutcastRheasRecoverWhileOpeningChest()
 	Local $me = GetMyAgent()
 	If $me == Null Then Return
 	OutcastRheasTryUnblockMove(Int(DllStructGetData($me, 'X')) + 120, Int(DllStructGetData($me, 'Y')) + 80, True)
-EndFunc
-
-
-Func OutcastRheasPostChestLootRecovery($fastExit = False)
-	If $fastExit Then
-		Info('Chest opened, fast loot recovery for direct left transition')
-	Else
-		Info('Chest opened, attempting loot recovery')
-	EndIf
-
-	Local $passes = $fastExit ? 3 : 8
-	For $i = 1 To $passes
-		If Not IsPlayerAlive() Then Return
-		OutcastRheasUseUpkeep(True, True)
-
-		If $outcast_rheas_last_chest_x <> 0 Or $outcast_rheas_last_chest_y <> 0 Then
-			If Not $fastExit And GetDistanceToPoint(GetMyAgent(), $outcast_rheas_last_chest_x, $outcast_rheas_last_chest_y) > 250 Then
-				OutcastRheasTryUnblockMove($outcast_rheas_last_chest_x, $outcast_rheas_last_chest_y, True)
-			EndIf
-			Move($outcast_rheas_last_chest_x, $outcast_rheas_last_chest_y)
-		EndIf
-
-		PickUpItems(OutcastRheasDefendWhileOpeningChest)
-
-		If Not $fastExit And Not IsPlayerMoving() Then
-			Local $me = GetMyAgent()
-			If $me <> Null Then
-				If $outcast_rheas_last_chest_x <> 0 Or $outcast_rheas_last_chest_y <> 0 Then
-					OutcastRheasTryUnblockMove($outcast_rheas_last_chest_x, $outcast_rheas_last_chest_y, True)
-				Else
-					OutcastRheasTryUnblockMove(Int(DllStructGetData($me, 'X')) + 140, Int(DllStructGetData($me, 'Y')) + 100, True)
-				EndIf
-			EndIf
-		EndIf
-
-		RandomSleep($fastExit ? 120 : 180)
-	Next
 EndFunc
 
 
@@ -734,17 +688,7 @@ Func OutcastRheasFlagHeroesAtEntry()
 	ClearPartyCommands()
 	CancelAllHeroes()
 
-	For $i = 1 To 3
-		CommandAll($OUTCAST_RHEAS_ENTRY_FLAG_X, $OUTCAST_RHEAS_ENTRY_FLAG_Y)
-		CommandHero($outcast_rheas_hero_ogden_index, $OUTCAST_RHEAS_ENTRY_FLAG_X, $OUTCAST_RHEAS_ENTRY_FLAG_Y)
-		CommandHero($outcast_rheas_hero_tahlkora_index, $OUTCAST_RHEAS_ENTRY_FLAG_X, $OUTCAST_RHEAS_ENTRY_FLAG_Y)
-		CommandHero($outcast_rheas_hero_morgahn_index, $OUTCAST_RHEAS_ENTRY_FLAG_X, $OUTCAST_RHEAS_ENTRY_FLAG_Y)
-		CommandHero($outcast_rheas_hero_zhed_index, $OUTCAST_RHEAS_ENTRY_FLAG_X, $OUTCAST_RHEAS_ENTRY_FLAG_Y)
-		CommandHero($outcast_rheas_hero_vekk_index, $OUTCAST_RHEAS_ENTRY_FLAG_X, $OUTCAST_RHEAS_ENTRY_FLAG_Y)
-		CommandHero($outcast_rheas_hero_xandra_index, $OUTCAST_RHEAS_ENTRY_FLAG_X, $OUTCAST_RHEAS_ENTRY_FLAG_Y)
-		CommandHero($outcast_rheas_hero_dunkoro_index, $OUTCAST_RHEAS_ENTRY_FLAG_X, $OUTCAST_RHEAS_ENTRY_FLAG_Y)
-		RandomSleep(180)
-	Next
+	CommandAll($OUTCAST_RHEAS_ENTRY_FLAG_X, $OUTCAST_RHEAS_ENTRY_FLAG_Y)
 EndFunc
 
 
