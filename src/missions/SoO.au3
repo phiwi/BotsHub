@@ -1125,7 +1125,7 @@ Func ClearSoOFloor2()
 
 	Local $firstRoomfirstTime = True
 	Local $braziersLit = False
-	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -11000, -6000, $RANGE_EARSHOT)
+	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), -11000, -6000, $RANGE_EARSHOT)
 		If CheckStuck('SoO Floor 2 - First Room', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
@@ -1263,7 +1263,7 @@ Func ClearSoOFloor2()
 
 	Local $secondRoomfirstTime = True
 	Local $mapLoaded = False
-	While Not IsRunFailed() And Not $mapLoaded
+	While Not SoOIsRunFailed() And Not $mapLoaded
 		If CheckStuck('SoO Floor 2 - Second Room', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
@@ -1383,7 +1383,7 @@ Func ClearSoOFloor2()
 		RandomSleep(2000)
 		$mapLoaded = WaitMapLoading($ID_SHARDS_OF_ORR_LVL_3)
 	WEnd
-	Return IsRunFailed() ? $FAIL : $SUCCESS
+	Return SoOIsRunFailed() ? $FAIL : $SUCCESS
 EndFunc
 
 
