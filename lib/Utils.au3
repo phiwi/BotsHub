@@ -1124,6 +1124,7 @@ $default_move_aggro_kill_options['approachBeforeFight']	= False
 $default_move_aggro_kill_options['fightDuration']		= 60000
 $default_move_aggro_kill_options['killMethod']			= UseSkillSequentially
 $default_move_aggro_kill_options['movementRoutine']		= Null
+$default_move_aggro_kill_options['shouldPickItem']		= Null
 
 Global $flag_move_aggro_kill_options					= CloneMap($default_move_aggro_kill_options)
 $flag_move_aggro_kill_options['flagHeroesOnFight']		= True
@@ -1348,6 +1349,7 @@ Func KillFoesInArea($options = $default_move_aggro_kill_options)
 	Local $lootTrappedArea		= $options['lootTrappedArea'] <> Null ?		$options['lootTrappedArea'] : False
 	Local $ignoreDroppedLoot	= $options['ignoreDroppedLoot'] <> Null ?	$options['ignoreDroppedLoot'] : False
 	Local $killMethod			= $options['killMethod'] <> Null ?			$options['killMethod'] : UseSkillSequentially
+	Local $shouldPickItem		= $options['shouldPickItem'] <> Null ?		$options['shouldPickItem'] : DefaultShouldPickItem
 	Local $abortCondition		= $options['abortCondition'] <> Null ?		$options['abortCondition'] : Null
 	Local $priorityRange		= $options['priorityRange'] <> Null ?			$options['priorityRange'] : $RANGE_COMPASS
 	Local $movementRoutine		= $options['movementRoutine'] <> Null ?		$options['movementRoutine'] : Null
@@ -1388,7 +1390,7 @@ Func KillFoesInArea($options = $default_move_aggro_kill_options)
 			$killMethod($target, $options)
 		EndIf
 
-		If $lootInCombat And IsPlayerAlive() Then PickUpItems(Null, DefaultShouldPickItem, $fightRange)
+		If $lootInCombat And IsPlayerAlive() Then PickUpItems(Null, $shouldPickItem, $fightRange)
 		$me = GetMyAgent()
 		$foesCount = CountFoesInRangeOfAgent($me, $fightRange)
 		; Cancel fan formation when player is dead so heroes can walk to the corpse and resurrect.
@@ -1402,7 +1404,7 @@ Func KillFoesInArea($options = $default_move_aggro_kill_options)
 	WEnd
 	RandomSleep(500)
 	If $flagHeroes Then CancelAllHeroes()
-	If Not $ignoreDroppedLoot And IsPlayerAlive() Then PickUpItems($lootTrappedArea ? LootTrappedAreaSafely : Null, DefaultShouldPickItem, $fightRange)
+	If Not $ignoreDroppedLoot And IsPlayerAlive() Then PickUpItems($lootTrappedArea ? LootTrappedAreaSafely : Null, $shouldPickItem, $fightRange)
 	Return $SUCCESS
 EndFunc
 

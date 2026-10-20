@@ -45,8 +45,13 @@ Global Const $FROGGY_TEAM_MISSING_FALLBACK_PASSES = 3
 Global Const $FROGGY_TEAM_OUTPOST_RETRIES = 4
 Global Const $FROGGY_TEMPLATE_LOAD_RETRIES = 5
 Global Const $FROGGY_ASSASSIN_SKILLBAR = 'OwFkQxVlHNuEuDPxVBNpqYfxO4UD'
-Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgBDg6ucSqDkDtl7irDylJRHOA'
-;~ Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdDgYysS7ilCQf2kuZIDpOZDA' ; Earth Magic
+;~ Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgBDg6ucSqDkDtl7irDylJRHOA' ; SoO
+;~ Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdCkMzENJOIygPEuTqjrgdN' ; EQ Shockwave
+Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgdTkWm1ZSVkmUACAih5K0VI1BA' ; Shockwave Dagger
+
+
+;~ Global Const $FROGGY_ELEMENTALIST_SKILLBAR = '
+;~ Global Const $FROGGY_ELEMENTALIST_SKILLBAR = 'OgBDg6ucSqDkDtl7irDylJRHOA' ; Earth Magic
 Global Const $FROGGY_ASSASSIN_WEAPON_SET = 3
 Global Const $FROGGY_ELEMENTALIST_WEAPON_SET = 3
 Global Const $FROGGY_ASSASSIN_HERO_MOW_TEMPLATE = 'OANDQrh+OmMXCUtqOJME7r5B'
@@ -137,8 +142,21 @@ EndFunc
 
 ;~ Main method to farm Froggy
 Func FroggyFarm()
-	If Not $froggy_farm_setup And SetupFroggyFarm() == $FAIL Then Return $FAIL
-	Return FroggyFarmLoop()
+	Local $defaultShouldPickItem = $default_move_aggro_kill_options['shouldPickItem']
+	Local $flagShouldPickItem = $flag_move_aggro_kill_options['shouldPickItem']
+	$default_move_aggro_kill_options['shouldPickItem'] = FroggyShouldPickItem
+	$flag_move_aggro_kill_options['shouldPickItem'] = FroggyShouldPickItem
+
+	Local $result = $SUCCESS
+	If Not $froggy_farm_setup And SetupFroggyFarm() == $FAIL Then
+		$result = $FAIL
+	Else
+		$result = FroggyFarmLoop()
+	EndIf
+
+	$default_move_aggro_kill_options['shouldPickItem'] = $defaultShouldPickItem
+	$flag_move_aggro_kill_options['shouldPickItem'] = $flagShouldPickItem
+	Return $result
 EndFunc
 
 
@@ -891,7 +909,7 @@ Func ClearFroggyFloor2()
 		MoveAggroAndKillInRange(16841, -5619, 'Keyboss', $FROGGY_AGGRO_RANGE)
 
 		RandomSleep(500)
-		PickUpItems()
+		PickUpItems(Null, FroggyShouldPickItem)
 
 		Info('Open dungeon door')
 		ClearTarget()
@@ -965,8 +983,14 @@ Func ClearFroggyFloor2()
 		TargetNearestItem()
 		ActionInteract()
 		RandomSleep(2500)
-		PickUpItems()
+		PickUpItems(Null, FroggyShouldPickItem)
 		RandomSleep(5000)
 	Next
 	Return $SUCCESS
+EndFunc
+
+
+Func FroggyShouldPickItem($item)
+	If IsWeapon($item) And GetRarity($item) == $RARITY_GREEN Then Return False
+	Return DefaultShouldPickItem($item)
 EndFunc
