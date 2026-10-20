@@ -56,10 +56,16 @@ Global Const $UWCT_FARM_INFORMATIONS = _
 Global Const $UWCT_FARM_DURATION     = 5 * 60 * 1000
 Global Const $MAX_UWCT_FARM_DURATION = 10 * 60 * 1000
 Global Const $UWCT_MAX_ENERGY        = 55   ; Ranger build max energy — update if gear changes
+Global Const $UWCT_DUST_TRAP_ENERGY   = 12
+Global Const $UWCT_BARBED_TRAP_ENERGY = 4
+Global Const $UWCT_FLAME_TRAP_ENERGY  = 4
 
 ; Aatxe model IDs visible in The Chamber
 Global Const $UWCT_AATXE_MODEL_ID         = 2389
 Global Const $UWCT_VENGEFUL_AATXE_MODEL_ID = $ID_VENGEFUL_AATXE
+Global Const $UWCT_DYING_NIGHTMARE_MODEL_ID = 2318
+Global Const $UWCT_SPOT2_AGGRO_X = -665
+Global Const $UWCT_SPOT2_AGGRO_Y = 6472
 
 Global $uw_ct_farm_setup = False
 #EndRegion Configuration
@@ -154,11 +160,13 @@ Func UWChamberTrapsLoop()
     If CheckStuck('UW CT', $MAX_UWCT_FARM_DURATION) == $FAIL Then Return $FAIL
 
     Info('UW CT: casting initial trap combo at Spot 1A')
+    UWCTKillNightmare()
     UWCTCastInitialCombo()
     If Not IsPlayerAlive() Then Return $FAIL
 
     Info('UW CT: moving into Spot 1B niche for more traps')
     MoveTo(1397, 7512)
+    UWCTKillNightmare()
     UWCTCastSpot1BTraps()
     If Not IsPlayerAlive() Then Return $FAIL
 
@@ -192,10 +200,12 @@ Func UWChamberTrapsLoop()
     If UWCTWaitForEnergySpot2(142, 6191) == $FAIL Then Return $FAIL
 
     Info('UW CT: casting initial trap combo at Spot 2')
+    UWCTKillNightmare()
     UWCTCastInitialCombo()
     If Not IsPlayerAlive() Then Return $FAIL
 
     Info('UW CT: Spot 2 - additional trap sequence')
+    UWCTKillNightmare()
     UWCTCastSpot1BTraps()
     If Not IsPlayerAlive() Then Return $FAIL
 
@@ -204,7 +214,7 @@ Func UWChamberTrapsLoop()
     MoveTo(-260, 6380)
     If Not IsPlayerAlive() Then Return $FAIL
     UWCTLogPosition('spot2_stairs')
-    UWCTStepIntoAggroRange()
+    UWCTStepIntoAggroRangeSpot2()
     If Not IsPlayerAlive() Then Return $FAIL
     UWCTLogPosition('spot2_aggro_done')
     ; Whirling Defense before the run back: the Aatxe swarm her at the stairs choke
@@ -302,6 +312,7 @@ Func UWCTCastSpot1BTraps()
     Local $t = TimerInit()
     While Not IsRecharged($UWCT_DUST_TRAP) And TimerDiff($t) < 35000
         UWCTEtherSignetCheck()
+        UWCTKillNightmare()
         Sleep(200)
     WEnd
 
@@ -338,6 +349,7 @@ Func UWCTCastSpot1BTraps()
     Local $t2 = TimerInit()
     While Not IsRecharged($UWCT_DUST_TRAP) And TimerDiff($t2) < 35000
         UWCTEtherSignetCheck()
+        UWCTKillNightmare()
         Sleep(200)
     WEnd
 
@@ -408,6 +420,33 @@ Func UWCTEtherSignetCheck()
 EndFunc
 
 
+Func IsDyingNightmare($agent)
+    If DllStructGetData($agent, 'ModelID') <> $UWCT_DYING_NIGHTMARE_MODEL_ID Then Return False
+    If GetIsDead($agent) Then Return False
+    Return True
+EndFunc
+
+
+Func UWCTKillNightmare()
+    If Not UWCTAttackNightmare() Then Return
+    Info('UW CT: Dying Nightmare detected - killing it')
+    Local $attacks = 0
+    While $attacks < 8
+        If Not UWCTAttackNightmare() Then Return
+        $attacks += 1
+    WEnd
+EndFunc
+
+
+Func UWCTAttackNightmare()
+    Local $nightmare = GetNearestAgentToAgent(GetMyAgent(), $ID_AGENT_TYPE_NPC, $RANGE_SPELLCAST, IsDyingNightmare)
+    If $nightmare == Null Then Return False
+    Attack($nightmare)
+    Sleep(1500)
+    Return True
+EndFunc
+
+
 ; Wait until energy is at or above $minEnergy, up to 15 seconds.
 Func UWCTWaitForEnergy($minEnergy, $maxWaitMs = 15000)
     Local $t = TimerInit()
@@ -474,6 +513,18 @@ Func UWCTStepIntoAggroRange()
 EndFunc
 
 
+Func UWCTStepIntoAggroRangeSpot2()
+    Local $t = TimerInit()
+    While TimerDiff($t) < 12000
+        If Not IsPlayerAlive() Then Return
+        If CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_AREA) > 1 Then ExitLoop
+        Move($UWCT_SPOT2_AGGRO_X, $UWCT_SPOT2_AGGRO_Y)
+        RandomSleep(200)
+    WEnd
+    CancelAction()
+EndFunc
+
+
 ; Log the player's current position, used to see where the Ranger gets stuck during
 ; the aggro run (e.g. against the stairs at Spot 2).
 Func UWCTLogPosition($label)
@@ -486,7 +537,15 @@ EndFunc
 ; Kill loop
 ; ============================================================
 
-; Wait for all enemies in earshot to die, with a 30-second hard timeout.
+Func UWCTCastTrap($skillSlot, $minEnergy)
+    If Not IsRecharged($skillSlot) Then Return False
+    If GetEnergy() < $minEnergy Then Return False
+    UseSkill($skillSlot)
+    Sleep(2500)
+    Return True
+EndFunc
+
+
 Func UWCTKillLoop($runTimer)
     Local $killTimer = TimerInit()
     Local $foeCount = 999
@@ -495,6 +554,14 @@ Func UWCTKillLoop($runTimer)
         If Not IsPlayerAlive() Then Return $FAIL
         If TimerDiff($runTimer) > $MAX_UWCT_FARM_DURATION Then Return $FAIL
         If TimerDiff($killTimer) > 30000 Then ExitLoop
+
+        If UWCTAttackNightmare() Then ContinueLoop
+
+        UWCTCastTrap($UWCT_DUST_TRAP, $UWCT_DUST_TRAP_ENERGY)
+        UWCTCastTrap($UWCT_BARBED_TRAP, $UWCT_BARBED_TRAP_ENERGY)
+        UWCTCastTrap($UWCT_FLAME_TRAP, $UWCT_FLAME_TRAP_ENERGY)
+        UWCTEtherSignetCheck()
+
         $foeCount = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_EARSHOT)
     WEnd
     Return $SUCCESS
