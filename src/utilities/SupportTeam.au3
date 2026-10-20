@@ -77,6 +77,10 @@ Func SupportTeamOpenHeroPanels($contextLabel = 'Support team', $hero2Key = '9', 
 	If $panelCount >= 1 Then
 		ToggleHeroPanel(1)
 		Sleep(130 + GetPing())
+		CloseAllPanels()
+		Sleep(150 + GetPing())
+		ToggleHeroPanel(1)
+		Sleep(130 + GetPing())
 	EndIf
 
 	If $panelCount >= 2 Then
