@@ -10,7 +10,7 @@
 ;
 ; Unless required by applicable law or agreed to in writing, software
 ; distributed under the License is distributed on an 'AS IS' BASIS,
-; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;rmon WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ; See the License for the specific language governing permissions and
 ; limitations under the License.
 #CE ===========================================================================
@@ -34,32 +34,45 @@ Global Const $GEMSTONES_MESMER_SKILLBAR = 'OghkkgKKjIyEz0rA0XR0t41U1kPI'
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdUkSFySvSpCMNnC3iwCRfFRLQA' ; Promise Wards 
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBDgcqMS7ihD0CkDvCwCfDeDA' ; Air + Wards
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgljgwMopS7ihD0CkD+Y1YfDeDA' ; Air + Commmand
-Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OghkkwKBjIyEz0u4rw1U1U5kjTrI' ; Spirits + Wards
+;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OghjwMgsITMTXTVTZObOOO+gRbA' ; Spirits + Rift
+;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBCsMzEyQuocZbZKz6whT6A' ; Shatterstone
+;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBDg6ucSqDkDtl7irDylJRHOA' ; Water + Air
+;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBDk6yMSIDvDTDHOOioCpD21A' ; Ward Overcast Prot
+;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OghjwMgsITMT7iXTVTtllTfT+gA' ; EVAS + + Techno Spirits
+Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgRDQ4xsSvB7i2kfCWChVlBylA' ;Curses assist
+
+
+
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgVDIMusRkD7i3imOCO3U4UTPA' ; Dom
 
 ; Fixed 7-hero team. Hero index 1..7 = the AddHero order in SetupTeamGemstonesFarm.
 Global Const $GEMSTONES_HERO_OLIAS_ID = $ID_OLIAS
-Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhkQoG4hEyzdYoVVtDSzJ3wccC'
+Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhkQoG4hEyzdAsVVFeSzJ3wccC' ; Barbed Signet
 Global Const $GEMSTONES_HERO_NORGU_ID = $ID_NORGU
-Global Const $GEMSTONES_HERO_NORGU_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDQ6QjA'
+Global Const $GEMSTONES_HERO_NORGU_TEMPLATE = 'OQBDArsDOFAcqpb6lDyAkOnA' ;PB + Compl * Epi
 Global Const $GEMSTONES_HERO_RAZAH_ID = $ID_RAZAH
-Global Const $GEMSTONES_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDwBQjA'
+Global Const $GEMSTONES_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDMEKqA'
 Global Const $GEMSTONES_HERO_GWEN_ID = $ID_GWEN
-Global Const $GEMSTONES_HERO_GWEN_TEMPLATE = 'OQNEAawD2C9CgAyBlnRCMBQEgGB'
+Global Const $GEMSTONES_HERO_GWEN_TEMPLATE = 'OQNEAawD2C9CgAyBlnRCMBMC1TB'
 Global Const $GEMSTONES_HERO_XANDRA_ID = $ID_XANDRA
-Global Const $GEMSTONES_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00Ze2QuA'
+Global Const $GEMSTONES_HERO_XANDRA_TEMPLATE = 'OACjAyhDJPYTr3jLcCNdmI3kLA' ;DP Signet
 Global Const $GEMSTONES_HERO_ATMO_ID = $ID_MERCENARY_HERO_1
 Global Const $GEMSTONES_HERO_ATMO_TEMPLATE = 'OAWjEyiM5M6OMm3kZKNncDziK' ; Splinter Weapon Healer
 Global Const $GEMSTONES_HERO_MERCENARY2_ID = $ID_MERCENARY_HERO_2
 Global Const $GEMSTONES_HERO_MERCENARY2_TEMPLATE = 'OANDYazPSxVNgeErEfEaRVVGNA'
 Global Const $GEMSTONES_HERO_LIVIA_ID = $ID_LIVIA
-Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OAhjUwGYoSxMVBoBbhKgTOSTDTA'
+Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABDUshnSrBVBoBbhKgWCkBfCA' ; Virulence
 Global Const $GEMSTONES_HERO_BLACKOUT_ID = $ID_MERCENARY_HERO_4
 Global Const $GEMSTONES_HERO_BLACKOUT_TEMPLATE = 'OQRDAbwjNC1pXOYIYJyAlByA' ; Illusion Curses
 Global Const $GEMSTONES_HERO_INNO_ID = $ID_MERCENARY_HERO_3
-Global Const $GEMSTONES_HERO_INNO_TEMPLATE = 'OQhjAoDYIThQZAEBSTTODTXMciA'
+Global Const $GEMSTONES_HERO_INNO_TEMPLATE = 'OQNEAawD2CdDgAyBlntCkBUAOCB'
 Global Const $GEMSTONES_HERO_MOW_ID = $ID_MASTER_OF_WHISPERS
-Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OAhjUwGYoSxMUB4BbhqBTOSTDTA'
+Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OABDUshnS5BUBHV4BbhnBQCCNA'
+Global Const $GEMSTONES_HERO_OGDEN_ID = $ID_OGDEN
+Global Const $GEMSTONES_HERO_OGDEN_TEMPLATE = 'OwAT40nC3hh0FvIUfXCeVLeXBA' ; Command
+;~ Global Const $GEMSTONES_HERO_OGDEN_TEMPLATE = 'OwAS4YIPMku4Fh67Swr3jsI' ; Wraths
+Global Const $GEMSTONES_HERO_TAHLKORA_ID = $ID_TAHLKORA
+Global Const $GEMSTONES_HERO_TAHLKORA_TEMPLATE = 'OwUUMum+SoO1j760/i0F3IGNGCA' ;Dwayna's Sorrow + Prots
 
 Global Const $GEMSTONES_FARM_INFORMATIONS = 'Requirements:' & @CRLF _
 	& '- Access to mallyx (finished all 4 doa parts)' & @CRLF _
@@ -92,6 +105,7 @@ Global Const $GEMSTONES_SUMMON_RESUMMON_MS = 65000
 ;=== Configuration / Globals ===
 Global Const $GEMSTONES_DEFEND_POSITION_X = -3432
 Global Const $GEMSTONES_DEFEND_POSITION_Y = -5564
+Global Const $GEMSTONES_FAN_RADIUS = 250
 
 ; Skill numbers declared to make the code WAY more readable (UseSkill($SKILL_CONVICTION) is better than UseSkill(1))
 Global Const $GEM_SYMBOLIC_CELERITY		= 1
@@ -251,6 +265,37 @@ Func SetupGemstonesFightOptions()
 	$gemstones_fight_options['skillsCostMap']		= $GEM_SKILLS_COSTS_MAP
 	; there are no chests in Ebony Citadel of Mallyx location
 	$gemstones_fight_options['openChests']			= False
+	$gemstones_fight_options['movementRoutine']	= GemstonesStayInFormation
+	$gemstones_fight_options['killMethod']		= GemstonesKillMethod
+EndFunc
+
+
+Func GemstonesStayInFormation()
+	Local Static $lastCheck = 0
+	If TimerDiff($lastCheck) < 2000 Then Return
+	$lastCheck = TimerInit()
+	If GetDistanceToPoint(GetMyAgent(), $GEMSTONES_DEFEND_POSITION_X, $GEMSTONES_DEFEND_POSITION_Y) > $GEMSTONES_FAN_RADIUS Then
+		MoveTo($GEMSTONES_DEFEND_POSITION_X, $GEMSTONES_DEFEND_POSITION_Y)
+	EndIf
+EndFunc
+
+
+Func GemstonesKillMethod($target, $options = Null)
+	If $options == Null Then $options = $gemstones_fight_options
+	Local $skillsCostMap = $options['skillsCostMap']
+	Local $i = 0
+	While $target <> Null And Not GetIsDead($target) And DllStructGetData($target, 'HealthPercent') > 0 And DllStructGetData($target, 'ID') <> 0 And DllStructGetData($target, 'Allegiance') == $ID_ALLEGIANCE_FOE
+		$i = Mod($i, 8) + 1
+		Attack($target)
+		PingSleep(100)
+		Local $sufficientEnergy = $skillsCostMap == Null ? True : (GetEnergy() >= $skillsCostMap[$i])
+		If $sufficientEnergy And IsRecharged($i) Then
+			UseSkillEx($i, $target)
+			PingSleep(100)
+		EndIf
+		$target = GetCurrentTarget()
+		If IsPlayerDead() Then ExitLoop
+	WEnd
 EndFunc
 
 
@@ -284,35 +329,30 @@ EndFunc
 Func SetupTeamGemstonesFarm()
 	If IsTeamAutoSetup() Then Return $SUCCESS
 
-	Info('Setting up team: Olias, Razah, Gwen, Xandra, MoW, Blackout, + Livia/Atmosphere')
 	LeaveParty()
-	AddHero($GEMSTONES_HERO_OLIAS_ID)
-	;~ AddHero($GEMSTONES_HERO_NORGU_ID)
-	;~ AddHero($GEMSTONES_HERO_INNO_ID)
 	AddHero($GEMSTONES_HERO_RAZAH_ID)
+	AddHero($GEMSTONES_HERO_INNO_ID)
+	;~ AddHero($GEMSTONES_HERO_NORGU_ID)
 	AddHero($GEMSTONES_HERO_GWEN_ID)
-	AddHero($GEMSTONES_HERO_XANDRA_ID)
 	AddHero($GEMSTONES_HERO_MOW_ID)
-	AddHero($GEMSTONES_HERO_BLACKOUT_ID)
-	; 7th slot: Livia OR Atmosphere — swap by commenting/uncommenting this pair.
-	AddHero($GEMSTONES_HERO_LIVIA_ID)
-	;~ AddHero($GEMSTONES_HERO_ATMO_ID)
+	AddHero($GEMSTONES_HERO_OGDEN_ID)
+	;~ AddHero($GEMSTONES_HERO_TAHLKORA_ID)
+	AddHero($GEMSTONES_HERO_OLIAS_ID)
+	AddHero($GEMSTONES_HERO_XANDRA_ID)
 	RandomSleep(500)
 	If GetPartySize() <> $ID_TEAM_SIZE_LARGE Then
 		Warn('Party not set up correctly. Team size different than ' & $ID_TEAM_SIZE_LARGE)
 		Return $FAIL
 	EndIf
-	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_OLIAS_ID, 'Olias', $GEMSTONES_HERO_OLIAS_TEMPLATE) == $FAIL Then Return $FAIL
-	;~ If GemstonesLoadHeroTemplate($GEMSTONES_HERO_NORGU_ID, 'Norgu', $GEMSTONES_HERO_NORGU_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_RAZAH_ID, 'Razah', $GEMSTONES_HERO_RAZAH_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_INNO_ID, 'Inno', $GEMSTONES_HERO_INNO_TEMPLATE) == $FAIL Then Return $FAIL
+	;~ If GemstonesLoadHeroTemplate($GEMSTONES_HERO_NORGU_ID, 'Norgu', $GEMSTONES_HERO_NORGU_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_GWEN_ID, 'Gwen', $GEMSTONES_HERO_GWEN_TEMPLATE) == $FAIL Then Return $FAIL
-	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_XANDRA_ID, 'Xandra', $GEMSTONES_HERO_XANDRA_TEMPLATE) == $FAIL Then Return $FAIL
 	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_MOW_ID, 'MoW', $GEMSTONES_HERO_MOW_TEMPLATE) == $FAIL Then Return $FAIL
-	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_BLACKOUT_ID, 'A R U Blackout', $GEMSTONES_HERO_BLACKOUT_TEMPLATE) == $FAIL Then Return $FAIL
-	; 7th slot: Livia OR Atmosphere — swap by commenting/uncommenting this pair.
-	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_LIVIA_ID, 'Livia', $GEMSTONES_HERO_LIVIA_TEMPLATE) == $FAIL Then Return $FAIL
-	;~ If GemstonesLoadHeroTemplate($GEMSTONES_HERO_ATMO_ID, 'A R U Atmosphere', $GEMSTONES_HERO_ATMO_TEMPLATE) == $FAIL Then Return $FAIL
-	;~ If GemstonesLoadHeroTemplate($GEMSTONES_HERO_INNO_ID, 'A R U Innocence', $GEMSTONES_HERO_INNO_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_OGDEN_ID, 'Ogden', $GEMSTONES_HERO_OGDEN_TEMPLATE) == $FAIL Then Return $FAIL
+	;~ If GemstonesLoadHeroTemplate($GEMSTONES_HERO_TAHLKORA_ID, 'Tahlkora', $GEMSTONES_HERO_TAHLKORA_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_OLIAS_ID, 'Olias', $GEMSTONES_HERO_OLIAS_TEMPLATE) == $FAIL Then Return $FAIL
+	If GemstonesLoadHeroTemplate($GEMSTONES_HERO_XANDRA_ID, 'Xandra', $GEMSTONES_HERO_XANDRA_TEMPLATE) == $FAIL Then Return $FAIL
 	RandomSleep(250)
 	Return $SUCCESS
 EndFunc
@@ -366,47 +406,7 @@ Func WalkToSpotGemstonesFarm()
 	; go close to Zhellix to let him start erforming the ritual, Null for no interaction
 	GoToAgent(GetAgentByID($AGENTID_ZHELLIX), Null)
 	MoveTo($GEMSTONES_DEFEND_POSITION_X, $GEMSTONES_DEFEND_POSITION_Y)
-	; Arrange heroes in a tight ring around the player (Ele in the center) so the
-	; player's Wards cover everyone. Radius keeps the 25%-tighter spacing (250 * 0.75 = 188).
-	GemstonesArrangeHeroesAroundPlayer(188)
-EndFunc
-
-
-;~ Place the 7 heroes in a ring around the player (Elementalist in the center) so the
-;~ player's Wards benefit every hero. The ring is oriented with one hero facing the
-;~ nearest foe (incoming waves). $range is the ring radius (188 = 25% tighter than the
-;~ default fan spacing of 250).
-Func GemstonesArrangeHeroesAroundPlayer($range = 188)
-	Local $heroCount = GetHeroCount()
-	If $heroCount < 1 Then Return
-	Local $me = GetMyAgent()
-	Local $x = DllStructGetData($me, 'X')
-	Local $y = DllStructGetData($me, 'Y')
-
-	; Forward direction: toward the nearest foe, else the player's facing.
-	Local $fx = DllStructGetData($me, 'RotationCos')
-	Local $fy = DllStructGetData($me, 'RotationSin')
-	Local $foe = GetNearestEnemyToAgent($me)
-	If $foe <> Null Then
-		Local $dx = DllStructGetData($foe, 'X') - $x
-		Local $dy = DllStructGetData($foe, 'Y') - $y
-		Local $len = Sqrt($dx * $dx + $dy * $dy)
-		If $len > 0 Then
-			$fx = $dx / $len
-			$fy = $dy / $len
-		EndIf
-	EndIf
-	; Right direction (perpendicular to forward, matches FanFlagHeroes convention).
-	Local $rx = $fy
-	Local $ry = -$fx
-
-	Local $angleStep = (2 * 3.14159265358979) / $heroCount
-	For $i = 1 To $heroCount
-		Local $a = ($i - 1) * $angleStep
-		Local $cosA = Cos($a)
-		Local $sinA = Sin($a)
-		CommandHero($i, $x + ($fx * $cosA + $rx * $sinA) * $range, $y + ($fy * $cosA + $ry * $sinA) * $range)
-	Next
+	FanFlagHeroes()
 EndFunc
 
 
