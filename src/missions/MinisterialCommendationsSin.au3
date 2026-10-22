@@ -113,7 +113,7 @@ Func MinisterialCommendationsSinFarm()
         Info('No reset needed (custom): already in outpost (result=' & $result & ')')
     EndIf
     If CountSlots(1, $bags_count) < 5 Then
-        SharedLootIdentifyAndSellLoot($ID_Kaineng_Center)
+        SharedLootIdentifyAndSellLoot()
     EndIf
     Return $result
 EndFunc

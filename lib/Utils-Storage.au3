@@ -76,7 +76,7 @@ EndFunc
 
 
 ;~ Function to deal with inventory before farm run
-Func InventoryManagementBeforeRun()
+Func InventoryManagementBeforeRun($shouldSellItem = DefaultShouldSellItem, $shouldStoreItem = DefaultShouldStoreItem, $forceFullClear = False)
 	; Clarity rename
 	Local $cache = $inventory_management_cache
 	; Operations order :
@@ -90,12 +90,15 @@ Func InventoryManagementBeforeRun()
 	; 8-Balance character gold level
 	; 9-Buy ectoplasm/obsidian with surplus
 	; 10-Store items
-	If $cache['Store items.Unidentified gold items'] And HasGoldUnidentifiedItems() Then
+	If $forceFullClear Then TravelToOutpost($trade_town, $district_name)
+	If Not $forceFullClear And $cache['Store items.Unidentified gold items'] And HasGoldUnidentifiedItems() Then
 		If GetMapType() <> $ID_OUTPOST Then TravelToOutpost($trade_town, $district_name)
 		StoreItemsInXunlaiStorage(ShouldStoreUnidentifiedGoldItem)
 	EndIf
 	If $run_options_cache['run.sort_items'] Then SortInventory()
-	If $cache['@identify.something'] And HasUnidentifiedItems() Then
+	If $forceFullClear Then
+		If HasUnidentifiedItems() Then IdentifyAllPurpleAndGoldItems()
+	ElseIf $cache['@identify.something'] And HasUnidentifiedItems() Then
 		TravelToOutpost($trade_town, $district_name)
 		IdentifyItems()
 	EndIf
@@ -122,11 +125,11 @@ Func InventoryManagementBeforeRun()
 		If $cache['@sell.materials.basic.something'] And HasBasicMaterials() Then SellBasicMaterialsToMerchant()
 		If $cache['@sell.materials.rare.something'] And HasRareMaterials() Then SellRareMaterialsToMerchant()
 	EndIf
-	If $cache['@sell.something'] And HasItemsToSell() Then
+	If $cache['@sell.something'] And HasItemsToSell($shouldSellItem) Then
 		TravelToOutpost($trade_town, $district_name)
 		; If we have more than 60k, we risk running into the situation we cannot sell because we're too rich, so we store some in xunlai
 		If GetGoldCharacter() > 60000 Then BalanceCharacterGold(10000)
-		SellItemsToMerchant()
+		SellItemsToMerchant($shouldSellItem)
 	EndIf
 	; Max gold in Xunlai chest is 1000 platinums
 	If $cache['Store items.Gold'] Then
@@ -148,7 +151,7 @@ Func InventoryManagementBeforeRun()
 	EndIf
 	If $cache['@store.something'] Then
 		If GetMapType() <> $ID_OUTPOST Then TravelToOutpost($trade_town, $district_name)
-		StoreItemsInXunlaiStorage()
+		StoreItemsInXunlaiStorage($shouldStoreItem)
 	EndIf
 	ResetGWA2State()
 	ResetBotsSetups()
@@ -1233,6 +1236,24 @@ Func IdentifyItems($buyKit = True)
 		Next
 	Next
 	Return True
+EndFunc
+
+
+;~ Identify every unidentified purple and gold item
+Func IdentifyAllPurpleAndGoldItems()
+	For $bagIndex = 1 To $bags_count
+		Local $bag = GetBag($bagIndex)
+		For $i = 1 To DllStructGetData($bag, 'slots')
+			Local $item = GetItemBySlot($bagIndex, $i)
+			If DllStructGetData($item, 'ID') == 0 Then ContinueLoop
+			If IsIdentified($item) Then ContinueLoop
+			Local $rarity = GetRarity($item)
+			If $rarity <> $RARITY_PURPLE And $rarity <> $RARITY_GOLD Then ContinueLoop
+			If FindIdentificationKit() == Null Then BuySuperiorIdentificationKitInTown()
+			IdentifyItem($item)
+			RandomSleep(100)
+		Next
+	Next
 EndFunc
 
 

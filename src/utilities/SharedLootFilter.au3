@@ -156,26 +156,23 @@ Func SharedLootShouldSellItem($item)
 EndFunc
 
 
-Func SharedLootIdentifyAll()
-	For $bagIndex = 1 To $bags_count
-		Local $bag = GetBag($bagIndex)
-		For $i = 1 To DllStructGetData($bag, 'slots')
-			Local $item = GetItemBySlot($bagIndex, $i)
-			If DllStructGetData($item, 'ID') == 0 Then ContinueLoop
-			If IsIdentified($item) Then ContinueLoop
-			Local $rarity = GetRarity($item)
-			If $rarity <> $RARITY_PURPLE And $rarity <> $RARITY_GOLD Then ContinueLoop
-			If FindIdentificationKit() == Null Then BuySuperiorIdentificationKitInTown()
-			IdentifyItem($item)
-			RandomSleep(100)
-		Next
-	Next
+Func SharedLootShouldStoreItem($item)
+	If DllStructGetData($item, 'Equipped') > 0 Then Return False
+	If DllStructGetData($item, 'Customized') <> 0 Then Return False
+	If SharedLootShouldKeepItem($item) Then Return True
+	Return DefaultShouldStoreItem($item)
 EndFunc
 
 
-Func SharedLootIdentifyAndSellLoot($tradeTown = $trade_town)
+Func SharedLootIdentifyAndSellLoot()
 	Info('Inventory full - identifying and selling loot')
-	TravelToOutpost($tradeTown, $district_name)
-	SharedLootIdentifyAll()
+	TravelToOutpost($trade_town, $district_name)
+	IdentifyAllPurpleAndGoldItems()
 	SellItemsToMerchant(SharedLootShouldSellItem)
+	StoreItemsInXunlaiStorage(SharedLootShouldStoreItem)
+EndFunc
+
+
+Func SharedLootForceInventoryClear()
+	Return InventoryManagementBeforeRun(SharedLootShouldSellItem, SharedLootShouldStoreItem, True)
 EndFunc
