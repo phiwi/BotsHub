@@ -21,6 +21,7 @@
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
 #include '../utilities/SupportTeam.au3'
+#include '../utilities/SharedLootFilter.au3'
 #include <File.au3>
 
 Opt('MustDeclareVars', True)
@@ -110,6 +111,9 @@ Func MinisterialCommendationsSinFarm()
         EndIf
     Else
         Info('No reset needed (custom): already in outpost (result=' & $result & ')')
+    EndIf
+    If CountSlots(1, $bags_count) < 5 Then
+        SharedLootIdentifyAndSellLoot($ID_Kaineng_Center)
     EndIf
     Return $result
 EndFunc

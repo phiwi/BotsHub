@@ -35,6 +35,12 @@ Func SharedLootShouldKeepItem($item)
 
 	If $itemID == $ID_FROGGY_DOMINATION Or ($itemID >= $ID_FROGGY_FAST_CASTING And $itemID <= $ID_FROGGY_CHANNELING) Then Return True
 
+	If $itemID == $ID_OMINOUS_AEGIS_TACTICS Or $itemID == $ID_OMINOUS_AEGIS_STRENGTH Or $itemID == $ID_OMINOUS_AEGIS_LEADERSHIP Then Return True
+
+	If $itemID == $ID_JAPAN_1ST_ANNIVERSARY_SHIELD_STRENGTH Or $itemID == $ID_JAPAN_1ST_ANNIVERSARY_SHIELD_TACTICS Or $itemID == $ID_JAPAN_1ST_ANNIVERSARY_SHIELD_LEADERSHIP Then Return True
+
+	If $itemID == $ID_BLADED_SHIELD Or $itemID == $ID_BLADED_SHIELD_2 Then Return True
+
 	If $req == 9 Then
 		Switch $itemID
 			Case $ID_HOGS_GLUTTONY_TACTICS, $ID_HOGS_GLUTTONY_STRENGTH, $ID_HOGS_GLUTTONY_LEADERSHIP, _
@@ -50,12 +56,24 @@ Func SharedLootShouldKeepItem($item)
 	Local $modStruct = GetModStruct($item)
 	If Not $modStruct Then Return False
 
+	If $itemType == $ID_TYPE_STAFF And $req == 9 And SharedLootHasInherentHCTOrHSR($modStruct) Then Return True
+
+	; Dual vamp: both inherent +15% damage mods (health regen -1 and energy regen -1)
+	If StringInStr($modStruct, $STRUCT_INHERENT_VAMPIRIC_STRENGTH) And StringInStr($modStruct, $STRUCT_INHERENT_ZEALOUS_STRENGTH) Then
+		Switch $itemType
+			Case $ID_TYPE_AXE, $ID_TYPE_SWORD, $ID_TYPE_HAMMER, $ID_TYPE_BOW
+				Return True
+		EndSwitch
+	EndIf
+
 	If StringInStr($modStruct, $STRUCT_MOD_OF_THE_NECROMANCER) Then
 		Switch $itemType
 			Case $ID_TYPE_WAND, $ID_TYPE_STAFF, $ID_TYPE_SCYTHE, $ID_TYPE_SPEAR
 				Return True
 		EndSwitch
 	EndIf
+
+	If $itemType == $ID_TYPE_OFFHAND And StringInStr($modStruct, $STRUCT_MOD_OF_APTITUDE) Then Return True
 
 	If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_APTITUDE_NOT_ATTITUDE) Then Return True
 	If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_FORGET_ME_NOT) Then Return True
@@ -70,6 +88,56 @@ Func SharedLootHasInscription($modStruct, $struct)
 		If IsInscriptionStruct($modStruct, $pos) Then Return True
 		$pos = StringInStr($modStruct, $struct, 0, 1, $pos + 1)
 	WEnd
+	Return False
+EndFunc
+
+
+Func SharedLootHasInherentHCTOrHSR($modStruct)
+	Local $inherentStructs = [ _
+		$STRUCT_INHERENT_FIRE_MAGIC_HCT, _
+		$STRUCT_INHERENT_FIRE_MAGIC_HSR, _
+		$STRUCT_INHERENT_WATER_MAGIC_HCT, _
+		$STRUCT_INHERENT_WATER_MAGIC_HSR, _
+		$STRUCT_INHERENT_AIR_MAGIC_HCT, _
+		$STRUCT_INHERENT_AIR_MAGIC_HSR, _
+		$STRUCT_INHERENT_EARTH_MAGIC_HCT, _
+		$STRUCT_INHERENT_EARTH_MAGIC_HSR, _
+		$STRUCT_INHERENT_ENERGY_STORAGE_HCT, _
+		$STRUCT_INHERENT_ENERGY_STORAGE_HSR, _
+		$STRUCT_INHERENT_SMITING_PRAYERS_HCT, _
+		$STRUCT_INHERENT_SMITING_PRAYERS_HSR, _
+		$STRUCT_INHERENT_DIVINE_FAVOR_HCT, _
+		$STRUCT_INHERENT_DIVINE_FAVOR_HSR, _
+		$STRUCT_INHERENT_HEALING_PRAYERS_HCT, _
+		$STRUCT_INHERENT_HEALING_PRAYERS_HSR, _
+		$STRUCT_INHERENT_PROTECTION_PRAYERS_HCT, _
+		$STRUCT_INHERENT_PROTECTION_PRAYERS_HSR, _
+		$STRUCT_INHERENT_CHANNELING_MAGIC_HCT, _
+		$STRUCT_INHERENT_CHANNELING_MAGIC_HSR, _
+		$STRUCT_INHERENT_RESTORATION_MAGIC_HCT, _
+		$STRUCT_INHERENT_RESTORATION_MAGIC_HSR, _
+		$STRUCT_INHERENT_COMMUNING_HCT, _
+		$STRUCT_INHERENT_COMMUNING_HSR, _
+		$STRUCT_INHERENT_SPAWNING_POWER_HCT, _
+		$STRUCT_INHERENT_SPAWNING_POWER_HSR, _
+		$STRUCT_INHERENT_ILLUSION_MAGIC_HCT, _
+		$STRUCT_INHERENT_ILLUSION_MAGIC_HSR, _
+		$STRUCT_INHERENT_DOMINATION_MAGIC_HCT, _
+		$STRUCT_INHERENT_DOMINATION_MAGIC_HSR, _
+		$STRUCT_INHERENT_INSPIRATION_MAGIC_HCT, _
+		$STRUCT_INHERENT_INSPIRATION_MAGIC_HSR, _
+		$STRUCT_INHERENT_DEATH_MAGIC_HCT, _
+		$STRUCT_INHERENT_DEATH_MAGIC_HSR, _
+		$STRUCT_INHERENT_BLOOD_MAGIC_HCT, _
+		$STRUCT_INHERENT_BLOOD_MAGIC_HSR, _
+		$STRUCT_INHERENT_SOUL_REAPING_HCT, _
+		$STRUCT_INHERENT_SOUL_REAPING_HSR, _
+		$STRUCT_INHERENT_CURSES_HCT, _
+		$STRUCT_INHERENT_CURSES_HSR _
+	]
+	For $struct In $inherentStructs
+		If StringInStr($modStruct, $struct) > 0 Then Return True
+	Next
 	Return False
 EndFunc
 
@@ -105,9 +173,9 @@ Func SharedLootIdentifyAll()
 EndFunc
 
 
-Func SharedLootIdentifyAndSellLoot()
+Func SharedLootIdentifyAndSellLoot($tradeTown = $trade_town)
 	Info('Inventory full - identifying and selling loot')
-	TravelToOutpost($trade_town, $district_name)
+	TravelToOutpost($tradeTown, $district_name)
 	SharedLootIdentifyAll()
 	SellItemsToMerchant(SharedLootShouldSellItem)
 EndFunc
