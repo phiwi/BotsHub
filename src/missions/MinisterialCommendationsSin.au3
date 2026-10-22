@@ -25,7 +25,7 @@
 
 Opt('MustDeclareVars', True)
 
-Global Const $A_COMMENDATIONS_SIN_FARMER_SKILLBAR = 'OwFTQ5q+R6qgnovYHMAwlhSMXEA'
+Global Const $A_COMMENDATIONS_SIN_FARMER_SKILLBAR = 'OwFkQxV6HOKErIPRfxOYAgLDlYuI'
 Global Const $COMMENDATIONS_SIN_FARM_INFORMATIONS = 'Custom variant:' & @CRLF _
     & '- expects an Assassin player build' & @CRLF _
     & '- same player flow as original Ministerial run' & @CRLF _
@@ -33,7 +33,7 @@ Global Const $COMMENDATIONS_SIN_FARM_INFORMATIONS = 'Custom variant:' & @CRLF _
 Global Const $COMMENDATIONS_SIN_FARM_DURATION = (3 * 60 + 20) * 1000
 Global Const $COMMENDATIONS_SIN_MIKU_AGENT_ID = 58
 
-Global Const $COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE = 1
+Global Const $COMMENDATIONS_SIN_SKILL_GREAT_DWARF_ARMOR = 1
 Global Const $COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT = 2
 Global Const $COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES = 3
 Global Const $COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK = 4
@@ -55,11 +55,11 @@ Global Const $COMMENDATIONS_SIN_XANDRA_DISPLACEMENT = 4
 Global Const $COMMENDATIONS_SIN_XANDRA_ARMOR_OF_UNFEELING = 5
 Global Const $COMMENDATIONS_SIN_ZHED_WARD_AGAINST_MELEE = 7
 
-Global Const $COMMENDATIONS_SIN_HERO_NORGU_TEMPLATE = 'OQBDArsDOFAcqpb6lDyAeASH'
-Global Const $COMMENDATIONS_SIN_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDMEKqA'
+Global Const $COMMENDATIONS_SIN_HERO_NORGU_TEMPLATE = 'OQBDArsDOEVcqpb6lDyADhmA'
+Global Const $COMMENDATIONS_SIN_HERO_RAZAH_TEMPLATE = 'OQNEAqwD2yQDwpmupXOIDMEaCA'
 Global Const $COMMENDATIONS_SIN_HERO_GWEN_TEMPLATE = 'OQNEAawD2C9CgAyBlnRCMBMChGB'
-Global Const $COMMENDATIONS_SIN_HERO_ZHED_TEMPLATE = 'OgBCkMnTqYHy06znCVBsAZA'
-Global Const $COMMENDATIONS_SIN_HERO_OGDEN_TEMPLATE = 'Owkj4oQrpOMku4Fh67Swr1YfMA'
+Global Const $COMMENDATIONS_SIN_HERO_ZHED_TEMPLATE = 'OgBCkMzTqYHy06znCoPsYVA'
+Global Const $COMMENDATIONS_SIN_HERO_OGDEN_TEMPLATE = 'OwAT40nC3hh0FvIUfXCeVLeXBA'
 Global Const $COMMENDATIONS_SIN_HERO_OLIAS_TEMPLATE = 'OAhjQkGZIP3hhWVV4JNncDzxJA'
 Global Const $COMMENDATIONS_SIN_HERO_XANDRA_TEMPLATE = 'OACiAyk8gNtePuwJ00ZicnnA'
 
@@ -368,8 +368,6 @@ Func PrepareToFightCustom()
     RandomSleep(1500)
     RandomSleep(11000)
     UseConsumable($ID_BIRTHDAY_CUPCAKE)
-    ; Original run used a hero shout to make enemies hostile; Xandra responds right after that shout.
-    If IsRecharged($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
     PrecastXandraSpiritsCustom()
     RandomSleep(2500)
     UseSkillEx($COMMENDATIONS_SIN_SKILL_EBON_BATTLE_STANDARD_OF_HONOR)
@@ -484,7 +482,6 @@ Func InitialFightCustom()
 
         Local $pullTimer = TimerInit()
         While $foesInRange == 0 And TimerDiff($pullTimer) < 7000
-            If IsRecharged($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
             RandomSleep(750)
             $foesInRange = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_COMPASS)
             If IsCommendationsCustomFail() Then Return $FAIL
@@ -509,10 +506,9 @@ Func InitialFightCustom()
             RandomSleep(350)
         EndIf
 
-        If IsRecharged($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
         If IsRecharged($COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES)
         If IsRecharged($COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_TO_THE_LIMIT)
-        AttackOrUseSkill(1300, $COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE, $COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES)
+        AttackOrUseSkill(1300, $COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES)
 
         ; Allow player deaths here so heroes can resurrect.
         ; Bail immediately only on full party wipe — no one left to rez.
@@ -536,7 +532,7 @@ Func InitialFightCustom()
             If IsRecharged($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE)
             If DllStructGetData(GetMyAgent(), 'HealthPercent') < 0.70 And IsRecharged($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_HEALING_SIGNET)
         EndIf
-        AttackOrUseSkill(1200, $COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE, $COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES)
+        AttackOrUseSkill(1200, $COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES)
         RandomSleep(250)
         $mikuPressure = CountFoesInRangeOfAgent($COMMENDATIONS_SIN_MIKU_AGENT_ID, $RANGE_SPELLCAST)
     WEnd
@@ -578,6 +574,9 @@ Func RunToKillSpotCustom()
     MoveTo(-690, -3769)
     If IsRecharged($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED)
     MoveTo(-850, -3961, 0, 0)
+    RandomSleep(20000)
+    ; Great Dwarf Armor to survive Ranger trap spikes while waiting for the ball
+    If IsRecharged($COMMENDATIONS_SIN_SKILL_GREAT_DWARF_ARMOR) Then UseSkillEx($COMMENDATIONS_SIN_SKILL_GREAT_DWARF_ARMOR)
     RandomSleep(500)
     Return $SUCCESS
 EndFunc
@@ -679,18 +678,6 @@ Func KillMinistryOfPurityCustom()
     UseSkillEx($COMMENDATIONS_SIN_SKILL_HUNDRED_BLADES)
     RandomSleep(50)
 
-    If IsRecharged($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE) Then
-        While IsRecharged($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
-            UseSkillEx($COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
-            RandomSleep(50)
-            If IsPlayerDead() Then
-                Warn('Player died at hold spot during spike.')
-                LogIntoFileCustom('Player died at hold spot during spike.')
-                Return $FAIL
-            EndIf
-        WEnd
-    EndIf
-
     Local $initialFoeCount = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY)
     Local $initialAdrenaline = GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK)
     Local $adrenaline = $initialAdrenaline
@@ -755,7 +742,7 @@ Func KillMinistryOfPurityCustom()
                 RandomSleep(250)
             WEnd
         Else
-            AttackOrUseSkill(1300, $COMMENDATIONS_SIN_SKILL_FOR_GREAT_JUSTICE)
+            AttackOrUseSkill(1300)
         EndIf
 
         $foesCount = CountFoesInRangeOfAgent(GetMyAgent(), $RANGE_NEARBY)

@@ -1,8 +1,8 @@
 ﻿{
 	"main": {
-		"character": "A R U Synthesis",
-		"farm": "Path Recorder",
-		"loot_configuration": "new"
+		"character": "A R U Technology",
+		"farm": "Sell, Salvage, Stash",
+		"loot_configuration": "Default Loot Configuration"
 	},
 	"run": {
 		"loop_mode": true,

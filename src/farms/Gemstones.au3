@@ -67,7 +67,7 @@ Global Const $GEMSTONES_HERO_BLACKOUT_TEMPLATE = 'OQRDAbwjNC1pXOYIYJyAlByA' ; Il
 Global Const $GEMSTONES_HERO_INNO_ID = $ID_MERCENARY_HERO_3
 Global Const $GEMSTONES_HERO_INNO_TEMPLATE = 'OQNEAawD2CdDgAyBlntCkBUAOCB'
 Global Const $GEMSTONES_HERO_MOW_ID = $ID_MASTER_OF_WHISPERS
-Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OABDUshnS5BUBHV4BbhnBQCCNA'
+Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OABDUshnS5BUBHV4BbhkBQCCNA'
 Global Const $GEMSTONES_HERO_OGDEN_ID = $ID_OGDEN
 Global Const $GEMSTONES_HERO_OGDEN_TEMPLATE = 'OwAT40nC3hh0FvIUfXCeVLeXBA' ; Command
 ;~ Global Const $GEMSTONES_HERO_OGDEN_TEMPLATE = 'OwAS4YIPMku4Fh67Swr3jsI' ; Wraths
@@ -257,11 +257,11 @@ Func SetupGemstonesFightOptions()
 	; auch auf Distanz erkannt, priorisiert und angegriffen werden.
 	$gemstones_fight_options['fightRange']			= 2000
 	$gemstones_fight_options['fightTimeout']		= $GEMSTONES_FARM_DURATION
-	$gemstones_fight_options['priorityTargeting']	= True
-	; Sehr grosse Prioritaets-Reichweite: die Tortureweb Dryder ist ein Fernkaempfer,
-	; der weit weg bleibt/kitet (teils >5000u). Nur so wird sie zuverlaessig gefunden
-	; und der Bot faellt nicht auf den Dream Rider zurueck.
-	$gemstones_fight_options['priorityRange']		= 20000
+	;~ $gemstones_fight_options['priorityTargeting']	= True
+	;~ Sehr grosse Prioritaets-Reichweite: die Tortureweb Dryder ist ein Fernkaempfer,
+	;~ der weit weg bleibt/kitet (teils >5000u). Nur so wird sie zuverlaessig gefunden
+	;~ und der Bot faellt nicht auf den Dream Rider zurueck.
+	;~ $gemstones_fight_options['priorityRange']		= 20000
 	$gemstones_fight_options['skillsCostMap']		= $GEM_SKILLS_COSTS_MAP
 	; there are no chests in Ebony Citadel of Mallyx location
 	$gemstones_fight_options['openChests']			= False
