@@ -23,6 +23,7 @@
 #include '../../lib/Utils-Console.au3'
 #include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SharedLootFilter.au3'
 
 
 ; ==== Constants ====
@@ -69,6 +70,9 @@ Func DragonMossFarm()
 	GoToDrazachThicket()
 	Local $result = DragonMossFarmLoop()
 	ResignAndReturnToOutpost($ID_SAINT_ANJEKAS_SHRINE)
+	If CountSlots(1, $bags_count) < 5 Then
+		SharedLootIdentifyAndSellLoot()
+	EndIf
 	Return $result
 EndFunc
 

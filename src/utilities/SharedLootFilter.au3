@@ -41,6 +41,20 @@ Func SharedLootShouldKeepItem($item)
 
 	If $itemID == $ID_BLADED_SHIELD Or $itemID == $ID_BLADED_SHIELD_2 Then Return True
 
+	If $itemID == $ID_DRAGON_FANGS And $req == 9 Then Return True
+
+	If ($itemID == $ID_OUTCAST_SHIELD Or $itemID == $ID_OUTCAST_SHIELD_2) And $req == 9 Then Return True
+
+	If $itemID == $ID_CELESTIAL_SHIELD Or $itemID == $ID_CELESTIAL_SHIELD_2 Then Return True
+
+	If $itemID == $ID_ECHOVALD_SHIELD_STRENGTH Or $itemID == $ID_ECHOVALD_SHIELD_TACTICS Then Return True
+
+	If $itemID == $ID_DIAMOND_AEGIS Or $itemID == $ID_DIAMOND_AEGIS_2 Or $itemID == $ID_DIAMOND_AEGIS_3 Then Return True
+
+	If $itemID == $ID_ORNATE_SHIELD Then Return True
+
+	If $itemID == $ID_GOTHIC_DEFENDER Or $itemID == $ID_GOTHIC_DEFENDER_2 Then Return True
+
 	If $req == 9 Then
 		Switch $itemID
 			Case $ID_HOGS_GLUTTONY_TACTICS, $ID_HOGS_GLUTTONY_STRENGTH, $ID_HOGS_GLUTTONY_LEADERSHIP, _
@@ -56,13 +70,15 @@ Func SharedLootShouldKeepItem($item)
 	Local $modStruct = GetModStruct($item)
 	If Not $modStruct Then Return False
 
-	If $itemType == $ID_TYPE_STAFF And $req == 9 And SharedLootHasInherentHCTOrHSR($modStruct) Then Return True
+	If $itemType == $ID_TYPE_STAFF And $req == 9 Then
+		If SharedLootHasInherentHCTOrHSR($modStruct) Or StringInStr($modStruct, $STRUCT_MOD_HCT_20) Or StringInStr($modStruct, $STRUCT_MOD_HSR_20) Then Return True
+	EndIf
 
-	; Dual vamp: both inherent +15% damage mods (health regen -1 and energy regen -1)
-	If StringInStr($modStruct, $STRUCT_INHERENT_VAMPIRIC_STRENGTH) And StringInStr($modStruct, $STRUCT_INHERENT_ZEALOUS_STRENGTH) Then
+	If $req == 9 Then
 		Switch $itemType
 			Case $ID_TYPE_AXE, $ID_TYPE_SWORD, $ID_TYPE_HAMMER, $ID_TYPE_BOW
-				Return True
+				If SharedLootHasInherentMod($modStruct, $STRUCT_INHERENT_VAMPIRIC_STRENGTH) Then Return True
+				If SharedLootHasInherentMod($modStruct, $STRUCT_INHERENT_ZEALOUS_STRENGTH) Then Return True
 		EndSwitch
 	EndIf
 
@@ -86,6 +102,16 @@ Func SharedLootHasInscription($modStruct, $struct)
 	Local $pos = StringInStr($modStruct, $struct)
 	While $pos > 0
 		If IsInscriptionStruct($modStruct, $pos) Then Return True
+		$pos = StringInStr($modStruct, $struct, 0, 1, $pos + 1)
+	WEnd
+	Return False
+EndFunc
+
+
+Func SharedLootHasInherentMod($modStruct, $struct)
+	Local $pos = StringInStr($modStruct, $struct)
+	While $pos > 0
+		If Not IsWeaponUpgradeStruct($modStruct, $pos) And Not IsInscriptionStruct($modStruct, $pos) Then Return True
 		$pos = StringInStr($modStruct, $struct, 0, 1, $pos + 1)
 	WEnd
 	Return False

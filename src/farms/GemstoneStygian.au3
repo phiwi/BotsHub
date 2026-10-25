@@ -23,6 +23,7 @@ https://gwpvx.fandom.com/wiki/Build:R/N_HM_Stygian_Veil_Trapper
 #include '../../lib/Utils-Console.au3'
 #include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SharedLootFilter.au3'
 
 #Region Configuration
 ; === Build ===
@@ -104,6 +105,9 @@ Func GemstoneStygianFarm()
 	If $result == $FAIL Then Info('Player died. Could not clear stygian mobs')
 	Info('Returning back to the outpost')
 	ResignAndReturnToOutpost($ID_GATE_OF_ANGUISH, true)
+	If CountSlots(1, $bags_count) < 10 Then
+		SharedLootIdentifyAndSellLoot()
+	EndIf
 	Return $result
 EndFunc
 

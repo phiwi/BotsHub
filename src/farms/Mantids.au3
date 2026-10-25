@@ -23,6 +23,7 @@
 #include '../../lib/Utils-Console.au3'
 #include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SharedLootFilter.au3'
 
 ; Possible improvements : none, this is perfect ;)
 
@@ -70,6 +71,9 @@ Func MantidsFarm()
 	GoToWajjunBazaar()
 	Local $result = MantidsFarmLoop()
 	ResignAndReturnToOutpost($ID_NAHPUI_QUARTER)
+	If CountSlots(1, $bags_count) < 5 Then
+		SharedLootIdentifyAndSellLoot()
+	EndIf
 	Return $result
 EndFunc
 

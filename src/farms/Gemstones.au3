@@ -25,6 +25,7 @@
 #include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 #include '../utilities/SupportTeam.au3'
+#include '../utilities/SharedLootFilter.au3'
 
 
 ; ==== Constants ====
@@ -140,6 +141,9 @@ Func GemstonesFarm()
 	Local $result = GemstonesFarmLoop()
 	If $result == $SUCCESS Then Info('Successfully cleared all 19 waves')
 	If $result == $FAIL Then Info('Could not clear all 19 waves')
+	If CountSlots(1, $bags_count) < 10 Then
+		SharedLootIdentifyAndSellLoot()
+	EndIf
 	TravelToOutpost($ID_GATE_OF_ANGUISH, $district_name)
 	Return $result
 EndFunc

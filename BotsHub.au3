@@ -332,7 +332,7 @@ Func RunFarmLoop()
 		; During pickup, items will be moved to equipment bag (if used) when first 3 bags are full
 		; So bag 5 will always fill before 4 - hence we can count items up to bag 4
 		If Not $sooSafetyBypassInventory And (CountSlots(1, _Min($bags_count, 4)) < $inventorySpaceNeeded) Then
-			InventoryManagementBeforeRun()
+			InventoryManagementBeforeRun(SharedLootShouldSellItem, SharedLootShouldStoreItem, True)
 		EndIf
 		; Inventory management did not clean up inventory - we pause
 		If Not $sooSafetyBypassInventory And (CountSlots(1, $bags_count) < $inventorySpaceNeeded) Then

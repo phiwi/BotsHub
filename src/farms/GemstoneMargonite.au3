@@ -24,6 +24,7 @@ https://gwpvx.fandom.com/wiki/Build:Team_-_1_Hero_Whirling_Defense_City_Farmer
 #include '../../lib/Utils-Storage.au3'
 #include '../../lib/Utils.au3'
 #include '../utilities/SupportTeam.au3'
+#include '../utilities/SharedLootFilter.au3'
 
 
 #Region Configuration
@@ -153,6 +154,9 @@ Func GemstoneMargoniteFarm()
 	EndIf
 	Info('Returning back to the outpost')
 	ResignAndReturnToOutpost($ID_GATE_OF_ANGUISH, true)
+	If CountSlots(1, $bags_count) < 10 Then
+		SharedLootIdentifyAndSellLoot()
+	EndIf
 	Return $result
 EndFunc
 

@@ -22,6 +22,7 @@
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
 #include '../utilities/SupportTeam.au3'
+#include '../utilities/SharedLootFilter.au3'
 
 Opt('MustDeclareVars', True)
 
@@ -98,6 +99,9 @@ Func OutcastRheasCraterChestFarm()
 	If $openedChests < 0 Then Return $FAIL
 	Info('Opened ' & $openedChests & ' chest(s).')
 	ResignAndReturnToOutpost($ID_SEAFARERS_REST)
+	If CountSlots(1, $bags_count) < 5 Then
+		SharedLootIdentifyAndSellLoot()
+	EndIf
 	Return $SUCCESS
 EndFunc
 
