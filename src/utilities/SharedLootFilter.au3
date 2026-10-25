@@ -189,6 +189,8 @@ Func SharedLootShouldSellItem($item)
 			$ID_SAURIAN_BONE, $ID_BEETLE_EGG, $ID_AMPHIBIAN_TONGUE, $ID_BERSERKER_HORN, $ID_DRAGON_ROOT
 			Return DllStructGetData($item, 'Value') > 0
 	EndSwitch
+	If IsBlueScroll($itemID) Then Return DllStructGetData($item, 'Value') > 0
+	If IsGoldScroll($itemID) Then Return $itemID <> $ID_UW_SCROLL And $itemID <> $ID_FOW_SCROLL And DllStructGetData($item, 'Value') > 0
 	If ($rarity == $RARITY_PURPLE Or $rarity == $RARITY_GOLD) And (IsWeapon($item) Or IsTome($itemID)) Then
 		Return Not SharedLootShouldKeepItem($item)
 	EndIf
