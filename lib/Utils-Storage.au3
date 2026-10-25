@@ -2279,6 +2279,24 @@ Func GetStaffEnergy($staffItem)
 EndFunc
 
 
+;~ Get focus base energy
+Func GetFocusEnergy($focusItem)
+	Local $modString = GetModStruct($focusItem)
+	Local $position = StringInStr($modString, 'C867') - 2
+	If $position <= 0 Then Return 0
+	Return Int('0x' & StringMid($modString, $position, 2))
+EndFunc
+
+
+;~ Get shield base armor
+Func GetShieldArmor($shieldItem)
+	Local $modString = GetModStruct($shieldItem)
+	Local $position = StringInStr($modString, 'B8A7') - 2
+	If $position <= 0 Then Return 0
+	Return Int('0x' & StringMid($modString, $position, 2))
+EndFunc
+
+
 ;~ Get staff base HSR chance (chance to Half Skill Recharge of spells)
 Func GetStaffHSR($staffItem)
 	Local $modString = GetModStruct($staffItem)

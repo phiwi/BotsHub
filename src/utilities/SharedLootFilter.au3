@@ -27,8 +27,6 @@ Func SharedLootShouldKeepItem($item)
 	Local $itemType = DllStructGetData($item, 'type')
 	Local $req = GetItemReq($item)
 
-	If $itemType == $ID_TYPE_SHIELD And $req == 8 Then Return True
-
 	If $itemID == $ID_GLACIAL_BLADE Or $itemID == $ID_GLACIAL_BLADES Then Return True
 
 	If $itemID >= $ID_BONE_DRAGON_STAFF_DOMINATION And $itemID <= $ID_BONE_DRAGON_STAFF_CHANNELING Then Return True
@@ -69,6 +67,9 @@ Func SharedLootShouldKeepItem($item)
 
 	Local $modStruct = GetModStruct($item)
 	If Not $modStruct Then Return False
+
+	If ($itemType == $ID_TYPE_SHIELD And $req == 8 And GetShieldArmor($item) == 16) Or _
+		($itemType == $ID_TYPE_OFFHAND And $req == 8 And GetFocusEnergy($item) == 12) Then Return True
 
 	If $itemType == $ID_TYPE_STAFF And $req == 9 Then
 		If SharedLootHasInherentHCTOrHSR($modStruct) Or StringInStr($modStruct, $STRUCT_MOD_HCT_20) Or StringInStr($modStruct, $STRUCT_MOD_HSR_20) Then Return True
@@ -174,6 +175,7 @@ Func SharedLootShouldSellItem($item)
 
 	Local $rarity = GetRarity($item)
 	Local $itemID = DllStructGetData($item, 'ModelID')
+	If IsKey($itemID) And $itemID <> $ID_ZAISHEN_KEY Then Return DllStructGetData($item, 'Value') > 0
 	If ($rarity == $RARITY_PURPLE Or $rarity == $RARITY_GOLD) And (IsWeapon($item) Or IsTome($itemID)) Then
 		Return Not SharedLootShouldKeepItem($item)
 	EndIf
