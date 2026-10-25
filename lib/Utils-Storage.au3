@@ -97,7 +97,7 @@ Func InventoryManagementBeforeRun($shouldSellItem = DefaultShouldSellItem, $shou
 	EndIf
 	If $run_options_cache['run.sort_items'] Then SortInventory()
 	If $forceFullClear Then
-		If HasUnidentifiedItems() Then IdentifyAllPurpleAndGoldItems()
+		If HasUnidentifiedItems() Then IdentifyAllLootItems()
 	ElseIf $cache['@identify.something'] And HasUnidentifiedItems() Then
 		TravelToOutpost($trade_town, $district_name)
 		IdentifyItems()
@@ -1239,16 +1239,15 @@ Func IdentifyItems($buyKit = True)
 EndFunc
 
 
-;~ Identify every unidentified purple and gold item
-Func IdentifyAllPurpleAndGoldItems()
+;~ Identify every unidentified item that can still carry a valuable upgrade or stat
+Func IdentifyAllLootItems()
 	For $bagIndex = 1 To $bags_count
 		Local $bag = GetBag($bagIndex)
 		For $i = 1 To DllStructGetData($bag, 'slots')
 			Local $item = GetItemBySlot($bagIndex, $i)
 			If DllStructGetData($item, 'ID') == 0 Then ContinueLoop
 			If IsIdentified($item) Then ContinueLoop
-			Local $rarity = GetRarity($item)
-			If $rarity <> $RARITY_PURPLE And $rarity <> $RARITY_GOLD Then ContinueLoop
+			If GetRarity($item) == $RARITY_WHITE Then ContinueLoop
 			If FindIdentificationKit() == Null Then BuySuperiorIdentificationKitInTown()
 			IdentifyItem($item)
 			RandomSleep(100)
