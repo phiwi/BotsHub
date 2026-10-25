@@ -325,7 +325,7 @@ Func RunFarmLoop()
 	If $character_name <> '' Then
 		; Must do mid-run inventory management before normal one else we will go back to town
 		If Not $sooSafetyBypassInventory And $inventorySpaceNeeded <> 0 And $run_options_cache['run.farm_materials_mid_run'] Then
-			Local $resetRequired = InventoryManagementMidRun()
+			Local $resetRequired = InventoryManagementMidRun(SharedLootShouldSellItem, SharedLootShouldStoreItem)
 			If $resetRequired Then ResetBotsSetups()
 		EndIf
 
@@ -688,7 +688,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Warden Farm',					WardenFarm,					5,					$WARDEN_FARM_DURATION)
 	AddFarmToFarmMap(	'War Supply Keiran',			WarSupplyKeiranFarm,			10,					$WAR_SUPPLY_FARM_DURATION)
 	AddFarmToFarmMap(	'Manual Mode',					ManualMode,						0,					2 * 60 * 1000)
-	AddFarmToFarmMap(	'Storage',						InventoryManagementBeforeRun,	5,					2 * 60 * 1000)
+	AddFarmToFarmMap(	'Storage',						SharedLootForceInventoryClear,	5,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'Tonic Spammer',				AutomaticTonicConsumer,			5,					30 * 60 * 1000)
 	AddFarmToFarmMap(	'Tests',						RunTests,						0,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'Test Suite',					RunTestSuite,					0,					5 * 60 * 1000)

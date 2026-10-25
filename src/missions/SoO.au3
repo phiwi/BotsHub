@@ -1596,11 +1596,11 @@ Func ClearSoOFloor3()
 
 	CancelAllHeroes()
 
-	; Open and fully loot Fendi's boss chest.  The chest can contain up to
-	; 2 items (gold/green weapons and/or rare materials like Onyx/Diamonds).
-	; Use a permissive pickup helper so nothing is filtered out by GUI settings.
-	; Open Fendi's boss chest.  Items spawn with a short animation delay,
-	; so we do multiple PickUpItems passes with 1s gaps to catch all of them.
+	; Fendi's boss chest can contain 2 items (gold/green weapons and rare
+	; materials like Onyx/Diamonds). Green weapons are worth less than the
+	; inventory slot they take for the next run, so they stay on the ground.
+	; Items spawn with a short animation delay, so we do multiple PickUpItems
+	; passes with 1s gaps to catch all of them.
 	MoveTo(-15800, 16950)
 	Info('Opening Fendis chest')
 	TargetNearestItem()
@@ -1608,10 +1608,15 @@ Func ClearSoOFloor3()
 	RandomSleep(3000)
 
 	For $pass = 1 To 4
-		PickUpItems()
+		PickUpItems(Null, SoOShouldPickChestItem)
 		RandomSleep(1000)
 	Next
 	Return $SUCCESS
+EndFunc
+
+
+Func SoOShouldPickChestItem($item)
+	Return GetRarity($item) <> $RARITY_GREEN And DefaultShouldPickItem($item)
 EndFunc
 
 

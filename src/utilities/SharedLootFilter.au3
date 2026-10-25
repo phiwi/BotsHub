@@ -176,6 +176,7 @@ Func SharedLootShouldSellItem($item)
 	Local $rarity = GetRarity($item)
 	Local $itemID = DllStructGetData($item, 'ModelID')
 	If IsKey($itemID) And $itemID <> $ID_ZAISHEN_KEY Then Return DllStructGetData($item, 'Value') > 0
+	If $itemID == $ID_UNDEAD_BONE Or $itemID == $ID_KRAIT_SKIN Or $itemID == $ID_SENTIENT_VINE Then Return DllStructGetData($item, 'Value') > 0
 	If ($rarity == $RARITY_PURPLE Or $rarity == $RARITY_GOLD) And (IsWeapon($item) Or IsTome($itemID)) Then
 		Return Not SharedLootShouldKeepItem($item)
 	EndIf

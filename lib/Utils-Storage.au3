@@ -125,7 +125,7 @@ Func InventoryManagementBeforeRun($shouldSellItem = DefaultShouldSellItem, $shou
 		If $cache['@sell.materials.basic.something'] And HasBasicMaterials() Then SellBasicMaterialsToMerchant()
 		If $cache['@sell.materials.rare.something'] And HasRareMaterials() Then SellRareMaterialsToMerchant()
 	EndIf
-	If $cache['@sell.something'] And HasItemsToSell($shouldSellItem) Then
+	If ($forceFullClear Or $cache['@sell.something']) And HasItemsToSell($shouldSellItem) Then
 		TravelToOutpost($trade_town, $district_name)
 		; If we have more than 60k, we risk running into the situation we cannot sell because we're too rich, so we store some in xunlai
 		If GetGoldCharacter() > 60000 Then BalanceCharacterGold(10000)
@@ -149,7 +149,7 @@ Func InventoryManagementBeforeRun($shouldSellItem = DefaultShouldSellItem, $shou
 			BuyRareMaterialFromMerchantUntilPoor($ID_GLOB_OF_ECTOPLASM, 10000, $ID_OBSIDIAN_SHARD)
 		EndIf
 	EndIf
-	If $cache['@store.something'] Then
+	If $forceFullClear Or $cache['@store.something'] Then
 		If GetMapType() <> $ID_OUTPOST Then TravelToOutpost($trade_town, $district_name)
 		StoreItemsInXunlaiStorage($shouldStoreItem)
 	EndIf
@@ -160,7 +160,7 @@ EndFunc
 
 
 ;~ Function to deal with inventory during farm to preserve inventory space
-Func InventoryManagementMidRun()
+Func InventoryManagementMidRun($shouldSellItem = DefaultShouldSellItem, $shouldStoreItem = DefaultShouldStoreItem)
 	; Operations order :
 	; 1-Check if we have at least 1 identification kit and 1 salvage kit
 	; 2-If not, buy until we have 4 identification kits and 12 salvaged kits
@@ -173,7 +173,7 @@ Func InventoryManagementMidRun()
 		Info('Buying kits for passive inventory management')
 		TravelToOutpost($trade_town, $district_name)
 		; Since we are in trade town, might as well clear inventory
-		InventoryManagementBeforeRun()
+		InventoryManagementBeforeRun($shouldSellItem, $shouldStoreItem, True)
 		BuyKitsForMidRun()
 		Return True
 	EndIf
