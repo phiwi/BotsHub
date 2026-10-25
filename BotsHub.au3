@@ -438,6 +438,7 @@ Func LoadLootConfiguration($filePath)
 	$loot_configuration = StringTrimRight($loot_configuration, 5)
 	Local $jsonLootOptions = LoadLootOptions($filePath)
 	FillInventoryCacheFromJSON($jsonLootOptions, '')
+	MigrateLegacyInventoryCacheKeys()
 	BuildInventoryDerivedFlags()
 	RefreshValuableListsFromCache()
 	Info('Loaded loot configuration at ' & $filePath)
@@ -858,6 +859,23 @@ Func SwitchToHardModeIfEnabled()
 	Else
 		SwitchMode($ID_NORMAL_MODE)
 	EndIf
+EndFunc
+
+
+;~ Older configurations saved a few material names in plural, which silently disabled their options
+Func MigrateLegacyInventoryCacheKeys()
+	MigrateInventoryCacheKeySuffix('Onyx Gemstones', 'Onyx Gemstone')
+	MigrateInventoryCacheKeySuffix('Lumps of Charcoal', 'Lump of Charcoal')
+	MigrateInventoryCacheKeySuffix('Leather Squares', 'Leather Square')
+EndFunc
+
+
+Func MigrateInventoryCacheKeySuffix($legacyName, $canonicalName)
+	For $key In MapKeys($inventory_management_cache)
+		If StringRight($key, StringLen($legacyName) + 1) <> '.' & $legacyName Then ContinueLoop
+		$inventory_management_cache[StringLeft($key, StringLen($key) - StringLen($legacyName)) & $canonicalName] = $inventory_management_cache[$key]
+		MapRemove($inventory_management_cache, $key)
+	Next
 EndFunc
 
 
