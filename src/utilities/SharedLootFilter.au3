@@ -27,6 +27,8 @@ Func SharedLootShouldKeepItem($item)
 	Local $itemType = DllStructGetData($item, 'type')
 	Local $req = GetItemReq($item)
 
+	If $MAP_ULTRA_RARE_WEAPONS[$itemID] <> Null Then Return True
+
 	If $itemID == $ID_GLACIAL_BLADE Or $itemID == $ID_GLACIAL_BLADES Then Return True
 
 	If $itemID >= $ID_BONE_DRAGON_STAFF_DOMINATION And $itemID <= $ID_BONE_DRAGON_STAFF_CHANNELING Then Return True
