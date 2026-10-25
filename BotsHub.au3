@@ -315,6 +315,7 @@ Func RunFarmLoop()
 	; Farm Name;Farm function;Inventory space;Farm duration
 	Local $farm = $farm_map[$farm_name]
 	Local $inventorySpaceNeeded = $farm[2]
+	$shared_loot_keep_farmed_greens = ($farm_name == 'Focus Hanaku' Or $farm_name == 'Wingstorm' Or $farm_name == 'Brightclaw')
 	Local $sooSafetyBypassInventory = (StringLeft($farm_name, 3) == 'SoO' And $soo_skip_next_inventory_management)
 	If $sooSafetyBypassInventory Then
 		Warn('SoO safety mode: skipping this cycle inventory management after critical failure recovery')

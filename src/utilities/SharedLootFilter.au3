@@ -17,12 +17,15 @@
 #include-once
 #include '../../lib/Utils.au3'
 
+Global $shared_loot_keep_farmed_greens = False
+
 
 Func SharedLootShouldKeepItem($item)
 	Local $itemID = DllStructGetData($item, 'ModelID')
 
 	If IsTome($itemID) Then Return $itemID == $ID_DERVISH_ELITETOME
 	If Not IsWeapon($item) Then Return False
+	If $shared_loot_keep_farmed_greens And GetRarity($item) == $RARITY_GREEN Then Return True
 
 	Local $itemType = DllStructGetData($item, 'type')
 	Local $req = GetItemReq($item)
@@ -182,7 +185,7 @@ Func SharedLootShouldSellItem($item)
 	If ($rarity == $RARITY_PURPLE Or $rarity == $RARITY_GOLD) And (IsWeapon($item) Or IsTome($itemID)) Then
 		Return Not SharedLootShouldKeepItem($item)
 	EndIf
-	If IsWeapon($item) And $rarity == $RARITY_GREEN Then Return True
+	If IsWeapon($item) And $rarity == $RARITY_GREEN Then Return Not SharedLootShouldKeepItem($item)
 	Return DefaultShouldSellItem($item)
 EndFunc
 
