@@ -927,18 +927,18 @@
 			"Ruby": true,
 			"Sapphire": true,
 			"Diamond": true,
-			"Onyx Gemstones": true,
-			"Lumps of Charcoal": true,
 			"Obsidian Shard": true,
 			"Tempered Glass Vial": true,
-			"Leather Squares": true,
 			"Elonian Leather Square": true,
 			"Vial of Ink": true,
 			"Roll of Parchment": true,
 			"Roll of Vellum": true,
 			"Spiritwood Plank": true,
 			"Amber Chunk": true,
-			"Jadeite Shard": true
+			"Jadeite Shard": true,
+			"Onyx Gemstone": true,
+			"Lump of Charcoal": true,
+			"Leather Square": true
 		},
 		"Trophies": {
 			"Margonite Gemstone": true,
@@ -961,15 +961,15 @@
 		"Tomes": {
 			"Normal": {
 				"Warrior Tome": false,
-				"Ranger Tome": true,
-				"Monk Tome": true,
-				"Necromancer Tome": true,
-				"Mesmer Tome": true,
-				"Elementalist Tome": true,
+				"Ranger Tome": false,
+				"Monk Tome": false,
+				"Necromancer Tome": false,
+				"Mesmer Tome": false,
+				"Elementalist Tome": false,
 				"Assassin Tome": false,
-				"Ritualist Tome": true,
-				"Paragon Tome": true,
-				"Dervish Tome": true
+				"Ritualist Tome": false,
+				"Paragon Tome": false,
+				"Dervish Tome": false
 			},
 			"Elite": {
 				"Elite Warrior Tome": true,
@@ -2441,18 +2441,18 @@
 			"Ruby": false,
 			"Sapphire": false,
 			"Diamond": false,
-			"Onyx Gemstones": false,
-			"Lumps of Charcoal": false,
 			"Obsidian Shard": false,
 			"Tempered Glass Vial": false,
-			"Leather Squares": false,
 			"Elonian Leather Square": false,
 			"Vial of Ink": false,
 			"Roll of Parchment": false,
 			"Roll of Vellum": false,
 			"Spiritwood Plank": false,
 			"Amber Chunk": false,
-			"Jadeite Shard": false
+			"Jadeite Shard": false,
+			"Onyx Gemstone": false,
+			"Lump of Charcoal": false,
+			"Leather Square": false
 		},
 		"Trophies": {
 			"Chunk of Drake Flesh": false,
@@ -3213,18 +3213,18 @@
 			"Ruby": false,
 			"Sapphire": false,
 			"Diamond": false,
-			"Onyx Gemstones": false,
-			"Lumps of Charcoal": false,
 			"Obsidian Shard": false,
 			"Tempered Glass Vial": false,
-			"Leather Squares": false,
 			"Elonian Leather Square": false,
 			"Vial of Ink": false,
 			"Roll of Parchment": false,
 			"Roll of Vellum": false,
 			"Spiritwood Plank": false,
 			"Amber Chunk": false,
-			"Jadeite Shard": false
+			"Jadeite Shard": false,
+			"Onyx Gemstone": false,
+			"Lump of Charcoal": false,
+			"Leather Square": false
 		},
 		"Trophies": {
 			"Chunk of Drake Flesh": false,
@@ -3277,18 +3277,18 @@
 			"Ruby": false,
 			"Sapphire": false,
 			"Diamond": false,
-			"Onyx Gemstones": false,
-			"Lumps of Charcoal": false,
 			"Obsidian Shard": false,
 			"Tempered Glass Vial": false,
-			"Leather Squares": false,
 			"Elonian Leather Square": false,
 			"Vial of Ink": false,
 			"Roll of Parchment": false,
 			"Roll of Vellum": false,
 			"Spiritwood Plank": false,
 			"Amber Chunk": false,
-			"Jadeite Shard": false
+			"Jadeite Shard": false,
+			"Onyx Gemstone": false,
+			"Lump of Charcoal": false,
+			"Leather Square": false
 		}
 	},
 	"Store items": {
@@ -4220,18 +4220,18 @@
 			"Ruby": true,
 			"Sapphire": true,
 			"Diamond": true,
-			"Onyx Gemstones": true,
-			"Lumps of Charcoal": true,
 			"Obsidian Shard": true,
 			"Tempered Glass Vial": true,
-			"Leather Squares": true,
 			"Elonian Leather Square": true,
 			"Vial of Ink": true,
 			"Roll of Parchment": true,
 			"Roll of Vellum": true,
 			"Spiritwood Plank": true,
 			"Amber Chunk": true,
-			"Jadeite Shard": true
+			"Jadeite Shard": true,
+			"Onyx Gemstone": true,
+			"Lump of Charcoal": true,
+			"Leather Square": true
 		},
 		"Trophies": {
 			"Margonite Gemstone": true,
