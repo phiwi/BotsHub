@@ -22,6 +22,7 @@
 #include '../../lib/GWA2.au3'
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
+#include '../utilities/SharedLootFilter.au3'
 
 Opt('MustDeclareVars', True)
 
@@ -82,13 +83,24 @@ Global $brightclaw_last_recast_block_log = Null
 
 ;~ Main method to farm Chkkr Brightclaw
 Func BrightclawFarm()
-	If Not $brightclaw_farm_setup And SetupBrightclawFarm() == $FAIL Then Return $PAUSE
-	If GoToMelandrusHope() == $FAIL Then Return $FAIL
+	Local $defaultShouldPickItem = $default_move_aggro_kill_options['shouldPickItem']
+	Local $flagShouldPickItem = $flag_move_aggro_kill_options['shouldPickItem']
+	$default_move_aggro_kill_options['shouldPickItem'] = SharedLootShouldPickItem
+	$flag_move_aggro_kill_options['shouldPickItem'] = SharedLootShouldPickItem
 
-	Local $result = BrightclawFarmLoop()
-	If $result == $PAUSE Then Return $PAUSE
-	StopBrightclawRecorder()
-	If Not $BRIGHTCLAW_DISABLE_RESIGN_FOR_TESTS Then ResignAndReturnToOutpost($BRIGHTCLAW_OUTPOST_ID)
+	Local $result = $PAUSE
+	If $brightclaw_farm_setup Or SetupBrightclawFarm() <> $FAIL Then
+		If GoToMelandrusHope() == $FAIL Then
+			$result = $FAIL
+		Else
+			$result = BrightclawFarmLoop()
+			StopBrightclawRecorder()
+			If $result <> $PAUSE And Not $BRIGHTCLAW_DISABLE_RESIGN_FOR_TESTS Then ResignAndReturnToOutpost($BRIGHTCLAW_OUTPOST_ID)
+		EndIf
+	EndIf
+
+	$default_move_aggro_kill_options['shouldPickItem'] = $defaultShouldPickItem
+	$flag_move_aggro_kill_options['shouldPickItem'] = $flagShouldPickItem
 	Return $result
 EndFunc
 
@@ -641,9 +653,9 @@ Func LootBrightclawFast()
 	EndIf
 
 	Info('Picking up loot quickly')
-	PickUpItems()
+	PickUpItems(Null, SharedLootShouldPickItem)
 	RandomSleep(350)
-	PickUpItems()
+	PickUpItems(Null, SharedLootShouldPickItem)
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
 

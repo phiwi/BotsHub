@@ -22,6 +22,7 @@
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
 #include '../utilities/SupportTeam.au3'
+#include '../utilities/SharedLootFilter.au3'
 
 Opt('MustDeclareVars', True)
 
@@ -127,16 +128,28 @@ Global $hanaku_chain_fail_count = 0
 
 ;~ Main method to farm Focus of Hanaku
 Func FocusHanakuFarm()
-	If Not $hanaku_farm_setup And SetupFocusHanakuFarm() == $FAIL Then Return $PAUSE
-	If GoToRheasCrater() == $FAIL Then Return $FAIL
-	$hanaku_log_run_number += 1
-	HanakuFightLogInit()
-	HanakuFightLogWrite('run_start', 'run=' & $hanaku_log_run_number & ';baseline=' & $HANAKU_STABLE_BASELINE)
+	Local $defaultShouldPickItem = $default_move_aggro_kill_options['shouldPickItem']
+	Local $flagShouldPickItem = $flag_move_aggro_kill_options['shouldPickItem']
+	$default_move_aggro_kill_options['shouldPickItem'] = SharedLootShouldPickItem
+	$flag_move_aggro_kill_options['shouldPickItem'] = SharedLootShouldPickItem
 
-	Local $result = FocusHanakuFarmLoop()
-	HanakuFightLogWrite('run_end', 'result=' & $result)
-	HanakuFightLogClose()
-	ResignAndReturnToOutpost($HANAKU_OUTPOST_ID)
+	Local $result = $PAUSE
+	If $hanaku_farm_setup Or SetupFocusHanakuFarm() <> $FAIL Then
+		If GoToRheasCrater() == $FAIL Then
+			$result = $FAIL
+		Else
+			$hanaku_log_run_number += 1
+			HanakuFightLogInit()
+			HanakuFightLogWrite('run_start', 'run=' & $hanaku_log_run_number & ';baseline=' & $HANAKU_STABLE_BASELINE)
+			$result = FocusHanakuFarmLoop()
+			HanakuFightLogWrite('run_end', 'result=' & $result)
+			HanakuFightLogClose()
+			ResignAndReturnToOutpost($HANAKU_OUTPOST_ID)
+		EndIf
+	EndIf
+
+	$default_move_aggro_kill_options['shouldPickItem'] = $defaultShouldPickItem
+	$flag_move_aggro_kill_options['shouldPickItem'] = $flagShouldPickItem
 	Return $result
 EndFunc
 
@@ -655,10 +668,10 @@ Func LootHanakuFast()
 
 	Info('Picking up loot')
 	For $j = 1 To 4
-		PickUpItems(Null, DefaultShouldPickItem, $RANGE_SPIRIT)
+		PickUpItems(Null, SharedLootShouldPickItem, $RANGE_SPIRIT)
 		RandomSleep(150)
 	Next
-	PickUpItems(Null, DefaultShouldPickItem, $RANGE_SPIRIT)
+	PickUpItems(Null, SharedLootShouldPickItem, $RANGE_SPIRIT)
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
 

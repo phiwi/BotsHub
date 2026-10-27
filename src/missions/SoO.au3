@@ -1548,6 +1548,7 @@ Func ClearSoOFloor3()
 	WEnd
 
 	Local $largerSoOAggroRange = $RANGE_SPELLCAST + 500
+	Local $bossRoomEntryDone = False
 	$soo_floor3_final_fight_conset_uptime = True
 	AdlibRegister('SoOFinalFightConsetUptimeTick', 1000)
 	While Not SoOIsRunFailed() And Not IsQuestReward($ID_QUEST_LOST_SOULS)
@@ -1570,8 +1571,9 @@ Func ClearSoOFloor3()
 
 		Info('Boss room')
 		UseMoraleConsumableIfNeeded()
-		; Poison trap between 1 2 and 3
-		SoOMoveAggroAndKill(-9850, 7600, '1', $largerSoOAggroRange)
+		; The floor 3 loop already stops at the portal, so only repeated passes need the corner waypoint
+		If $bossRoomEntryDone Then SoOMoveAggroAndKill(-9850, 7600, '1', $largerSoOAggroRange)
+		$bossRoomEntryDone = True
 		SoOMoveAggroAndKill(-8650, 9200, '2', $largerSoOAggroRange)
 		SoOMoveAggroAndKill(-9150, 10250, '3', $largerSoOAggroRange)
 		SoOMoveAggroAndKill(-9450, 10550, '4', $largerSoOAggroRange)

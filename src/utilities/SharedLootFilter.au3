@@ -25,7 +25,6 @@ Func SharedLootShouldKeepItem($item)
 
 	If IsTome($itemID) Then Return $itemID == $ID_DERVISH_ELITETOME
 	If Not IsWeapon($item) Then Return False
-	If $shared_loot_keep_farmed_greens And GetRarity($item) == $RARITY_GREEN Then Return True
 
 	Local $itemType = DllStructGetData($item, 'type')
 	Local $req = GetItemReq($item)
@@ -36,29 +35,16 @@ Func SharedLootShouldKeepItem($item)
 
 	If $itemID >= $ID_BONE_DRAGON_STAFF_DOMINATION And $itemID <= $ID_BONE_DRAGON_STAFF_CHANNELING Then Return True
 
-	If $itemID == $ID_FROGGY_DOMINATION Or ($itemID >= $ID_FROGGY_FAST_CASTING And $itemID <= $ID_FROGGY_CHANNELING) Then Return True
+	;~ Green uniques are junk except on the farms that exist to farm them
+	If GetRarity($item) == $RARITY_GREEN Then Return $shared_loot_keep_farmed_greens
 
-	If $itemID == $ID_OMINOUS_AEGIS_TACTICS Or $itemID == $ID_OMINOUS_AEGIS_STRENGTH Or $itemID == $ID_OMINOUS_AEGIS_LEADERSHIP Then Return True
+	If $itemType == $ID_TYPE_SHIELD And $req == 8 And GetShieldArmor($item) == 16 Then Return True
 
-	If $itemID == $ID_JAPAN_1ST_ANNIVERSARY_SHIELD_STRENGTH Or $itemID == $ID_JAPAN_1ST_ANNIVERSARY_SHIELD_TACTICS Or $itemID == $ID_JAPAN_1ST_ANNIVERSARY_SHIELD_LEADERSHIP Then Return True
+	If ($itemID == $ID_DARKWING_DEFENDER Or $itemID == $ID_DARKWING_DEFENDER_TACTICS) And $req == 9 And GetRarity($item) == $RARITY_GOLD Then Return True
 
-	If $itemID == $ID_BLADED_SHIELD Or $itemID == $ID_BLADED_SHIELD_2 Then Return True
+	If $itemType == $ID_TYPE_SHIELD And SharedLootIsKeepableOsShield($item) Then Return True
 
-	If $itemID == $ID_DRAGON_FANGS And $req == 9 Then Return True
-
-	If ($itemID == $ID_OUTCAST_SHIELD Or $itemID == $ID_OUTCAST_SHIELD_2) And $req == 9 Then Return True
-
-	If $itemID == $ID_CELESTIAL_SHIELD Or $itemID == $ID_CELESTIAL_SHIELD_2 Then Return True
-
-	If $itemID == $ID_ECHOVALD_SHIELD_STRENGTH Or $itemID == $ID_ECHOVALD_SHIELD_TACTICS Then Return True
-
-	If $itemID == $ID_DIAMOND_AEGIS Or $itemID == $ID_DIAMOND_AEGIS_2 Or $itemID == $ID_DIAMOND_AEGIS_3 Then Return True
-
-	If $itemID == $ID_ORNATE_SHIELD Then Return True
-
-	If ($itemID == $ID_PLAGUEBORN_SHIELD_STRENGTH Or $itemID == $ID_PLAGUEBORN_SHIELD_TACTICS) And $req == 9 Then Return True
-
-	If $itemID == $ID_GOTHIC_DEFENDER Or $itemID == $ID_GOTHIC_DEFENDER_2 Then Return True
+	If SharedLootIsRareShieldSkin($itemID) And IsInscribable($item) Then Return True
 
 	If $req == 9 Then
 		Switch $itemID
@@ -75,12 +61,15 @@ Func SharedLootShouldKeepItem($item)
 	Local $modStruct = GetModStruct($item)
 	If Not $modStruct Then Return False
 
-	If $itemType == $ID_TYPE_SHIELD And $req == 8 And GetShieldArmor($item) == 16 Then Return True
 	If $itemType == $ID_TYPE_OFFHAND And $req == 8 And GetFocusEnergy($item) == 12 Then Return True
 	If $itemType == $ID_TYPE_SWORD And $req == 8 And IsMaxStatsForReq($item) Then Return True
 
+	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And Not IsInscribable($item) Then
+		If SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HCT_IDENTIFIER) And SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HSR_IDENTIFIER) Then Return True
+	EndIf
+
 	If $itemType == $ID_TYPE_STAFF And $req == 9 Then
-		If SharedLootHasInherentHCTOrHSR($modStruct) Or StringInStr($modStruct, $STRUCT_MOD_HCT_20) Or StringInStr($modStruct, $STRUCT_MOD_HSR_20) Then Return True
+		If SharedLootHasInherentHCTOrHSR($modStruct) Or StringInStr($modStruct, $STRUCT_MOD_HSR_20) Then Return True
 	EndIf
 
 	If $req == 9 Then
@@ -98,11 +87,33 @@ Func SharedLootShouldKeepItem($item)
 		EndSwitch
 	EndIf
 
-	If $itemType == $ID_TYPE_OFFHAND And StringInStr($modStruct, $STRUCT_MOD_OF_APTITUDE) Then Return True
-
 	If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_APTITUDE_NOT_ATTITUDE) Then Return True
 	If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_FORGET_ME_NOT) Then Return True
 
+	Return False
+EndFunc
+
+
+;~ Old school shields are only worth keeping as gold q8/q9 with two valuable mods
+Func SharedLootIsKeepableOsShield($item)
+	If IsInscribable($item) Then Return False
+	If GetRarity($item) <> $RARITY_GOLD Then Return False
+	Local $req = GetItemReq($item)
+	If $req <> 8 And $req <> 9 Then Return False
+	Return HasPerfectMods($item)
+EndFunc
+
+
+Func SharedLootIsRareShieldSkin($itemID)
+	Switch $itemID
+		Case $ID_OMINOUS_AEGIS_TACTICS, $ID_OMINOUS_AEGIS_STRENGTH, $ID_OMINOUS_AEGIS_LEADERSHIP, _
+			$ID_JAPAN_1ST_ANNIVERSARY_SHIELD_STRENGTH, $ID_JAPAN_1ST_ANNIVERSARY_SHIELD_TACTICS, $ID_JAPAN_1ST_ANNIVERSARY_SHIELD_LEADERSHIP, _
+			$ID_BLADED_SHIELD, $ID_BLADED_SHIELD_2, $ID_DRAGON_FANGS, $ID_OUTCAST_SHIELD, $ID_OUTCAST_SHIELD_2, _
+			$ID_CELESTIAL_SHIELD, $ID_CELESTIAL_SHIELD_2, $ID_ECHOVALD_SHIELD_STRENGTH, $ID_ECHOVALD_SHIELD_TACTICS, _
+			$ID_DIAMOND_AEGIS, $ID_DIAMOND_AEGIS_2, $ID_DIAMOND_AEGIS_3, $ID_ORNATE_SHIELD, _
+			$ID_PLAGUEBORN_SHIELD_STRENGTH, $ID_PLAGUEBORN_SHIELD_TACTICS, $ID_GOTHIC_DEFENDER, $ID_GOTHIC_DEFENDER_2
+			Return True
+	EndSwitch
 	Return False
 EndFunc
 
@@ -123,6 +134,17 @@ Func SharedLootHasInherentMod($modStruct, $struct)
 		If Not IsWeaponUpgradeStruct($modStruct, $pos) And Not IsInscriptionStruct($modStruct, $pos) Then Return True
 		$pos = StringInStr($modStruct, $struct, 0, 1, $pos + 1)
 	WEnd
+	Return False
+EndFunc
+
+
+;~ Half skill recharge and half casting time mods roll 19-20% when tied to one attribute, 9-10% when tied to all spells
+Func SharedLootHasInherentChance($modStruct, $identifier)
+	Local $mods = StringTrimLeft($modStruct, 2)
+	For $i = 0 To StringLen($mods) / 8 - 1
+		If StringMid($mods, 8 * $i + 5, 4) <> $identifier Then ContinueLoop
+		If Int('0x' & StringMid($mods, 8 * $i + 3, 2)) >= 19 Then Return True
+	Next
 	Return False
 EndFunc
 
@@ -181,21 +203,25 @@ Func SharedLootShouldSellItem($item)
 	If DllStructGetData($item, 'Equipped') > 0 Then Return False
 	If DllStructGetData($item, 'Customized') <> 0 Then Return False
 
-	Local $rarity = GetRarity($item)
 	Local $itemID = DllStructGetData($item, 'ModelID')
 	If IsKey($itemID) And $itemID <> $ID_ZAISHEN_KEY Then Return DllStructGetData($item, 'Value') > 0
 	Switch $itemID
 		Case $ID_UNDEAD_BONE, $ID_KRAIT_SKIN, $ID_SENTIENT_VINE, $ID_SKELK_FANG, $ID_SKELK_CLAW, _
-			$ID_SAURIAN_BONE, $ID_BEETLE_EGG, $ID_AMPHIBIAN_TONGUE, $ID_BERSERKER_HORN, $ID_DRAGON_ROOT
+			$ID_SAURIAN_BONE, $ID_BEETLE_EGG, $ID_AMPHIBIAN_TONGUE, $ID_BERSERKER_HORN, $ID_DRAGON_ROOT, _
+			$ID_INCUBUS_WING
 			Return DllStructGetData($item, 'Value') > 0
 	EndSwitch
 	If IsBlueScroll($itemID) Then Return DllStructGetData($item, 'Value') > 0
 	If IsGoldScroll($itemID) Then Return $itemID <> $ID_UW_SCROLL And DllStructGetData($item, 'Value') > 0
-	If ($rarity == $RARITY_PURPLE Or $rarity == $RARITY_GOLD) And (IsWeapon($item) Or IsTome($itemID)) Then
-		Return Not SharedLootShouldKeepItem($item)
-	EndIf
-	If IsWeapon($item) And $rarity == $RARITY_GREEN Then Return Not SharedLootShouldKeepItem($item)
+	If IsWeapon($item) Or IsTome($itemID) Then Return Not SharedLootShouldKeepItem($item)
 	Return DefaultShouldSellItem($item)
+EndFunc
+
+
+;~ Green items stay lootable on the farms that exist to farm them
+Func SharedLootShouldPickItem($item)
+	If $shared_loot_keep_farmed_greens And GetRarity($item) == $RARITY_GREEN Then Return True
+	Return DefaultShouldPickItem($item)
 EndFunc
 
 
@@ -203,6 +229,7 @@ Func SharedLootShouldStoreItem($item)
 	If DllStructGetData($item, 'Equipped') > 0 Then Return False
 	If DllStructGetData($item, 'Customized') <> 0 Then Return False
 	If SharedLootShouldKeepItem($item) Then Return True
+	If IsWeapon($item) Then Return False
 	Return DefaultShouldStoreItem($item)
 EndFunc
 

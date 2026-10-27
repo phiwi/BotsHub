@@ -998,6 +998,6 @@ EndFunc
 
 
 Func FroggyShouldPickItem($item)
-	If IsWeapon($item) And GetRarity($item) == $RARITY_GREEN Then Return False
+	If GetRarity($item) == $RARITY_GREEN Then Return False
 	Return DefaultShouldPickItem($item)
 EndFunc

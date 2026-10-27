@@ -22,6 +22,7 @@
 #include '../../lib/GWA2_ID.au3'
 #include '../../lib/Utils.au3'
 #include '../utilities/SupportTeam.au3'
+#include '../utilities/SharedLootFilter.au3'
 
 Opt('MustDeclareVars', True)
 
@@ -96,12 +97,23 @@ Global $wingstorm_last_boss_death_y = 0
 
 
 Func WingstormFarm()
-	If Not $wingstorm_farm_setup And SetupWingstormFarm() == $FAIL Then Return $PAUSE
-	If GoToWingstormMap() == $FAIL Then Return $FAIL
+	Local $defaultShouldPickItem = $default_move_aggro_kill_options['shouldPickItem']
+	Local $flagShouldPickItem = $flag_move_aggro_kill_options['shouldPickItem']
+	$default_move_aggro_kill_options['shouldPickItem'] = SharedLootShouldPickItem
+	$flag_move_aggro_kill_options['shouldPickItem'] = SharedLootShouldPickItem
 
-	Local $result = WingstormFarmLoop()
-	If $result == $PAUSE Then Return $PAUSE
-	ResignAndReturnToOutpost($WINGSTORM_OUTPOST_ID)
+	Local $result = $PAUSE
+	If $wingstorm_farm_setup Or SetupWingstormFarm() <> $FAIL Then
+		If GoToWingstormMap() == $FAIL Then
+			$result = $FAIL
+		Else
+			$result = WingstormFarmLoop()
+			If $result <> $PAUSE Then ResignAndReturnToOutpost($WINGSTORM_OUTPOST_ID)
+		EndIf
+	EndIf
+
+	$default_move_aggro_kill_options['shouldPickItem'] = $defaultShouldPickItem
+	$flag_move_aggro_kill_options['shouldPickItem'] = $flagShouldPickItem
 	Return $result
 EndFunc
 
@@ -816,9 +828,9 @@ Func LootWingstormFast()
 		WingstormWaitForPlayerNearPoint($wingstorm_last_boss_death_x, $wingstorm_last_boss_death_y, 240, 5000)
 	EndIf
 
-	PickUpItems()
+	PickUpItems(Null, SharedLootShouldPickItem)
 	RandomSleep(350)
-	PickUpItems()
+	PickUpItems(Null, SharedLootShouldPickItem)
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
 EndFunc
 

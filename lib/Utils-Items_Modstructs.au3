@@ -74,6 +74,8 @@ Global Const $STRUCT_MOD_HCT_20								= '00140828'
 Global Const $STRUCT_MOD_HCT_10								= '000A0822'
 Global Const $STRUCT_MOD_HSR_20								= '00142828'
 Global Const $STRUCT_MOD_HSR_10								= '000AA823'
+Global Const $STRUCT_INHERENT_HCT_IDENTIFIER				= '1822'
+Global Const $STRUCT_INHERENT_HSR_IDENTIFIER				= '9823'
 
 
 #Region Inscriptions
