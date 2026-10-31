@@ -130,7 +130,15 @@ EndFunc
 ;~ Returns True if the party is alive, that is if there is still an alive hero with resurrection skill
 Func HasRezMemberAlive()
 	Local Static $heroesWithRez
-	If Not IsArray($heroesWithRez) Then $heroesWithRez = FindHeroesWithRez()
+	Local Static $cachedHeroIDs
+	Local $heroIDs = ''
+	For $heroNumber = 1 To GetHeroCount()
+		$heroIDs &= GetHeroID($heroNumber) & ';'
+	Next
+	If Not IsArray($heroesWithRez) Or $heroIDs <> $cachedHeroIDs Then
+		$heroesWithRez = FindHeroesWithRez()
+		$cachedHeroIDs = $heroIDs
+	EndIf
 	For $i In $heroesWithRez
 		Local $heroID = GetHeroID($i)
 		If GetAgentExists($heroID) And Not GetIsDead(GetAgentByID($heroID)) Then Return True

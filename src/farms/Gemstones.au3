@@ -40,7 +40,7 @@ Global Const $GEMSTONES_MESMER_SKILLBAR = 'OghkkgKKjIyEz0rA0XR0t41U1kPI'
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBDg6ucSqDkDtl7irDylJRHOA' ; Water + Air
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBDk6yMSIDvDTDHOOioCpD21A' ; Ward Overcast Prot
 ;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OghjwMgsITMT7iXTVTtllTfT+gA' ; EVAS + + Techno Spirits
-Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdTsQm6ZSdwmcXcBSuEZIJ6wBA' ;Water
+Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdUow1xQPTqD7i2kLQtlID9CzCA'
 
 
 
@@ -48,7 +48,7 @@ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdTsQm6ZSdwmcXcBSuEZIJ6wBA' ;W
 
 ; Fixed 7-hero team. Hero index 1..7 = the AddHero order in SetupTeamGemstonesFarm.
 Global Const $GEMSTONES_HERO_OLIAS_ID = $ID_OLIAS
-Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhjQoGYIP3BwWVV4JNncDzxJA'
+Global Const $GEMSTONES_HERO_OLIAS_TEMPLATE = 'OAhkQoG4hEyzdwOUVFeSzJ3wccC'
 Global Const $GEMSTONES_HERO_NORGU_ID = $ID_NORGU
 Global Const $GEMSTONES_HERO_NORGU_TEMPLATE = 'OQBDArsDOFAcqpb6lDyAkOnA' ;PB + Compl * Epi
 Global Const $GEMSTONES_HERO_RAZAH_ID = $ID_RAZAH
@@ -64,11 +64,11 @@ Global Const $GEMSTONES_HERO_MERCENARY2_TEMPLATE = 'OANDYazPSxVNgeErEfEaRVVGNA'
 Global Const $GEMSTONES_HERO_LIVIA_ID = $ID_LIVIA
 Global Const $GEMSTONES_HERO_LIVIA_TEMPLATE = 'OABDUshnSrBVBoBbhKgWCkBfCA' ; Virulence
 Global Const $GEMSTONES_HERO_BLACKOUT_ID = $ID_MERCENARY_HERO_4
-Global Const $GEMSTONES_HERO_BLACKOUT_TEMPLATE = 'OQREAawDeCdDwCgAmnVAOCZAuCA'
+Global Const $GEMSTONES_HERO_BLACKOUT_TEMPLATE = 'OQRDAcwzQCVIgTPnBkBQCZAEBA'
 Global Const $GEMSTONES_HERO_INNO_ID = $ID_MERCENARY_HERO_3
 Global Const $GEMSTONES_HERO_INNO_TEMPLATE = 'OQNEAawD2CdDgAyBlntCkBUAOCB'
 Global Const $GEMSTONES_HERO_MOW_ID = $ID_MASTER_OF_WHISPERS
-Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OABDUsdnS5BUBHV4BbhlBQCCNA'
+Global Const $GEMSTONES_HERO_MOW_TEMPLATE = 'OABDUsdnS5BUBHV4BbhlBfCCNA'
 Global Const $GEMSTONES_HERO_OGDEN_ID = $ID_OGDEN
 Global Const $GEMSTONES_HERO_OGDEN_TEMPLATE = 'OwAT40XC3hhgX7iXEqvLRLeXBA'
 ;~ Global Const $GEMSTONES_HERO_OGDEN_TEMPLATE = 'OwAS4YIPMku4Fh67Swr3jsI' ; Wraths
@@ -102,6 +102,7 @@ Global Const $MAX_GEMSTONES_FARM_DURATION = 18 * 60 * 1000
 ; array (skill summons like the Ebon Vanguard Assassin live outside it), so we
 ; re-trigger on a fixed interval instead of detecting the ally's death.
 Global Const $GEMSTONES_SUMMON_RESUMMON_MS = 65000
+Global Const $GEMSTONES_RITUAL_START_TIMEOUT_MS = 90000
 
 ;=== Configuration / Globals ===
 Global Const $GEMSTONES_DEFEND_POSITION_X = -3432
@@ -410,9 +411,25 @@ EndFunc
 Func WalkToSpotGemstonesFarm()
 	Info('Moving to defend position')
 	; go close to Zhellix to let him start erforming the ritual, Null for no interaction
-	GoToAgent(GetAgentByID($AGENTID_ZHELLIX), Null)
+	GoToAgent(GemstonesZhellixAgent(), Null)
 	MoveTo($GEMSTONES_DEFEND_POSITION_X, $GEMSTONES_DEFEND_POSITION_Y)
 	FanFlagHeroes()
+EndFunc
+
+
+Func GemstonesZhellixAgent()
+	Local $me = GetMyAgent()
+	Local $nearest = Null
+	Local $nearestDistance = 0
+	For $agent In GetAgentArray()
+		If DllStructGetData($agent, 'ModelID') <> $MODELID_ZHELLIX Then ContinueLoop
+		Local $distance = GetDistance($me, $agent)
+		If $nearest <> Null And $distance >= $nearestDistance Then ContinueLoop
+		$nearest = $agent
+		$nearestDistance = $distance
+	Next
+	If $nearest <> Null Then Return $nearest
+	Return GetAgentByID($AGENTID_ZHELLIX)
 EndFunc
 
 
@@ -430,10 +447,19 @@ Func GemstonesDefendPosition()
 	Local $waveNumber = 0
 	Local $waveActive = False
 	Local $lullSince = 0
+	Local $ritualStarted = False
+	Local $startTimer = TimerInit()
 
-	While IsZhellixPerformingRitual()
-		If CheckStuck('Gemstones fight', $MAX_GEMSTONES_FARM_DURATION) == $FAIL Then Return $FAIL
+	While True
 		If IsDoARunFailed() Then Return $FAIL
+		Local $foesNow = CountFoesInRangeOfCoords($GEMSTONES_DEFEND_POSITION_X, $GEMSTONES_DEFEND_POSITION_Y, $gemstones_fight_options['fightRange'])
+		If $foesNow > 0 Then $ritualStarted = True
+		If $ritualStarted Then
+			If Not IsZhellixPerformingRitual() Then ExitLoop
+		ElseIf TimerDiff($startTimer) > $GEMSTONES_RITUAL_START_TIMEOUT_MS Then
+			ExitLoop
+		EndIf
+		If CheckStuck('Gemstones fight', $MAX_GEMSTONES_FARM_DURATION) == $FAIL Then Return $FAIL
 		; Hard Mode: maintain consets throughout the waves (gated by the GUI
 		; "use consets" checkbox). If a single-consumable override is set,
 		; only that consumable is used.
@@ -441,7 +467,6 @@ Func GemstonesDefendPosition()
 		GemstonesMaintainSummon()
 		Sleep(1000)
 
-		Local $foesNow = CountFoesInRangeOfCoords($GEMSTONES_DEFEND_POSITION_X, $GEMSTONES_DEFEND_POSITION_Y, $gemstones_fight_options['fightRange'])
 		If $foesNow >= 3 And Not $waveActive Then
 			$waveNumber += 1
 			Info('Wave ' & $waveNumber & '/19 started (' & $foesNow & ' foes in range)')
@@ -463,9 +488,17 @@ Func GemstonesDefendPosition()
 		If IsPlayerAlive() Then PickUpItems(Null, DefaultShouldPickItem, $RANGE_SPIRIT)
 		MoveTo($GEMSTONES_DEFEND_POSITION_X, $GEMSTONES_DEFEND_POSITION_Y)
 	WEnd
-	Info('Defend loop ended after wave ' & $waveNumber & '.')
+	Info('Defend loop ended after wave ' & $waveNumber & ' (' & GemstonesZhellixState() & ', ' & CountFoesInRangeOfAgent(GetMyAgent(), $gemstones_fight_options['fightRange']) & ' foes)')
+	If Not $ritualStarted Then Return $FAIL
 	; if ritual completed then successful run
 	Return IsDoARunFailed()? $FAIL : $SUCCESS
+EndFunc
+
+
+Func GemstonesZhellixState()
+	Local $zhellix = GemstonesZhellixAgent()
+	If $zhellix == Null Then Return 'Zhellix not in agent array'
+	Return 'Zhellix ' & Round(GetDistance(GetMyAgent(), $zhellix)) & ' away'
 EndFunc
 
 
@@ -503,10 +536,24 @@ EndFunc
 
 ;~ Check if run failed
 Func IsDoARunFailed()
-	Local $zhellix = GetAgentByID($AGENTID_ZHELLIX)
-	If GetIsDead($zhellix) Then Warn('Zhellix dead')
-	If IsPlayerDead() Then Warn('Player dead')
-	Return GetIsDead($zhellix) Or Not HasRezMemberAlive()
+	Local $zhellix = GemstonesZhellixAgent()
+	If GetIsDead($zhellix) Then
+		Warn('Zhellix dead')
+		Return True
+	EndIf
+	If IsPlayerDead() And Not GemstonesAnyHeroAlive() Then
+		Warn('Player and heroes dead')
+		Return True
+	EndIf
+	Return False
+EndFunc
+
+
+Func GemstonesAnyHeroAlive()
+	For $heroIndex = 1 To GetHeroCount()
+		If Not GetIsDead(GetAgentByID(GetHeroID($heroIndex))) Then Return True
+	Next
+	Return False
 EndFunc
 
 
@@ -515,7 +562,7 @@ Func IsZhellixPerformingRitual()
 	If IsDoARunFailed() Then Return False
 
 	Local $me = GetMyAgent()
-	Local $zhellix = GetAgentByID($AGENTID_ZHELLIX)
+	Local $zhellix = GemstonesZhellixAgent()
 	Local $foesCount = CountFoesInRangeOfAgent($me, $gemstones_fight_options['fightRange'])
 	; After all waves are finished, Zhellix leaves entrance of citadel area where player is, which makes below check False
 	Return (Not GetIsDead($zhellix) And GetDistance($me, $zhellix) < 1500) Or $foesCount > 0
