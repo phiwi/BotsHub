@@ -44,6 +44,8 @@ Func SharedLootShouldKeepItem($item)
 
 	If $itemType == $ID_TYPE_SHIELD And SharedLootIsKeepableOsShield($item) Then Return True
 
+	If ($itemID == $ID_IRIDESCENT_AEGIS Or $itemID == $ID_IRIDESCENT_AEGIS_COMMAND) And ($req == 8 Or $req == 9) And HasPerfectMods($item) Then Return True
+
 	If SharedLootIsRareShieldSkin($itemID) And IsInscribable($item) Then Return True
 
 	If $req == 9 Then
@@ -75,9 +77,19 @@ Func SharedLootShouldKeepItem($item)
 	If $req == 9 Then
 		Switch $itemType
 			Case $ID_TYPE_AXE, $ID_TYPE_SWORD, $ID_TYPE_HAMMER, $ID_TYPE_BOW
-				If SharedLootHasInherentMod($modStruct, $STRUCT_INHERENT_VAMPIRIC_STRENGTH) Then Return True
-				If SharedLootHasInherentMod($modStruct, $STRUCT_INHERENT_ZEALOUS_STRENGTH) Then Return True
+				If StringInStr($modStruct, $STRUCT_15_DAMAGE) Then
+					If SharedLootHasInherentMod($modStruct, $STRUCT_INHERENT_VAMPIRIC_STRENGTH) Then Return True
+					If SharedLootHasInherentMod($modStruct, $STRUCT_INHERENT_ZEALOUS_STRENGTH) Then Return True
+				EndIf
 		EndSwitch
+	EndIf
+
+	If $itemType == $ID_TYPE_SWORD And $req == 9 And Not IsInscribable($item) And GetRarity($item) == $RARITY_GOLD Then
+		If SharedLootHasInherentMod($modStruct, $STRUCT_5_ENERGY) Then Return True
+	EndIf
+
+	If ($itemID == $ID_SHINOBI_BLADE Or $itemID == $ID_KATANA Or $itemID == $ID_DADAO_SWORD) And $req == 9 And GetRarity($item) == $RARITY_GOLD Then
+		If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_STRENGTH_AND_HONOR) Then Return True
 	EndIf
 
 	If StringInStr($modStruct, $STRUCT_MOD_OF_THE_NECROMANCER) Then
@@ -208,7 +220,7 @@ Func SharedLootShouldSellItem($item)
 	Switch $itemID
 		Case $ID_UNDEAD_BONE, $ID_KRAIT_SKIN, $ID_SENTIENT_VINE, $ID_SKELK_FANG, $ID_SKELK_CLAW, _
 			$ID_SAURIAN_BONE, $ID_BEETLE_EGG, $ID_AMPHIBIAN_TONGUE, $ID_BERSERKER_HORN, $ID_DRAGON_ROOT, _
-			$ID_INCUBUS_WING
+			$ID_INCUBUS_WING, $ID_FUNGAL_ROOT, $ID_CHROMATIC_SCALE, $ID_SPIRITWOOD_PLANK, $ID_PLANT_FIBER
 			Return DllStructGetData($item, 'Value') > 0
 	EndSwitch
 	If IsBlueScroll($itemID) Then Return DllStructGetData($item, 'Value') > 0
