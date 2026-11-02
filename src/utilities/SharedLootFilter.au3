@@ -38,7 +38,7 @@ Func SharedLootShouldKeepItem($item)
 	;~ Green uniques are junk except on the farms that exist to farm them
 	If GetRarity($item) == $RARITY_GREEN Then Return $shared_loot_keep_farmed_greens
 
-	If $itemType == $ID_TYPE_SHIELD And $req == 8 And GetShieldArmor($item) == 16 Then Return True
+	If $itemType == $ID_TYPE_SHIELD And $req == 8 And IsInscribable($item) And GetShieldArmor($item) == 16 Then Return True
 
 	If ($itemID == $ID_DARKWING_DEFENDER Or $itemID == $ID_DARKWING_DEFENDER_TACTICS) And $req == 9 And GetRarity($item) == $RARITY_GOLD Then Return True
 
@@ -63,11 +63,12 @@ Func SharedLootShouldKeepItem($item)
 	Local $modStruct = GetModStruct($item)
 	If Not $modStruct Then Return False
 
-	If $itemType == $ID_TYPE_OFFHAND And $req == 8 And GetFocusEnergy($item) == 12 Then Return True
+	If $itemType == $ID_TYPE_OFFHAND And $req == 8 And IsInscribable($item) And GetFocusEnergy($item) == 12 Then Return True
 	If $itemType == $ID_TYPE_SWORD And $req == 8 And IsMaxStatsForReq($item) Then Return True
 
-	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And Not IsInscribable($item) Then
+	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And ($req == 8 Or $req == 9) And Not IsInscribable($item) Then
 		If SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HCT_IDENTIFIER) And SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HSR_IDENTIFIER) Then Return True
+		If SharedLootHasInherentMod($modStruct, $STRUCT_5_ENERGY) And (SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HCT_IDENTIFIER, 20) Or SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HSR_IDENTIFIER, 20)) Then Return True
 	EndIf
 
 	If $itemType == $ID_TYPE_STAFF And $req == 9 Then
@@ -151,11 +152,11 @@ EndFunc
 
 
 ;~ Half skill recharge and half casting time mods roll 19-20% when tied to one attribute, 9-10% when tied to all spells
-Func SharedLootHasInherentChance($modStruct, $identifier)
+Func SharedLootHasInherentChance($modStruct, $identifier, $minimumChance = 19)
 	Local $mods = StringTrimLeft($modStruct, 2)
 	For $i = 0 To StringLen($mods) / 8 - 1
 		If StringMid($mods, 8 * $i + 5, 4) <> $identifier Then ContinueLoop
-		If Int('0x' & StringMid($mods, 8 * $i + 3, 2)) >= 19 Then Return True
+		If Int('0x' & StringMid($mods, 8 * $i + 3, 2)) >= $minimumChance Then Return True
 	Next
 	Return False
 EndFunc
