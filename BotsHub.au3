@@ -223,6 +223,7 @@ Func BotsHubMain()
 	If $run_mode == 'GUI' Then
 		$gui_enabled = True
 		CreateBotsHubGUI()
+		AdlibRegister('UpdateSharedLootAlert', 500)
 		ApplyConfigToGUI()
 		FillConfigurationCombo()
 		GUISetState(@SW_SHOWNORMAL)
@@ -772,7 +773,7 @@ Func GeneralFarmSetup()
 		SetupTeamUsingGlobalSettings()
 	EndIf
 	If $character_name <> '' Then
-		If $run_options_cache['run.go_offline'] Then
+		If $run_options_cache['run.go_offline'] Or Int(@HOUR) >= 22 Or Int(@HOUR) < 12 Then
 			SetPlayerStatus(0)
 		Else
 			SetPlayerStatus(3)
@@ -1063,6 +1064,7 @@ Func UpdateHeartbeat()
 	Info('Enable GUI order: ' & $enableGUICommand)
 	If Not $gui_enabled And $enableGUICommand Then
 		CreateBotsHubGUI()
+		AdlibRegister('UpdateSharedLootAlert', 500)
 		ApplyConfigToGUI()
 		FillConfigurationCombo()
 		GUISetState(@SW_SHOWNORMAL)

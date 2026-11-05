@@ -18,12 +18,39 @@
 #include '../../lib/Utils.au3'
 
 Global $shared_loot_keep_farmed_greens = False
+Global $shared_loot_gold_value_alert = ''
+Global Const $shared_loot_keeper_armor_structs[] = [ _
+	$STRUCT_ALL_RUNES_SUPERIOR_VIGOR, _
+	$STRUCT_ALL_RUNES_MAJOR_VIGOR, _
+	$STRUCT_MESMER_RUNES_SUPERIOR_DOMINATION_MAGIC, _
+	$STRUCT_MESMER_INSIGNIAS_PRODIGYS, _
+	$STRUCT_RITUALIST_INSIGNIAS_SHAMANS _
+]
 
 
 Func SharedLootShouldKeepItem($item)
+	If Not SharedLootIsKeeper($item) Then Return False
+	SharedLootFlagGoldValueKeeper($item)
+	Return True
+EndFunc
+
+
+;~ Kept items whose merchant value is a multiple of 100 are collector material (x00 GV)
+Func SharedLootFlagGoldValueKeeper($item)
+	Local $value = DllStructGetData($item, 'Value')
+	If $value < 100 Or Mod($value, 100) <> 0 Then Return
+	Local $typeName = $WEAPON_NAMES_FROM_TYPES[DllStructGetData($item, 'Type')]
+	If $typeName == Null Then $typeName = 'Item'
+	$shared_loot_gold_value_alert = $value & ' GV keeper: ' & $typeName & ' q' & GetItemReq($item) & ' (model ' & DllStructGetData($item, 'ModelID') & ')'
+	Info($shared_loot_gold_value_alert)
+EndFunc
+
+
+Func SharedLootIsKeeper($item)
 	Local $itemID = DllStructGetData($item, 'ModelID')
 
 	If IsTome($itemID) Then Return $itemID == $ID_DERVISH_ELITETOME
+	If IsArmorSalvageItem($item) Then Return SharedLootIsKeepableArmor($item)
 	If Not IsWeapon($item) Then Return False
 
 	Local $itemType = DllStructGetData($item, 'type')
@@ -41,6 +68,8 @@ Func SharedLootShouldKeepItem($item)
 	If $itemType == $ID_TYPE_SHIELD And $req == 8 And IsInscribable($item) And GetShieldArmor($item) == 16 Then Return True
 
 	If ($itemID == $ID_DARKWING_DEFENDER Or $itemID == $ID_DARKWING_DEFENDER_TACTICS) And $req == 9 And GetRarity($item) == $RARITY_GOLD Then Return True
+
+	If $itemID == $ID_SUNSPEAR Then Return True
 
 	If $itemType == $ID_TYPE_SHIELD And SharedLootIsKeepableOsShield($item) Then Return True
 
@@ -65,6 +94,11 @@ Func SharedLootShouldKeepItem($item)
 
 	If $itemType == $ID_TYPE_OFFHAND And $req == 8 And IsInscribable($item) And GetFocusEnergy($item) == 12 Then Return True
 	If $itemType == $ID_TYPE_SWORD And $req == 8 And IsMaxStatsForReq($item) Then Return True
+
+	If $itemType == $ID_TYPE_SHIELD Then
+		If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_SHELTERED_BY_FAITH) Then Return True
+		If StringInStr($modStruct, $STRUCT_MOD_OF_DEVOTION) Then Return True
+	EndIf
 
 	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And ($req == 8 Or $req == 9) And Not IsInscribable($item) Then
 		If SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HCT_IDENTIFIER) And SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HSR_IDENTIFIER) Then Return True
@@ -103,6 +137,18 @@ Func SharedLootShouldKeepItem($item)
 	If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_APTITUDE_NOT_ATTITUDE) Then Return True
 	If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_FORGET_ME_NOT) Then Return True
 
+	Return False
+EndFunc
+
+
+;~ Armor carries its rune into the stash, so these five upgrades make a piece worth keeping
+Func SharedLootIsKeepableArmor($item)
+	If GetRarity($item) <> $RARITY_GOLD Then Return False
+	If Not IsIdentified($item) Then Return False
+	Local $modStruct = GetModStruct($item)
+	For $struct In $shared_loot_keeper_armor_structs
+		If StringInStr($modStruct, $struct) Then Return True
+	Next
 	Return False
 EndFunc
 
@@ -221,12 +267,14 @@ Func SharedLootShouldSellItem($item)
 	Switch $itemID
 		Case $ID_UNDEAD_BONE, $ID_KRAIT_SKIN, $ID_SENTIENT_VINE, $ID_SKELK_FANG, $ID_SKELK_CLAW, _
 			$ID_SAURIAN_BONE, $ID_BEETLE_EGG, $ID_AMPHIBIAN_TONGUE, $ID_BERSERKER_HORN, $ID_DRAGON_ROOT, _
-			$ID_INCUBUS_WING, $ID_FUNGAL_ROOT, $ID_CHROMATIC_SCALE, $ID_SPIRITWOOD_PLANK, $ID_PLANT_FIBER
+			$ID_INCUBUS_WING, $ID_FUNGAL_ROOT, $ID_CHROMATIC_SCALE, $ID_SPIRITWOOD_PLANK, $ID_PLANT_FIBER, _
+			$ID_SKREE_WING, $ID_BOLT_OF_CLOTH
 			Return DllStructGetData($item, 'Value') > 0
 	EndSwitch
 	If IsBlueScroll($itemID) Then Return DllStructGetData($item, 'Value') > 0
 	If IsGoldScroll($itemID) Then Return $itemID <> $ID_UW_SCROLL And DllStructGetData($item, 'Value') > 0
 	If IsWeapon($item) Or IsTome($itemID) Then Return Not SharedLootShouldKeepItem($item)
+	If SharedLootShouldKeepItem($item) Then Return False
 	Return DefaultShouldSellItem($item)
 EndFunc
 

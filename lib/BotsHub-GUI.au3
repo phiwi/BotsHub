@@ -123,7 +123,8 @@ Global $gui_label_manualmode, $gui_input_manualmode, $gui_button_manualmode, $gu
 Global $gui_group_runinfos, _
 		$gui_label_runs_text, $gui_label_runs_value, $gui_label_successes_text, $gui_label_successes_value, $gui_label_failures_text, $gui_label_failures_value, $gui_label_successratio_text, $gui_label_successratio_value, _
 		$gui_label_time_text, $gui_label_time_value, $gui_label_timeperrun_text, $gui_label_timeperrun_value, $gui_label_experience_text, $gui_label_experience_value, $gui_label_chests_text, $gui_label_chests_value, _
-		$gui_label_gold_text, $gui_label_gold_value, $gui_label_golditems_text, $gui_label_golditems_value, $gui_label_ectos_text, $gui_label_ectos_value, $gui_label_obsidianshards_text, $gui_label_obsidianshards_value
+		$gui_label_gold_text, $gui_label_gold_value, $gui_label_golditems_text, $gui_label_golditems_value, $gui_label_ectos_text, $gui_label_ectos_value, $gui_label_obsidianshards_text, $gui_label_obsidianshards_value, _
+		$gui_label_sharedlootalert
 Global $gui_group_itemslooted, _
 		$gui_label_lockpicks_text, $gui_label_lockpicks_value, $gui_label_jadebracelets_text, $gui_label_jadebracelets_value, _
 		$gui_label_glacialstones_text, $gui_label_glacialstones_value, $gui_label_destroyercores_text, $gui_label_destroyercores_value, _
@@ -191,13 +192,13 @@ Func CreateBotsHubGUI()
 	_GUICtrlTab_SetBkColor($gui_botshub, $gui_tabs_parent, $COLOR_SILVER)
 	GUICtrlSetOnEvent($gui_tabs_parent, 'GuiTabHandler')
 
-	$gui_console = _GUICtrlRichEdit_Create($gui_botshub, '', 20, 190, 300, 255, BitOR($ES_MULTILINE, $ES_READONLY, $WS_VSCROLL))
+	$gui_console = _GUICtrlRichEdit_Create($gui_botshub, '', 20, 210, 300, 235, BitOR($ES_MULTILINE, $ES_READONLY, $WS_VSCROLL))
 	_GUICtrlRichEdit_SetCharColor($gui_console, $COLOR_WHITE)
 	_GUICtrlRichEdit_SetBkColor($gui_console, $COLOR_BLACK)
 	SetConsole($gui_console)
 
 	; === Run Infos ===
-	$gui_group_runinfos = GUICtrlCreateGroup('Informations', 21, 39, 300, 145)
+	$gui_group_runinfos = GUICtrlCreateGroup('Informations', 21, 39, 300, 165)
 	$gui_label_runs_text = GUICtrlCreateLabel('Runs:', 31, 64, 65, 16)
 	$gui_label_runs_value = GUICtrlCreateLabel('0', 110, 64, 50, 16, $SS_RIGHT)
 	$gui_label_successes_text = GUICtrlCreateLabel('Successes:', 31, 84, 65, 16)
@@ -223,6 +224,10 @@ Func CreateBotsHubGUI()
 	$gui_label_ectos_value = GUICtrlCreateLabel('0', 260, 144, 50, 16, $SS_RIGHT)
 	$gui_label_obsidianshards_text = GUICtrlCreateLabel('Obsidian Shards:', 180, 164, 85, 16)
 	$gui_label_obsidianshards_value = GUICtrlCreateLabel('0', 260, 164, 50, 16, $SS_RIGHT)
+	$gui_label_sharedlootalert = GUICtrlCreateLabel('', 31, 184, 280, 16)
+	GUICtrlSetColor($gui_label_sharedlootalert, $CLR_RED)
+	GUICtrlSetFont($gui_label_sharedlootalert, 8.5, 800)
+	GUICtrlSetState($gui_label_sharedlootalert, $GUI_HIDE)
 	GUICtrlCreateGroup('', -99, -99, 1, 1)
 
 	; === Items Looted ===
@@ -1689,6 +1694,20 @@ EndFunc
 ;~ Update the progress bar to 100%
 Func CompleteGUIFarmProgress()
 	GUICtrlSetData($gui_farmprogress, 100)
+EndFunc
+
+
+;~ Show kept items whose merchant value is a multiple of 100 (100, 200, 300, 400 GV)
+Func UpdateSharedLootAlert()
+	Local Static $blinkOn = False
+	If $gui_label_sharedlootalert == Null Then Return
+	If $shared_loot_gold_value_alert == '' Then Return
+	If GUICtrlRead($gui_label_sharedlootalert) <> $shared_loot_gold_value_alert Then
+		GUICtrlSetData($gui_label_sharedlootalert, $shared_loot_gold_value_alert)
+		GUICtrlSetState($gui_label_sharedlootalert, $GUI_SHOW)
+	EndIf
+	$blinkOn = Not $blinkOn
+	GUICtrlSetColor($gui_label_sharedlootalert, $blinkOn ? $CLR_RED : $CLR_BLACK)
 EndFunc
 #EndRegion Handlers
 #EndRegion GUI
