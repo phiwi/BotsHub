@@ -68,8 +68,6 @@ Func SharedLootIsKeeper($item)
 	;~ Green uniques are junk except on the farms that exist to farm them
 	If GetRarity($item) == $RARITY_GREEN Then Return $shared_loot_keep_farmed_greens
 
-	If $itemType == $ID_TYPE_SHIELD And $req == 8 And IsInscribable($item) And GetShieldArmor($item) == 16 Then Return True
-
 	If ($itemID == $ID_DARKWING_DEFENDER Or $itemID == $ID_DARKWING_DEFENDER_TACTICS) And $req == 9 And GetRarity($item) == $RARITY_GOLD Then Return True
 
 	If $itemID == $ID_SUNSPEAR Then Return True
@@ -87,7 +85,7 @@ Func SharedLootIsKeeper($item)
 				$ID_BRONZE_GUARDIAN_TACTICS, $ID_BRONZE_GUARDIAN_STRENGTH, $ID_BRONZE_GUARDIAN_LEADERSHIP, _
 				$ID_BLACK_HAWKS_LUST, $ID_SCORPIONS_LUST, $ID_SCORPION_BOW, $ID_ITHAS_BOW, $ID_DARKSTEEL_LONGBOW, _
 				$ID_PEACOCKS_WRATH_DOMINATION_MAGIC, $ID_QUICKSILVER_DOMINATION_MAGIC
-				Return True
+				Return HasPerfectMods($item)
 		EndSwitch
 		If $itemID >= $ID_HOURGLASS_STAFF_DOMINATION_MAGIC And $itemID <= $ID_HOURGLASS_STAFF_CHANNELING Then Return True
 	EndIf
@@ -95,8 +93,20 @@ Func SharedLootIsKeeper($item)
 	Local $modStruct = GetModStruct($item)
 	If Not $modStruct Then Return False
 
-	If $itemType == $ID_TYPE_OFFHAND And $req == 8 And IsInscribable($item) And GetFocusEnergy($item) == 12 Then Return True
-	If $itemType == $ID_TYPE_SWORD And $req == 8 And IsMaxStatsForReq($item) Then Return True
+	;~ A wand or focus above q9 stays junk however many mods it carries
+	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And $req > 9 Then Return False
+
+	;~ A gold q8 piece with max stats is worth a stash slot whatever its mods
+	If $req == 8 And GetRarity($item) == $RARITY_GOLD Then
+		Switch $itemType
+			Case $ID_TYPE_OFFHAND
+				If GetFocusEnergy($item) == 12 Then Return True
+			Case $ID_TYPE_SHIELD
+				If GetShieldArmor($item) == 16 Then Return True
+			Case $ID_TYPE_SWORD
+				If IsMaxStatsForReq($item) Then Return True
+		EndSwitch
+	EndIf
 
 	If $itemType == $ID_TYPE_SHIELD Then
 		If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_SHELTERED_BY_FAITH) Then Return True
@@ -271,7 +281,7 @@ Func SharedLootShouldSellItem($item)
 		Case $ID_UNDEAD_BONE, $ID_KRAIT_SKIN, $ID_SENTIENT_VINE, $ID_SKELK_FANG, $ID_SKELK_CLAW, _
 			$ID_SAURIAN_BONE, $ID_BEETLE_EGG, $ID_AMPHIBIAN_TONGUE, $ID_BERSERKER_HORN, $ID_DRAGON_ROOT, _
 			$ID_INCUBUS_WING, $ID_FUNGAL_ROOT, $ID_CHROMATIC_SCALE, $ID_SPIRITWOOD_PLANK, $ID_PLANT_FIBER, _
-			$ID_SKREE_WING, $ID_BOLT_OF_CLOTH
+			$ID_SKREE_WING, $ID_BOLT_OF_CLOTH, $ID_JADE_BRACELET
 			Return DllStructGetData($item, 'Value') > 0
 	EndSwitch
 	If IsBlueScroll($itemID) Then Return DllStructGetData($item, 'Value') > 0
