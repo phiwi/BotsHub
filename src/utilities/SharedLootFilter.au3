@@ -281,7 +281,7 @@ Func SharedLootShouldSellItem($item)
 		Case $ID_UNDEAD_BONE, $ID_KRAIT_SKIN, $ID_SENTIENT_VINE, $ID_SKELK_FANG, $ID_SKELK_CLAW, _
 			$ID_SAURIAN_BONE, $ID_BEETLE_EGG, $ID_AMPHIBIAN_TONGUE, $ID_BERSERKER_HORN, $ID_DRAGON_ROOT, _
 			$ID_INCUBUS_WING, $ID_FUNGAL_ROOT, $ID_CHROMATIC_SCALE, $ID_SPIRITWOOD_PLANK, $ID_PLANT_FIBER, _
-			$ID_SKREE_WING, $ID_BOLT_OF_CLOTH, $ID_JADE_BRACELET
+			$ID_SKREE_WING, $ID_BOLT_OF_CLOTH, $ID_JADE_BRACELET, $ID_BOLT_OF_SILK
 			Return DllStructGetData($item, 'Value') > 0
 	EndSwitch
 	If IsBlueScroll($itemID) Then Return DllStructGetData($item, 'Value') > 0
@@ -304,6 +304,8 @@ Func SharedLootShouldStoreItem($item)
 	If DllStructGetData($item, 'Customized') <> 0 Then Return False
 	If SharedLootShouldKeepItem($item) Then Return True
 	If IsWeapon($item) Then Return False
+	;~ Anything the filter would sell must not end up in the chest before the next sell
+	If SharedLootShouldSellItem($item) Then Return False
 	Return DefaultShouldStoreItem($item)
 EndFunc
 
