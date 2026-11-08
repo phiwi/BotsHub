@@ -286,7 +286,7 @@ Func SharedLootShouldSellItem($item)
 	EndSwitch
 	If IsBlueScroll($itemID) Then Return DllStructGetData($item, 'Value') > 0
 	If IsGoldScroll($itemID) Then Return $itemID <> $ID_UW_SCROLL And DllStructGetData($item, 'Value') > 0
-	If IsWeapon($item) Or IsTome($itemID) Then Return Not SharedLootShouldKeepItem($item)
+	If IsWeapon($item) Then Return Not SharedLootShouldKeepItem($item)
 	If SharedLootShouldKeepItem($item) Then Return False
 	Return DefaultShouldSellItem($item)
 EndFunc

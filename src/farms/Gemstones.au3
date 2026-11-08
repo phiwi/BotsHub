@@ -31,15 +31,6 @@
 ; ==== Constants ====
 ; TODO: rework builds following 26.06.24 nerfs
 Global Const $GEMSTONES_MESMER_SKILLBAR = 'OghkkgKKjIyEz0rA0XR0t41U1kPI'
-;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBCsMz0uI0w7w6whT6gcZuI' ; Water
-;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdUkSFySvSpCMNnC3iwCRfFRLQA' ; Promise Wards 
-;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBDgcqMS7ihD0CkDvCwCfDeDA' ; Air + Wards
-;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgljgwMopS7ihD0CkD+Y1YfDeDA' ; Air + Commmand
-;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OghjwMgsITMTXTVTZObOOO+gRbA' ; Spirits + Rift
-;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBCsMzEyQuocZbZKz6whT6A' ; Shatterstone
-;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBDg6ucSqDkDtl7irDylJRHOA' ; Water + Air
-;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgBDk6yMSIDvDTDHOOioCpD21A' ; Ward Overcast Prot
-;~ Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OghjwMgsITMT7iXTVTtllTfT+gA' ; EVAS + + Techno Spirits
 Global Const $GEMSTONES_ELEMENTALIST_SKILLBAR = 'OgdUow1xQPTqD7i5M7CLQtl21zCA'
 
 
