@@ -1581,6 +1581,8 @@ Func ClearSoOFloor3()
 		MoveTo(-13900, 13500)
 		; Fire traps between 5 6 and 7
 		SoOFlagMoveAggroAndKill(-15250, 15900, '6', $largerSoOAggroRange)
+		;~ The Legionnaire crystal goes off for the Fendi Nin fight no matter what the GUI option says
+		UseSummoningStone(True)
 		Info('Boss fight, go in and move around to make sure its aggroed')
 		SoOFlagMoveAggroAndKill(-16300, 16600, '7', $largerSoOAggroRange)
 		SoOFlagMoveAggroAndKill(-15850, 17500, '8', $largerSoOAggroRange)

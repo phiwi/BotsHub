@@ -93,6 +93,12 @@ Func SharedLootIsKeeper($item)
 	Local $modStruct = GetModStruct($item)
 	If Not $modStruct Then Return False
 
+	;~ These two shield mods are kept unconditionally, whatever the rest of the shield looks like
+	If $itemType == $ID_TYPE_SHIELD Then
+		If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_SHELTERED_BY_FAITH) Then Return True
+		If StringInStr($modStruct, $STRUCT_MOD_OF_DEVOTION) Then Return True
+	EndIf
+
 	;~ A wand or focus above q9 stays junk however many mods it carries
 	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And $req > 9 Then Return False
 
@@ -106,11 +112,6 @@ Func SharedLootIsKeeper($item)
 			Case $ID_TYPE_SWORD
 				If IsMaxStatsForReq($item) Then Return True
 		EndSwitch
-	EndIf
-
-	If $itemType == $ID_TYPE_SHIELD Then
-		If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_SHELTERED_BY_FAITH) Then Return True
-		If StringInStr($modStruct, $STRUCT_MOD_OF_DEVOTION) Then Return True
 	EndIf
 
 	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And ($req == 8 Or $req == 9) And Not IsInscribable($item) Then
@@ -281,7 +282,8 @@ Func SharedLootShouldSellItem($item)
 		Case $ID_UNDEAD_BONE, $ID_KRAIT_SKIN, $ID_SENTIENT_VINE, $ID_SKELK_FANG, $ID_SKELK_CLAW, _
 			$ID_SAURIAN_BONE, $ID_BEETLE_EGG, $ID_AMPHIBIAN_TONGUE, $ID_BERSERKER_HORN, $ID_DRAGON_ROOT, _
 			$ID_INCUBUS_WING, $ID_FUNGAL_ROOT, $ID_CHROMATIC_SCALE, $ID_SPIRITWOOD_PLANK, $ID_PLANT_FIBER, _
-			$ID_SKREE_WING, $ID_BOLT_OF_CLOTH, $ID_JADE_BRACELET, $ID_BOLT_OF_SILK
+			$ID_SKREE_WING, $ID_BOLT_OF_CLOTH, $ID_JADE_BRACELET, $ID_BOLT_OF_SILK, $ID_PLAGUE_IDOL, _
+			$ID_BONE, $ID_KOURNAN_PENDANT
 			Return DllStructGetData($item, 'Value') > 0
 	EndSwitch
 	If IsBlueScroll($itemID) Then Return DllStructGetData($item, 'Value') > 0
