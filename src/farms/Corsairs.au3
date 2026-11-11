@@ -116,23 +116,36 @@ EndFunc
 Func SetupTeamCorsairsFarm()
 	If IsTeamAutoSetup() Then Return $SUCCESS
 
-	Info('Setting up team')
-	LeaveParty()
-	If AddRequiredHero($ID_DUNKORO) == $FAIL Then Return $FAIL
-	If AddHeroByProfession($ID_DERVISH, $ID_MELONNI) == $FAIL Then Return $FAIL
-	If HeroHasTemplate(1, $MOP_CORSAIRS_HERO_SKILLBAR) Then
+	Local $dunkoroIndex = GetHeroNumberByHeroID($ID_DUNKORO)
+	Local $melonniIndex = GetHeroNumberByHeroID($ID_MELONNI)
+	If $dunkoroIndex == Null Or $melonniIndex == Null Or GetHeroCount() <> 2 Then
+		Info('Setting up team')
+		LeaveParty()
+		If AddRequiredHero($ID_DUNKORO) == $FAIL Then Return $FAIL
+		If AddHeroByProfession($ID_DERVISH, $ID_MELONNI) == $FAIL Then Return $FAIL
+		$dunkoroIndex = GetHeroNumberByHeroID($ID_DUNKORO)
+		$melonniIndex = GetHeroNumberByHeroID($ID_MELONNI)
+		If $dunkoroIndex == Null Or $melonniIndex == Null Then
+			Warn('Corsairs team setup: Dunkoro or Melonni missing after re-adding (party=' & GetPartySize() & ', heroes=' & GetHeroCount() & ')')
+			Return $FAIL
+		EndIf
+	Else
+		Info('Corsairs team: Dunkoro and Melonni already in the party, skipping team setup')
+	EndIf
+
+	If HeroHasTemplate($dunkoroIndex, $MOP_CORSAIRS_HERO_SKILLBAR) Then
 		Info('Corsairs Dunkoro: template already loaded, skipping')
 	Else
-		LoadSkillTemplate($MOP_CORSAIRS_HERO_SKILLBAR, 1)
+		LoadSkillTemplate($MOP_CORSAIRS_HERO_SKILLBAR, $dunkoroIndex)
 	EndIf
-	If HeroHasTemplate(2, $DR_CORSAIRS_HERO_SKILLBAR) Then
+	If HeroHasTemplate($melonniIndex, $DR_CORSAIRS_HERO_SKILLBAR) Then
 		Info('Corsairs Melonni: template already loaded, skipping')
 	Else
-		LoadSkillTemplate($DR_CORSAIRS_HERO_SKILLBAR, 2)
+		LoadSkillTemplate($DR_CORSAIRS_HERO_SKILLBAR, $melonniIndex)
 	EndIf
 	RandomSleep(250)
-	DisableHeroSkillSlot(1, $CORSAIRS_MAKE_HASTE)
-	DisableHeroSkillSlot(2, $CORSAIRS_WINNOWING)
+	DisableHeroSkillSlot($dunkoroIndex, $CORSAIRS_MAKE_HASTE)
+	DisableHeroSkillSlot($melonniIndex, $CORSAIRS_WINNOWING)
 	RandomSleep(250)
 	Return $SUCCESS
 EndFunc

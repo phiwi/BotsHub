@@ -40,6 +40,7 @@ Global Const $ID_FROGGY_QUEST = $ID_QUEST_GIRIFFS_WAR
 
 Global Const $FROGGY_FARM_DURATION = 40 * 60 * 1000
 Global Const $MAX_FROGGY_FARM_DURATION = 60 * 60 * 1000
+Global Const $FROGGY_BOSS_SUMMON_RETRY_MS = 65000
 Global Const $FROGGY_HERO_PANELS_TEST_DURATION = 30 * 1000
 Global Const $FROGGY_TEAM_ASSEMBLY_PASSES = 4
 Global Const $FROGGY_TEAM_MISSING_FALLBACK_PASSES = 3
@@ -131,6 +132,8 @@ Global Const $FROGGY_ELEMENTALIST_SLOT7_HERO_TEMPLATE = $FROGGY_ELEMENTALIST_HER
 
 Global $froggy_farm_setup = False
 Global $froggy_no_builds_mode = False
+Global $froggy_boss_summon_sickness_seen = False
+Global $froggy_boss_summon_last_attempt = TimerInit()
 
 ;~ Main method to farm Froggy (no builds variant — preserves custom party and skill bars)
 Func FroggyNoBuildsFarm()
@@ -943,6 +946,9 @@ Func ClearFroggyFloor2()
 	Local $bossAreaPasses = 0
 	Local $bossAreaTimer = TimerInit()
 	Local $lastBossAreaMorale = GetMorale()
+	$froggy_boss_summon_sickness_seen = False
+	$froggy_boss_summon_last_attempt = TimerInit()
+	AdlibRegister('FroggyBossSummonTick', 1000)
 	While Not FroggyIsRunFailed() And Not IsQuestReward($ID_FROGGY_QUEST)
 		If IsPlayerDead() Then
 			CancelAllHeroes()
@@ -960,7 +966,10 @@ Func ClearFroggyFloor2()
 		EndIf
 
 		$bossAreaPasses += 1
-		If CheckStuck('Froggy Floor 2 - Fourth loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then Return $FAIL
+		If CheckStuck('Froggy Floor 2 - Fourth loop', $MAX_FROGGY_FARM_DURATION) == $FAIL Then
+			AdlibUnRegister('FroggyBossSummonTick')
+			Return $FAIL
+		EndIf
 		Info('------------------------------------')
 		Info('Boss area')
 		FroggyWaitUntilPartyAlive()
@@ -968,6 +977,8 @@ Func ClearFroggyFloor2()
 		MoveAggroAndKillInRange(17494, -14149, 'Our enemies will be undone', $largeFroggyAggroRange)
 		MoveAggroAndKillInRange(14641, -15081, 'I live to serve.', $largeFroggyAggroRange)
 		MoveAggroAndKillInRange(13934, -17384, 'The mission is in peril!', $largeFroggyAggroRange)
+		;~ The Legionnaire crystal goes off for the Bogroot fight no matter what the GUI option says
+		UseSummoningStone(True)
 		MoveAggroAndKillInRange(14365, -17681, 'Boss fight', $largeFroggyAggroRange)
 		FlagMoveAggroAndKillInRange(15286, -17662, 'All hail! King of the losers!', $largeFroggyAggroRange)
 		FlagMoveAggroAndKillInRange(15804, -19107, 'Oh fuck its huge', $largeFroggyAggroRange)
@@ -975,9 +986,11 @@ Func ClearFroggyFloor2()
 
 		If $bossAreaPasses >= 12 And TimerDiff($bossAreaTimer) > 240000 Then
 			Warn('Froggy Floor 2: boss area repeated without quest completion, resetting run')
+			AdlibUnRegister('FroggyBossSummonTick')
 			Return $FAIL
 		EndIf
 	WEnd
+	AdlibUnRegister('FroggyBossSummonTick')
 	If FroggyIsRunFailed() Then Return $FAIL
 
 	; Chest
@@ -994,6 +1007,28 @@ Func ClearFroggyFloor2()
 		RandomSleep(5000)
 	Next
 	Return $SUCCESS
+EndFunc
+
+
+Func FroggyBossSummonTick()
+	If IsQuestReward($ID_FROGGY_QUEST) Then Return
+	If FroggyIsRunFailed() Then Return
+	FroggyMaintainBossSummon()
+EndFunc
+
+
+;~ Summoning Sickness lands on the summoner once the ally is gone, so a cleared sickness after
+;~ one we saw means the Legionnaire died. The slow retry covers summons that expire instead.
+Func FroggyMaintainBossSummon()
+	If GetEffectTimeRemaining(GetEffect($ID_SUMMONING_SICKNESS)) > 0 Then
+		$froggy_boss_summon_sickness_seen = True
+		Return
+	EndIf
+	If Not $froggy_boss_summon_sickness_seen And TimerDiff($froggy_boss_summon_last_attempt) < $FROGGY_BOSS_SUMMON_RETRY_MS Then Return
+	If UseSummoningStone(True) Then
+		$froggy_boss_summon_sickness_seen = False
+		$froggy_boss_summon_last_attempt = TimerInit()
+	EndIf
 EndFunc
 
 

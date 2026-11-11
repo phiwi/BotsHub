@@ -68,6 +68,7 @@ Global Const $SOO_PLAYER_SKILLBAR = 'OgBDg6ucSqDkDtl7irDylJRHOA'
 
 Global Const $SOO_FARM_DURATION = 60 * 60 * 1000
 Global Const $MAX_SOO_FARM_DURATION = 80 * 60 * 1000
+Global Const $SOO_BOSS_SUMMON_RETRY_MS = 65000
 Global Const $SOO_TEAM_ASSEMBLY_PASSES = 4
 Global Const $SOO_TEAM_MISSING_FALLBACK_PASSES = 3
 Global Const $SOO_TEAM_OUTPOST_RETRIES = 4
@@ -147,6 +148,8 @@ Global $soo_celerity_only = False
 Global $soo_armor_on_floor3 = False
 Global $soo_no_builds_mode = False
 Global $soo_current_floor = 0
+Global $soo_boss_summon_sickness_seen = False
+Global $soo_boss_summon_last_attempt = TimerInit()
 
 
 ;~ SoO-specific run failure check: fails when player reaches -60% death penalty,
@@ -1550,6 +1553,8 @@ Func ClearSoOFloor3()
 	Local $largerSoOAggroRange = $RANGE_SPELLCAST + 500
 	Local $bossRoomEntryDone = False
 	$soo_floor3_final_fight_conset_uptime = True
+	$soo_boss_summon_sickness_seen = False
+	$soo_boss_summon_last_attempt = TimerInit()
 	AdlibRegister('SoOFinalFightConsetUptimeTick', 1000)
 	While Not SoOIsRunFailed() And Not IsQuestReward($ID_QUEST_LOST_SOULS)
 		If CheckStuck('SoO Floor 3 - Third loop', $MAX_SOO_FARM_DURATION) == $FAIL Then
@@ -1625,9 +1630,25 @@ EndFunc
 
 Func SoOFinalFightConsetUptimeTick()
 	If Not $soo_floor3_final_fight_conset_uptime Then Return
-	If Not IsHardmodeEnabled() Then Return
 	If IsQuestReward($ID_QUEST_LOST_SOULS) Then Return
+	SoOMaintainBossSummon()
+	If Not IsHardmodeEnabled() Then Return
 	SoOUseConset()
+EndFunc
+
+
+;~ Summoning Sickness lands on the summoner once the ally is gone, so a cleared sickness after
+;~ one we saw means the Legionnaire died. The slow retry covers summons that expire instead.
+Func SoOMaintainBossSummon()
+	If GetEffectTimeRemaining(GetEffect($ID_SUMMONING_SICKNESS)) > 0 Then
+		$soo_boss_summon_sickness_seen = True
+		Return
+	EndIf
+	If Not $soo_boss_summon_sickness_seen And TimerDiff($soo_boss_summon_last_attempt) < $SOO_BOSS_SUMMON_RETRY_MS Then Return
+	If UseSummoningStone(True) Then
+		$soo_boss_summon_sickness_seen = False
+		$soo_boss_summon_last_attempt = TimerInit()
+	EndIf
 EndFunc
 
 
