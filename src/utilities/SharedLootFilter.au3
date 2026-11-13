@@ -92,12 +92,6 @@ Func SharedLootIsKeeper($item)
 	Local $modStruct = GetModStruct($item)
 	If Not $modStruct Then Return False
 
-	;~ These two shield mods are kept unconditionally, whatever the rest of the shield looks like
-	If $itemType == $ID_TYPE_SHIELD Then
-		If SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_SHELTERED_BY_FAITH) Then Return True
-		If StringInStr($modStruct, $STRUCT_MOD_OF_DEVOTION) Then Return True
-	EndIf
-
 	;~ A wand or focus above q9 stays junk however many mods it carries
 	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And $req > 9 Then Return False
 

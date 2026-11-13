@@ -48,6 +48,7 @@ Opt('MustDeclareVars', True)
 #include 'lib/Utils-Items_Modstructs.au3'
 #include 'lib/Utils-Shared_Memory.au3'
 #include 'lib/Utils-Storage.au3'
+#include 'lib/Utils-Party.au3'
 #include 'lib/Build_PW_Heroic-Refrain.au3'
 
 #include 'src/farms/Brightclaw.au3'
@@ -346,6 +347,7 @@ Func RunFarmLoop()
 		EndIf
 
 		; Global farm setup
+		If $farm[1] <> 'DumpPartyBuilds' Then DumpPartyBuilds()
 		If Not $global_farm_setup Then GeneralFarmSetup()
 	EndIf
 
@@ -695,6 +697,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Tonic Spammer',				AutomaticTonicConsumer,			5,					30 * 60 * 1000)
 	AddFarmToFarmMap(	'Tests',						RunTests,						0,					2 * 60 * 1000)
 	AddFarmToFarmMap(	'Test Suite',					RunTestSuite,					0,					5 * 60 * 1000)
+	AddFarmToFarmMap(	'Dump Party Builds',			DumpPartyBuilds,				0,					2 * 60 * 1000)
 EndFunc
 
 
