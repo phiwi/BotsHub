@@ -1589,7 +1589,7 @@ Global Const $ID_ICICLE_STAFF_SPAWNING_POWER		= 2389
 
 Global Const $ID_SIGNET_SHIELD_1					= 2419
 Global Const $ID_SIGNET_SHIELD_2					= 2420
-Global Const $ID_SIGNET_SHIELD_3					= 2428
+Global Const $ID_SIGNET_SHIELD_3					= 2421
 
 #Region Envoy Weapons
 ; Green Envoys
@@ -1975,7 +1975,7 @@ Global Const $ID_WOLFS_GREED_CHANNELING					= 2095
 Global Const $ID_BEARS_SLOTH							= 2239
 
 Global Const $ID_HOGS_GLUTTONY_TACTICS					= 2438
-Global Const $ID_HOGS_GLUTTONY_STRENGTH					= 2339
+Global Const $ID_HOGS_GLUTTONY_STRENGTH					= 2439
 Global Const $ID_HOGS_GLUTTONY_LEADERSHIP				= 2440
 
 Global Const $ID_SNAKES_ENVY_SOUL_REAPING				= 2451
