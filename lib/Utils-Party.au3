@@ -22,30 +22,27 @@
 #include 'Utils-Console.au3'
 
 Global Const $PARTY_BASE64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-Global Const $PARTY_PROFESSION_NAMES[] = ['None', 'Warrior', 'Ranger', 'Monk', 'Necromancer', 'Mesmer', 'Elementalist', _
-		'Assassin', 'Ritualist', 'Paragon', 'Dervish']
 
 
-;~ Prints the current party (player + up to 7 heroes) with professions, attribute spread and build code
+;~ Prints the build code of the player and of up to 7 heroes
 Func DumpPartyBuilds()
 	Local $heroCount = GetHeroCount()
 	Info('Party builds (' & $heroCount & ' hero(es))')
-	Local $attributes = PartyAttributeTable(0)
-	Info('[0] Player  ' & PartyProfessionPair(0) & '  ' & PartyAttributeSummary($attributes) & '  ' & PartyBuildCodeWithCheck(0, $attributes))
+	PartyPrintBuildCode(0, 'Player')
 	For $heroIndex = 1 To $heroCount
-		$attributes = PartyAttributeTable($heroIndex)
-		Info('[' & $heroIndex & '] ' & PartyHeroName(PartyHeroCatalogID($heroIndex)) & '  ' & PartyProfessionPair($heroIndex) & _
-				'  ' & PartyAttributeSummary($attributes) & '  ' & PartyBuildCodeWithCheck($heroIndex, $attributes))
+		PartyPrintBuildCode($heroIndex, PartyHeroName(PartyHeroCatalogID($heroIndex)))
 	Next
 	Return $PAUSE
 EndFunc
 
 
-;~ Build code plus the result of feeding that code back into the template comparison
-Func PartyBuildCodeWithCheck($heroIndex, $attributes)
-	Local $code = PartyBuildCode($heroIndex, $attributes)
-	If $code == '' Then Return 'no build code'
-	Return $code & (HeroHasTemplate($heroIndex, $code) ? ' [OK]' : ' [MISMATCH]')
+Func PartyPrintBuildCode($heroIndex, $name)
+	Local $code = PartyBuildCode($heroIndex, PartyAttributeTable($heroIndex))
+	If HeroHasTemplate($heroIndex, $code) Then
+		Out('[' & $heroIndex & '] ' & $name & '  ' & $code, $LVL_NOTICE)
+	Else
+		Out('[' & $heroIndex & '] ' & $name & '  ' & $code & ' [MISMATCH]', $LVL_WARNING)
+	EndIf
 EndFunc
 
 
@@ -83,18 +80,6 @@ Func PartyPrimaryAndSecondary($heroIndex)
 EndFunc
 
 
-Func PartyProfessionPair($heroIndex)
-	Local $professions = PartyPrimaryAndSecondary($heroIndex)
-	Return PartyProfessionName($professions[0]) & '/' & PartyProfessionName($professions[1])
-EndFunc
-
-
-Func PartyProfessionName($professionID)
-	If $professionID == Null Or $professionID < 0 Or $professionID >= UBound($PARTY_PROFESSION_NAMES) Then Return '?'
-	Return $PARTY_PROFESSION_NAMES[$professionID]
-EndFunc
-
-
 ;~ [attribute id, points spent] pairs of the given party index; points are the rune-less values a template stores
 Func PartyAttributeTable($heroIndex)
 	Local $table[UBound($ATTRIBUTES_DOUBLE_ARRAY)][2]
@@ -106,25 +91,6 @@ Func PartyAttributeTable($heroIndex)
 		$table[$row][1] = $level
 	Next
 	Return $table
-EndFunc
-
-
-Func PartyAttributeSummary($attributes)
-	Local $summary = ''
-	For $row = 0 To UBound($attributes) - 1
-		If $attributes[$row][1] <= 0 Then ContinueLoop
-		If $summary <> '' Then $summary &= ', '
-		$summary &= PartyAttributeName($attributes[$row][0]) & ' ' & $attributes[$row][1]
-	Next
-	Return $summary
-EndFunc
-
-
-Func PartyAttributeName($attributeID)
-	For $row = 0 To UBound($ATTRIBUTES_DOUBLE_ARRAY) - 1
-		If $ATTRIBUTES_DOUBLE_ARRAY[$row][0] == $attributeID Then Return $ATTRIBUTES_DOUBLE_ARRAY[$row][1]
-	Next
-	Return 'attribute ' & $attributeID
 EndFunc
 
 

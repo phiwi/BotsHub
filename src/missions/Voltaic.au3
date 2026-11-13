@@ -110,13 +110,75 @@ Global Const $VOLTAIC_SLOT7_HERO_TEMPLATE = $VOLTAIC_HERO_ZHED_TEMPLATE
 
 Global $voltaic_farm_setup = False
 Global $voltaic_no_builds_mode = False
+Global $voltaic_consets_override = ''
+Global $voltaic_forced_conset_missing = False
 
 ;~ Main method to farm Voltaic (no builds variant — preserves custom party and skill bars)
 Func VoltaicNoBuildsFarm()
+	Return VoltaicNoBuildsConsetFarm('')
+EndFunc
+
+
+;~ No builds variant that always pops Essence of Celerity in the dungeon
+Func VoltaicNoBuildsCelerityFarm()
+	Return VoltaicNoBuildsConsetFarm('celerity')
+EndFunc
+
+
+;~ No builds variant that always pops Armor of Salvation in the dungeon
+Func VoltaicNoBuildsArmorFarm()
+	Return VoltaicNoBuildsConsetFarm('armor')
+EndFunc
+
+
+;~ No builds variant that always pops Grail of Might in the dungeon
+Func VoltaicNoBuildsGrailFarm()
+	Return VoltaicNoBuildsConsetFarm('grail')
+EndFunc
+
+
+Func VoltaicNoBuildsConsetFarm($consetsOverride)
 	$voltaic_no_builds_mode = True
+	$voltaic_consets_override = $consetsOverride
+	$voltaic_forced_conset_missing = False
 	Local $result = VoltaicFarm()
 	$voltaic_no_builds_mode = False
+	$voltaic_consets_override = ''
 	Return $result
+EndFunc
+
+
+;~ Pops the variant consumable, bypassing the GUI consumable checkbox
+Func VoltaicUseForcedConset()
+	If $voltaic_consets_override == '' Or $voltaic_forced_conset_missing Then Return
+	Local $consumableID, $effectID, $name
+	Switch $voltaic_consets_override
+		Case 'celerity'
+			$consumableID = $ID_ESSENCE_OF_CELERITY
+			$effectID = $ID_ESSENCE_OF_CELERITY_EFFECT
+			$name = 'Essence of Celerity'
+		Case 'armor'
+			$consumableID = $ID_ARMOR_OF_SALVATION
+			$effectID = $ID_ARMOR_OF_SALVATION_EFFECT
+			$name = 'Armor of Salvation'
+		Case 'grail'
+			$consumableID = $ID_GRAIL_OF_MIGHT
+			$effectID = $ID_GRAIL_OF_MIGHT_EFFECT
+			$name = 'Grail of Might'
+		Case Else
+			Return
+	EndSwitch
+	If GetEffectTimeRemaining(GetEffect($effectID)) > 0 Then Return
+	Info('Voltaic con: using ' & $name)
+	If UseConsumable($consumableID, True) == $FAIL Then $voltaic_forced_conset_missing = True
+EndFunc
+
+
+;~ Keeps the variant consumable and the Legionnaire up in the dungeon, ignoring the GUI checkboxes
+Func VoltaicUseVariantBoosts()
+	VoltaicUseForcedConset()
+	If $voltaic_consets_override == '' Then Return
+	UseSummoningStone(True)
 EndFunc
 
 
@@ -436,7 +498,11 @@ Func VoltaicFarmLoop()
 	Dialog(0x84)
 	RandomSleep(500)
 
-	If IsHardmodeEnabled() Then UseConset()
+	If $voltaic_consets_override <> '' Then
+		VoltaicUseVariantBoosts()
+	ElseIf IsHardmodeEnabled() Then
+		UseConset()
+	EndIf
 
 	Sleep(1000)
 	While Not IsRunFailed() And Not IsAgentInRange(GetMyAgent(), -18500, -8000, $RANGE_LONGBOW)
@@ -448,6 +514,7 @@ Func VoltaicFarmLoop()
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		UseSummoningStone()
+		VoltaicUseVariantBoosts()
 		MoveAggroAndKillInRange(-13500, -15750, 'In front of the door', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-12500, -15000, 'Before the bridge', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-10400, -14800, 'After the bridge', $VS_AGGRO_RANGE)
@@ -468,6 +535,7 @@ Func VoltaicFarmLoop()
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		UseSummoningStone()
+		VoltaicUseVariantBoosts()
 		MoveAggroAndKillInRange(-18500, -11500, 'Pre-Boss group', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-17700, -12500, 'Boss group', $VS_AGGRO_RANGE)
 		MoveAggroAndKillInRange(-17500, -14250, 'Final group', $VS_AGGRO_RANGE)
