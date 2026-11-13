@@ -54,6 +54,24 @@ Func SharedLootIsKeeper($item)
 
 	Local $itemType = DllStructGetData($item, 'type')
 	Local $req = GetItemReq($item)
+	Local $modStruct = GetModStruct($item)
+	If Not $modStruct Then Return False
+
+	;~ Unicorn's Wrath wands share a model ID with a rare shield, so the rare weapon list would keep every one
+	If $itemType == $ID_TYPE_WAND Then
+		Switch $itemID
+			Case $ID_UNICORNS_WRATH_DOMINATION_MAGIC, $ID_UNICORNS_WRATH_FAST_CASTING, $ID_UNICORNS_WRATH_ILLUSION_MAGIC, _
+				$ID_UNICORNS_WRATH_INSPIRATION_MAGIC, $ID_UNICORNS_WRATH_SOUL_REAPING, $ID_UNICORNS_WRATH_ENERGY_STORAGE, _
+				$ID_UNICORNS_WRATH_DIVINE_FAVOR, $ID_UNICORNS_WRATH_COMMUNING
+				If IsInscribable($item) Then
+					Return StringInStr($modStruct, $STRUCT_MOD_OF_THE_NECROMANCER) > 0 _
+						And SharedLootHasInscription($modStruct, $STRUCT_INSCRIPTION_APTITUDE_NOT_ATTITUDE)
+				EndIf
+				Return ($req == 8 Or $req == 9) _
+					And SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HCT_IDENTIFIER) _
+					And SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HSR_IDENTIFIER)
+		EndSwitch
+	EndIf
 
 	;~ Suntouched staffs sit in the rare weapon list but drop far too often to be worth a stash slot
 	If $itemID >= $ID_SUNTOUCHED_STAFF_INSPIRATION And $itemID <= $ID_SUNTOUCHED_STAFF_SPAWNING_POWER Then Return False
@@ -88,9 +106,6 @@ Func SharedLootIsKeeper($item)
 		EndSwitch
 		If $itemID >= $ID_HOURGLASS_STAFF_DOMINATION_MAGIC And $itemID <= $ID_HOURGLASS_STAFF_CHANNELING Then Return True
 	EndIf
-
-	Local $modStruct = GetModStruct($item)
-	If Not $modStruct Then Return False
 
 	;~ A wand or focus above q9 stays junk however many mods it carries
 	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And $req > 9 Then Return False
@@ -277,7 +292,7 @@ Func SharedLootShouldSellItem($item)
 			$ID_INCUBUS_WING, $ID_FUNGAL_ROOT, $ID_CHROMATIC_SCALE, $ID_SPIRITWOOD_PLANK, $ID_PLANT_FIBER, _
 			$ID_SKREE_WING, $ID_BOLT_OF_CLOTH, $ID_JADE_BRACELET, $ID_BOLT_OF_SILK, $ID_PLAGUE_IDOL, _
 			$ID_BONE, $ID_KOURNAN_PENDANT, $ID_STOLEN_GOODS, $ID_SILVER_BULLION_COIN, $ID_DEMONIC_REMAINS, _
-			$ID_TANNED_HIDE_SQUARE
+			$ID_TANNED_HIDE_SQUARE, $ID_VAETTIR_ESSENCE
 			Return DllStructGetData($item, 'Value') > 0
 	EndSwitch
 	If IsBlueScroll($itemID) Then Return DllStructGetData($item, 'Value') > 0
