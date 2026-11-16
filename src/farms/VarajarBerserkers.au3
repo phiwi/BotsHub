@@ -852,9 +852,9 @@ Func VarajarBerserkersAggroAndSpike()
 EndFunc
 
 
-;~ Green is excluded because only Asterius' Scythe drops here, and it is worthless
+;~ Only the green scythe is worth a slot here, the other greens are junk
 Func VarajarBerserkersShouldPickItem($item)
-	If IsWeapon($item) And GetRarity($item) == $RARITY_GREEN Then Return False
+	If IsWeapon($item) And GetRarity($item) == $RARITY_GREEN Then Return DllStructGetData($item, 'Type') == $ID_TYPE_SCYTHE
 	Return DefaultShouldPickItem($item)
 EndFunc
 
