@@ -1526,7 +1526,7 @@
 			},
 			"Scythe": {
 				"Prefix - Snathe": {
-					"Ebon (Earth damage)": false,
+					"Ebon (Earth damage)": true,
 					"Fiery (Fire damage)": false,
 					"Icy (Cold damage)": false,
 					"Shocking (Lightning damage)": false,
@@ -1545,7 +1545,7 @@
 					"Of Defense (Armor +5)": false,
 					"Of Shelter (Armor +7 vs physical damage)": false,
 					"Of Warding (Armor +7 vs elemental damage)": false,
-					"Of Enchanting (Enchantments last 20% longer)": false,
+					"Of Enchanting (Enchantments last 20% longer)": true,
 					"Of The Warrior": false,
 					"Of The Ranger": false,
 					"Of The Necromancer": false,

@@ -25,6 +25,10 @@ Global Const $shared_loot_keeper_armor_structs[] = [ _
 	$STRUCT_MESMER_INSIGNIAS_PRODIGYS, _
 	$STRUCT_RITUALIST_INSIGNIAS_SHAMANS _
 ]
+Global Const $shared_loot_keeper_scythe_structs[] = [ _
+	$STRUCT_MOD_EBON, _
+	$STRUCT_MOD_OF_ENCHANTING _
+]
 
 
 Func SharedLootShouldKeepItem($item)
@@ -71,6 +75,13 @@ Func SharedLootIsKeeper($item)
 					And SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HCT_IDENTIFIER) _
 					And SharedLootHasInherentChance($modStruct, $STRUCT_INHERENT_HSR_IDENTIFIER)
 		EndSwitch
+	EndIf
+
+	;~ A scythe carrying one of these upgrades is worth a stash slot whatever the rest of it looks like
+	If $itemType == $ID_TYPE_SCYTHE Then
+		For $struct In $shared_loot_keeper_scythe_structs
+			If StringInStr($modStruct, $struct) Then Return True
+		Next
 	EndIf
 
 	;~ Suntouched staffs sit in the rare weapon list but drop far too often to be worth a stash slot
