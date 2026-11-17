@@ -78,6 +78,8 @@ Global Const $SOO_SETUP_RECOVERY_COOLDOWN_MS = 12000
 Global Const $SOO_SETUP_RUN_TO_DUNGEON_RETRIES = 3
 Global Const $SOO_RUN_TO_DUNGEON_TIMEOUT_MS = 15 * 60 * 1000
 Global Const $SOO_FLOOR3_SECOND_LOOP_TIMEOUT_MS = 25 * 60 * 1000
+Global Const $SOO_FLOOR1_MAX_RECOVERY_PASSES = 4
+Global Const $SOO_FLOOR1_FIRST_LOOP_TIMEOUT_MS = 20 * 60 * 1000
 Global Const $SOO_CONSECUTIVE_FAIL_GUARD_THRESHOLD = 3
 Global Const $SOO_CONSECUTIVE_FAIL_GUARD_COOLDOWN_MS = 45000
 Global Const $SOO_EXPLORE_ESCAPE_ATTEMPTS = 2
@@ -417,6 +419,20 @@ Func SoOWaitUntilPartyAlive()
 	; at the shrine and heroes are still flagged at fight positions — too far to help.
 	If $wasWiped Or $wasDead Then CancelAllHeroes()
 	WaitUntilPartyAlive()
+EndFunc
+
+
+;~ The shrine is used up after the first visit, so a wipe must not chase whatever NPC is nearest to it
+Func SoOTakeBlessingAt($x, $y, $maxRange = 2000)
+	Local $shrine = GetNearestNPCToCoords($x, $y)
+	If $shrine == Null Then Return False
+	If GetDistanceToPoint($shrine, $x, $y) > $maxRange Then Return False
+	Info('Getting blessing')
+	GoToNPC($shrine)
+	RandomSleep(250)
+	Dialog(0x84)
+	RandomSleep(500)
+	Return True
 EndFunc
 
 
@@ -1043,19 +1059,35 @@ Func ClearSoOFloor1()
 	Info('------------------------------------')
 	Info('First floor')
 	$soo_current_floor = 1
+	Local $floor1BlessingTaken = False
+	Local $floor1RecoveryPasses = 0
+	Local $floor1FirstLoopTimer = TimerInit()
 
 	If IsHardmodeEnabled() Then SoOUseConset()
 	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), 9232, 11483, 1250)
 		If CheckStuck('SoO Floor 1 - First loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
+		If TimerDiff($floor1FirstLoopTimer) > $SOO_FLOOR1_FIRST_LOOP_TIMEOUT_MS Then
+			Error('Bot appears to be stuck at: SoO Floor 1 - First loop. Restarting run.')
+			Return $FAIL
+		EndIf
 		CancelAllHeroes()
 		SoOWaitUntilPartyAlive()
 		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
 		UseMoraleConsumableIfNeeded()
-		Info('Getting blessing')
-		GoToNPC(GetNearestNPCToCoords(-11657, 10465))
-		RandomSleep(250)
-		Dialog(0x84)
-		RandomSleep(500)
+		If $floor1BlessingTaken Then
+			$floor1RecoveryPasses += 1
+			If $floor1RecoveryPasses > $SOO_FLOOR1_MAX_RECOVERY_PASSES Then
+				Warn('SoO floor 1: beacon 2 still not reached after ' & $floor1RecoveryPasses & ' recovery passes, restarting the run')
+				Return $FAIL
+			EndIf
+			Local $me = GetMyAgent()
+			Info('Recovery: respawned at (' & Round(DllStructGetData($me, 'X')) & ', ' & Round(DllStructGetData($me, 'Y')) & '), walking back to the shrine')
+			MoveTo(-11657, 10465)
+		ElseIf SoOTakeBlessingAt(-11657, 10465) Then
+			$floor1BlessingTaken = True
+		Else
+			Warn('SoO floor 1: blessing shrine not reachable, continuing without it')
+		EndIf
 
 		MoveTo(-11750, 9925)
 		SoOMoveAggroAndKill(-10486, 9587, '1', $SOO_AGGRO_RANGE)
@@ -1153,11 +1185,7 @@ Func ClearSoOFloor2()
 		WaitUntilPartyAlive()
 		UseMoraleConsumableIfNeeded()
 		UseSummoningStone()
-		Info('Getting blessing')
-		GoToNPC(GetNearestNPCToCoords(-14076, -19457))
-		RandomSleep(250)
-		Dialog(0x84)
-		RandomSleep(500)
+		SoOTakeBlessingAt(-14076, -19457)
 
 		; Remember wipe count so we can detect new wipes even after party has respawned
 		Local $wipesBefore = $party_failures_count
@@ -1422,11 +1450,7 @@ Func ClearSoOFloor3()
 		SoOWaitUntilPartyAlive()
 		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
 		UseMoraleConsumableIfNeeded()
-		Info('Getting blessing')
-		GoToNPC(GetNearestNPCToCoords(17544, 18810))
-		RandomSleep(250)
-		Dialog(0x84)
-		RandomSleep(500)
+		SoOTakeBlessingAt(17544, 18810)
 
 		SoOFlagMoveAggroAndKill(16337, 16366, '1', $SOO_AGGRO_RANGE)
 		SoOFlagMoveAggroAndKill(16313, 17997, '2', $SOO_AGGRO_RANGE)
