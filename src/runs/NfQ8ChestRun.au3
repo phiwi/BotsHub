@@ -6,7 +6,7 @@
 ;
 ; This module is a faithful, self-contained re-homing of the older standalone
 ; "Q8 Mono ROAD NF 44+ C,H" farm. It intentionally does NOT depend on / mirror
-; the much larger BarbarousShoreSin hero-support engine. Instead it follows the
+; the much larger BarbarousShore hero-support engine. Instead it follows the
 ; proven, leaner BotsHub solo-run pattern (travel -> move to spots -> open
 ; chests -> loot via the hub -> resign back to the outpost), on the original
 ; route coordinates of the former standalone farm.

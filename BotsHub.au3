@@ -112,7 +112,7 @@ Opt('MustDeclareVars', True)
 #include 'src/runs/OutcastRheasCrater.au3'
 #include 'src/runs/Pongmei.au3'
 #include 'src/runs/PongmeiSin.au3'
-#include 'src/runs/BarbarousShoreSin.au3'
+#include 'src/runs/BarbarousShore.au3'
 #include 'src/runs/NfQ8ChestRun.au3'
 #include 'src/runs/Tasca.au3'
 #include 'src/runs/WajjunBazar.au3'
@@ -647,7 +647,7 @@ Func FillFarmMap()
 	AddFarmToFarmMap(	'Rhea''s Crater',				OutcastRheasCraterChestFarm,		5,					$OUTCAST_RHEAS_CRATER_FARM_DURATION)
 	AddFarmToFarmMap(	'Pongmei',						PongmeiChestFarm,				5,					$PONGMEI_FARM_DURATION)
 	AddFarmToFarmMap(	'Pongmei Sin',					PongmeiSinChestFarm,				5,					$PONGMEI_SIN_FARM_DURATION)
-	AddFarmToFarmMap(	'Barbarous Shore Sin',			BarbarousShoreSinChestFarm,		5,					$BARBAROUS_SHORE_SIN_FARM_DURATION)
+	AddFarmToFarmMap(	'Barbarous Shore',			BarbarousShoreChestFarm,		5,					$BARBAROUS_SHORE_FARM_DURATION)
 	AddFarmToFarmMap(	'NF Q8 Chest Run',			NfQ8ChestFarm,				5,					$NFQ8_CHESTRUNNER_FARM_DURATION)
 	AddFarmToFarmMap(	'Brightclaw',							BrightclawFarm,					5,					5 * 60 * 1000)
 	AddFarmToFarmMap(	'Wingstorm',							WingstormFarm,					5,					$WINGSTORM_RUN_TIMEOUT_MS)
