@@ -148,8 +148,8 @@ EndFunc
 Func FroggyFarm()
 	Local $defaultShouldPickItem = $default_move_aggro_kill_options['shouldPickItem']
 	Local $flagShouldPickItem = $flag_move_aggro_kill_options['shouldPickItem']
-	$default_move_aggro_kill_options['shouldPickItem'] = FroggyShouldPickItem
-	$flag_move_aggro_kill_options['shouldPickItem'] = FroggyShouldPickItem
+	$default_move_aggro_kill_options['shouldPickItem'] = SharedLootShouldPickMoneyOnly
+	$flag_move_aggro_kill_options['shouldPickItem'] = SharedLootShouldPickMoneyOnly
 
 	Local $result = $SUCCESS
 	If Not $froggy_farm_setup And SetupFroggyFarm() == $FAIL Then
@@ -919,7 +919,7 @@ Func ClearFroggyFloor2()
 		MoveAggroAndKillInRange(16841, -5619, 'Keyboss', $FROGGY_AGGRO_RANGE)
 
 		RandomSleep(500)
-		PickUpItems(Null, FroggyShouldPickItem)
+		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
 
 		Info('Open dungeon door')
 		ClearTarget()
@@ -1003,7 +1003,7 @@ Func ClearFroggyFloor2()
 		TargetNearestItem()
 		ActionInteract()
 		RandomSleep(2500)
-		PickUpItems(Null, FroggyShouldPickItem)
+		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
 		RandomSleep(5000)
 	Next
 	Return $SUCCESS
@@ -1032,7 +1032,3 @@ Func FroggyMaintainBossSummon()
 EndFunc
 
 
-Func FroggyShouldPickItem($item)
-	If GetRarity($item) == $RARITY_GREEN Then Return False
-	Return DefaultShouldPickItem($item)
-EndFunc

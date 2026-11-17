@@ -45,10 +45,12 @@ Global Const $SOO_AGGRO_RANGE = $RANGE_SPELLCAST + 350
 Global $soo_move_aggro_options
 $soo_move_aggro_options = CloneMap($default_move_aggro_kill_options)
 $soo_move_aggro_options['approachBeforeFight'] = True
+$soo_move_aggro_options['shouldPickItem'] = SharedLootShouldPickMoneyOnly
 
 Global $soo_flag_move_aggro_options
 $soo_flag_move_aggro_options = CloneMap($flag_move_aggro_kill_options)
 $soo_flag_move_aggro_options['approachBeforeFight'] = True
+$soo_flag_move_aggro_options['shouldPickItem'] = SharedLootShouldPickMoneyOnly
 
 Func SoOMoveAggroAndKill($x, $y, $log = '', $range = $SOO_AGGRO_RANGE)
 	$soo_move_aggro_options['fightRange'] = $range
@@ -275,24 +277,35 @@ EndFunc
 ;~ Main method to farm SoO
 Func SoOFarm()
 	Local $result = $FAIL
+	Local $defaultShouldPickItem = $default_move_aggro_kill_options['shouldPickItem']
+	Local $flagShouldPickItem = $flag_move_aggro_kill_options['shouldPickItem']
+	$default_move_aggro_kill_options['shouldPickItem'] = SharedLootShouldPickMoneyOnly
+	$flag_move_aggro_kill_options['shouldPickItem'] = SharedLootShouldPickMoneyOnly
+
 	SoOForceOutpostRecoveryIfNeeded()
+	Local $ready = True
 	If Not $soo_farm_setup Then
 		Local $setupResult = SetupSoOFarm()
 		If $setupResult <> $SUCCESS Then
 			SoOHandleRunFailure('setup failed')
-			If $setupResult == $PAUSE Then Return $PAUSE
-			Return $FAIL
+			$result = ($setupResult == $PAUSE) ? $PAUSE : $FAIL
+			$ready = False
 		EndIf
 	Else
 		SoOHasEnoughConsets()
 	EndIf
 
-	$result = SoOFarmLoop()
-	If $result == $SUCCESS Then
-		SoOHandleRunSuccess()
-	Else
-		SoOHandleRunFailure('run failed')
+	If $ready Then
+		$result = SoOFarmLoop()
+		If $result == $SUCCESS Then
+			SoOHandleRunSuccess()
+		Else
+			SoOHandleRunFailure('run failed')
+		EndIf
 	EndIf
+
+	$default_move_aggro_kill_options['shouldPickItem'] = $defaultShouldPickItem
+	$flag_move_aggro_kill_options['shouldPickItem'] = $flagShouldPickItem
 	Return $result
 EndFunc
 
@@ -1070,7 +1083,7 @@ Func ClearSoOFloor1()
 		; too close to walls
 		SoOMoveAggroAndKill(7300, 12200, '', $SOO_AGGRO_RANGE)
 		SoOMoveAggroAndKill(6300, 10400, 'Killing boss for key', $SOO_AGGRO_RANGE)
-		PickUpItems()
+		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
 		SoOMoveAggroAndKill(11200, 13900, '1', $SOO_AGGRO_RANGE)
 		; Poison trap between 1 and 2
 		FanFlagHeroes()
@@ -1353,7 +1366,7 @@ Func ClearSoOFloor2()
 		If $party_failures_count > $wipesBefore Then ContinueLoop
 		MoveAggroAndKillInRange(-6481, -2668, '18', $PLAYER_AGGRO_RANGE)
 		If $party_failures_count > $wipesBefore Then ContinueLoop
-		PickUpItems()
+		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
 		MoveAggroAndKillInRange(-9000, -4350, '19', $PLAYER_AGGRO_RANGE)
 		If $party_failures_count > $wipesBefore Then ContinueLoop
 		; Poison trap between 19 and 20
@@ -1529,7 +1542,7 @@ Func ClearSoOFloor3()
 		SoOMoveAggroAndKill(-11600, 2400, '14', $SOO_AGGRO_RANGE)
 		SoOMoveAggroAndKill(-10000, 3000, '15', $SOO_AGGRO_RANGE)
 
-		PickUpItems()
+		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
 
 		SoOMoveAggroAndKill(-9200, 6000, '16', $SOO_AGGRO_RANGE)
 
@@ -1604,11 +1617,7 @@ Func ClearSoOFloor3()
 
 	CancelAllHeroes()
 
-	; Fendi's boss chest can contain 2 items (gold/green weapons and rare
-	; materials like Onyx/Diamonds). Green weapons are worth less than the
-	; inventory slot they take for the next run, so they stay on the ground.
-	; Items spawn with a short animation delay, so we do multiple PickUpItems
-	; passes with 1s gaps to catch all of them.
+	; Chest items spawn with a short animation delay, so we need several passes
 	MoveTo(-15800, 16950)
 	Info('Opening Fendis chest')
 	TargetNearestItem()
@@ -1616,15 +1625,10 @@ Func ClearSoOFloor3()
 	RandomSleep(3000)
 
 	For $pass = 1 To 4
-		PickUpItems(Null, SoOShouldPickChestItem)
+		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
 		RandomSleep(1000)
 	Next
 	Return $SUCCESS
-EndFunc
-
-
-Func SoOShouldPickChestItem($item)
-	Return GetRarity($item) <> $RARITY_GREEN And DefaultShouldPickItem($item)
 EndFunc
 
 

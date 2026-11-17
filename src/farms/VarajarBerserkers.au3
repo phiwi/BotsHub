@@ -843,19 +843,12 @@ Func VarajarBerserkersAggroAndSpike()
 	Info('Spike killed ' & $foesKilled & ' foes')
 
 	; Loot immediately after the spike - do not wait for stragglers, they can kill us
-	PickUpItems(Null, VarajarBerserkersShouldPickItem)
+	PickUpItems(Null)
 
 	; Success = survived AND the spike actually cleared the ball. A run where the
 	; ball never formed (0 kills) must not inflate the success ratio.
 	If Not IsPlayerAlive() Then Return False
 	Return $foesKilled >= $VB_MIN_KILLS_FOR_SUCCESS
-EndFunc
-
-
-;~ Only the green scythe is worth a slot here, the other greens are junk
-Func VarajarBerserkersShouldPickItem($item)
-	If IsWeapon($item) And GetRarity($item) == $RARITY_GREEN Then Return DllStructGetData($item, 'Type') == $ID_TYPE_SCYTHE
-	Return DefaultShouldPickItem($item)
 EndFunc
 
 
@@ -883,7 +876,7 @@ Func VarajarBerserkersFarmLoop()
 
 	Info('Picking up loot')
 	RandomSleep(1000)
-	PickUpItems(Null, VarajarBerserkersShouldPickItem)
+	PickUpItems(Null)
 
 	ResignAndReturnToOutpost($ID_OLAFSTEAD)
 
