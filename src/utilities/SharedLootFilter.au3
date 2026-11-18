@@ -139,7 +139,8 @@ Func SharedLootIsKeeper($item)
 
 	If ($itemID == $ID_IRIDESCENT_AEGIS Or $itemID == $ID_IRIDESCENT_AEGIS_COMMAND) And ($req == 8 Or $req == 9) And HasPerfectMods($item) Then Return True
 
-	If SharedLootIsRareShieldSkin($itemID) And IsInscribable($item) Then Return True
+	;~ An inscribable rare skin is only worth a slot at q9, the inscription is swappable either way
+	If SharedLootIsRareShieldSkin($itemID) And $req == 9 And IsInscribable($item) Then Return True
 
 	If $req == 9 Then
 		Switch $itemID
