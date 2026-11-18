@@ -119,6 +119,9 @@ Func SharedLootIsKeeper($item)
 	;~ Suntouched staffs sit in the rare weapon list but drop far too often to be worth a stash slot
 	If $itemID >= $ID_SUNTOUCHED_STAFF_INSPIRATION And $itemID <= $ID_SUNTOUCHED_STAFF_SPAWNING_POWER Then Return False
 
+	;~ Moldavite staffs are rare but we never sell them, so they keep nothing but a slot
+	If $itemID >= $ID_MOLDAVITE_STAFF_INSPIRATION And $itemID <= $ID_MOLDAVITE_STAFF_SPAWNING_POWER Then Return False
+
 	If $MAP_ULTRA_RARE_WEAPONS[$itemID] <> Null Then Return True
 
 	If $itemID == $ID_GLACIAL_BLADE Or $itemID == $ID_GLACIAL_BLADES Then Return True
