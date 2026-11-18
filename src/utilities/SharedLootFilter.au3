@@ -157,15 +157,15 @@ Func SharedLootIsKeeper($item)
 	;~ A wand or focus above q9 stays junk however many mods it carries
 	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And $req > 9 Then Return False
 
-	;~ A gold q8 piece with max stats is worth a stash slot whatever its mods
-	If $req == 8 And GetRarity($item) == $RARITY_GOLD Then
+	;~ A q8 focus or shield with max stats sells well at any rarity once it carries an inscription slot
+	If $req == 8 Then
 		Switch $itemType
 			Case $ID_TYPE_OFFHAND
 				If GetFocusEnergy($item) == 12 Then Return True
 			Case $ID_TYPE_SHIELD
 				If GetShieldArmor($item) == 16 Then Return True
 			Case $ID_TYPE_SWORD
-				If IsMaxStatsForReq($item) Then Return True
+				If GetRarity($item) == $RARITY_GOLD And IsMaxStatsForReq($item) Then Return True
 		EndSwitch
 	EndIf
 

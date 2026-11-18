@@ -701,6 +701,11 @@ Func CheckPickupWeapon($weaponItem)
 	If $weaponRarity == $RARITY_RED Then Return True
 	If $weaponRarity == $RARITY_GRAY Then Return False
 	If $weaponRarity <> $RARITY_WHITE And IsLowReqMaxStats($weaponItem) Then Return True
+	;~ A q8 focus or shield shows its max stats only once identified, so it is worth the slot unseen
+	If $weaponRarity <> $RARITY_WHITE And $weaponRarity <> $RARITY_GREEN Then
+		Local $lowReqType = DllStructGetData($weaponItem, 'Type')
+		If ($lowReqType == $ID_TYPE_OFFHAND Or $lowReqType == $ID_TYPE_SHIELD) And GetItemReq($weaponItem) == 8 Then Return True
+	EndIf
 	Local $itemID = DllStructGetData($weaponItem, 'ModelID')
 	If $weaponRarity <> $RARITY_WHITE And $RARE_WEAPONS_TO_PICK[$itemID] <> Null And IsMaxStatsForReq($weaponItem) Then Return True
 
