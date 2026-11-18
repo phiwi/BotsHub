@@ -920,6 +920,7 @@ Func ClearFroggyFloor2()
 
 		RandomSleep(500)
 		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
+		SharedLootCollectDungeonKey(16841, -5619, 'Froggy')
 
 		Info('Open dungeon door')
 		ClearTarget()

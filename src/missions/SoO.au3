@@ -1116,6 +1116,7 @@ Func ClearSoOFloor1()
 		SoOMoveAggroAndKill(7300, 12200, '', $SOO_AGGRO_RANGE)
 		SoOMoveAggroAndKill(6300, 10400, 'Killing boss for key', $SOO_AGGRO_RANGE)
 		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
+		SharedLootCollectDungeonKey(6300, 10400, 'SoO floor 1')
 		SoOMoveAggroAndKill(11200, 13900, '1', $SOO_AGGRO_RANGE)
 		; Poison trap between 1 and 2
 		FanFlagHeroes()
@@ -1567,6 +1568,7 @@ Func ClearSoOFloor3()
 		SoOMoveAggroAndKill(-10000, 3000, '15', $SOO_AGGRO_RANGE)
 
 		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
+		SharedLootCollectDungeonKey(-10000, 3000, 'SoO floor 3')
 
 		SoOMoveAggroAndKill(-9200, 6000, '16', $SOO_AGGRO_RANGE)
 

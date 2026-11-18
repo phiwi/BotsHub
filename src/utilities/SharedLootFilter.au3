@@ -33,10 +33,47 @@ Func SharedLootShouldKeepItem($item)
 	Return True
 EndFunc
 
-;~ Farms whose every drop is vendor trash still want the loose gold
+;~ Farms whose every drop is vendor trash still want the loose gold and every dungeon key
 Func SharedLootShouldPickMoneyOnly($item)
+	If SharedLootIsKey($item) Then Return True
 	If DllStructGetData($item, 'ModelID') <> $ID_MONEY Then Return False
 	Return DefaultShouldPickItem($item)
+EndFunc
+
+
+;~ Keys are the one drop a dungeon cannot run without, so they ignore every loot rule
+Func SharedLootIsKey($item)
+	Return DllStructGetData($item, 'Type') == $ID_TYPE_KEY Or IsKey(DllStructGetData($item, 'ModelID'))
+EndFunc
+
+
+;~ Lockpicks are keys too, so they must not count as the boss key
+Func SharedLootHasDungeonKey()
+	For $bagIndex = 1 To $bags_count
+		Local $bagSize = DllStructGetData(GetBag($bagIndex), 'Slots')
+		For $slot = 1 To $bagSize
+			Local $item = GetItemBySlot($bagIndex, $slot)
+			If Not SharedLootIsKey($item) Then ContinueLoop
+			If DllStructGetData($item, 'ModelID') == $ID_LOCKPICK Then ContinueLoop
+			Return True
+		Next
+	Next
+	Return False
+EndFunc
+
+
+;~ A key can roll a step away from the kill, so walk back over the spot until it is in the bag
+Func SharedLootCollectDungeonKey($x, $y, $context)
+	If SharedLootHasDungeonKey() Then Return True
+	Warn($context & ': no dungeon key in the bag yet, walking back over the kill spot')
+	For $attempt = 1 To 3
+		MoveTo($x, $y)
+		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
+		RandomSleep(300)
+		If SharedLootHasDungeonKey() Then Return True
+	Next
+	Error($context & ': dungeon key still missing after walking back, the run will stall at the door')
+	Return False
 EndFunc
 
 
