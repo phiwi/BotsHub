@@ -34,7 +34,7 @@ Global Const $BARBAROUS_SHORE_CHESTRUN_INFORMATIONS = 'Assassin Barbarous Shore 
 	& 'Permanent cover:' & @CRLF _
 	& '- 1 Deadly Paradox + 2 Shadow Form for spell immunity' & @CRLF _
 	& '- 3 Dwarven Stability as stance upkeep' & @CRLF _
-	& '- 4 Dark Escape, 6 Dash fills its cooldown' & @CRLF _
+	& '- 4 Dark Escape only after a fresh Deadly Paradox + Shadow Form cycle' & @CRLF _
 	& '- 7 Death''s Charge and 8 Heart of Shadow for emergency healing'
 Global Const $BARBAROUS_SHORE_FARM_DURATION = (8 * 60) * 1000
 
@@ -44,7 +44,6 @@ Global Const $BARBAROUS_SHORE_SHADOWFORM = 2
 Global Const $BARBAROUS_SHORE_DWARVEN_STABILITY = 3
 Global Const $BARBAROUS_SHORE_DARK_ESCAPE = 4
 Global Const $BARBAROUS_SHORE_I_AM_UNSTOPPABLE = 5
-Global Const $BARBAROUS_SHORE_DASH = 6
 Global Const $BARBAROUS_SHORE_DEATHS_CHARGE = 7
 Global Const $BARBAROUS_SHORE_HEART_OF_SHADOW = 8
 
@@ -129,7 +128,10 @@ Global Const $BARBAROUS_SHORE_PORTAL_PATH[][] = [ _
 ]
 
 Global Const $BARBAROUS_SHORE_OUTPOST_RETURN[2] = [-14062, 18220]
+Global Const $BARBAROUS_SHORE_REZONE_DEEP[2] = [-14500, 18540]
+Global Const $BARBAROUS_SHORE_REZONE_ATTEMPTS = 3
 
+Global $barbarous_shore_dark_escape_pending = False
 Global $barbarous_shore_farm_setup = False
 Global $barbarous_shore_support_enabled = False
 Global $barbarous_shore_next_mh_tick = 0
@@ -366,10 +368,13 @@ Func BarbarousShoreRezoneCampHojanu()
 	RandomSleep(1500)
 	If Not WaitMapLoading($ID_BARBAROUS_SHORE, 10000, 500) Then Return False
 
-	Move($BARBAROUS_SHORE_OUTPOST_RETURN[0], $BARBAROUS_SHORE_OUTPOST_RETURN[1])
-	RandomSleep(1500)
-	If Not WaitMapLoading($ID_CAMP_HOJANU, 10000, 500) Then Return False
-	Return SupportTeamStabilizeAfterTravel($ID_CAMP_HOJANU, 10000, 250)
+	MoveTo($BARBAROUS_SHORE_OUTPOST_RETURN[0], $BARBAROUS_SHORE_OUTPOST_RETURN[1])
+	For $attempt = 1 To $BARBAROUS_SHORE_REZONE_ATTEMPTS
+		MoveTo($BARBAROUS_SHORE_REZONE_DEEP[0], $BARBAROUS_SHORE_REZONE_DEEP[1])
+		RandomSleep(500)
+		If WaitMapLoading($ID_CAMP_HOJANU, 6000, 500) Then Return SupportTeamStabilizeAfterTravel($ID_CAMP_HOJANU, 10000, 250)
+	Next
+	Return False
 EndFunc
 
 
@@ -571,6 +576,7 @@ Func BarbarousShoreMaintainShadowForm()
 		WEnd
 		If IsRecharged($BARBAROUS_SHORE_DEADLY_PARADOX) Then
 			UseSkill($BARBAROUS_SHORE_DEADLY_PARADOX)
+			$barbarous_shore_dark_escape_pending = True
 			BarbarousShoreLogSF('dp_cast', GetEffectTimeRemaining($ID_SHADOW_FORM), GetEnergy(), 'ctx=move')
 		Else
 			BarbarousShoreLogSF('dp_skip_recharge', GetEffectTimeRemaining($ID_SHADOW_FORM), GetEnergy(), 'ctx=move')
@@ -594,13 +600,10 @@ Func BarbarousShoreMaintainBuffs()
 		WEnd
 	EndIf
 
-	;~ Only one stance can run at a time, so Dash fills the Dark Escape cooldown and never overlaps it
-	If GetEffect($ID_DARK_ESCAPE) == Null And GetEffect($ID_DASH) == Null Then
-		If IsRecharged($BARBAROUS_SHORE_DARK_ESCAPE) Then
-			If GetEnergy() >= 5 Then UseSkill($BARBAROUS_SHORE_DARK_ESCAPE)
-		ElseIf IsRecharged($BARBAROUS_SHORE_DASH) And GetEnergy() >= 5 Then
-			UseSkill($BARBAROUS_SHORE_DASH)
-		EndIf
+	;~ Deadly Paradox has done its job once Shadow Form is cast, so Dark Escape takes the stance slot right away
+	If $barbarous_shore_dark_escape_pending Then
+		If IsRecharged($BARBAROUS_SHORE_DARK_ESCAPE) And GetEnergy() >= 5 Then UseSkill($BARBAROUS_SHORE_DARK_ESCAPE)
+		$barbarous_shore_dark_escape_pending = False
 	EndIf
 
 	If GetEffect($ID_CRIPPLED) <> Null And IsRecharged($BARBAROUS_SHORE_I_AM_UNSTOPPABLE) _
