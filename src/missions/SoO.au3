@@ -151,6 +151,9 @@ Global $soo_last_conset_timer = TimerInit()
 Global $soo_celerity_only = False
 Global $soo_armor_on_floor3 = False
 Global $soo_no_builds_mode = False
+Global $soo_no_cons_mode = False
+Global $soo_legionnaire_crystal_mode = False
+Global $soo_celerity_last_floor_only = False
 Global $soo_current_floor = 0
 Global $soo_boss_summon_sickness_seen = False
 Global $soo_boss_summon_last_attempt = TimerInit()
@@ -199,6 +202,36 @@ Func SoOCelerityOnlyNoBuildsFarm()
 	Local $result = SoOFarmNoBuilds()
 	$soo_celerity_only = False
 	$soo_no_builds_mode = False
+	Return $result
+EndFunc
+
+
+;~ Main method to farm SoO with the current builds, Legionnaire on every floor and Essence only on the last floor
+Func SoOCelerityLastFloorNoBuildsFarm()
+	$soo_celerity_only = True
+	$soo_armor_on_floor3 = False
+	$soo_no_builds_mode = True
+	$soo_legionnaire_crystal_mode = True
+	$soo_celerity_last_floor_only = True
+	Local $result = SoOFarmNoBuilds()
+	$soo_celerity_only = False
+	$soo_armor_on_floor3 = False
+	$soo_no_builds_mode = False
+	$soo_legionnaire_crystal_mode = False
+	$soo_celerity_last_floor_only = False
+	Return $result
+EndFunc
+
+
+;~ Main method to farm SoO without build loading and without any conset
+Func SoONoBuildsFarm()
+	$soo_no_builds_mode = True
+	$soo_no_cons_mode = True
+	$soo_legionnaire_crystal_mode = True
+	Local $result = SoOFarmNoBuilds()
+	$soo_no_builds_mode = False
+	$soo_no_cons_mode = False
+	$soo_legionnaire_crystal_mode = False
 	Return $result
 EndFunc
 
@@ -330,7 +363,15 @@ Func SoOResetConsetCounters()
 EndFunc
 
 
+;~ Hard Mode always consets, and the celerity-last-floor variant wants its Essence in Normal Mode too once floor 3 starts
+Func SoOConsetsActive()
+	Return IsHardmodeEnabled() Or ($soo_celerity_last_floor_only And $soo_current_floor >= 3)
+EndFunc
+
+
 Func SoOUseConset()
+	If $soo_no_cons_mode Then Return
+	If $soo_celerity_last_floor_only And $soo_current_floor < 3 Then Return
 	If TimerDiff($soo_last_conset_timer) < 3000 Then Return
 	$soo_last_conset_timer = TimerInit()
 	If Not $soo_celerity_only Then
@@ -360,12 +401,23 @@ Func SoOUseConset()
 EndFunc
 
 
+;~ The no-builds variant opens every floor with a Legionnaire, so it does not depend on the GUI summon checkbox
+Func SoODeployLegionnaireCrystal()
+	If Not $soo_legionnaire_crystal_mode Then Return
+	UseSummoningStone(True, $ID_LEGIONNAIRE_SUMMONING_CRYSTAL)
+EndFunc
+
+
 Func SoOLogConsetSummary()
 	Info('SoO con summary: Grails=' & $soo_grails_used & '  Armors=' & $soo_armors_used & '  Essences=' & $soo_essences_used)
 EndFunc
 
 
 Func SoOHasEnoughConsets()
+	If $soo_no_cons_mode Then
+		Info('SoO no builds: running without Grail, Armor and Essence')
+		Return True
+	EndIf
 	; SoO always uses consets in Hard Mode, regardless of the GUI checkbox
 	If Not $run_options_cache['run.use_consets'] And Not IsHardmodeEnabled() Then
 		Info('SoO con: consets disabled (HM off, checkbox off)')
@@ -1060,11 +1112,12 @@ Func ClearSoOFloor1()
 	Info('------------------------------------')
 	Info('First floor')
 	$soo_current_floor = 1
+	SoODeployLegionnaireCrystal()
 	Local $floor1BlessingTaken = False
 	Local $floor1RecoveryPasses = 0
 	Local $floor1FirstLoopTimer = TimerInit()
 
-	If IsHardmodeEnabled() Then SoOUseConset()
+	If SoOConsetsActive() Then SoOUseConset()
 	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), 9232, 11483, 1250)
 		If CheckStuck('SoO Floor 1 - First loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		If TimerDiff($floor1FirstLoopTimer) > $SOO_FLOOR1_FIRST_LOOP_TIMEOUT_MS Then
@@ -1073,7 +1126,7 @@ Func ClearSoOFloor1()
 		EndIf
 		CancelAllHeroes()
 		SoOWaitUntilPartyAlive()
-		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
+		If SoOConsetsActive() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
 		UseMoraleConsumableIfNeeded()
 		If $floor1BlessingTaken Then
 			$floor1RecoveryPasses += 1
@@ -1178,7 +1231,8 @@ EndFunc
 Func ClearSoOFloor2()
 	Info('------------------------------------')
 	Info('Second floor')
-	If IsHardmodeEnabled() Then SoOUseConset()
+	If SoOConsetsActive() Then SoOUseConset()
+	SoODeployLegionnaireCrystal()
 
 	Local $firstRoomfirstTime = True
 	Local $braziersLit = False
@@ -1445,12 +1499,13 @@ Func ClearSoOFloor3()
 	Info('------------------------------------')
 	Info('Third floor')
 	$soo_current_floor = 3
+	SoODeployLegionnaireCrystal()
 
 	While Not SoOIsRunFailed() And Not IsAgentInRange(GetMyAgent(), 1100, 7100, 1250)
 		If CheckStuck('SoO Floor 3 - First loop', $MAX_SOO_FARM_DURATION) == $FAIL Then Return $FAIL
 		CancelAllHeroes()
 		SoOWaitUntilPartyAlive()
-		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
+		If SoOConsetsActive() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
 		UseMoraleConsumableIfNeeded()
 		SoOTakeBlessingAt(17544, 18810)
 
@@ -1481,7 +1536,7 @@ Func ClearSoOFloor3()
 			Return $FAIL
 		EndIf
 		SoOWaitUntilPartyAlive()
-		If IsHardmodeEnabled() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
+		If SoOConsetsActive() And Not IsQuestReward($ID_QUEST_LOST_SOULS) Then SoOUseConset()
 		UseMoraleConsumableIfNeeded()
 
 		If $soo_floor3_torch_sequence_done Then
@@ -1612,7 +1667,7 @@ Func ClearSoOFloor3()
 			RandomSleep(200)
 			ContinueLoop
 		EndIf
-		If IsHardmodeEnabled() Then SoOUseConset()
+		If SoOConsetsActive() Then SoOUseConset()
 
 		Info('Boss room')
 		UseMoraleConsumableIfNeeded()
@@ -1663,7 +1718,7 @@ Func SoOFinalFightConsetUptimeTick()
 	If Not $soo_floor3_final_fight_conset_uptime Then Return
 	If IsQuestReward($ID_QUEST_LOST_SOULS) Then Return
 	SoOMaintainBossSummon()
-	If Not IsHardmodeEnabled() Then Return
+	If Not SoOConsetsActive() Then Return
 	SoOUseConset()
 EndFunc
 
