@@ -33,23 +33,6 @@ Func SharedLootShouldKeepItem($item)
 	Return True
 EndFunc
 
-;~ Farms whose every drop is vendor trash still want the loose gold and every dungeon key
-Func SharedLootShouldPickMoneyOnly($item)
-	If SharedLootIsKey($item) Then Return True
-	If DllStructGetData($item, 'ModelID') <> $ID_MONEY Then Return False
-	Return DefaultShouldPickItem($item)
-EndFunc
-
-
-;~ Boss chests pay for the run, so their loot is picked even when the farm runs on the money-only rule
-Func SharedLootShouldPickChestItem($item)
-	If SharedLootIsKey($item) Then Return True
-	If IsRareMaterial($item) Then Return True
-	If IsWeapon($item) Then Return GetRarity($item) <> $RARITY_WHITE And GetRarity($item) <> $RARITY_GRAY
-	Return DefaultShouldPickItem($item)
-EndFunc
-
-
 ;~ Keys are the one drop a dungeon cannot run without, so they ignore every loot rule
 Func SharedLootIsKey($item)
 	Return DllStructGetData($item, 'Type') == $ID_TYPE_KEY Or IsKey(DllStructGetData($item, 'ModelID'))
@@ -77,7 +60,7 @@ Func SharedLootCollectDungeonKey($x, $y, $context)
 	Warn($context & ': no dungeon key in the bag yet, walking back over the kill spot')
 	For $attempt = 1 To 3
 		MoveTo($x, $y)
-		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
+		PickUpItems()
 		RandomSleep(300)
 		If SharedLootHasDungeonKey() Then Return True
 	Next
