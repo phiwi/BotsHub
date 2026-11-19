@@ -41,6 +41,15 @@ Func SharedLootShouldPickMoneyOnly($item)
 EndFunc
 
 
+;~ Boss chests pay for the run, so their loot is picked even when the farm runs on the money-only rule
+Func SharedLootShouldPickChestItem($item)
+	If SharedLootIsKey($item) Then Return True
+	If IsRareMaterial($item) Then Return True
+	If IsWeapon($item) Then Return GetRarity($item) <> $RARITY_WHITE And GetRarity($item) <> $RARITY_GRAY
+	Return DefaultShouldPickItem($item)
+EndFunc
+
+
 ;~ Keys are the one drop a dungeon cannot run without, so they ignore every loot rule
 Func SharedLootIsKey($item)
 	Return DllStructGetData($item, 'Type') == $ID_TYPE_KEY Or IsKey(DllStructGetData($item, 'ModelID'))

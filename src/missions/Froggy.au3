@@ -1006,7 +1006,7 @@ Func ClearFroggyFloor2()
 		TargetNearestItem()
 		ActionInteract()
 		RandomSleep(2500)
-		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
+		PickUpItems(Null, SharedLootShouldPickChestItem)
 		RandomSleep(5000)
 	Next
 	Return $SUCCESS

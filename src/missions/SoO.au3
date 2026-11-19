@@ -1652,7 +1652,7 @@ Func ClearSoOFloor3()
 	RandomSleep(3000)
 
 	For $pass = 1 To 4
-		PickUpItems(Null, SharedLootShouldPickMoneyOnly)
+		PickUpItems(Null, SharedLootShouldPickChestItem)
 		RandomSleep(1000)
 	Next
 	Return $SUCCESS
