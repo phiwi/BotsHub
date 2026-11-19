@@ -100,7 +100,9 @@ EndFunc
 
 
 Func MinisterialCommendationsSinFarm()
-    If Not $ministerial_commendations_sin_farm_setup Then SetupMinisterialCommendationsSinFarm()
+    If Not $ministerial_commendations_sin_farm_setup Then
+        If SetupMinisterialCommendationsSinFarm() == $FAIL Then Return $FAIL
+    EndIf
 
     Local $result = MinisterialCommendationsSinFarmLoop()
     If GetMapType() <> $ID_OUTPOST Then
@@ -159,7 +161,10 @@ Func SetupMinisterialCommendationsSinFarm()
 
     SetupPlayerMinisterialCommendationsSinFarm()
     If Not $commendations_sin_no_builds_mode Then
-        SetupTeamMinisterialCommendationsSinFarm()
+        If SetupTeamMinisterialCommendationsSinFarm() == $FAIL Then
+            Warn('Custom Ministerial: fixed team setup failed, aborting instead of entering with a partial party')
+            Return $FAIL
+        EndIf
     Else
         Info('MinisterialCommendationsSin no-builds: skipping hero team and build setup')
         Info('MinisterialCommendationsSin no-builds: preserving custom party (' & GetPartySize() & ' members, ' & GetHeroCount() & ' heroes)')
@@ -272,10 +277,13 @@ Func CommendationsCustomTryAddHero($heroID, $heroName, $expectedSize)
     For $i = 1 To 6
         If GetHeroNumberByHeroID($heroID) <> Null Then Return $SUCCESS
         AddHero($heroID)
-        RandomSleep(420)
-        If GetPartySize() >= $expectedSize Then Return $SUCCESS
+        Local $waitTimer = TimerInit()
+        While TimerDiff($waitTimer) < 1500
+            RandomSleep(120)
+            If GetHeroNumberByHeroID($heroID) <> Null Or GetPartySize() >= $expectedSize Then Return $SUCCESS
+        WEnd
     Next
-    Warn('Custom Ministerial: could not add hero ' & $heroName & '. Party size=' & GetPartySize())
+    Warn('Custom Ministerial: could not add hero ' & $heroName & '. Party size=' & GetPartySize() & ', heroes=' & GetHeroCount())
     Return $FAIL
 EndFunc
 
