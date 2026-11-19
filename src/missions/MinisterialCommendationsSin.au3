@@ -43,6 +43,7 @@ Global Const $COMMENDATIONS_SIN_SKILL_SHADOW_REFUGE = 6
 Global Const $COMMENDATIONS_SIN_SKILL_SOLDIERS_SPEED = 7
 Global Const $COMMENDATIONS_SIN_SKILL_EBON_BATTLE_STANDARD_OF_HONOR = 8
 Global Const $COMMENDATIONS_SIN_MAX_SPIKE_WAIT_MS = 22000
+Global Const $COMMENDATIONS_SIN_SPIKE_EMERGENCY_HP = 350
 Global Const $COMMENDATIONS_SIN_FAST_RESET_ENABLED = True
 Global Const $COMMENDATIONS_SIN_FAST_RESIGN_SLEEP_MS = 400
 Global Const $COMMENDATIONS_SIN_FAST_AFTER_RETURN_SLEEP_MS = 400
@@ -608,6 +609,12 @@ Func WaitForPurityBallCustom()
     Local $ping = GetPing()
     Local $spikeWaitTimer = TimerInit()
     While IsPlayerAlive() And TimerDiff($deadlock) < 75000 And (Not IsFurthestMobInBallCustom() Or GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK) < 130)
+        Local $meHealth = GetHealth()
+        If $meHealth < $COMMENDATIONS_SIN_SPIKE_EMERGENCY_HP Then
+            LogIntoFileCustom('Ball wait emergency spike at ' & Round($meHealth) & ' hp (foes=' & $foesCount & ', wwAdr=' & GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK) & ')')
+            ExitLoop
+        EndIf
+
         If TimerDiff($spikeWaitTimer) >= $COMMENDATIONS_SIN_MAX_SPIKE_WAIT_MS Then
             LogIntoFileCustom('Ball wait forced engage at ' & Round(TimerDiff($spikeWaitTimer) / 1000) & 's (foes=' & $foesCount & ', wwAdr=' & GetSkillbarSkillAdrenaline($COMMENDATIONS_SIN_SKILL_WHIRLWIND_ATTACK) & ')')
             ExitLoop
