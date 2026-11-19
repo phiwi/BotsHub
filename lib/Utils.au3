@@ -611,6 +611,10 @@ Func FindAndOpenChests($range = $RANGE_EARSHOT, $survivalFunction = Null, $block
 			;Final solution, caution, chest is considered as signpost by game client
 			GoToSignpostSafely($agent, $survivalFunction, $blockedFunction)
 			If IsPlayerDead() Then Return
+			If GetDistance(GetMyAgent(), $agent) > 350 Then
+				Warn('Chest could not be reached - leaving it closed instead of popping it from a distance')
+				ContinueLoop
+			EndIf
 			RandomSleep(200)
 			OpenChest()
 			RandomSleep(1000)
