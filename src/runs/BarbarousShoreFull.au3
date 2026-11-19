@@ -81,7 +81,6 @@ Global Const $BARBAROUS_SHORE_FULL_SF_LOGGING = True
 
 ;~ Perma Shadow Form, same rhythm as Focus Hanaku: request Shadow Form, then slip Deadly Paradox into its cast time
 Global Const $BARBAROUS_SHORE_FULL_SF_DP_MIN_ENERGY = 20
-Global Const $BARBAROUS_SHORE_FULL_DP_AFTER_SF_DELAY_MS = 500
 Global Const $BARBAROUS_SHORE_FULL_SF_QUEUE_RETRY_MS = 250
 Global Const $BARBAROUS_SHORE_FULL_IAU_MIN_ENERGY = 5
 Global Const $BARBAROUS_SHORE_FULL_DWARVEN_STABILITY_CAST_MS = 800
@@ -245,6 +244,12 @@ Global Const $BARBAROUS_SHORE_FULL_REZONE_DEEP[2] = [-14500, 18540]
 Global Const $BARBAROUS_SHORE_FULL_REZONE_ATTEMPTS = 3
 
 Global $barbarous_shore_full_dark_escape_pending = False
+Global Const $BARBAROUS_SHORE_FULL_LOG_HEARTBEAT_MS = 1000
+Global $barbarous_shore_full_log_file = ''
+Global $barbarous_shore_full_log_handle = -1
+Global $barbarous_shore_full_log_timer = 0
+Global $barbarous_shore_full_log_heartbeat_timer = 0
+
 Global $barbarous_shore_full_farm_setup = False
 Global $barbarous_shore_full_support_enabled = False
 Global $barbarous_shore_full_next_mh_tick = 0
@@ -264,9 +269,11 @@ Global $barbarous_shore_full_portal_anchor_y = 0
 
 Func BarbarousShoreFullChestFarm()
 	If Not $barbarous_shore_full_farm_setup Then SetupBarbarousShoreFullChestFarm()
+	BarbarousShoreFullLogInit()
 
 	GoToBarbarousShoreFull()
 	Local $result = BarbarousShoreFullChestFarmLoop()
+	BarbarousShoreFullLogClose()
 	ResignAndReturnToOutpost($ID_CAMP_HOJANU)
 	Return $result
 EndFunc
@@ -433,7 +440,48 @@ Func BarbarousShoreFullLogTiming($label, $timer)
 EndFunc
 
 
+;~ Skill state per event and per heartbeat, same shape as the Focus Hanaku log
+Func BarbarousShoreFullLogInit()
+	$barbarous_shore_full_log_file = @ScriptDir & '/logs/barbarous_full_debug-' & GetCharacterName() & '.csv'
+	$barbarous_shore_full_log_handle = FileOpen($barbarous_shore_full_log_file, $FO_OVERWRITE + $FO_CREATEPATH + $FO_UTF8)
+	$barbarous_shore_full_log_timer = TimerInit()
+	$barbarous_shore_full_log_heartbeat_timer = TimerInit()
+	Info('BarbarousShoreFull CSV: ' & $barbarous_shore_full_log_file)
+	If $barbarous_shore_full_log_handle == -1 Then Return
+	FileWriteLine($barbarous_shore_full_log_handle, 'time_ms;event;energy;hp;x;y;sf_ms;sf_up;casting;dp_ms;de_ms;ds_ms;sf_ready;dp_ready;de_ready;ds_ready;note')
+EndFunc
+
+
+Func BarbarousShoreFullLogClose()
+	If $barbarous_shore_full_log_handle == -1 Then Return
+	FileClose($barbarous_shore_full_log_handle)
+	$barbarous_shore_full_log_handle = -1
+EndFunc
+
+
+Func BarbarousShoreFullLogHeartbeat()
+	If TimerDiff($barbarous_shore_full_log_heartbeat_timer) < $BARBAROUS_SHORE_FULL_LOG_HEARTBEAT_MS Then Return
+	BarbarousShoreFullLogWrite('tick')
+	$barbarous_shore_full_log_heartbeat_timer = TimerInit()
+EndFunc
+
+
+Func BarbarousShoreFullLogWrite($eventName, $note = '')
+	If $barbarous_shore_full_log_handle == -1 Then Return
+	Local $me = GetMyAgent()
+	FileWriteLine($barbarous_shore_full_log_handle, Int(TimerDiff($barbarous_shore_full_log_timer)) & ';' & $eventName & ';' & Round(GetEnergy(), 1) & ';' & Round(DllStructGetData($me, 'HealthPercent')) & ';' & _
+		Round(DllStructGetData($me, 'X')) & ';' & Round(DllStructGetData($me, 'Y')) & ';' & _
+		GetEffectTimeRemaining($ID_SHADOW_FORM) & ';' & (GetEffect($ID_SHADOW_FORM) <> Null) & ';' & IsCasting($me) & ';' & _
+		GetEffectTimeRemaining($ID_DEADLY_PARADOX) & ';' & _
+		GetEffectTimeRemaining($ID_DARK_ESCAPE) & ';' & GetEffectTimeRemaining($ID_DWARVEN_STABILITY) & ';' & _
+		IsRecharged($BARBAROUS_SHORE_FULL_SHADOWFORM) & ';' & IsRecharged($BARBAROUS_SHORE_FULL_DEADLY_PARADOX) & ';' & _
+		IsRecharged($BARBAROUS_SHORE_FULL_DARK_ESCAPE) & ';' & IsRecharged($BARBAROUS_SHORE_FULL_DWARVEN_STABILITY) & ';' & $note)
+	FileFlush($barbarous_shore_full_log_handle)
+EndFunc
+
+
 Func BarbarousShoreFullLogSF($eventName, $sfRemaining = -1, $energy = -1, $extra = '')
+	BarbarousShoreFullLogWrite($eventName, $extra)
 	If Not $BARBAROUS_SHORE_FULL_SF_LOGGING Then Return
 	Local $msg = 'Barbarous SF: ' & $eventName
 	If $sfRemaining >= 0 Then $msg &= ';sf=' & Int($sfRemaining)
@@ -684,22 +732,18 @@ EndFunc
 ;~ Perma Shadow Form: request Shadow Form and slip Deadly Paradox into its cast time
 Func BarbarousShoreFullMaintainShadowForm()
 	Local Static $sfQueueTimer = 0
-	If IsRecharged($BARBAROUS_SHORE_FULL_SHADOWFORM) And GetEnergy() >= $BARBAROUS_SHORE_FULL_SF_DP_MIN_ENERGY _
-		And ($sfQueueTimer == 0 Or TimerDiff($sfQueueTimer) > $BARBAROUS_SHORE_FULL_SF_QUEUE_RETRY_MS) Then
-		UseSkill($BARBAROUS_SHORE_FULL_SHADOWFORM)
-		$sfQueueTimer = TimerInit()
-		Local $dpTimer = TimerInit()
-		While IsPlayerAlive() And TimerDiff($dpTimer) < $BARBAROUS_SHORE_FULL_DP_AFTER_SF_DELAY_MS
-			Sleep(10)
-		WEnd
-		If IsRecharged($BARBAROUS_SHORE_FULL_DEADLY_PARADOX) Then
-			UseSkill($BARBAROUS_SHORE_FULL_DEADLY_PARADOX)
-			$barbarous_shore_full_dark_escape_pending = True
-			BarbarousShoreFullLogSF('dp_cast', GetEffectTimeRemaining($ID_SHADOW_FORM), GetEnergy(), 'ctx=move')
-		Else
-			BarbarousShoreFullLogSF('dp_skip_recharge', GetEffectTimeRemaining($ID_SHADOW_FORM), GetEnergy(), 'ctx=move')
-		EndIf
-	EndIf
+	If Not IsRecharged($BARBAROUS_SHORE_FULL_SHADOWFORM) Or GetEnergy() < $BARBAROUS_SHORE_FULL_SF_DP_MIN_ENERGY Then Return GetEffect($ID_SHADOW_FORM) <> Null
+	If $sfQueueTimer <> 0 And TimerDiff($sfQueueTimer) <= $BARBAROUS_SHORE_FULL_SF_QUEUE_RETRY_MS Then Return GetEffect($ID_SHADOW_FORM) <> Null
+
+	;~ Deadly Paradox first guarantees it is already up when Shadow Form finishes casting
+	Local $paradoxReady = IsRecharged($BARBAROUS_SHORE_FULL_DEADLY_PARADOX)
+	If $paradoxReady Then UseSkill($BARBAROUS_SHORE_FULL_DEADLY_PARADOX)
+	UseSkill($BARBAROUS_SHORE_FULL_SHADOWFORM)
+	$sfQueueTimer = TimerInit()
+	;~ Dark Escape follows every Shadow Form cast, not only the ones Deadly Paradox could speed up
+	$barbarous_shore_full_dark_escape_pending = True
+	BarbarousShoreFullLogSF('dp_sf', -1, Round(GetEnergy(), 1), 'ctx=move;dp=' & ($paradoxReady ? 1 : 0))
+
 	Return GetEffect($ID_SHADOW_FORM) <> Null
 EndFunc
 
@@ -707,21 +751,31 @@ EndFunc
 ;~ Shadow Form, Dwarven Stability, Dark Escape and the cripple cleaner; skills 6 to 8 are backup only
 Func BarbarousShoreFullMaintainBuffs()
 	If IsPlayerDead() Then Return
+	BarbarousShoreFullLogHeartbeat()
 	If Not BarbarousShoreFullMaintainShadowForm() Then Return
 
 	;~ Dwarven Stability stretches the stance but needs a 0.5s cast, so let it land before touching the stance
 	If GetEffect($ID_DWARVEN_STABILITY) == Null And IsRecharged($BARBAROUS_SHORE_FULL_DWARVEN_STABILITY) And GetEnergy() >= 5 Then
 		UseSkill($BARBAROUS_SHORE_FULL_DWARVEN_STABILITY)
+		BarbarousShoreFullLogSF('ds_cast', -1, Round(GetEnergy(), 1), 'ctx=buff')
 		Local $stabilityTimer = TimerInit()
 		While GetEffect($ID_DWARVEN_STABILITY) == Null And TimerDiff($stabilityTimer) < $BARBAROUS_SHORE_FULL_DWARVEN_STABILITY_CAST_MS
 			Sleep(20)
 		WEnd
 	EndIf
 
-	;~ Deadly Paradox has done its job once Shadow Form is cast, so Dark Escape takes the stance slot right away
-	If $barbarous_shore_full_dark_escape_pending Then
-		If IsRecharged($BARBAROUS_SHORE_FULL_DARK_ESCAPE) And GetEnergy() >= 5 Then UseSkill($BARBAROUS_SHORE_FULL_DARK_ESCAPE)
-		$barbarous_shore_full_dark_escape_pending = False
+	;~ Dark Escape is a stance too: it may only take the slot once the Shadow Form and Dwarven Stability casts are done
+	If $barbarous_shore_full_dark_escape_pending And Not IsCasting(GetMyAgent()) Then
+		If Not IsRecharged($BARBAROUS_SHORE_FULL_DARK_ESCAPE) Then
+			BarbarousShoreFullLogSF('de_skip_recharge', -1, Round(GetEnergy(), 1), 'ctx=buff')
+			$barbarous_shore_full_dark_escape_pending = False
+		ElseIf GetEnergy() >= 5 Then
+			UseSkill($BARBAROUS_SHORE_FULL_DARK_ESCAPE)
+			BarbarousShoreFullLogSF('de_cast', -1, Round(GetEnergy(), 1), 'ctx=buff')
+			$barbarous_shore_full_dark_escape_pending = False
+		Else
+			BarbarousShoreFullLogSF('de_skip_energy', -1, Round(GetEnergy(), 1), 'ctx=buff')
+		EndIf
 	EndIf
 
 	If GetEffect($ID_CRIPPLED) <> Null And IsRecharged($BARBAROUS_SHORE_FULL_I_AM_UNSTOPPABLE) _
@@ -744,17 +798,24 @@ Func BarbarousShoreFullTryBreakBodyblock($targetX, $targetY)
 	Local $startX = DllStructGetData($me, 'X')
 	Local $startY = DllStructGetData($me, 'Y')
 
+	;~ Dark Escape only needs an instant and 5 energy, so it goes before the escape skills burn that energy
+	If $barbarous_shore_full_dark_escape_pending And GetEnergy() >= 5 Then Return False
+
 	If IsRecharged($BARBAROUS_SHORE_FULL_HEART_OF_SHADOW) And GetEnergy() >= 5 Then
 		Local $npc = GetNPCInTheBackBarbarousShoreFull($targetX, $targetY)
 		If $npc == Null Then $npc = $me
 		UseSkill($BARBAROUS_SHORE_FULL_HEART_OF_SHADOW, $npc)
+		BarbarousShoreFullLogWrite('hos_break')
 		RandomSleep(100)
 	EndIf
 	If IsRecharged($BARBAROUS_SHORE_FULL_DEATHS_CHARGE) And GetEnergy() >= 5 Then
 		Local $chargeTarget = GetTargetForDeathsChargeBarbarousShoreFull($targetX, $targetY)
 		If $chargeTarget <> Null Then
 			UseSkill($BARBAROUS_SHORE_FULL_DEATHS_CHARGE, $chargeTarget)
+			BarbarousShoreFullLogWrite('dc_break')
 			RandomSleep(100)
+		Else
+			BarbarousShoreFullLogWrite('dc_no_target')
 		EndIf
 	EndIf
 
@@ -772,7 +833,9 @@ Func BarbarousShoreFullTryBreakBodyblock($targetX, $targetY)
 
 	$me = GetMyAgent()
 	If $me == Null Then Return False
-	Return ComputeDistance($startX, $startY, DllStructGetData($me, 'X'), DllStructGetData($me, 'Y')) >= 120
+	Local $freed = ComputeDistance($startX, $startY, DllStructGetData($me, 'X'), DllStructGetData($me, 'Y')) >= 120
+	If Not $freed Then BarbarousShoreFullLogWrite('break_failed')
+	Return $freed
 EndFunc
 
 
@@ -807,12 +870,21 @@ Func GetNPCInTheBackBarbarousShoreFull($x, $y)
 EndFunc
 
 
-Func GetTargetForDeathsChargeBarbarousShoreFull($x, $y, $leadDistance = 700)
+;~ Farthest foe still inside teleport range that is meaningfully closer to the goal
+Func GetTargetForDeathsChargeBarbarousShoreFull($x, $y, $leadDistance = 300)
 	Local $me = GetMyAgent()
 	Local $foes = GetFoesInRangeOfAgent($me, $RANGE_SPELLCAST)
 	If Not IsArray($foes) Or UBound($foes) <= 0 Then Return Null
+	Local $myDistanceToGoal = GetDistanceToPoint($me, $x, $y)
+	Local $bestFoe = Null
+	Local $bestDistance = 0
 	For $foe In $foes
-		If (GetDistanceToPoint($me, $x, $y) - GetDistanceToPoint($foe, $x, $y)) > $leadDistance Then Return $foe
+		If ($myDistanceToGoal - GetDistanceToPoint($foe, $x, $y)) < $leadDistance Then ContinueLoop
+		Local $foeDistance = GetDistance($me, $foe)
+		If $foeDistance > $bestDistance Then
+			$bestDistance = $foeDistance
+			$bestFoe = $foe
+		EndIf
 	Next
-	Return Null
+	Return $bestFoe
 EndFunc
