@@ -700,6 +700,7 @@ Func CheckPickupWeapon($weaponItem)
 	Local $weaponRarity = GetRarity($weaponItem)
 	If $weaponRarity == $RARITY_RED Then Return True
 	If $weaponRarity == $RARITY_GRAY Then Return False
+	If $weaponRarity == $RARITY_GREEN And $shared_loot_skip_green_weapons Then Return False
 	If $weaponRarity <> $RARITY_WHITE And IsLowReqMaxStats($weaponItem) Then Return True
 	;~ A q8 focus or shield shows its max stats only once identified, so it is worth the slot unseen
 	If $weaponRarity <> $RARITY_WHITE And $weaponRarity <> $RARITY_GREEN Then

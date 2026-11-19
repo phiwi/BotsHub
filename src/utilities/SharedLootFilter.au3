@@ -18,6 +18,7 @@
 #include '../../lib/Utils.au3'
 
 Global $shared_loot_keep_farmed_greens = False
+Global $shared_loot_skip_green_weapons = False
 Global $shared_loot_gold_value_alert = ''
 Global Const $shared_loot_keeper_armor_structs[] = [ _
 	$STRUCT_ALL_RUNES_SUPERIOR_VIGOR, _
