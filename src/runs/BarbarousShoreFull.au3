@@ -92,6 +92,7 @@ Global Const $BARBAROUS_SHORE_FULL_WAYPOINT_TIMEOUT_MS = 45000
 Global Const $BARBAROUS_SHORE_FULL_ROUTE_TIMEOUT_MS = 25 * 60 * 1000
 Global Const $BARBAROUS_SHORE_FULL_BLOCKED_TICKS_BEFORE_UNSTUCK = 3
 Global Const $BARBAROUS_SHORE_FULL_BYPASS_SIDE_STEP = 520
+Global Const $BARBAROUS_SHORE_FULL_RESUME_LOOKAHEAD = 8
 Global Const $BARBAROUS_SHORE_FULL_TIMING_LOG = True
 Global Const $BARBAROUS_SHORE_FULL_SKIP_HERO_TEMPLATE_LOAD = False
 Global Const $BARBAROUS_SHORE_FULL_EXPAND_HERO_PANELS = True
@@ -666,7 +667,8 @@ Func BarbarousShoreFullChestFarmLoop()
 	Local $openedChests = 0
 	Local $spotCount = UBound($BARBAROUS_SHORE_FULL_ROUTE_WAYPOINTS)
 	Local $routeTimer = TimerInit()
-	For $i = 0 To $spotCount - 1
+	Local $i = 0
+	While $i < $spotCount
 		If IsPlayerDead() Then
 			Warn('Barbarous full run: player dead, aborting run for resign/restart')
 			Return $FAIL
@@ -680,17 +682,42 @@ Func BarbarousShoreFullChestFarmLoop()
 		If BarbarousShoreFullRunTo($BARBAROUS_SHORE_FULL_ROUTE_WAYPOINTS[$i][0], $BARBAROUS_SHORE_FULL_ROUTE_WAYPOINTS[$i][1]) == $FAIL Then
 			If IsPlayerDead() Then Return $FAIL
 			Warn('Barbarous full run: spot ' & ($i + 1) & ' blocked, skipping it')
+			$i += 1
 			ContinueLoop
 		EndIf
 
 		If FindAndOpenChests($BARBAROUS_SHORE_FULL_CHEST_OPEN_RANGE, DefendWhileOpeningChestsBarbarousShoreFull) Then
 			$openedChests += 1
 			Info('Opened chest #' & $openedChests & ' at spot ' & ($i + 1))
+			$i = BarbarousShoreFullResumeSpot($i)
+		Else
+			$i += 1
 		EndIf
-	Next
+	WEnd
 
 	Info('Opened ' & $openedChests & ' chest(s) on the full route')
 	Return IsPlayerAlive() ? $SUCCESS : $FAIL
+EndFunc
+
+
+;~ Rejoin the route at the nearest of the coming spots, so a chest detour never walks the route backwards
+Func BarbarousShoreFullResumeSpot($fromIndex)
+	Local $me = GetMyAgent()
+	If $me == Null Then Return $fromIndex + 1
+	Local $spotCount = UBound($BARBAROUS_SHORE_FULL_ROUTE_WAYPOINTS)
+	Local $best = $fromIndex + 1
+	If $best >= $spotCount Then Return $best
+	Local $bestDistance = GetDistanceToPoint($me, $BARBAROUS_SHORE_FULL_ROUTE_WAYPOINTS[$best][0], $BARBAROUS_SHORE_FULL_ROUTE_WAYPOINTS[$best][1])
+	Local $last = $fromIndex + $BARBAROUS_SHORE_FULL_RESUME_LOOKAHEAD
+	If $last > $spotCount - 1 Then $last = $spotCount - 1
+	For $k = $best + 1 To $last
+		Local $distance = GetDistanceToPoint($me, $BARBAROUS_SHORE_FULL_ROUTE_WAYPOINTS[$k][0], $BARBAROUS_SHORE_FULL_ROUTE_WAYPOINTS[$k][1])
+		If $distance < $bestDistance Then
+			$best = $k
+			$bestDistance = $distance
+		EndIf
+	Next
+	Return $best
 EndFunc
 
 
