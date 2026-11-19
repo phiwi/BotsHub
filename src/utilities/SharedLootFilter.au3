@@ -97,6 +97,15 @@ Func SharedLootIsKeeper($item)
 
 	Local $itemType = DllStructGetData($item, 'type')
 	Local $req = GetItemReq($item)
+
+	;~ A q8 focus or shield only reveals its max stat once identified, so an unidentified one is kept instead of sold unseen
+	If $req == 8 And Not IsIdentified($item) Then
+		Switch $itemType
+			Case $ID_TYPE_OFFHAND, $ID_TYPE_SHIELD
+				Return True
+		EndSwitch
+	EndIf
+
 	Local $modStruct = GetModStruct($item)
 	If Not $modStruct Then Return False
 
@@ -157,15 +166,17 @@ Func SharedLootIsKeeper($item)
 	;~ A wand or focus above q9 stays junk however many mods it carries
 	If ($itemType == $ID_TYPE_WAND Or $itemType == $ID_TYPE_OFFHAND) And $req > 9 Then Return False
 
-	;~ A q8 focus or shield with max stats sells well at any rarity once it carries an inscription slot
+	;~ A q8 sword, focus or shield with max stats is worth a stash slot whatever its colour
 	If $req == 8 Then
 		Switch $itemType
+			Case $ID_TYPE_SWORD
+				If IsMaxStatsForReq($item) Then Return True
 			Case $ID_TYPE_OFFHAND
-				If GetFocusEnergy($item) == 12 Then Return True
+				Local $focusEnergy = GetFocusEnergy($item)
+				;~ A focus whose energy cannot be read yet is not provably junk, so it is kept rather than sold
+				If $focusEnergy == 12 Or $focusEnergy == 0 Then Return True
 			Case $ID_TYPE_SHIELD
 				If GetShieldArmor($item) == 16 Then Return True
-			Case $ID_TYPE_SWORD
-				If GetRarity($item) == $RARITY_GOLD And IsMaxStatsForReq($item) Then Return True
 		EndSwitch
 	EndIf
 
