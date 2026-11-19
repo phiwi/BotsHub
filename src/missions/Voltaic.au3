@@ -301,6 +301,7 @@ EndFunc
 
 
 Func VoltaicAssembleFixedTeamWithRecovery(ByRef $heroIDs, ByRef $heroNames, $teamLabel)
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Local $attempt
 	For $attempt = 1 To $VOLTAIC_TEAM_OUTPOST_RETRIES
 		If $attempt > 1 Then

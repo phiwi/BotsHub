@@ -720,6 +720,7 @@ EndFunc
 
 
 Func SetupVSFTeamFromMinisterialCommendations()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('VSF team: Norgu, Gwen, Razah, Xandra, Master of Whispers, Livia, Olias')
 
 	If VSFEnsureSoloParty() == $FAIL Then Return $FAIL

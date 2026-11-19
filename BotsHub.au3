@@ -348,7 +348,7 @@ Func RunFarmLoop()
 		EndIf
 
 		; Global farm setup
-		If $farm[1] <> 'DumpPartyBuilds' Then DumpPartyBuilds()
+		If $farm[1] <> 'DumpPartyBuilds' Then CaptureCurrentTeamToSettings()
 		If Not $global_farm_setup Then GeneralFarmSetup()
 	EndIf
 

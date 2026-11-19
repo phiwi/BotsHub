@@ -224,6 +224,7 @@ EndFunc
 
 
 Func SetupTeamBorealChestFarm()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('Setting up fixed support team')
 	BorealLogSupportSetupState('pre_solo_reset')
 	If BorealEnsureSoloParty() == $FAIL Then

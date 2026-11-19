@@ -336,6 +336,7 @@ EndFunc
 
 
 Func SetupTeamBarbarousShoreFullChestFarm()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('Setting up fixed support team for Barbarous Shore Full chest run')
 	Local $stepTimer = TimerInit()
 	Local $requiredHeroes[] = [$BARBAROUS_SHORE_FULL_ID_KAHMU, $BARBAROUS_SHORE_FULL_ID_MELONNI, $BARBAROUS_SHORE_FULL_ID_MOX, $BARBAROUS_SHORE_FULL_ID_TAHLKORA, $BARBAROUS_SHORE_FULL_ID_MORGAHN, $BARBAROUS_SHORE_FULL_ID_MOW, $BARBAROUS_SHORE_FULL_ID_OLIAS]

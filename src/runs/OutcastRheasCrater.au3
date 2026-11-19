@@ -697,6 +697,7 @@ EndFunc
 
 
 Func OutcastRheasSetupSinTeamFromFroggy()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('Outcast Rhea''s Crater team: Ogden, Tahlkora, General Morgahn, Zhed, Vekk, Xandra, Dunkoro')
 	If Not SupportTeamStabilizeAfterTravel($ID_SEAFARERS_REST, 9000, 250) Then
 		Warn('Outcast Rhea''s Crater team: initial outpost stabilization timed out')

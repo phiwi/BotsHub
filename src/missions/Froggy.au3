@@ -286,6 +286,7 @@ EndFunc
 
 
 Func SetupFroggyElementalistTeam($skipBuildLoad = False)
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('Froggy Elementalist team: ' & $FROGGY_ELEMENTALIST_SLOT1_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT2_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT3_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT4_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT5_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT6_HERO_NAME & ', ' & $FROGGY_ELEMENTALIST_SLOT7_HERO_NAME)
 	Local $heroIDs[7] = [ _
 		$FROGGY_ELEMENTALIST_SLOT1_HERO_ID, _
@@ -341,6 +342,7 @@ EndFunc
 
 
 Func SetupFroggySinTeamFromWingstorm()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('Froggy Assassin team: Master of Whispers, Olias, Livia, A R U Catalyst, A R U Atmosphere, Razah, Norgu')
 	Local $heroIDs[7] = [ _
 		$ID_MASTER_OF_WHISPERS, _

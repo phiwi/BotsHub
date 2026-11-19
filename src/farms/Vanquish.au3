@@ -115,6 +115,7 @@ EndFunc
 
 
 Func SetupVanquishTeam()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('Vanquish: setting up team with Gwen, Norgu, Zhed')
 	If VanquishEnsureSoloParty() == $FAIL Then Return $FAIL
 

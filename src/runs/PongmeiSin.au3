@@ -138,6 +138,7 @@ EndFunc
 
 
 Func SetupTeamPongmeiSinChestFarm()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('Setting up fixed support team for Sin chest run')
 	SupportTeamKickAllHeroesByIDSweep()
 	LeaveParty()

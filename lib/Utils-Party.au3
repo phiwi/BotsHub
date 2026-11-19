@@ -24,6 +24,25 @@
 Global Const $PARTY_BASE64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
 
+;~ Mirrors the party that is actually in play into the team tab before every run
+Func CaptureCurrentTeamToSettings()
+	If IsTeamAutoSetup() Then Return
+	Local $heroCount = GetHeroCount()
+	$run_options_cache['team.player_build'] = PartyBuildCode(0, PartyAttributeTable(0))
+	For $heroIndex = 1 To $ID_TEAM_SIZE_LARGE - 1
+		Local $heroName = ''
+		Local $buildCode = ''
+		If $heroIndex <= $heroCount Then
+			$heroName = PartyHeroName(PartyHeroCatalogID($heroIndex))
+			$buildCode = PartyBuildCode($heroIndex, PartyAttributeTable($heroIndex))
+		EndIf
+		$run_options_cache['team.hero_' & $heroIndex] = $heroName
+		$run_options_cache['team.hero_' & $heroIndex & '_build'] = $buildCode
+	Next
+	RefreshTeamTabFromSettings()
+EndFunc
+
+
 ;~ Prints the build code of the player and of up to 7 heroes
 Func DumpPartyBuilds()
 	Local $heroCount = GetHeroCount()

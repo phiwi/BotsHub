@@ -115,6 +115,7 @@ EndFunc
 
 
 Func SetupVanquishBTTeam()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('Vanquish Blacktide: setting up team with Xandra, Olias')
 	If VanquishBTEnsureSoloParty() == $FAIL Then Return $FAIL
 

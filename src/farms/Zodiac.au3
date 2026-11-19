@@ -81,10 +81,12 @@ Func SetupZodiacFarm()
 	Info('Setting up farm')
 	If GetMapID() <> $ID_URGOZS_WARREN Then
 		; Setup must happen before getting into Urgoz_Warren
-		LeaveParty()
-		AddHero($ID_GENERAL_MORGAHN)
-		LoadSkillTemplate($RA_ZODIAC_FARMER_SKILLBAR)
-		LoadSkillTemplate($ZODIAC_HERO_SKILLBAR, 1)
+		If Not IsTeamAutoSetup() Then
+			LeaveParty()
+			AddHero($ID_GENERAL_MORGAHN)
+			LoadSkillTemplate($RA_ZODIAC_FARMER_SKILLBAR)
+			LoadSkillTemplate($ZODIAC_HERO_SKILLBAR, 1)
+		EndIf
 		SwitchMode($ID_HARD_MODE)
 		RandomSleep(250)
 		DisableAllHeroSkills(1)

@@ -175,6 +175,7 @@ EndFunc
 
 
 Func SetupTeamTascaChestFarm()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('Setting up fixed support team')
 	If TascaEnsureSoloParty() == $FAIL Then
 		Warn('Could not reset to solo party before hero setup')

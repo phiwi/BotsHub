@@ -1795,6 +1795,27 @@ Func ApplyConfigToGUI()
 	GUICtrlSetData($gui_input_build_hero_7, $run_options_cache['team.hero_7_build'])
 	UpdateTeamComboboxes($run_options_cache['team.automatic_team_setup'])
 EndFunc
+
+
+;~ Push the team stored in the settings into the team tab without touching the rest of the GUI
+Func RefreshTeamTabFromSettings()
+	If $gui_combo_hero_1 == 0 Or $gui_combo_hero_1 == Null Then Return
+	GUICtrlSetData($gui_combo_hero_1, $run_options_cache['team.hero_1'])
+	GUICtrlSetData($gui_combo_hero_2, $run_options_cache['team.hero_2'])
+	GUICtrlSetData($gui_combo_hero_3, $run_options_cache['team.hero_3'])
+	GUICtrlSetData($gui_combo_hero_4, $run_options_cache['team.hero_4'])
+	GUICtrlSetData($gui_combo_hero_5, $run_options_cache['team.hero_5'])
+	GUICtrlSetData($gui_combo_hero_6, $run_options_cache['team.hero_6'])
+	GUICtrlSetData($gui_combo_hero_7, $run_options_cache['team.hero_7'])
+	GUICtrlSetData($gui_input_build_player, $run_options_cache['team.player_build'])
+	GUICtrlSetData($gui_input_build_hero_1, $run_options_cache['team.hero_1_build'])
+	GUICtrlSetData($gui_input_build_hero_2, $run_options_cache['team.hero_2_build'])
+	GUICtrlSetData($gui_input_build_hero_3, $run_options_cache['team.hero_3_build'])
+	GUICtrlSetData($gui_input_build_hero_4, $run_options_cache['team.hero_4_build'])
+	GUICtrlSetData($gui_input_build_hero_5, $run_options_cache['team.hero_5_build'])
+	GUICtrlSetData($gui_input_build_hero_6, $run_options_cache['team.hero_6_build'])
+	GUICtrlSetData($gui_input_build_hero_7, $run_options_cache['team.hero_7_build'])
+EndFunc
 #EndRegion Configuration
 
 

@@ -582,6 +582,7 @@ EndFunc
 
 
 Func SetupSoOFlexibleTeam()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	Info('SoO team: ' & $SOO_SLOT1_HERO_NAME & ', ' & $SOO_SLOT2_HERO_NAME & ', ' & $SOO_SLOT3_HERO_NAME & ', ' & $SOO_SLOT4_HERO_NAME & ', ' & $SOO_SLOT5_HERO_NAME & ', ' & $SOO_SLOT6_HERO_NAME & ', ' & $SOO_SLOT7_HERO_NAME)
 	Local $heroIDs[7] = [ _
 		$SOO_SLOT1_HERO_ID, _

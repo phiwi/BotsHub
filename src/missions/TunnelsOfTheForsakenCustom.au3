@@ -98,6 +98,7 @@ EndFunc
 
 
 Func SetupTunnelsForsakenCustomTeam()
+	If IsTeamAutoSetup() Then Return $SUCCESS
 	LeaveParty()
 	RandomSleep(200)
 
